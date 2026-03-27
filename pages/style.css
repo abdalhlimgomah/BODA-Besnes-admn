@@ -1,0 +1,164 @@
+.login-page {
+  min-height: 100vh;
+  padding: 16px;
+}
+
+.login-layout {
+  max-width: 1160px;
+  margin: 0 auto;
+  min-height: calc(100vh - 32px);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.login-hero,
+.login-card {
+  padding: 22px;
+}
+
+.login-hero {
+  color: #fff;
+  background:
+    linear-gradient(155deg, rgba(255, 107, 26, 0.94), rgba(229, 88, 12, 0.94)),
+    radial-gradient(500px 250px at 80% -10%, rgba(255, 255, 255, 0.35), transparent 72%),
+    radial-gradient(400px 240px at -10% 110%, rgba(0, 184, 169, 0.35), transparent 72%);
+  border: none;
+}
+
+.hero-label {
+  display: inline-flex;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.login-hero h1 {
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1.25;
+  margin-bottom: 10px;
+}
+
+.hero-text {
+  color: rgba(255, 255, 255, 0.92);
+  margin-bottom: 16px;
+}
+
+.hero-points {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.hero-points li {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  padding: 8px 10px;
+  font-weight: 700;
+}
+
+.login-card {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+}
+
+.login-card h2 {
+  font-size: 28px;
+  margin-bottom: 6px;
+}
+
+.login-subtitle {
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.field label {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.field-input {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0 10px;
+  min-height: 48px;
+}
+
+.field-input:focus-within {
+  border-color: var(--brand-teal);
+  box-shadow: 0 0 0 3px rgba(0, 184, 169, 0.18);
+}
+
+.field-input i {
+  color: var(--muted);
+}
+
+.field-input input {
+  border: none;
+  padding: 10px 0;
+  min-height: 44px;
+}
+
+.field-input input:focus {
+  box-shadow: none;
+}
+
+.eye-btn {
+  width: 44px;
+  min-height: 44px;
+  border-radius: 10px;
+  padding: 0;
+  background: transparent;
+  color: var(--muted);
+}
+
+.eye-btn:hover {
+  background: var(--surface-muted);
+}
+
+.form-actions {
+  margin-top: 4px;
+}
+
+.login-btn {
+  width: 100%;
+}
+
+@media (min-width: 860px) {
+  .login-page {
+    padding: 20px;
+  }
+
+  .login-layout {
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 20px;
+  }
+
+  .login-hero,
+  .login-card {
+    padding: 28px;
+  }
+}

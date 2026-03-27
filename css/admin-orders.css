@@ -1,0 +1,163 @@
+.orders-page {
+  display: grid;
+  gap: 12px;
+}
+
+.summary-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 12px;
+}
+
+.summary-item {
+  border-radius: 12px;
+  padding: 10px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  display: grid;
+  gap: 3px;
+}
+
+.summary-item p {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.summary-item strong {
+  font-size: 24px;
+  font-family: "Tajawal", sans-serif;
+}
+
+.filters {
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.filter-item {
+  display: grid;
+  gap: 6px;
+}
+
+.filter-item label {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.search-group {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 7px;
+}
+
+.search-group button {
+  min-width: 84px;
+}
+
+.orders-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.order-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.order-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.order-name {
+  font-weight: 800;
+  font-size: 17px;
+}
+
+.order-product-preview {
+  width: 84px;
+  height: 84px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-alt);
+  overflow: hidden;
+}
+
+.order-product-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+.order-grid {
+  display: grid;
+  gap: 6px;
+}
+
+.order-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.order-row strong {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.status-control-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.status-btn {
+  min-width: 88px;
+}
+
+.empty-text {
+  text-align: center;
+  color: var(--muted);
+  font-weight: 700;
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  background: var(--surface-alt);
+  padding: 24px 12px;
+}
+
+@media (min-width: 860px) {
+  .filters {
+    grid-template-columns: 2fr 1fr;
+    align-items: end;
+  }
+
+  .orders-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .orders-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .order-product-preview {
+    width: 72px;
+    height: 72px;
+  }
+}

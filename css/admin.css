@@ -1,0 +1,152 @@
+.admin-page {
+  display: grid;
+  gap: 14px;
+}
+
+.form-card,
+.list-card {
+  padding: 14px;
+}
+
+.form-card h2,
+.list-card h2 {
+  font-size: 22px;
+  margin-bottom: 12px;
+}
+
+.editor-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.field-block {
+  display: grid;
+  gap: 6px;
+}
+
+.field-block label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.submit-btn {
+  margin-top: 10px;
+  width: 100%;
+}
+
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.product-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-alt);
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.product-card > img {
+  width: 100%;
+  height: 150px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: #fff;
+}
+
+.product-summary {
+  display: grid;
+  gap: 4px;
+}
+
+.product-name {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.price-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-weight: 700;
+}
+
+.price-row del {
+  color: var(--muted);
+}
+
+.inline-grid {
+  display: grid;
+  gap: 7px;
+}
+
+.edit-field {
+  display: grid;
+  gap: 4px;
+}
+
+.edit-field label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.inline-grid select,
+.inline-grid input {
+  background: #fff;
+}
+
+.product-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.update-btn,
+.delete-btn {
+  min-height: 44px;
+  border-radius: 10px;
+  font-weight: 800;
+}
+
+.update-btn {
+  background: linear-gradient(135deg, var(--brand-teal), var(--brand-teal-deep));
+  color: #fff;
+}
+
+.delete-btn {
+  background: linear-gradient(135deg, #ef5350, #d32f2f);
+  color: #fff;
+}
+
+@media (min-width: 760px) {
+  .editor-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .span-2 {
+    grid-column: span 2;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1160px) {
+  .products-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

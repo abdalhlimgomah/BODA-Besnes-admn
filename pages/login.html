@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تسجيل الدخول | لوحة الإدارة</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="login-page">
+    <main class="login-layout">
+      <section class="login-hero card">
+        <p class="hero-label">Buda Commerce</p>
+      </section>
+
+      <section class="login-card card">
+        <h2>تسجيل الدخول</h2>
+        <p class="login-subtitle">أدخل بيانات المدير للوصول إلى لوحة التحكم</p>
+
+        <form id="loginForm" novalidate>
+          <div class="field">
+            <label for="username">اسم المستخدم</label>
+            <div class="field-input">
+              <i class="fa-solid fa-user"></i>
+              <input type="text" id="username" name="username" autocomplete="username" required />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="password">كلمة المرور</label>
+            <div class="field-input">
+              <i class="fa-solid fa-lock"></i>
+              <input type="password" id="password" name="password" autocomplete="current-password" required />
+              <button type="button" id="eye" class="eye-btn" aria-label="إظهار كلمة المرور">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary login-btn">
+              <i class="fa-solid fa-arrow-left-to-bracket"></i>
+              دخول
+            </button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script src="main.js"></script>
+  </body>
+</html>

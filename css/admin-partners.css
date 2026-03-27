@@ -1,0 +1,137 @@
+.partners-page {
+  display: grid;
+  gap: 12px;
+}
+
+.partners-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 12px;
+}
+
+.summary-box {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-alt);
+  padding: 10px;
+}
+
+.summary-box p {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.summary-box strong {
+  display: block;
+  font-size: 22px;
+}
+
+.partners-filters {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.field-block {
+  display: grid;
+  gap: 6px;
+}
+
+.field-block label {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.partners-list {
+  display: grid;
+  gap: 10px;
+}
+
+.partner-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.partner-head {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.partner-head strong {
+  font-size: 17px;
+}
+
+.partner-meta {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.partner-content {
+  padding: 10px 12px 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.partner-content details {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-alt);
+  padding: 8px;
+}
+
+.partner-content summary {
+  list-style: none;
+  cursor: pointer;
+  font-weight: 800;
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+}
+
+.partner-content summary::-webkit-details-marker {
+  display: none;
+}
+
+.kv-list {
+  display: grid;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.kv-item {
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid var(--border);
+  padding: 7px 8px;
+  font-size: 13px;
+}
+
+.kv-item strong {
+  color: var(--muted);
+}
+
+@media (min-width: 860px) {
+  .partners-filters {
+    grid-template-columns: 2fr 1fr;
+    align-items: end;
+  }
+
+  .partners-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .partners-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

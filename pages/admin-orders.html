@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>إدارة الطلبات</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/app-shell.css" />
+    <link rel="stylesheet" href="../css/admin-orders.css" />
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-badge">
+        <i class="fa-solid fa-bag-shopping"></i>
+        <div>
+          <strong>Buda Admin</strong>
+          <small>إدارة المتجر</small>
+        </div>
+      </div>
+      <nav class="side-nav">
+        <a class="side-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>لوحة التحكم</span></a>
+        <a class="side-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة المنتجات</span></a>
+        <a class="side-link active" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>الطلبات</span></a>
+        <a class="side-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>طلبات الشراكة</span></a>
+        <a class="side-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة المنتجات</span></a>
+      </nav>
+    </aside>
+
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-title">
+          <h1>لوحة الطلبات</h1>
+          <p>تحديث مباشر كل 4 ثوانٍ لإدارة سير الطلبات</p>
+        </div>
+      </header>
+
+      <section class="content-wrap orders-page">
+        <section class="card summary-row">
+          <div class="summary-item">
+            <p>كل الطلبات</p>
+            <strong id="ordersCount">0 طلب</strong>
+          </div>
+          <div class="summary-item">
+            <p>طلبات اليوم</p>
+            <strong id="todayOrders">0 طلب</strong>
+          </div>
+        </section>
+
+        <section class="card filters">
+          <div class="filter-item grow">
+            <label for="searchInput">بحث بالاسم أو الهاتف</label>
+            <div class="search-group">
+              <input type="text" id="searchInput" placeholder="ابحث الآن..." />
+              <button id="searchBtn" class="btn btn-primary">بحث</button>
+            </div>
+          </div>
+          <div class="filter-item">
+            <label for="statusFilter">فلترة بالحالة</label>
+            <select id="statusFilter">
+              <option value="all">كل الحالات</option>
+              <option value="pending">قيد الانتظار</option>
+              <option value="preparing">جارٍ التجهيز</option>
+              <option value="shipped">تم الشحن</option>
+              <option value="delivered">تم التسليم</option>
+            </select>
+          </div>
+        </section>
+
+        <section class="orders-grid" id="ordersGrid"></section>
+      </section>
+    </main>
+
+    <nav class="mobile-bottom-nav">
+      <a class="mobile-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>الرئيسية</span></a>
+      <a class="mobile-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة</span></a>
+      <a class="mobile-link active" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>طلبات</span></a>
+      <a class="mobile-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>شراكة</span></a>
+      <a class="mobile-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة</span></a>
+    </nav>
+
+    <script src="./admin-orders.page.js"></script>
+  </body>
+</html>

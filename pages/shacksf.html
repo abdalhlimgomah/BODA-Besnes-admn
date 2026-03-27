@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>لوحة التحكم</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/app-shell.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-badge">
+        <i class="fa-solid fa-bag-shopping"></i>
+        <div>
+          <strong>Buda Admin</strong>
+          <small>إدارة المتجر</small>
+        </div>
+      </div>
+
+      <nav class="side-nav">
+        <a class="side-link active" href="shacksf.html">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>لوحة التحكم</span>
+        </a>
+        <a class="side-link" href="admin.html">
+          <i class="fa-solid fa-square-plus"></i>
+          <span>إضافة المنتجات</span>
+        </a>
+        <a class="side-link" href="admin-orders.html">
+          <i class="fa-solid fa-receipt"></i>
+          <span>الطلبات</span>
+        </a>
+        <a class="side-link" href="admin-partners.html">
+          <i class="fa-solid fa-handshake"></i>
+          <span>طلبات الشراكة</span>
+        </a>
+        <a class="side-link" href="view-products.html">
+          <i class="fa-solid fa-box-open"></i>
+          <span>مراجعة المنتجات</span>
+        </a>
+      </nav>
+    </aside>
+
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-title">
+          <h1>لوحة التحكم</h1>
+          <p>متابعة أداء المتجر وإعداداته من أي جهاز</p>
+        </div>
+        <div class="topbar-actions">
+          <button type="button" class="btn btn-secondary section-btn menu-link active" data-section="dashboard">
+            لوحة التحكم
+          </button>
+          <button type="button" class="btn section-btn menu-link" data-section="settings">
+            الإعدادات
+          </button>
+        </div>
+      </header>
+
+      <section class="content-wrap">
+        <section class="dashboard-hero card">
+          <div class="owner-row">
+            <div class="profile-image-container">
+              <img id="profileImage" src="https://via.placeholder.com/200?text=صورة+المالك" alt="صورة المالك" />
+              <label for="imageUpload" class="upload-btn" title="تحديث الصورة">
+                <i class="fa-solid fa-camera"></i>
+              </label>
+              <input type="file" id="imageUpload" accept="image/*" hidden />
+            </div>
+            <div>
+              <h2 id="ownerName">*ᬼ👑𓆩Buda*⚡</h2>
+              <p id="ownerEmail">قاعدة البيانات</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="dashboard" class="section active">
+          <h3 class="section-title">مؤشرات سريعة</h3>
+          <div class="stats-grid">
+            <article class="stat-card card">
+              <div class="stat-icon products-icon"><i class="fa-solid fa-box"></i></div>
+              <div>
+                <p class="stat-label">المنتجات</p>
+                <p id="productCount" class="stat-value">0</p>
+              </div>
+            </article>
+            <article class="stat-card card">
+              <div class="stat-icon orders-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+              <div>
+                <p class="stat-label">الطلبات</p>
+                <p id="orderCount" class="stat-value">0</p>
+              </div>
+            </article>
+            <article class="stat-card card">
+              <div class="stat-icon sales-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+              <div>
+                <p class="stat-label">المبيعات</p>
+                <p id="salesAmount" class="stat-value">0 ج.م</p>
+              </div>
+            </article>
+            <article class="stat-card card">
+              <div class="stat-icon revenue-icon"><i class="fa-solid fa-chart-pie"></i></div>
+              <div>
+                <p class="stat-label">الإيرادات</p>
+                <p id="revenueAmount" class="stat-value">0 ج.م</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="settings" class="section">
+          <h3 class="section-title">الإعدادات</h3>
+          <div class="settings-grid">
+            <article class="setting-item card">
+              <h4>بيانات المتجر</h4>
+              <form id="settingsForm">
+                <label for="storeName">اسم المتجر</label>
+                <input type="text" id="storeName" placeholder="اسم متجرك" />
+                <label for="storeDescription">وصف المتجر</label>
+                <textarea id="storeDescription" placeholder="وصف قصير"></textarea>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fa-solid fa-floppy-disk"></i>
+                  حفظ البيانات
+                </button>
+              </form>
+            </article>
+
+            <article class="setting-item card">
+              <h4>السمات</h4>
+              <label class="theme-toggle-label" for="themeToggle">
+                <input type="checkbox" id="themeToggle" class="theme-toggle" />
+                <span class="toggle-slider"></span>
+                <span id="themeLabel">تفعيل الوضع الليلي</span>
+              </label>
+            </article>
+
+            <article class="setting-item card">
+              <h4>العملة</h4>
+              <form id="currencyForm">
+                <label for="currencySelect">اختر العملة</label>
+                <select id="currencySelect" class="currency-select">
+                  <option value="EGP">الجنيه المصري (ج.م)</option>
+                  <option value="USD">الدولار الأمريكي ($)</option>
+                </select>
+                <button type="submit" class="btn btn-secondary">
+                  <i class="fa-solid fa-rotate"></i>
+                  حفظ العملة
+                </button>
+              </form>
+            </article>
+
+            <article class="setting-item card">
+              <h4>الحساب</h4>
+              <button id="logoutBtn" class="btn btn-danger">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                تسجيل الخروج
+              </button>
+            </article>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <nav class="mobile-bottom-nav">
+      <a class="mobile-link active" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>الرئيسية</span></a>
+      <a class="mobile-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة</span></a>
+      <a class="mobile-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>طلبات</span></a>
+      <a class="mobile-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>شراكة</span></a>
+      <a class="mobile-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة</span></a>
+    </nav>
+
+    <script src="./dashboard-manager.page.js"></script>
+    <script>
+      function initializeNewSeller() {
+        const params = new URLSearchParams(window.location.search);
+        const sellerEmail = params.get("seller");
+        const merchantId = params.get("merchantId");
+        if (!sellerEmail || !merchantId) return;
+
+        localStorage.setItem("currentSellerEmail", sellerEmail);
+        localStorage.setItem("currentMerchantId", merchantId);
+        window.history.replaceState({}, document.title, window.location.pathname);
+
+        try {
+          const seller = JSON.parse(localStorage.getItem(`seller_${sellerEmail}`));
+          if (!seller) return;
+          const ownerName = document.getElementById("ownerName");
+          const ownerEmail = document.getElementById("ownerEmail");
+          if (ownerName) ownerName.textContent = seller.name || "مالك المتجر";
+          if (ownerEmail) ownerEmail.textContent = sellerEmail;
+          const storeNameInput = document.getElementById("storeName");
+          const storeDescInput = document.getElementById("storeDescription");
+          if (storeNameInput) storeNameInput.value = seller.storeName || "";
+          if (storeDescInput) storeDescInput.value = seller.storeDescription || "";
+        } catch (error) {
+          console.error("خطأ في تحميل بيانات الشريك", error);
+        }
+      }
+
+      window.addEventListener("load", initializeNewSeller);
+    </script>
+  </body>
+</html>

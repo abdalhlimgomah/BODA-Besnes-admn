@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>مراجعة المنتجات</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/app-shell.css" />
+    <link rel="stylesheet" href="../css/view-products.css" />
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-badge">
+        <i class="fa-solid fa-bag-shopping"></i>
+        <div>
+          <strong>Buda Admin</strong>
+          <small>إدارة المتجر</small>
+        </div>
+      </div>
+      <nav class="side-nav">
+        <a class="side-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>لوحة التحكم</span></a>
+        <a class="side-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة المنتجات</span></a>
+        <a class="side-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>الطلبات</span></a>
+        <a class="side-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>طلبات الشراكة</span></a>
+        <a class="side-link active" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة المنتجات</span></a>
+      </nav>
+    </aside>
+
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-title">
+          <h1>مراجعة المنتجات</h1>
+          <p>إدارة حالة مراجعة منتجات التجار</p>
+        </div>
+      </header>
+
+      <section class="content-wrap review-page">
+        <section class="card review-summary">
+          <div class="summary-item">
+            <p>إجمالي المنتجات</p>
+            <strong id="productsCount">0</strong>
+          </div>
+          <div class="summary-item">
+            <p>قيد المراجعة</p>
+            <strong id="pendingCount">0</strong>
+          </div>
+          <div class="summary-item">
+            <p>تمت المراجعة</p>
+            <strong id="reviewedCount">0</strong>
+          </div>
+        </section>
+
+        <section class="card review-filters">
+          <div class="field-block grow">
+            <label for="searchInput">بحث باسم المنتج أو البريد</label>
+            <input type="text" id="searchInput" placeholder="ابحث الآن..." />
+          </div>
+          <div class="field-block">
+            <label for="reviewFilter">حالة المراجعة</label>
+            <select id="reviewFilter">
+              <option value="all">الكل</option>
+              <option value="pending">قيد المراجعة</option>
+              <option value="reviewed">تمت المراجعة</option>
+            </select>
+          </div>
+        </section>
+
+        <section class="products-grid" id="productsGrid"></section>
+      </section>
+    </main>
+
+    <nav class="mobile-bottom-nav">
+      <a class="mobile-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>الرئيسية</span></a>
+      <a class="mobile-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة</span></a>
+      <a class="mobile-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>طلبات</span></a>
+      <a class="mobile-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>شراكة</span></a>
+      <a class="mobile-link active" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة</span></a>
+    </nav>
+
+    <script>
+      const SUPABASE_URL = "https://msgqzgzoslearaprgiqq.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE";
+
+      const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      let allProducts = [];
+
+      function showToast(message, type = "info") {
+        let wrap = document.querySelector(".toast-wrap");
+        if (!wrap) {
+          wrap = document.createElement("div");
+          wrap.className = "toast-wrap";
+          document.body.appendChild(wrap);
+        }
+
+        const toast = document.createElement("div");
+        toast.className = `toast-item toast-${type}`;
+        toast.textContent = message;
+        wrap.appendChild(toast);
+
+        setTimeout(() => {
+          toast.style.opacity = "0";
+          toast.style.transform = "translateY(-6px)";
+          setTimeout(() => toast.remove(), 220);
+        }, 2400);
+      }
+
+      function statusLabel(status) {
+        return status === "reviewed" ? "تمت المراجعة" : "قيد المراجعة";
+      }
+
+      function statusClass(status) {
+        return status === "reviewed" ? "status-reviewed" : "status-review";
+      }
+
+      function applyFilters() {
+        const query = document.getElementById("searchInput").value.trim().toLowerCase();
+        const reviewFilter = document.getElementById("reviewFilter").value;
+
+        let filtered = [...allProducts];
+        if (query) {
+          filtered = filtered.filter((item) => {
+            const name = (item.product_name || "").toLowerCase();
+            const email = (item.email || "").toLowerCase();
+            return name.includes(query) || email.includes(query);
+          });
+        }
+
+        if (reviewFilter !== "all") {
+          filtered = filtered.filter((item) => (item.review_status || "pending") === reviewFilter);
+        }
+
+        renderProducts(filtered);
+        updateSummary(filtered);
+      }
+
+      function updateSummary(items) {
+        const pendingCount = items.filter((item) => (item.review_status || "pending") === "pending").length;
+        const reviewedCount = items.filter((item) => item.review_status === "reviewed").length;
+        document.getElementById("productsCount").textContent = items.length;
+        document.getElementById("pendingCount").textContent = pendingCount;
+        document.getElementById("reviewedCount").textContent = reviewedCount;
+      }
+
+      function priceAfterDiscount(item) {
+        const price = Number(item.price) || 0;
+        const discount = Number(item.discount_percent) || 0;
+        return price - (price * discount) / 100;
+      }
+
+      function renderProducts(products) {
+        const container = document.getElementById("productsGrid");
+        if (!products.length) {
+          container.innerHTML = '<div class="empty-state">لا توجد منتجات مطابقة</div>';
+          return;
+        }
+
+        container.innerHTML = products
+          .map((product) => {
+            const status = product.review_status || "pending";
+            return `
+              <article class="product-card">
+                <img src="${product.img1 || ""}" alt="${product.product_name || "منتج"}" />
+                <h4>${product.product_name || "-"}</h4>
+                <div class="product-meta">
+                  <p><strong>السعر:</strong> ${Number(product.price || 0).toFixed(2)}</p>
+                  <p><strong>بعد الخصم:</strong> ${priceAfterDiscount(product).toFixed(2)}</p>
+                  <p><strong>الكمية:</strong> ${product.quantity || 0}</p>
+                  <p><strong>القسم:</strong> ${product.category || "-"}</p>
+                  <p><strong>التاجر:</strong> ${product.email || "-"} | ${product.phone || "-"}</p>
+                </div>
+                <div class="status-row">
+                  <span>الحالة</span>
+                  <span class="status-pill ${statusClass(status)}">${statusLabel(status)}</span>
+                </div>
+                <div class="product-actions">
+                  <button class="review-btn" onclick="updateProductReview(${product.id}, 'pending')">قيد المراجعة</button>
+                  <button class="review-btn" onclick="updateProductReview(${product.id}, 'reviewed')">تمت المراجعة</button>
+                  <button class="delete-btn" onclick="deleteProduct(${product.id})">حذف</button>
+                </div>
+              </article>
+            `;
+          })
+          .join("");
+      }
+
+      async function loadProducts(showErrorToast = false) {
+        const { data, error } = await supabaseClient.from("my_products").select("*").order("id", { ascending: false });
+        if (error) {
+          console.error(error);
+          if (showErrorToast) showToast("تعذر تحميل المنتجات", "error");
+          return;
+        }
+
+        allProducts = data || [];
+        applyFilters();
+      }
+
+      async function updateProductReview(id, status) {
+        const { error } = await supabaseClient.from("my_products").update({ review_status: status }).eq("id", id);
+        if (error) {
+          console.error(error);
+          showToast("فشل تحديث حالة المراجعة", "error");
+          return;
+        }
+        showToast("تم تحديث حالة المنتج", "success");
+        loadProducts();
+      }
+
+      async function deleteProduct(id) {
+        if (!confirm("هل أنت متأكد أنك تريد حذف المنتج؟")) return;
+        const { error } = await supabaseClient.from("my_products").delete().eq("id", id);
+        if (error) {
+          console.error(error);
+          showToast("فشل حذف المنتج", "error");
+          return;
+        }
+        showToast("تم حذف المنتج", "success");
+        loadProducts();
+      }
+
+      document.getElementById("searchInput").addEventListener("input", applyFilters);
+      document.getElementById("reviewFilter").addEventListener("change", applyFilters);
+
+      window.updateProductReview = updateProductReview;
+      window.deleteProduct = deleteProduct;
+
+      loadProducts(true);
+      setInterval(loadProducts, 4000);
+    </script>
+  </body>
+</html>

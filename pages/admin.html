@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>إضافة المنتجات</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/app-shell.css" />
+    <link rel="stylesheet" href="../css/admin.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-badge">
+        <i class="fa-solid fa-bag-shopping"></i>
+        <div>
+          <strong>Buda Admin</strong>
+          <small>إدارة المتجر</small>
+        </div>
+      </div>
+      <nav class="side-nav">
+        <a class="side-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>لوحة التحكم</span></a>
+        <a class="side-link active" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة المنتجات</span></a>
+        <a class="side-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>الطلبات</span></a>
+        <a class="side-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>طلبات الشراكة</span></a>
+        <a class="side-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة المنتجات</span></a>
+      </nav>
+    </aside>
+
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-title">
+          <h1>إضافة المنتجات</h1>
+          <p>أضف منتجًا جديدًا وعدّل المنتجات الحالية من نفس الصفحة</p>
+        </div>
+      </header>
+
+      <section class="content-wrap admin-page">
+        <section class="card form-card">
+          <h2>بيانات المنتج</h2>
+          <div class="editor-grid">
+            <div class="field-block">
+              <label for="name">اسم المنتج</label>
+              <input type="text" id="name" placeholder="اسم المنتج" />
+            </div>
+            <div class="field-block">
+              <label for="price">السعر الأساسي</label>
+              <input type="number" id="price" placeholder="السعر" />
+            </div>
+            <div class="field-block">
+              <label for="discount">نسبة الخصم %</label>
+              <input type="number" id="discount" placeholder="الخصم" />
+            </div>
+            <div class="field-block">
+              <label for="stock">الكمية</label>
+              <input type="number" id="stock" placeholder="الكمية" />
+            </div>
+            <div class="field-block span-2">
+              <label for="description">الوصف</label>
+              <input type="text" id="description" placeholder="وصف المنتج" />
+            </div>
+            <div class="field-block">
+              <label for="category">القسم</label>
+              <select id="category">
+                <option value="">اختر القسم</option>
+                <option value="هواتف">هواتف</option>
+                <option value="ساعات">ساعات</option>
+                <option value="لوحات مفاتيح">لوحات مفاتيح</option>
+                <option value="سماعات رأس">سماعات رأس</option>
+                <option value="ملابس أطفال">ملابس أطفال</option>
+                <option value="منتجات تجميل وعناية">منتجات تجميل وعناية</option>
+                <option value="منتجات رياضية">منتجات رياضية</option>
+              </select>
+            </div>
+            <div class="field-block">
+              <label for="imageFile">صورة من الجهاز</label>
+              <input type="file" id="imageFile" />
+            </div>
+            <div class="field-block">
+              <label for="imageLink1">رابط الصورة الرئيسية (تظهر أولاً)</label>
+              <input type="url" id="imageLink1" placeholder="https://..." dir="ltr" />
+            </div>
+            <div class="field-block">
+              <label for="imageLink2">رابط صورة المعرض 2</label>
+              <input type="url" id="imageLink2" placeholder="https://..." dir="ltr" />
+            </div>
+            <div class="field-block">
+              <label for="imageLink3">رابط صورة المعرض 3</label>
+              <input type="url" id="imageLink3" placeholder="https://..." dir="ltr" />
+            </div>
+            <div class="field-block">
+              <label for="imageLink4">رابط صورة المعرض 4</label>
+              <input type="url" id="imageLink4" placeholder="https://..." dir="ltr" />
+            </div>
+            <div class="field-block">
+              <label for="imageLink5">رابط صورة المعرض 5</label>
+              <input type="url" id="imageLink5" placeholder="https://..." dir="ltr" />
+            </div>
+          </div>
+          <button class="btn btn-primary submit-btn" onclick="addProduct()">
+            <i class="fa-solid fa-plus"></i>
+            إضافة المنتج
+          </button>
+        </section>
+
+        <section class="card list-card">
+          <div class="list-header">
+            <h2>كل المنتجات</h2>
+          </div>
+          <div class="products-grid" id="products"></div>
+        </section>
+      </section>
+    </main>
+
+    <nav class="mobile-bottom-nav">
+      <a class="mobile-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>الرئيسية</span></a>
+      <a class="mobile-link active" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة</span></a>
+      <a class="mobile-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>طلبات</span></a>
+      <a class="mobile-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>شراكة</span></a>
+      <a class="mobile-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة</span></a>
+    </nav>
+
+    <script src="./admin.page.js"></script>
+  </body>
+</html>
