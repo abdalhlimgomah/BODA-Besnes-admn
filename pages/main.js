@@ -1,6 +1,10 @@
-const password = document.getElementById("password");
+﻿const password = document.getElementById("password");
 const eye = document.getElementById("eye");
 const loginForm = document.getElementById("loginForm");
+
+const USER_HASH = "8d2654bb9682069b2dea9ffbc637aebd847dad896ea0234b2e1935abf12d8980";
+const PASS_HASH = "bbff5fe367f12e5f17a89ed170014d317994476471e47b98c9f5630edb3c119c";
+const HASH_SALT = "boda-admin";
 
 function showInlineError(message) {
   let alertNode = document.getElementById("loginError");
@@ -11,6 +15,21 @@ function showInlineError(message) {
     loginForm.appendChild(alertNode);
   }
   alertNode.textContent = message;
+}
+
+function clearInlineError() {
+  const alertNode = document.getElementById("loginError");
+  if (alertNode) {
+    alertNode.textContent = "";
+  }
+}
+
+async function sha256(value) {
+  const encoded = new TextEncoder().encode(value);
+  const hash = await window.crypto.subtle.digest("SHA-256", encoded);
+  return Array.from(new Uint8Array(hash))
+    .map((part) => part.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 if (eye) {
@@ -25,29 +44,35 @@ if (eye) {
   });
 }
 
-function handleLogin() {
+async function handleLogin() {
   const userInput = document.getElementById("username").value.trim();
   const pwdInput = password.value.trim();
 
-  const expectedUser = atob("YWRtZW43ODhCT21lbg==");
-  const expectedPwd = atob("Ym9kYTMyNHNkanYt");
-
   if (!userInput || !pwdInput) {
-    showInlineError("يرجى إدخال اسم المستخدم وكلمة المرور.");
+    showInlineError("ÙŠØ±Ø¬Ù‰ Ø¥Ø¯Ø®Ø§Ù„ Ø§Ø³Ù… Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… ÙˆÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±.");
     return;
   }
 
-  if (userInput === expectedUser && pwdInput === expectedPwd) {
-    window.location.href = "shacksf.html";
+  const [enteredUserHash, enteredPassHash] = await Promise.all([
+    sha256(`u|${userInput}|${HASH_SALT}`),
+    sha256(`p|${pwdInput}|${HASH_SALT}`),
+  ]);
+
+  if (enteredUserHash === USER_HASH && enteredPassHash === PASS_HASH) {
+    if (window.adminAuth?.createSession) {
+      window.adminAuth.createSession();
+    }
+    window.location.replace("shacksf.html");
     return;
   }
 
-  showInlineError("اسم المستخدم أو كلمة المرور غير صحيحة.");
+  showInlineError("Ø§Ø³Ù… Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… Ø£Ùˆ ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ± ØºÙŠØ± ØµØ­ÙŠØ­Ø©.");
 }
 
 if (loginForm) {
-  loginForm.addEventListener("submit", (event) => {
+  loginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    handleLogin();
+    clearInlineError();
+    await handleLogin();
   });
 }

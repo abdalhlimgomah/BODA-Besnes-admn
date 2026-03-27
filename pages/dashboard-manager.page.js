@@ -148,7 +148,10 @@ class DashboardManager {
 
   handleLogout() {
     if (!confirm("هل تريد تسجيل الخروج؟")) return;
-    window.location.href = "login.html";
+    if (window.adminAuth?.clearSession) {
+      window.adminAuth.clearSession();
+    }
+    window.location.replace("login.html");
   }
 
   loadThemeSettings() {
