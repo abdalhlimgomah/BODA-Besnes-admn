@@ -1,4 +1,4 @@
-class DashboardManager {
+﻿class DashboardManager {
   constructor() {
     this.userEmail = this.getCurrentUserEmail();
     this.owner = this.loadOwnerData();

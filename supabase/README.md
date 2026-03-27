@@ -5,6 +5,8 @@
 Open Supabase Dashboard -> SQL Editor and run:
 
 `supabase/migrations/20260306_marketplace_full.sql`
+`supabase/migrations/20260326_partners_requests_status_in_progress.sql`
+`supabase/migrations/20260327_partner_orders_rpc.sql`
 
 This migration does:
 - Backup current tables (`products`, `my_products`, `orders`, `partners_requests`).

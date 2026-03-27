@@ -193,6 +193,11 @@ button:active {
   color: #11693b;
 }
 
+.status-in-progress {
+  background: #fff4db;
+  color: #9a5a00;
+}
+
 .status-rejected {
   background: #ffe5e5;
   color: #9b1c1c;

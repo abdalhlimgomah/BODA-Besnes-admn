@@ -1,4 +1,4 @@
-const SUPABASE_URL = "https://msgqzgzoslearaprgiqq.supabase.co";
+﻿const SUPABASE_URL = "https://msgqzgzoslearaprgiqq.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE";
 
@@ -6,6 +6,12 @@ const { createClient } = window.supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let allApplications = [];
+const STATUS_OPTIONS = [
+  { value: "pending", label: "قيد الانتظار" },
+  { value: "in_progress", label: "تحت التنفيذ" },
+  { value: "approved", label: "تم القبول" },
+  { value: "rejected", label: "مرفوض" },
+];
 
 function showToast(message, type = "info") {
   let wrap = document.querySelector(".toast-wrap");
@@ -29,6 +35,7 @@ function showToast(message, type = "info") {
 function statusClass(status) {
   return {
     approved: "status-approved",
+    in_progress: "status-in-progress",
     rejected: "status-rejected",
     pending: "status-pending",
   }[status] || "status-pending";
@@ -36,10 +43,26 @@ function statusClass(status) {
 
 function statusLabel(status) {
   return {
-    approved: "مقبول",
+    approved: "تم القبول",
+    in_progress: "تحت التنفيذ",
     rejected: "مرفوض",
     pending: "قيد الانتظار",
   }[status] || status || "-";
+}
+
+function statusSelectOptions(currentStatus) {
+  const current = String(currentStatus || "pending");
+  const knownStatuses = STATUS_OPTIONS.map((item) => item.value);
+
+  const options = STATUS_OPTIONS.map(
+    (item) => `<option value="${item.value}" ${item.value === current ? "selected" : ""}>${item.label}</option>`
+  );
+
+  if (current && !knownStatuses.includes(current)) {
+    options.push(`<option value="${current}" selected>${statusLabel(current)}</option>`);
+  }
+
+  return options.join("");
 }
 
 function formatDate(dateString) {
@@ -138,10 +161,49 @@ function renderApplications(applications) {
               { label: "نوع الحساب", value: app.account_type },
             ])}
           </div>
+          <div class="partner-actions">
+            <select id="statusSelect_${app.id}" class="partner-status-select">
+              ${statusSelectOptions(currentStatus)}
+            </select>
+            <button
+              type="button"
+              class="partner-status-btn"
+              onclick="updatePartnerStatus('${app.id}', this)"
+            >
+              حفظ الحالة
+            </button>
+          </div>
         </article>
       `;
     })
     .join("");
+}
+
+async function updatePartnerStatus(id, buttonElement) {
+  const selectElement = document.getElementById(`statusSelect_${id}`);
+  if (!selectElement) return;
+
+  const newStatus = selectElement.value;
+  if (buttonElement) buttonElement.disabled = true;
+
+  const { error } = await supabaseClient.from("partners_requests").update({ status: newStatus }).eq("id", id);
+
+  if (buttonElement) buttonElement.disabled = false;
+
+  if (error) {
+    console.error(error);
+    showToast("تعذر تحديث الحالة. تحقق أن قاعدة البيانات تدعم الحالة الجديدة.", "error");
+    return;
+  }
+
+  const updatedIndex = allApplications.findIndex((app) => String(app.id) === String(id));
+  if (updatedIndex >= 0) {
+    allApplications[updatedIndex] = { ...allApplications[updatedIndex], status: newStatus };
+  }
+
+  document.getElementById("lastRefresh").textContent = nowClock();
+  filterApplications();
+  showToast("تم تحديث حالة طلب الشراكة", "success");
 }
 
 async function loadRequests(showErrorToast = false) {
@@ -164,6 +226,8 @@ async function loadRequests(showErrorToast = false) {
 
 document.getElementById("searchInput").addEventListener("input", filterApplications);
 document.getElementById("statusFilter").addEventListener("change", filterApplications);
+
+window.updatePartnerStatus = updatePartnerStatus;
 
 loadRequests(true);
 setInterval(loadRequests, 4000);

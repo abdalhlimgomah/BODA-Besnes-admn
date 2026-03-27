@@ -49,7 +49,7 @@ async function handleLogin() {
   const pwdInput = password.value.trim();
 
   if (!userInput || !pwdInput) {
-    showInlineError("ÙŠØ±Ø¬Ù‰ Ø¥Ø¯Ø®Ø§Ù„ Ø§Ø³Ù… Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… ÙˆÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±.");
+    showInlineError("يرجى إدخال اسم المستخدم وكلمة المرور.");
     return;
   }
 
@@ -66,7 +66,7 @@ async function handleLogin() {
     return;
   }
 
-  showInlineError("Ø§Ø³Ù… Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù… Ø£Ùˆ ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ± ØºÙŠØ± ØµØ­ÙŠØ­Ø©.");
+  showInlineError("اسم المستخدم أو كلمة المرور غير صحيحة.");
 }
 
 if (loginForm) {

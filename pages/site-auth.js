@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   const ACCOUNTS_KEY = "__boda_site_accounts_v1";
   const SESSION_KEY = "__boda_site_session_v1";
 
