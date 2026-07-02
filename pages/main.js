@@ -2,8 +2,8 @@
 const eye = document.getElementById("eye");
 const loginForm = document.getElementById("loginForm");
 
-const USER_HASH = "8d2654bb9682069b2dea9ffbc637aebd847dad896ea0234b2e1935abf12d8980";
-const PASS_HASH = "bbff5fe367f12e5f17a89ed170014d317994476471e47b98c9f5630edb3c119c";
+const USER_HASH = "ab19f86f9ee97ec5ccbeb7e71910daaf7b69fd47d14092a042b36556a214b241";
+const PASS_HASH = "bbba5bf96cc103d98a39783064a00fbd56335dbfb36419e0870eb8e6a5ec1ea6";
 const HASH_SALT = "boda-admin";
 
 function showInlineError(message) {
