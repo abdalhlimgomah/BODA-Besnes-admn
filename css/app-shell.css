@@ -1,6 +1,7 @@
 .app-shell {
   display: flex;
-  align-items: stretch;
+    flex-direction: row;
+    align-items: center;
 }
 
 .app-sidebar {
@@ -95,7 +96,7 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  background: rgba(255, 255, 255, 0.78);
+  background: rgb(225 198 149 / 78%);
   border: 1px solid rgba(216, 222, 233, 0.9);
   box-shadow: var(--shadow-sm);
   border-radius: 16px;

@@ -32,6 +32,10 @@ function statusLabel(status) {
     preparing: "جارٍ التجهيز",
     shipped: "تم الشحن",
     delivered: "تم التسليم",
+    confirmed: "تم التأكيد",
+    cancelled: "ملغي",
+    onhold: "معلق مؤقتًا",
+    returned: "مرتجع",
   };
   return labels[status] || status || "-";
 }
@@ -42,6 +46,10 @@ function statusClass(status) {
     preparing: "status-preparing",
     shipped: "status-shipped",
     delivered: "status-delivered",
+    confirmed: "status-confirmed",
+    cancelled: "status-cancelled",
+    onhold: "status-onhold",
+    returned: "status-returned",
   }[status] || "status-pending";
 }
 
@@ -111,9 +119,13 @@ function renderOrders(orders) {
         <div class="status-control-row">
           <select id="status_select_${order.id}">
             <option value="pending" ${order.status === "pending" ? "selected" : ""}>قيد الانتظار</option>
+            <option value="confirmed" ${order.status === "confirmed" ? "selected" : ""}>تم التأكيد</option>
             <option value="preparing" ${order.status === "preparing" ? "selected" : ""}>جارٍ التجهيز</option>
             <option value="shipped" ${order.status === "shipped" ? "selected" : ""}>تم الشحن</option>
             <option value="delivered" ${order.status === "delivered" ? "selected" : ""}>تم التسليم</option>
+            <option value="onhold" ${order.status === "onhold" ? "selected" : ""}>معلق مؤقتًا</option>
+            <option value="cancelled" ${order.status === "cancelled" ? "selected" : ""}>ملغي</option>
+            <option value="returned" ${order.status === "returned" ? "selected" : ""}>مرتجع</option>
           </select>
           <button class="btn btn-secondary status-btn" onclick="changeStatus('${order.id}')">تحديث</button>
         </div>

@@ -286,3 +286,100 @@ button:active {
     min-width: 100%;
   }
 }
+
+body.dark-mode {
+  --surface: rgba(17, 27, 38, 0.85);
+  --surface-alt: #0f1824;
+  --surface-muted: #151f2e;
+  --text: #e8edf4;
+  --muted: #a9b5c5;
+  --border: #415165;
+  --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 14px 30px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 22px 55px rgba(0, 0, 0, 0.4);
+  background:
+    radial-gradient(1200px 450px at 100% -10%, rgba(255, 107, 26, 0.15), transparent 65%),
+    radial-gradient(1200px 450px at -10% 0%, rgba(0, 184, 169, 0.16), transparent 60%),
+    linear-gradient(180deg, #0f1722 0%, #111a27 100%);
+  color: #e8edf4;
+}
+
+body.dark-mode .app-topbar,
+body.dark-mode .card,
+body.dark-mode .app-main .card {
+  background: rgba(17, 27, 38, 0.85);
+  border-color: rgba(69, 84, 101, 0.9);
+  color: #e8edf4;
+}
+
+body.dark-mode .stat-label,
+body.dark-mode .owner-row p,
+body.dark-mode .topbar-title p,
+body.dark-mode .muted,
+body.dark-mode .order-row strong,
+body.dark-mode .field-block label,
+body.dark-mode .edit-field label,
+body.dark-mode .filter-item label,
+body.dark-mode .empty-state,
+body.dark-mode .summary-item p {
+  color: #a9b5c5;
+}
+
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea {
+  background: #0f1824;
+  color: #e8edf4;
+  border-color: #415165;
+}
+
+body.dark-mode .mobile-bottom-nav {
+  background: rgba(17, 27, 38, 0.95);
+  border-color: rgba(69, 84, 101, 0.9);
+}
+
+body.dark-mode .mobile-link {
+  color: #a9b5c5;
+}
+
+body.dark-mode .mobile-link.active {
+  background: rgba(255, 107, 26, 0.2);
+}
+
+body.dark-mode .price-preview {
+  background: #0f1824;
+  border-color: #415165;
+}
+
+body.dark-mode .section-divider::after {
+  background: #415165;
+}
+
+body.dark-mode .order-card,
+body.dark-mode .product-card {
+  background: rgba(17, 27, 38, 0.85);
+  border-color: rgba(69, 84, 101, 0.9);
+}
+
+body.dark-mode .summary-item,
+body.dark-mode .order-product-preview {
+  background: #0f1824;
+  border-color: #415165;
+}
+
+body.dark-mode .partner-card details {
+  background: #0f1824;
+  border-color: #415165;
+}
+
+body.dark-mode .partner-card summary {
+  color: #e8edf4;
+}
+
+body.dark-mode .kv-item strong {
+  color: #a9b5c5;
+}
+
+body.dark-mode .toast-wrap .toast-item {
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.4);
+}
