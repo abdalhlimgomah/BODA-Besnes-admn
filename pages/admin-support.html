@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>رسائل الدعم - Buda Admin</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/app-shell.css" />
+    <link rel="stylesheet" href="../css/admin.css" />
+    <link rel="stylesheet" href="../css/admin-support.css" />
+    <script>
+      try {
+        const s = JSON.parse(localStorage.getItem("dashboardSettings") || "{}");
+        if (s.theme === "dark") document.body.classList.add("dark-mode");
+      } catch (e) {}
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="./supabase-client.js"></script>
+    <script src="./auth-guard.js"></script>
+  </head>
+  <body class="app-shell">
+    
+    <!-- Connection Status Banner -->
+    <div id="offline-banner" class="offline-banner" role="alert">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      لا يوجد اتصال بالإنترنت. سيتم إعادة الاتصال تلقائيًا...
+    </div>
+
+    <aside class="app-sidebar">
+      <div class="brand-badge">
+        <i class="fa-solid fa-bag-shopping"></i>
+        <div>
+          <strong>Buda Admin</strong>
+          <small>إدارة المتجر</small>
+        </div>
+      </div>
+      <nav class="side-nav">
+        <a class="side-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>لوحة التحكم</span></a>
+        <a class="side-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة المنتجات</span></a>
+        <a class="side-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>الطلبات</span></a>
+        <a class="side-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>طلبات الشراكة</span></a>
+        <a class="side-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة المنتجات</span></a>
+        <a class="side-link active" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>رسائل الدعم</span></a>
+        <a class="side-link" href="admin-complaints.html"><i class="fa-solid fa-message"></i><span>الشكاوي</span></a>
+        <a class="side-link" href="admin-ai-details.html"><i class="fa-solid fa-wand-magic-sparkles"></i><span>AI محتوى</span></a>
+        <a class="side-link" href="taager-products.html"><i class="fa-solid fa-database"></i><span>منتجات Taager</span></a>
+        <a class="side-link" href="admin-sellers.html"><i class="fa-solid fa-store"></i><span>إدارة البائعين</span></a>
+        <a class="side-link" href="admin-coupons.html"><i class="fa-solid fa-tags"></i><span>إدارة الكوبونات</span></a>
+        <a class="side-link" href="admin-fake-prices.html"><i class="fa-solid fa-percent"></i><span>الأسعار الوهمية</span></a>
+        <a class="side-link" href="admin-taager-token.html"><i class="fa-solid fa-key"></i><span>توكن تاجر</span></a>
+      </nav>
+    </aside>
+
+    <main class="app-main" style="display: flex; flex-direction: column;">
+      <header class="app-topbar">
+        <div class="topbar-title">
+          <h1>رسائل الدعم الفني</h1>
+          <p>محادثات الدعم والمساعدة المباشرة مع العملاء</p>
+        </div>
+      </header>
+
+      <!-- Main Chat Interface -->
+      <section class="content-wrap" style="flex: 1; padding: 0 24px 24px; display: flex; flex-direction: column;">
+        
+        <div class="support-chat-container" id="chat-container">
+          
+          <!-- Left Panel (Conversations list) -->
+          <aside class="chat-list-panel">
+            <div class="list-panel-header">
+              <!-- Search bar -->
+              <div class="chat-search-wrap">
+                <i class="fa-solid fa-search"></i>
+                <input
+                  type="text"
+                  id="chat-search"
+                  class="chat-search-input"
+                  placeholder="البحث بالاسم، البريد أو رقم التذكرة..."
+                />
+              </div>
+              
+              <!-- Filter Tabs -->
+              <div class="chat-tabs">
+                <button class="chat-tab active" data-filter="all">الكل</button>
+                <button class="chat-tab" data-filter="open">المفتوحة</button>
+                <button class="chat-tab" data-filter="pending">قيد المراجعة</button>
+                <button class="chat-tab" data-filter="closed">المغلقة</button>
+                <button class="chat-tab" data-filter="unread">غير المقروءة</button>
+              </div>
+            </div>
+
+            <!-- Scrollable list of cards -->
+            <div class="conversations-scrollable" id="conversations-list">
+              <!-- Conversation cards will be loaded here dynamically -->
+            </div>
+          </aside>
+
+          <!-- Right Panel (Chat active window or Empty state placeholder) -->
+          <section class="chat-view-panel" id="chat-view-panel">
+            
+            <!-- Default Empty Screen (WhatsApp-like) -->
+            <div class="chat-view-placeholder" id="chat-placeholder">
+              <i class="fa-solid fa-headset chat-placeholder-icon"></i>
+              <h2 class="chat-placeholder-title">اختر محادثة لبدء الرد على العميل</h2>
+              <p class="chat-placeholder-desc">
+                اختر أي تذكرة أو محادثة دعم عملاء من القائمة الجانبية لعرض الرسائل وتفاصيل العميل والرد عليه مباشرة.
+              </p>
+            </div>
+
+            <!-- Active Chat Interface (Hidden by default) -->
+            <div id="active-chat-content" style="display: none; flex-direction: column; flex: 1; height: 100%;">
+              
+              <!-- Active Chat Header -->
+              <header class="chat-header">
+                <div class="chat-header-user">
+                  <!-- Back button for mobile view -->
+                  <button class="chat-back-btn" id="chat-back" aria-label="رجوع">
+                    <i class="fa-solid fa-arrow-right"></i>
+                  </button>
+                  <div class="conv-avatar" id="active-user-avatar">-</div>
+                  <div class="chat-header-info">
+                    <h3 class="chat-header-name" id="active-user-name">
+                      -
+                      <span id="active-online-indicator" class="online-dot" style="display: none; position: static; width: 10px; height: 10px; border: none; margin-right: 6px;"></span>
+                    </h3>
+                    <p class="chat-header-status-sub" id="active-user-status">آخر ظهور منذ وقت طويل</p>
+                  </div>
+                </div>
+
+                <div class="chat-header-meta">
+                  <span id="active-ticket-msg-count" style="font-size: 0.72rem; color: #64748b; font-weight: bold; background: #e2e8f0; padding: 3px 8px; border-radius: 6px;">0 رسالة</span>
+                  <span id="active-avg-response" style="font-size: 0.72rem; color: #22c55e; font-weight: bold; background: #dcfce7; padding: 3px 8px; border-radius: 6px; display: none;">متوسط الرد: 2 دقيقة</span>
+                  <span class="chat-ticket-id" id="active-ticket-id">تذكرة: -</span>
+                  
+                  <select class="chat-status-select" id="active-status-select" title="تغيير حالة التذكرة">
+                    <option value="open">مفتوحة</option>
+                    <option value="pending">قيد المراجعة</option>
+                    <option value="closed">مغلقة</option>
+                  </select>
+                </div>
+              </header>
+
+              <!-- Chat messages scrollable window -->
+              <div class="chat-messages-area" id="chat-messages-area">
+                <!-- Messages will be dynamically rendered here -->
+              </div>
+
+              <!-- Typing bar at the bottom -->
+              <div class="chat-input-bar">
+                <div class="chat-input-actions">
+                  <!-- Emoji trigger button -->
+                  <button class="chat-action-btn" id="emoji-trigger-btn" type="button" title="رموز تعبيرية">
+                    <i class="fa-regular fa-face-smile"></i>
+                  </button>
+                  <!-- Emoji list panel -->
+                  <div class="emoji-picker-panel" id="emoji-picker">
+                    <span class="emoji-item">😀</span>
+                    <span class="emoji-item">😊</span>
+                    <span class="emoji-item">😂</span>
+                    <span class="emoji-item">👍</span>
+                    <span class="emoji-item">❤️</span>
+                    <span class="emoji-item">🌹</span>
+                    <span class="emoji-item">🙏</span>
+                    <span class="emoji-item">🙌</span>
+                    <span class="emoji-item">🔥</span>
+                    <span class="emoji-item">✨</span>
+                    <span class="emoji-item">🎉</span>
+                    <span class="emoji-item">💡</span>
+                    <span class="emoji-item">⭐</span>
+                    <span class="emoji-item">✅</span>
+                    <span class="emoji-item">❌</span>
+                    <span class="emoji-item">💬</span>
+                  </div>
+
+                  <!-- Attachment trigger button -->
+                  <button class="chat-action-btn" id="attachment-btn" type="button" title="إرفاق ملف (صورة، PDF، Word)">
+                    <i class="fa-solid fa-paperclip"></i>
+                  </button>
+                  <input
+                    type="file"
+                    id="chat-file-input"
+                    accept="image/*, application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    style="display: none;"
+                  />
+                </div>
+
+                <div class="chat-textarea-wrap">
+                  <textarea
+                    id="chat-text-input"
+                    class="chat-text-input"
+                    placeholder="اكتب رسالتك هنا..."
+                    rows="1"
+                    aria-label="اكتب رسالتك"
+                  ></textarea>
+                </div>
+
+                <div class="chat-send-btn-wrap">
+                  <button class="chat-send-btn" id="chat-send-btn" type="button" title="إرسال">
+                    <i class="fa-solid fa-paper-plane-rtl"></i>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+        </div>
+      </section>
+    </main>
+
+    <!-- Mobile Navigation Bottom Bar (Hides on desktop) -->
+    <nav class="mobile-bottom-nav">
+      <a class="mobile-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>الرئيسية</span></a>
+      <a class="mobile-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة</span></a>
+      <a class="mobile-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>طلبات</span></a>
+      <a class="mobile-link active" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>الدعم</span></a>
+      <a class="mobile-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة</span></a>
+    </nav>
+
+    <!-- Fullscreen Lightbox for image viewing -->
+    <div id="image-lightbox" class="support-lightbox" role="dialog" aria-modal="true" aria-label="عرض الصورة كاملة">
+      <button class="support-lightbox-close" id="lightbox-close" aria-label="إغلاق">&times;</button>
+      <img class="support-lightbox-img" id="lightbox-img" src="" alt="صورة مبرزة" />
+    </div>
+
+    <!-- Page Logic -->
+    <script src="./admin-support.page.js"></script>
+  </body>
+</html>

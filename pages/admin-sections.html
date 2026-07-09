@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إدارة أقسام الهوم - Buda</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+  <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
+<style>
+:root{--sb-width:260px}
+body{margin:0;font-family:'Cairo',sans-serif;background:#f8fafc}
+.app-layout{display:flex;min-height:100vh}
+.sidebar{width:260px;background:#0f172a;color:#fff;padding:20px 0;position:fixed;top:0;right:0;bottom:0;overflow-y:auto;z-index:100;display:flex;flex-direction:column}
+.sidebar .brand{padding:0 20px 20px;border-bottom:1px solid #1e293b;font-size:1.2rem;font-weight:800;color:#facc15;display:flex;align-items:center;gap:10px}
+.sidebar nav{padding:10px 0;flex:1}
+.sidebar a{display:flex;align-items:center;gap:12px;padding:12px 20px;color:#94a3b8;text-decoration:none;font-size:.9rem;font-weight:500;transition:.15s;border-right:3px solid transparent}
+.sidebar a:hover,.sidebar a.active{background:#1e293b;color:#fff;border-right-color:#facc15}
+.sidebar a .material-icons-outlined{font-size:20px}
+.main-content{margin-right:260px;flex:1;padding:24px}
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+.page-header h1 { font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 0; }
+.section-card { background: #fff; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; }
+.section-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+.section-card-header h3 { margin: 0; font-size: 1rem; font-weight: 700; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; }
+.badge-active { background: #dcfce7; color: #16a34a; }
+.badge-inactive { background: #fef2f2; color: #ef4444; }
+.badge-mode { background: #eff6ff; color: #3b82f6; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-grid .full { grid-column: 1 / -1; }
+label { display: block; font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 4px; }
+input, select, textarea { width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; font-family: inherit; box-sizing: border-box; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: #facc15; box-shadow: 0 0 0 3px rgba(250,204,21,0.15); }
+textarea { resize: vertical; min-height: 60px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: 0; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; transition: all 0.15s; font-family: inherit; text-decoration: none;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn-primary { background: #facc15; color: #0f172a; }
+.btn-primary:hover { background: #eab308; }
+.btn-danger { background: #ef4444; color: #fff; }
+.btn-danger:hover { background: #dc2626; }
+.btn-outline { background: transparent; border: 1px solid #e2e8f0; color: #475569; }
+.btn-outline:hover { background: #f8fafc; border-color: #cbd5e1; }
+.btn-sm { padding: 4px 10px; font-size: 0.75rem; }
+.btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.toggle { position: relative; display: inline-block; width: 44px; height: 24px; cursor: pointer; }
+.toggle input { display: none; }
+.toggle-slider { position: absolute; inset: 0; background: #cbd5e1; border-radius: 12px; transition: 0.2s; }
+.toggle-slider::before { content: ''; position: absolute; width: 20px; height: 20px; left: 2px; bottom: 2px; background: #fff; border-radius: 50%; transition: 0.2s; }
+.toggle input:checked + .toggle-slider { background: #22c55e; }
+.toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+.product-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin-top: 8px; }
+.product-chip { display: flex; align-items: center; gap: 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; font-size: 0.8rem; }
+.product-chip img { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; }
+.product-chip .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.2s; }
+.modal-overlay.open { opacity: 1; pointer-events: auto; }
+.modal { background: #fff; border-radius: 16px; padding: 24px; width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto; }
+.modal h2 { margin: 0 0 16px; font-size: 1.2rem; }
+.product-picker-search { margin-bottom: 12px; }
+.product-picker-results { max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+.product-picker-item { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 8px; cursor: pointer; transition: 0.1s; }
+.product-picker-item:hover { background: #f1f5f9; }
+.product-picker-item.selected { background: #fef9c3; }
+.product-picker-item img { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; }
+.product-picker-item .info { flex: 1; }
+.product-picker-item .name { font-size: 0.85rem; font-weight: 600; }
+.product-picker-item .price { font-size: 0.75rem; color: #64748b; }
+.pagination { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 12px; }
+.empty-state { text-align: center; padding: 40px 20px; color: #94a3b8; }
+.empty-state .material-icons-outlined { font-size: 48px; margin-bottom: 12px; }
+@media (max-width: 768px) {
+  .sidebar { width: 100%; position: relative; height: auto; }
+  .main-content { margin-right: 0; max-width: 100%; }
+  .form-grid { grid-template-columns: 1fr; }
+  .product-list { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="app-layout">
+<aside class="sidebar">
+<div class="brand"><span class="material-icons-outlined">dashboard</span> Buda Admin</div>
+<nav>
+<a href="admin-sections.html" class="active"><span class="material-icons-outlined">view_carousel</span> أقسام الهوم</a>
+<a href="manage-products.html"><span class="material-icons-outlined">inventory</span> إدارة المنتجات</a>
+<a href="review-partnership.html"><span class="material-icons-outlined">handshake</span> مراجعة الشراكه</a>
+</nav>
+</aside>
+<main class="main-content">
+    <div class="page-header">
+      <h1>إدارة أقسام الصفحة الرئيسية</h1>
+      <button class="btn btn-primary" onclick="openSectionModal()"><span class="material-icons-outlined" style="font-size:18px;">add</span> قسم جديد</button>
+    </div>
+    <div id="sectionsContainer">
+      <div class="empty-state" id="emptyState">
+        <div class="material-icons-outlined"></div>
+        <p>لا توجد أقسام بعد. أضف أول قسم الآن!</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Section Modal -->
+<div class="modal-overlay" id="sectionModal">
+  <div class="modal">
+    <h2 id="sectionModalTitle">إضافة قسم جديد</h2>
+    <form id="sectionForm" onsubmit="saveSection(event)">
+      <div class="form-grid">
+        <div>
+          <label>نوع القسم</label>
+          <select id="f_section_type" required>
+            <option value="custom">مخصص</option>
+            <option value="shein-style">اختيارات المصمم</option>
+            <option value="shein-deal">صفقة اليوم</option>
+            <option value="shein-trend">رائج الآن</option>
+            <option value="shein-new">وصل حديثاً</option>
+            <option value="shein-brands">ماركات</option>
+            <option value="category-products">منتجات قسم</option>
+          </select>
+        </div>
+        <div>
+          <label>نوع الاختيار</label>
+          <select id="f_selection_mode" onchange="toggleSelectionMode()">
+            <option value="auto">أتوماتيك (قواعد)</option>
+            <option value="manual">يدوي (اختيار منتجات)</option>
+          </select>
+        </div>
+        <div class="full">
+          <label>العنوان</label>
+          <input id="f_title" required placeholder="مثال: تخفيضات نهاية الأسبوع" />
+        </div>
+        <div>
+          <label>العنوان الفرعي</label>
+          <input id="f_subtitle" placeholder="نص صغير تحت العنوان" />
+        </div>
+        <div>
+          <label>الوسم (badge)</label>
+          <input id="f_badge" placeholder="مثال: جديد، خصم" />
+        </div>
+        <div>
+          <label>عدد المنتجات</label>
+          <input id="f_display_count" type="number" value="12" min="1" max="50" />
+        </div>
+        <div>
+          <label>ترتيب الظهور</label>
+          <input id="f_sort_order" type="number" value="0" />
+        </div>
+        <div>
+          <label>الحالة</label>
+          <label class="toggle"><input id="f_is_active" type="checkbox" checked /><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+
+      <div id="autoRulesSection" style="margin-top:12px;">
+        <label>قواعد الاختيار الأتوماتيكي (JSON)</label>
+        <textarea id="f_auto_rules" rows="4" style="font-family:monospace;font-size:0.8rem;">{
+  "category": "",
+  "discount_min": 0,
+  "discount_max": 100,
+  "rating_min": 0,
+  "price_min": 0,
+  "price_max": 0,
+  "source": "",
+  "sort_by": "discount"
+}</textarea>
+        <div style="font-size:0.75rem;color:#64748b;margin-top:4px;">
+          الحقول المتاحة: category, discount_min, discount_max, rating_min, price_min, price_max, source (taager/internal), sort_by (discount/rating/price/random)
+        </div>
+      </div>
+
+      <div id="manualProductsSection" style="margin-top:12px;display:none;">
+        <label>المنتجات المختارة</label>
+        <div id="selectedProductsList" class="product-list"></div>
+        <button type="button" class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="openProductPicker()">+ إضافة منتجات</button>
+      </div>
+
+      <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end;">
+        <button type="button" class="btn btn-outline" onclick="closeModal('sectionModal')">إلغاء</button>
+        <button type="submit" class="btn btn-primary">حفظ</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Product Picker Modal -->
+<div class="modal-overlay" id="productPickerModal">
+  <div class="modal">
+    <h2>اختيار منتجات للقسم</h2>
+    <div class="product-picker-search">
+      <input id="productSearchInput" type="text" placeholder="ابحث عن منتج..." oninput="debouncedSearchProducts()" />
+    </div>
+    <div class="product-picker-results" id="productPickerResults"></div>
+    <div class="pagination" id="productPickerPagination"></div>
+    <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;">
+      <button type="button" class="btn btn-outline" onclick="closeModal('productPickerModal')">تم</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/vendor/supabase/supabase-js@2.js"></script>
+<script src="../assets/js/supabase-client.js"></script>
+<script src="../assets/js/store.js"></script>
+<script>
+var supabase = window.supabaseClient;
+var editingSectionId = null;
+var selectedProducts = [];
+var allPickerProducts = [];
+
+function getClient() {
+  return supabase || window.supabaseClient;
+}
+
+async function init() {
+  var store = window.BudaStore;
+  var local = store ? Object.values(store.getAllProducts()).filter(Boolean) : [];
+  var client = getClient();
+  if (client) {
+    try {
+      var tpAll=[], tpOff=0, tpPg=1000;
+      while(true) { var {data:tpB}=await client.from('taager_products').select('id,taager_product_id,name,price,image').eq('is_active',true).range(tpOff,tpOff+tpPg-1); if(!tpB||!tpB.length)break; tpAll=tpAll.concat(tpB); tpOff+=tpPg; if(tpB.length<tpPg)break; }
+      tpAll.forEach(function(p){ local.push({id:p.id, name:p.name||'', price:p.price, image:p.image||'', source:'taager'}); });
+    } catch(e) {}
+    try {
+      var {data:pp} = await client.from('partner_products').select('id,name,price,image').limit(500);
+      if (pp&&pp.length) pp.forEach(function(p){ local.push({id:p.id||'partner_'+Date.now()+'_'+Math.random(), name:p.name||'', price:p.price, image:p.image||'', source:'partner'}); });
+    } catch(e) { if(e.code!=='42P01')console.warn(e); }
+  }
+  allPickerProducts = local;
+  await loadSections();
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+
+async function loadSections() {
+  var client = getClient();
+  if (!client) { document.getElementById('sectionsContainer').innerHTML = '<div class="empty-state"><p>Supabase غير متصل</p></div>'; return; }
+  var { data, error } = await client.from('home_sections').select('*').order('sort_order', { ascending: true });
+  if (error) { alert('خطأ في تحميل الأقسام: ' + error.message); return; }
+  var container = document.getElementById('sectionsContainer');
+  if (!data || !data.length) {
+    container.innerHTML = '<div class="empty-state"><span class="material-icons-outlined">view_carousel</span><p>لا توجد أقسام بعد. أضف أول قسم الآن!</p></div>';
+    return;
+  }
+  container.innerHTML = data.map(function(s) { return renderSectionCard(s); }).join('');
+  data.forEach(function(s) {
+    loadProductCount(s.id, 'count-' + s.id);
+  });
+}
+
+function renderSectionCard(s) {
+  var activeLabel = s.is_active ? 'نشط' : 'غير نشط';
+  var activeBadge = s.is_active ? 'badge-active' : 'badge-inactive';
+  var modeLabel = s.selection_mode === 'auto' ? 'أتوماتيك' : 'يدوي';
+  return '<div class="section-card" id="card-' + s.id + '">' +
+    '<div class="section-card-header">' +
+    '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' +
+    '<h3>' + escapeHtml(s.title) + '</h3>' +
+    '<span class="badge ' + activeBadge + '">' + activeLabel + '</span>' +
+    '<span class="badge badge-mode">' + modeLabel + '</span>' +
+    '<span class="badge" style="background:#f1f5f9;color:#475569;" id="count-' + s.id + '">...</span>' +
+    '</div>' +
+    '<div class="btn-group">' +
+    '<button class="btn btn-outline btn-sm" onclick="previewSection(\'' + s.id + '\')">معاينة</button>' +
+    '<button class="btn btn-outline btn-sm" onclick="editSection(\'' + s.id + '\')">تعديل</button>' +
+    '<button class="btn btn-danger btn-sm" onclick="deleteSection(\'' + s.id + '\')">حذف</button>' +
+    '</div></div>' +
+    '<div style="font-size:0.8rem;color:#64748b;">' +
+    '<span>' + s.section_type + '</span>' +
+    (s.subtitle ? ' <span>·</span> <span>' + escapeHtml(s.subtitle) + '</span>' : '') +
+    (s.badge ? ' <span>·</span> <span>وسم: ' + escapeHtml(s.badge) + '</span>' : '') +
+    ' <span>·</span> <span>ترتيب: ' + s.sort_order + '</span>' +
+    '</div></div>';
+}
+
+async function loadProductCount(sectionId, elId) {
+  var client = getClient();
+  if (!client) return;
+  var { count, error } = await client.from('section_products').select('*', { count: 'exact', head: true }).eq('section_id', sectionId);
+  if (!error) document.getElementById(elId).textContent = count + ' منتج';
+}
+
+function escapeHtml(v) { return String(v || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function toggleSelectionMode() {
+  var mode = document.getElementById('f_selection_mode').value;
+  document.getElementById('autoRulesSection').style.display = mode === 'auto' ? 'block' : 'none';
+  document.getElementById('manualProductsSection').style.display = mode === 'manual' ? 'block' : 'none';
+}
+
+function openSectionModal(section) {
+  editingSectionId = null;
+  selectedProducts = [];
+  document.getElementById('sectionForm').reset();
+  document.getElementById('sectionModalTitle').textContent = 'إضافة قسم جديد';
+  document.getElementById('f_is_active').checked = true;
+  document.getElementById('f_sort_order').value = '0';
+  document.getElementById('f_display_count').value = '12';
+  toggleSelectionMode();
+  openModal('sectionModal');
+}
+
+async function editSection(id) {
+  var client = getClient();
+  if (!client) return;
+  var { data, error } = await client.from('home_sections').select('*').eq('id', id).single();
+  if (error || !data) { alert('خطأ في تحميل بيانات القسم'); return; }
+  editingSectionId = id;
+  document.getElementById('sectionModalTitle').textContent = 'تعديل القسم';
+  document.getElementById('f_section_type').value = data.section_type;
+  document.getElementById('f_selection_mode').value = data.selection_mode;
+  document.getElementById('f_title').value = data.title || '';
+  document.getElementById('f_subtitle').value = data.subtitle || '';
+  document.getElementById('f_badge').value = data.badge || '';
+  document.getElementById('f_display_count').value = data.display_count || 12;
+  document.getElementById('f_sort_order').value = data.sort_order || 0;
+  document.getElementById('f_is_active').checked = data.is_active !== false;
+  document.getElementById('f_auto_rules').value = JSON.stringify(data.auto_rules || {}, null, 2);
+  toggleSelectionMode();
+  // Load manual products
+  var { data: sp } = await client.from('section_products').select('product_id').eq('section_id', id).order('sort_order');
+  selectedProducts = (sp || []).map(function(p) { return p.product_id; });
+  renderSelectedProducts();
+  openModal('sectionModal');
+}
+
+async function saveSection(e) {
+  e.preventDefault();
+  var client = getClient();
+  if (!client) return;
+  var autoRules;
+  try { autoRules = JSON.parse(document.getElementById('f_auto_rules').value); } catch(_) { autoRules = {}; }
+  var payload = {
+    section_type: document.getElementById('f_section_type').value,
+    title: document.getElementById('f_title').value.trim(),
+    subtitle: document.getElementById('f_subtitle').value.trim(),
+    badge: document.getElementById('f_badge').value.trim(),
+    display_count: parseInt(document.getElementById('f_display_count').value) || 12,
+    sort_order: parseInt(document.getElementById('f_sort_order').value) || 0,
+    is_active: document.getElementById('f_is_active').checked,
+    selection_mode: document.getElementById('f_selection_mode').value,
+    auto_rules: autoRules,
+  };
+  if (editingSectionId) {
+    var { error } = await client.from('home_sections').update(payload).eq('id', editingSectionId);
+    if (error) { alert('خطأ في الحفظ: ' + error.message); return; }
+    // Update manual products
+    if (payload.selection_mode === 'manual') {
+      await client.from('section_products').delete().eq('section_id', editingSectionId);
+      if (selectedProducts.length) {
+        var inserts = selectedProducts.map(function(pid, i) { return { section_id: editingSectionId, product_id: pid, sort_order: i }; });
+        await client.from('section_products').insert(inserts);
+      }
+    }
+  } else {
+    var { data, error } = await client.from('home_sections').insert(payload).select('id').single();
+    if (error) { alert('خطأ في الحفظ: ' + error.message); return; }
+    if (payload.selection_mode === 'manual' && selectedProducts.length) {
+      var inserts = selectedProducts.map(function(pid, i) { return { section_id: data.id, product_id: pid, sort_order: i }; });
+      await client.from('section_products').insert(inserts);
+    }
+  }
+  closeModal('sectionModal');
+  await loadSections();
+}
+
+async function deleteSection(id) {
+  if (!confirm('هل أنت متأكد من حذف هذا القسم؟')) return;
+  var client = getClient();
+  if (!client) return;
+  await client.from('section_products').delete().eq('section_id', id);
+  await client.from('home_sections').delete().eq('id', id);
+  await loadSections();
+}
+
+function renderSelectedProducts() {
+  var container = document.getElementById('selectedProductsList');
+  if (!selectedProducts.length) { container.innerHTML = '<div style="color:#94a3b8;font-size:0.85rem;">لم يتم اختيار منتجات بعد</div>'; return; }
+  container.innerHTML = selectedProducts.map(function(pid) {
+    var p = window.BudaStore ? window.BudaStore.getProductById(pid) : null;
+    var img = (p && (p.image || p.image_url)) || '../assets/images/unnamed.png';
+    var name = (p && p.name) || pid;
+    return '<div class="product-chip">' +
+      '<img src="' + img + '" onerror="this.src=\'../assets/images/unnamed.png\'" />' +
+      '<span class="name">' + escapeHtml(name) + '</span>' +
+      '<button class="btn btn-danger btn-sm" onclick="removeProduct(\'' + pid + '\')">×</button></div>';
+  }).join('');
+}
+
+function removeProduct(pid) {
+  selectedProducts = selectedProducts.filter(function(p) { return p !== pid; });
+  renderSelectedProducts();
+}
+
+var pickerPage = 0;
+var pickerSearch = '';
+function openProductPicker() {
+  pickerPage = 0;
+  pickerSearch = '';
+  document.getElementById('productSearchInput').value = '';
+  openModal('productPickerModal');
+  renderProductPicker();
+}
+function renderProductPicker() {
+  var results = document.getElementById('productPickerResults');
+  var allProducts = allPickerProducts;
+  var filtered = allProducts;
+  if (pickerSearch.trim()) {
+    var q = pickerSearch.trim().toLowerCase();
+    filtered = allProducts.filter(function(p) { return (p.name || '').toLowerCase().includes(q) || (String(p.id) || '').includes(q); });
+  }
+  var pageSize = 20;
+  var start = pickerPage * pageSize;
+  var page = filtered.slice(start, start + pageSize);
+  if (!page.length && pickerPage > 0) { pickerPage = 0; return renderProductPicker(); }
+  results.innerHTML = page.map(function(p) {
+    var sel = selectedProducts.indexOf(p.id) !== -1;
+    var img = (p.image || p.image_url) || '../assets/images/unnamed.png';
+    return '<div class="product-picker-item' + (sel ? ' selected' : '') + '" onclick="togglePickerProduct(\'' + p.id + '\')">' +
+      '<img src="' + img + '" onerror="this.src=\'../assets/images/unnamed.png\'" />' +
+      '<div class="info"><div class="name">' + escapeHtml(p.name || p.id) + '</div>' +
+      '<div class="price">' + (p.price || '') + '</div></div>' +
+      (sel ? '<span class="material-icons-outlined" style="color:#16a34a;">check_circle</span>' : '') +
+      '</div>';
+  }).join('');
+  var totalPages = Math.ceil(filtered.length / pageSize);
+  document.getElementById('productPickerPagination').innerHTML =
+    (pickerPage > 0 ? '<button class="btn btn-outline btn-sm" onclick="pickerPage--;renderProductPicker()">السابق</button>' : '') +
+    '<span style="font-size:0.8rem;color:#64748b;">' + (pickerPage + 1) + ' / ' + totalPages + '</span>' +
+    (start + pageSize < filtered.length ? '<button class="btn btn-outline btn-sm" onclick="pickerPage++;renderProductPicker()">التالي</button>' : '');
+}
+function togglePickerProduct(pid) {
+  var idx = selectedProducts.indexOf(pid);
+  if (idx === -1) selectedProducts.push(pid); else selectedProducts.splice(idx, 1);
+  renderProductPicker();
+  renderSelectedProducts();
+}
+var debouncedSearchProducts = (function() { var t; return function() { clearTimeout(t); t = setTimeout(function() { pickerPage = 0; pickerSearch = document.getElementById('productSearchInput').value; renderProductPicker(); }, 300); }; })();
+
+async function previewSection(id) {
+  var client = getClient();
+  if (!client) return;
+  var { data: section } = await client.from('home_sections').select('*').eq('id', id).single();
+  if (!section) return;
+  var products = [];
+  if (section.selection_mode === 'manual') {
+    var { data: sp } = await client.from('section_products').select('product_id').eq('section_id', id).order('sort_order');
+    products = (sp || []).map(function(s) { return window.BudaStore ? window.BudaStore.getProductById(s.product_id) : null; }).filter(Boolean);
+  } else {
+    var all = allPickerProducts;
+    var rules = section.auto_rules || {};
+    products = all.filter(function(p) {
+      if (rules.category) { var pc = (p.category || '').toLowerCase(); var rc = rules.category.toLowerCase(); if (pc.indexOf(rc) === -1) return false; }
+      if (rules.source && p.source !== rules.source) return false;
+      if (rules.price_min > 0 && (Number(p.price) || 0) < rules.price_min) return false;
+      if (rules.price_max > 0 && (Number(p.price) || 0) > rules.price_max) return false;
+      if (rules.discount_min > 0 || rules.discount_max < 100) {
+        var rp = window.BudaStore ? window.BudaStore.resolveProductPrice(p) : {};
+        var dp = rp.discountPercent || 0;
+        if (rules.discount_min > 0 && dp < rules.discount_min) return false;
+        if (rules.discount_max < 100 && dp > rules.discount_max) return false;
+      }
+      if (rules.rating_min > 0 && (Number(p.rating) || 0) < rules.rating_min) return false;
+      return true;
+    });
+    if (rules.sort_by === 'discount') products.sort(function(a,b) { return ((window.BudaStore ? window.BudaStore.resolveProductPrice(b).discountPercent : 0) || 0) - ((window.BudaStore ? window.BudaStore.resolveProductPrice(a).discountPercent : 0) || 0); });
+    else if (rules.sort_by === 'rating') products.sort(function(a,b) { return (b.rating || 0) - (a.rating || 0); });
+    else if (rules.sort_by === 'price') products.sort(function(a,b) { return (a.price || 0) - (b.price || 0); });
+    else products.sort(function() { return 0.5 - Math.random(); });
+    products = products.slice(0, section.display_count || 12);
+  }
+  var html = products.map(function(p) {
+    var img = (p.image || p.image_url) || '../assets/images/unnamed.png';
+    return '<div class="product-chip"><img src="' + img + '" onerror="this.src=\'../assets/images/unnamed.png\'" /><span class="name">' + escapeHtml(p.name || p.id) + '</span></div>';
+  }).join('');
+  alert('عدد المنتجات: ' + products.length + '\n\n' + (products.length ? products.map(function(p,i) { return (i+1) + '. ' + (p.name || p.id); }).join('\n') : 'لا توجد منتجات'));
+}
+
+init();
+</script>
+</body>
+</html>

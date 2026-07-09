@@ -230,4 +230,4 @@ document.getElementById("statusFilter").addEventListener("change", filterApplica
 window.updatePartnerStatus = updatePartnerStatus;
 
 loadRequests(true);
-setInterval(loadRequests, 4000);
+setInterval(loadRequests, 30000);

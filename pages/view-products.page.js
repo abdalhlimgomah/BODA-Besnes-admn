@@ -387,6 +387,7 @@ function buildStorePayloadFromReview(product, reviewStatus) {
     stock: quantity,
     quantity,
     status: getStoreStatusFromReview(cleanStatus),
+    review_status: cleanStatus,
     seller_email: email || undefined,
     owner_email: email || undefined,
     email: email || undefined,
@@ -624,14 +625,35 @@ async function updateReviewRowStatus(reviewId, reviewStatus) {
 async function setReviewStatusWithStoreSync(product, nextStatus) {
   const normalized = normalizeReviewStatus(nextStatus);
 
-  if (normalized === "reviewed") {
-    await publishProductToStore(product);
-    await updateReviewRowStatus(product.id, normalized);
-    return;
+  // دايماً نحدث my_products الأول
+  await updateReviewRowStatus(product.id, normalized);
+
+  // نحاول نحدث products مباشرة عشان العميل يشوف التغيير
+  const storeValue = normalized === "reviewed" ? "published" : "pending_review";
+  const storePayload = { status: storeValue, review_status: normalized };
+
+  // نجرب عدة طرق لتحديث products
+  const linkedId = getStoreLink(product.id);
+  const updateAttempts = [];
+
+  if (linkedId) {
+    updateAttempts.push(
+      supabaseClient.from(STORE_TABLE).update(storePayload).eq("id", linkedId)
+    );
   }
 
-  await updateReviewRowStatus(product.id, normalized);
-  await removeProductFromStore(product.id);
+  updateAttempts.push(
+    supabaseClient.from(STORE_TABLE).update(storePayload).eq("legacy_my_products_id", product.id),
+    supabaseClient.from(STORE_TABLE).update(storePayload).eq("id", product.id)
+  );
+
+  for (const attempt of updateAttempts) {
+    const { error, data } = await attempt.select("id").limit(1);
+    if (!error && data && data[0]) {
+      setStoreLink(product.id, data[0].id);
+      break;
+    }
+  }
 }
 
 function findProductRow(productId) {

@@ -1,18 +1,22 @@
-﻿class DashboardManager {
+﻿const SUPABASE_URL = "https://msgqzgzoslearaprgiqq.supabase.co";
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+class DashboardManager {
   constructor() {
-    this.userEmail = this.getCurrentUserEmail();
-    this.owner = this.loadOwnerData();
+    this.username = localStorage.getItem("adminUsername") || (() => { try { var s = JSON.parse(sessionStorage.getItem("__boda_admin_session_v2")); return s?.username || ""; } catch(_) { return ""; } })() || "";
+    this.owner = { name: "", email: "", description: "", profileImage: null };
     this.settings = this.loadSettings();
     this.init();
   }
 
-  init() {
+  async init() {
     this.setupEventListeners();
-    this.loadOwnerProfile();
+    await this.loadOwnerProfile();
     this.loadThemeSettings();
     this.loadCurrencySettings();
     this.updateStats();
-
     window.addEventListener("focus", () => this.updateStats());
   }
 
@@ -47,10 +51,6 @@
     }
   }
 
-  getCurrentUserEmail() {
-    return localStorage.getItem("currentSellerEmail") || localStorage.getItem("userEmail") || "";
-  }
-
   switchSection(event) {
     event.preventDefault();
     const sectionId = event.currentTarget.getAttribute("data-section");
@@ -69,60 +69,121 @@
     if (targetSection) targetSection.classList.add("active");
   }
 
-  handleImageUpload(event) {
+  async handleImageUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
+    if (!this.username) {
+      this.showNotification("لم يتم التعرف على اسم المستخدم. سجل الدخول مرة أخرى.", "error");
+      return;
+    }
 
-    const reader = new FileReader();
-    reader.onload = (readerEvent) => {
-      const imageData = readerEvent.target.result;
-      const profileImage = document.getElementById("profileImage");
-      if (profileImage) profileImage.src = imageData;
-      this.owner.profileImage = imageData;
-      this.saveOwnerData();
-      this.showNotification("تم تحديث صورة المالك", "success");
-    };
-    reader.readAsDataURL(file);
+    var ext = (file.name || "").split('.').pop() || "jpg";
+    const fileName = `profile_${this.username}_${Date.now()}.${ext}`;
+    const { error: uploadError } = await supabaseClient.storage
+      .from("profile-images")
+      .upload(fileName, file, { upsert: true });
+    if (uploadError) {
+      this.showNotification("فشل رفع الصورة: " + uploadError.message, "error");
+      return;
+    }
+    const { data } = await supabaseClient.storage.from("profile-images").getPublicUrl(fileName);
+    const imageUrl = data?.publicUrl || "";
+    if (!imageUrl) {
+      this.showNotification("فشل الحصول على رابط الصورة", "error");
+      return;
+    }
+
+    const profileImage = document.getElementById("profileImage");
+    if (profileImage) profileImage.src = imageUrl;
+    this.owner.profileImage = imageUrl;
+    this.saveOwnerData();
+    await this.saveProfileToSupabase();
+    this.showNotification("تم تحديث صورة المالك", "success");
   }
 
-  loadOwnerProfile() {
+  async loadOwnerProfile() {
     const ownerName = document.getElementById("ownerName");
     const ownerEmail = document.getElementById("ownerEmail");
     const profileImage = document.getElementById("profileImage");
-
-    if (ownerName) ownerName.textContent = this.owner.name || "مالك المتجر";
-    if (ownerEmail) ownerEmail.textContent = this.owner.email || "manager@example.com";
-    if (profileImage && this.owner.profileImage) profileImage.src = this.owner.profileImage;
-
     const storeName = document.getElementById("storeName");
     const storeDescription = document.getElementById("storeDescription");
-    if (storeName) storeName.value = this.owner.name || "";
-    if (storeDescription) storeDescription.value = this.owner.description || "";
+
+    // Try to load from localStorage cache first
+    var cached = this.loadOwnerData();
+    if (cached.profileImage && profileImage) profileImage.src = cached.profileImage;
+    if (cached.name && ownerName) ownerName.textContent = cached.name;
+    if (cached.email && ownerEmail) ownerEmail.textContent = cached.email;
+    if (cached.name && storeName) storeName.value = cached.name;
+    if (cached.description && storeDescription) storeDescription.value = cached.description;
+
+    if (!this.username) return;
+
+    // Fetch latest from Supabase
+    console.log("Fetching profile for username:", this.username);
+    var { data, error } = await supabaseClient
+      .from("admin_profiles")
+      .select("*")
+      .eq("username", this.username)
+      .limit(1);
+
+    if (error) {
+      console.error("Failed to load profile:", error);
+      if (error.code === "PGRST116" || error.message?.includes("relation") || error.message?.includes("does not exist")) {
+        console.warn("admin_profiles table not found. Run the SQL migration first.");
+      }
+      return;
+    }
+
+    if (data && data.length > 0) {
+      var profile = data[0];
+      this.owner.name = profile.store_name || "";
+      this.owner.email = profile.email || "";
+      this.owner.description = profile.store_description || "";
+      this.owner.profileImage = profile.profile_image || "";
+
+      this.saveOwnerData();
+
+      if (ownerName) ownerName.textContent = this.owner.name || "مالك المتجر";
+      if (ownerEmail) ownerEmail.textContent = this.owner.email || this.username;
+      if (profileImage && this.owner.profileImage) profileImage.src = this.owner.profileImage;
+      if (storeName) storeName.value = this.owner.name || "";
+      if (storeDescription) storeDescription.value = this.owner.description || "";
+    }
   }
 
-  updateStats() {
-    const sellerProductsKey = `seller_products_${this.userEmail}`;
-    const sellerProducts = JSON.parse(localStorage.getItem(sellerProductsKey) || "[]");
-    const allOrders = JSON.parse(localStorage.getItem("seller_orders") || "[]");
-
-    const sellerOrders = allOrders.filter((order) => order.seller_email === this.userEmail);
-    const deliveredOrders = sellerOrders.filter((order) => order.status === "delivered");
-
-    const totalSales = deliveredOrders.reduce((sum, order) => sum + (order.total || 0), 0);
+  async updateStats() {
     const currencySymbol = this.getCurrencySymbol();
 
-    const productCount = document.getElementById("productCount");
-    const orderCount = document.getElementById("orderCount");
-    const salesAmount = document.getElementById("salesAmount");
-    const revenueAmount = document.getElementById("revenueAmount");
+    const [{ count: productCount }, { count: orderCount }, { data: deliveredOrders }, { count: taagerCount }, { count: complaintsCount }] = await Promise.all([
+      supabaseClient.from("products").select("*", { count: "exact", head: true }),
+      supabaseClient.from("orders").select("*", { count: "exact", head: true }),
+      supabaseClient.from("orders").select("total_price,total,amount").eq("status", "delivered"),
+      supabaseClient.from("taager_products").select("*", { count: "exact", head: true }),
+      supabaseClient.from("complaints").select("*", { count: "exact", head: true }).eq("status", "pending"),
+    ]);
 
-    if (productCount) productCount.textContent = sellerProducts.length;
-    if (orderCount) orderCount.textContent = sellerOrders.length;
-    if (salesAmount) salesAmount.textContent = `${totalSales.toFixed(2)} ${currencySymbol}`;
-    if (revenueAmount) revenueAmount.textContent = `${totalSales.toFixed(2)} ${currencySymbol}`;
+    const totalSales = (deliveredOrders || []).reduce((sum, order) => {
+      const val = Number(order.total_price ?? order.total ?? order.amount ?? 0);
+      return sum + val;
+    }, 0);
+
+    const productEl = document.getElementById("productCount");
+    const orderEl = document.getElementById("orderCount");
+    const salesEl = document.getElementById("salesAmount");
+    const revenueEl = document.getElementById("revenueAmount");
+
+    if (productEl) productEl.textContent = productCount ?? 0;
+    if (orderEl) orderEl.textContent = orderCount ?? 0;
+    if (salesEl) salesEl.textContent = `${totalSales.toFixed(2)} ${currencySymbol}`;
+    if (revenueEl) revenueEl.textContent = `${totalSales.toFixed(2)} ${currencySymbol}`;
+    const taagerEl = document.getElementById("taagerCount");
+    if (taagerEl) taagerEl.textContent = taagerCount ?? 0;
+
+    const complaintsEl = document.getElementById("complaintsCount");
+    if (complaintsEl) complaintsEl.textContent = complaintsCount ?? 0;
   }
 
-  handleSettingsSubmit(event) {
+  async handleSettingsSubmit(event) {
     event.preventDefault();
 
     const storeName = document.getElementById("storeName");
@@ -130,9 +191,34 @@
 
     this.owner.name = storeName ? storeName.value.trim() : this.owner.name;
     this.owner.description = storeDescription ? storeDescription.value.trim() : this.owner.description;
+
+    await this.saveProfileToSupabase();
     this.saveOwnerData();
     this.loadOwnerProfile();
     this.showNotification("تم حفظ الإعدادات بنجاح", "success");
+  }
+
+  async saveProfileToSupabase() {
+    if (!this.username) {
+      console.warn("no username set, can't save profile");
+      return;
+    }
+    var payload = {
+      username: this.username,
+      store_name: this.owner.name || "",
+      store_description: this.owner.description || "",
+      profile_image: this.owner.profileImage || "",
+      email: this.owner.email || "",
+      updated_at: new Date().toISOString(),
+    };
+    console.log("Saving profile to Supabase:", payload);
+    var { error } = await supabaseClient.from("admin_profiles").upsert(payload, { onConflict: "username" });
+    if (error) {
+      console.error("Failed to save profile:", error);
+      this.showNotification("فشل حفظ البيانات في سوبا بيز: " + error.message, "error");
+    } else {
+      console.log("Profile saved successfully");
+    }
   }
 
   handleCurrencySubmit(event) {
@@ -176,18 +262,9 @@
 
   getCurrencySymbol() {
     const symbols = {
-      EGP: "ج.م",
-      USD: "$",
-      EUR: "€",
-      SAR: "ر.س",
-      AED: "د.إ",
-      KWD: "د.ك",
-      QAR: "ر.ق",
-      BHD: "د.ب",
-      OMR: "ر.ع",
-      JOD: "د.أ",
-      LBP: "ل.ل",
-      SYP: "ل.س",
+      EGP: "ج.م", USD: "$", EUR: "€", SAR: "ر.س", AED: "د.إ",
+      KWD: "د.ك", QAR: "ر.ق", BHD: "د.ب", OMR: "ر.ع",
+      JOD: "د.أ", LBP: "ل.ل", SYP: "ل.س",
     };
     return symbols[this.settings.currency] || "ج.م";
   }
@@ -198,13 +275,10 @@
 
   loadOwnerData() {
     const saved = localStorage.getItem("dashboardOwner");
-    if (saved) return JSON.parse(saved);
-    return {
-      name: "*ᬼ👑𓆩Buda*⚡",
-      email: "قاعدة البيانات",
-      description: "",
-      profileImage: null,
-    };
+    if (saved) {
+      try { return JSON.parse(saved); } catch (_) {}
+    }
+    return { name: "", email: "", description: "", profileImage: null };
   }
 
   saveSettings() {
@@ -213,7 +287,9 @@
 
   loadSettings() {
     const saved = localStorage.getItem("dashboardSettings");
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      try { return JSON.parse(saved); } catch (_) {}
+    }
     return { theme: "light", currency: "EGP" };
   }
 

@@ -6,13 +6,25 @@ const supabaseClient = createClient(
 );
 
 const CATEGORIES = [
-  "هواتف",
-  "ساعات",
-  "لوحات مفاتيح",
-  "سماعات رأس",
-  "ملابس أطفال",
-  "منتجات تجميل وعناية",
+  "إلكترونيات",
+  "موبايلات وملحقاتها",
+  "ملابس وأحذية",
+  "تجميل وعناية",
+  "عطور",
   "منتجات رياضية",
+  "منزل ومطبخ",
+  "مستلزمات المنزل",
+  "مكتب ودراسة",
+  "ساعات",
+  "حفاضات وأطفال",
+  "ألعاب",
+  "كتب ومجلات",
+  "حيوانات أليفة",
+  "سيارات",
+  "مجوهرات وإكسسوارات",
+  "كاميرات وتصوير",
+  "سماعات",
+  "هدايا",
 ];
 
 function showToast(message, type = "info") {
@@ -38,12 +50,15 @@ function showToast(message, type = "info") {
 async function uploadImage(file) {
   if (!file) return "";
   const fileName = `${Date.now()}_${file.name.replace(/ /g, "_")}`;
+  console.log("Uploading to Buda bucket:", fileName);
   const { error } = await supabaseClient.storage.from("Buda").upload(fileName, file, { upsert: true });
   if (error) {
-    showToast(error.message, "error");
+    console.error("Upload error:", error);
+    showToast("فشل رفع الصورة: " + (error.message || "خطأ غير معروف"), "error");
     return "";
   }
   const { data } = await supabaseClient.storage.from("Buda").getPublicUrl(fileName);
+  console.log("Upload success, URL:", data?.publicUrl);
   return data?.publicUrl || "";
 }
 
@@ -65,23 +80,33 @@ async function addProduct() {
   const stock = safeNumber(document.getElementById("stock")?.value);
   const category = readInputValue("category");
 
+  const finalPriceEl = document.getElementById("finalPriceDisplay");
+  if (finalPriceEl) finalPriceEl.textContent = "—";
+
   if (!name || !price || !category) {
     showToast("يرجى إدخال الاسم والسعر والقسم.", "error");
     return;
   }
 
-  const imageLinks = [];
-  for (let i = 1; i <= 5; i += 1) {
-    imageLinks.push(readInputValue(`imageLink${i}`));
+  const fileInput = document.getElementById("imageFile");
+  const files = fileInput?.files ? Array.from(fileInput.files) : [];
+  if (files.length > 5) {
+    showToast("يمكنك رفع 5 صور كحد أقصى.", "error");
+    return;
   }
-  const [imageLink1, imageLink2, imageLink3, imageLink4, imageLink5] = imageLinks;
 
-  let imageURL = "";
-  const file = document.getElementById("imageFile")?.files?.[0];
-  if (file) imageURL = await uploadImage(file);
+  var uploadedUrls = [];
+  for (var i = 0; i < files.length; i++) {
+    var url = await uploadImage(files[i]);
+    if (url) uploadedUrls.push(url);
+  }
 
-  if (!imageURL) imageURL = imageLink1 || imageLink2 || imageLink3 || imageLink4 || imageLink5;
-  const extraLinks = imageLinks.filter(Boolean);
+  var imagePayload = {};
+  if (uploadedUrls.length > 0) imagePayload.image = uploadedUrls[0];
+  if (uploadedUrls.length > 1) imagePayload.image2 = uploadedUrls[1];
+  if (uploadedUrls.length > 2) imagePayload.image3 = uploadedUrls[2];
+  if (uploadedUrls.length > 3) imagePayload.image4 = uploadedUrls[3];
+  if (uploadedUrls.length > 4) imagePayload.image5 = uploadedUrls[4];
 
   const discountedPrice = price - (price * discount) / 100;
 
@@ -92,13 +117,9 @@ async function addProduct() {
       price_after_discount: discountedPrice,
       description,
       stock,
-      image: imageURL || null,
-      image2: imageLink2 || null,
-      image3: imageLink3 || null,
-      image4: imageLink4 || null,
-      image5: imageLink5 || null,
-      extra_links: JSON.stringify(extraLinks),
       category,
+      extra_links: JSON.stringify(uploadedUrls),
+      ...imagePayload,
     },
   ]);
 
@@ -115,9 +136,7 @@ async function addProduct() {
   document.getElementById("stock").value = "";
   document.getElementById("category").value = "";
   document.getElementById("imageFile").value = "";
-  for (let i = 1; i <= 5; i += 1) {
-    document.getElementById(`imageLink${i}`).value = "";
-  }
+  document.getElementById("imagePreviews").innerHTML = "";
 
   loadProducts();
 }
@@ -129,31 +148,37 @@ async function updateProduct(id) {
   const description = readInputValue(`description_${id}`);
   const stock = safeNumber(readInputValue(`stock_${id}`));
   const category = readInputValue(`category_${id}`);
-  const imageLinks = [];
-  for (let i = 1; i <= 5; i += 1) {
-    imageLinks.push(readInputValue(`imageLink${i}_${id}`));
-  }
-  const [imageLink1, imageLink2, imageLink3, imageLink4, imageLink5] = imageLinks;
-  const imageURL = imageLink1 || imageLink2 || imageLink3 || imageLink4 || imageLink5;
 
   const discountedPrice = price - (price * discount) / 100;
-  const { error } = await supabaseClient
-    .from("products")
-    .update({
-      name,
-      price,
-      price_after_discount: discountedPrice,
-      description,
-      stock,
-      category,
-      image: imageURL || null,
-      image2: imageLink2 || null,
-      image3: imageLink3 || null,
-      image4: imageLink4 || null,
-      image5: imageLink5 || null,
-      extra_links: JSON.stringify(imageLinks.filter(Boolean)),
-    })
-    .eq("id", id);
+
+  const { data: existing } = await supabaseClient.from("products").select("*").eq("id", id).single();
+  var updatePayload = {
+    name, price, price_after_discount: discountedPrice, description, stock, category,
+    image: existing?.image || null,
+    image2: existing?.image2 || null,
+    image3: existing?.image3 || null,
+    image4: existing?.image4 || null,
+    image5: existing?.image5 || null,
+    extra_links: existing?.extra_links || null,
+  };
+
+  const fileInput = document.getElementById("imageFile");
+  const files = fileInput?.files ? Array.from(fileInput.files) : [];
+  if (files.length > 0) {
+    var uploadedUrls = [];
+    for (var i = 0; i < Math.min(files.length, 5); i++) {
+      var url = await uploadImage(files[i]);
+      if (url) uploadedUrls.push(url);
+    }
+    if (uploadedUrls.length > 0) updatePayload.image = uploadedUrls[0];
+    if (uploadedUrls.length > 1) updatePayload.image2 = uploadedUrls[1];
+    if (uploadedUrls.length > 2) updatePayload.image3 = uploadedUrls[2];
+    if (uploadedUrls.length > 3) updatePayload.image4 = uploadedUrls[3];
+    if (uploadedUrls.length > 4) updatePayload.image5 = uploadedUrls[4];
+    updatePayload.extra_links = JSON.stringify(uploadedUrls);
+  }
+
+  const { error } = await supabaseClient.from("products").update(updatePayload).eq("id", id);
 
   if (error) {
     showToast(error.message, "error");
@@ -188,6 +213,81 @@ function estimatedDiscount(price, priceAfterDiscount) {
   return Math.round(((price - priceAfterDiscount) / price) * 100);
 }
 
+function updatePricePreview() {
+  const price = safeNumber(document.getElementById("price")?.value);
+  const discount = safeNumber(document.getElementById("discount")?.value);
+  const display = document.getElementById("finalPriceDisplay");
+  if (!display) return;
+  if (!price) { display.textContent = "—"; return; }
+  const finalPrice = price - (price * discount) / 100;
+  display.textContent = finalPrice.toFixed(2) + " EGP";
+}
+
+function clearForm() {
+  document.getElementById("name").value = "";
+  document.getElementById("price").value = "";
+  document.getElementById("discount").value = "";
+  document.getElementById("description").value = "";
+  document.getElementById("stock").value = "";
+  document.getElementById("category").value = "";
+  document.getElementById("imageFile").value = "";
+  document.getElementById("imagePreviews").innerHTML = "";
+  const display = document.getElementById("finalPriceDisplay");
+  if (display) display.textContent = "—";
+}
+
+function renderImagePreviews() {
+  var previews = document.getElementById("imagePreviews");
+  var files = document.getElementById("imageFile").files;
+  previews.innerHTML = "";
+  for (var i = 0; i < files.length; i++) {
+    (function (file) {
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        var div = document.createElement("div");
+        div.className = "product-image-preview";
+        div.innerHTML = '<img src="' + e.target.result + '" alt="صورة" />' +
+          '<button type="button" class="product-image-preview-remove" data-index="' + i + '">&times;</button>';
+        div.querySelector(".product-image-preview-remove").addEventListener("click", function () {
+          removeImage(i);
+        });
+        previews.appendChild(div);
+      };
+      reader.readAsDataURL(file);
+    })(files[i]);
+  }
+}
+
+function removeImage(index) {
+  var fileInput = document.getElementById("imageFile");
+  var dt = new DataTransfer();
+  var files = fileInput.files;
+  for (var i = 0; i < files.length; i++) {
+    if (i !== index) dt.items.add(files[i]);
+  }
+  fileInput.files = dt.files;
+  renderImagePreviews();
+}
+
+function toggleEdit(id) {
+  const fields = document.getElementById(`editFields_${id}`);
+  const card = document.getElementById(`card_${id}`);
+  const btn = document.getElementById(`editBtn_${id}`);
+  if (!fields || !card || !btn) return;
+
+  const isOpen = fields.classList.contains("open");
+  if (isOpen) {
+    updateProduct(id);
+    fields.classList.remove("open");
+    card.classList.remove("editing");
+    btn.textContent = "تعديل";
+  } else {
+    fields.classList.add("open");
+    card.classList.add("editing");
+    btn.textContent = "حفظ التعديلات";
+  }
+}
+
 async function loadProducts() {
   const container = document.getElementById("products");
   container.innerHTML = '<div class="empty-state">جاري تحميل المنتجات...</div>';
@@ -204,6 +304,7 @@ async function loadProducts() {
     return;
   }
 
+  window.__adminProducts = data;
   container.innerHTML = data
     .map((product) => {
       const discountValue =
@@ -211,9 +312,13 @@ async function loadProducts() {
           ? estimatedDiscount(Number(product.price), Number(product.price_after_discount))
           : 0;
 
+      var imgCount = getProductImages(product).length;
       return `
-      <article class="product-card">
-        <img src="${product.image || product.image2 || product.image3 || product.image4 || product.image5 || ""}" alt="${product.name || "منتج"}" />
+      <article class="product-card" id="card_${product.id}">
+        <div class="product-image-wrap" onclick="openGalleryById('${product.id}')">
+          <img src="${product.image || product.image2 || product.image3 || product.image4 || product.image5 || ""}" alt="${product.name || "منتج"}" />
+          ${imgCount > 1 ? '<span class="image-count-badge"><i class="fa-regular fa-images"></i> ' + imgCount + '</span>' : ""}
+        </div>
         <div class="product-summary">
           <p class="product-name">${product.name || "-"}</p>
           <div class="price-row">
@@ -224,7 +329,7 @@ async function loadProducts() {
           <p>الكمية: ${safeNumber(product.stock)}</p>
           <p>${product.description || ""}</p>
         </div>
-        <div class="inline-grid">
+        <div class="inline-grid" id="editFields_${product.id}">
           <div class="edit-field">
             <label for="name_${product.id}">اسم المنتج</label>
             <input type="text" id="name_${product.id}" value="${product.name || ""}" />
@@ -251,29 +356,13 @@ async function loadProducts() {
               ${categoryOptions(product.category || "")}
             </select>
           </div>
-          <div class="edit-field">
-            <label for="imageLink1_${product.id}">رابط الصورة الرئيسية</label>
-            <input type="url" id="imageLink1_${product.id}" value="${product.image || ""}" placeholder="https://..." dir="ltr" />
-          </div>
-          <div class="edit-field">
-            <label for="imageLink2_${product.id}">رابط صورة المعرض 2</label>
-            <input type="url" id="imageLink2_${product.id}" value="${product.image2 || ""}" placeholder="https://..." dir="ltr" />
-          </div>
-          <div class="edit-field">
-            <label for="imageLink3_${product.id}">رابط صورة المعرض 3</label>
-            <input type="url" id="imageLink3_${product.id}" value="${product.image3 || ""}" placeholder="https://..." dir="ltr" />
-          </div>
-          <div class="edit-field">
-            <label for="imageLink4_${product.id}">رابط صورة المعرض 4</label>
-            <input type="url" id="imageLink4_${product.id}" value="${product.image4 || ""}" placeholder="https://..." dir="ltr" />
-          </div>
-          <div class="edit-field">
-            <label for="imageLink5_${product.id}">رابط صورة المعرض 5</label>
-            <input type="url" id="imageLink5_${product.id}" value="${product.image5 || ""}" placeholder="https://..." dir="ltr" />
+          <div class="edit-field" style="grid-column:1/-1;">
+            <label>صور المنتج (اختر ملفات جديدة لاستبدالها)</label>
+            <input type="file" accept="image/*" multiple onchange="renderImagePreviews()" />
           </div>
         </div>
         <div class="product-actions">
-          <button class="update-btn" onclick="updateProduct('${product.id}')">تعديل</button>
+          <button class="update-btn" id="editBtn_${product.id}" onclick="toggleEdit('${product.id}')">تعديل</button>
           <button class="delete-btn" onclick="deleteProduct('${product.id}')">حذف</button>
         </div>
       </article>`;
@@ -281,8 +370,108 @@ async function loadProducts() {
     .join("");
 }
 
+/* ─── Image Gallery ─── */
+var galleryImages = [];
+var galleryIndex = 0;
+
+function getProductImages(product) {
+  var images = [];
+  if (product.image) images.push(product.image);
+  if (product.image2) images.push(product.image2);
+  if (product.image3) images.push(product.image3);
+  if (product.image4) images.push(product.image4);
+  if (product.image5) images.push(product.image5);
+  if (product.extra_links) {
+    try {
+      var parsed = JSON.parse(product.extra_links);
+      if (Array.isArray(parsed)) {
+        parsed.forEach(function (url) { if (url && images.indexOf(url) === -1) images.push(url); });
+      }
+    } catch (_) {}
+  }
+  return images;
+}
+
+function openGallery(product) {
+  galleryImages = getProductImages(product);
+  if (!galleryImages.length) return;
+  galleryIndex = 0;
+  document.getElementById("galleryOverlay").style.display = "flex";
+  showGalleryImage();
+}
+
+function openGalleryById(id) {
+  var products = window.__adminProducts || [];
+  for (var i = 0; i < products.length; i++) {
+    if (products[i].id == id) { openGallery(products[i]); return; }
+  }
+}
+
+function showGalleryImage() {
+  var img = document.getElementById("galleryImg");
+  if (galleryImages[galleryIndex]) img.src = galleryImages[galleryIndex];
+  img.alt = "صورة " + (galleryIndex + 1);
+  updateGalleryDots();
+  document.getElementById("galleryPrev").style.display = galleryIndex > 0 ? "" : "none";
+  document.getElementById("galleryNext").style.display = galleryIndex < galleryImages.length - 1 ? "" : "none";
+}
+
+function galleryNav(dir) {
+  galleryIndex += dir;
+  if (galleryIndex < 0) galleryIndex = 0;
+  if (galleryIndex >= galleryImages.length) galleryIndex = galleryImages.length - 1;
+  showGalleryImage();
+}
+
+function closeGallery(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById("galleryOverlay").style.display = "none";
+}
+
+function updateGalleryDots() {
+  var container = document.getElementById("galleryDots");
+  container.innerHTML = "";
+  for (var i = 0; i < galleryImages.length; i++) {
+    var dot = document.createElement("span");
+    dot.className = "gallery-dot" + (i === galleryIndex ? " active" : "");
+    dot.onclick = (function (idx) { return function () { galleryIndex = idx; showGalleryImage(); }; })(i);
+    container.appendChild(dot);
+  }
+}
+
+document.addEventListener("keydown", function (e) {
+  if (document.getElementById("galleryOverlay").style.display !== "flex") return;
+  if (e.key === "Escape") closeGallery();
+  if (e.key === "ArrowLeft") galleryNav(-1);
+  if (e.key === "ArrowRight") galleryNav(1);
+});
+
 loadProducts();
+
+function populateCategorySelect() {
+  var sel = document.getElementById("category");
+  if (!sel) return;
+  CATEGORIES.forEach(function (cat) {
+    var opt = document.createElement("option");
+    opt.value = cat;
+    opt.textContent = cat;
+    sel.appendChild(opt);
+  });
+}
+
+populateCategorySelect();
 
 window.addProduct = addProduct;
 window.updateProduct = updateProduct;
 window.deleteProduct = deleteProduct;
+window.toggleEdit = toggleEdit;
+window.updatePricePreview = updatePricePreview;
+window.clearForm = clearForm;
+window.renderImagePreviews = renderImagePreviews;
+window.removeImage = removeImage;
+window.openGallery = openGallery;
+window.openGalleryById = openGalleryById;
+window.closeGallery = closeGallery;
+window.galleryNav = galleryNav;
+
+document.getElementById("imageFile").addEventListener("change", renderImagePreviews);

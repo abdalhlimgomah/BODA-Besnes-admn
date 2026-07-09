@@ -2,34 +2,32 @@
 const eye = document.getElementById("eye");
 const loginForm = document.getElementById("loginForm");
 
-const USER_HASH = "ab19f86f9ee97ec5ccbeb7e71910daaf7b69fd47d14092a042b36556a214b241";
-const PASS_HASH = "bbba5bf96cc103d98a39783064a00fbd56335dbfb36419e0870eb8e6a5ec1ea6";
-const HASH_SALT = "boda-admin";
+const SUPABASE_URL = "https://msgqzgzoslearaprgiqq.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE";
+
+if (typeof supabase === "undefined") {
+  console.error("Supabase library not loaded. Check network/script.");
+}
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 function showInlineError(message) {
   let alertNode = document.getElementById("loginError");
   if (!alertNode) {
     alertNode = document.createElement("p");
     alertNode.id = "loginError";
-    alertNode.style.cssText = "color:#b42318;font-weight:700;font-size:13px;margin:6px 0 0;";
+    alertNode.className = "login-error";
     loginForm.appendChild(alertNode);
   }
   alertNode.textContent = message;
+  alertNode.classList.add("visible");
 }
 
 function clearInlineError() {
   const alertNode = document.getElementById("loginError");
   if (alertNode) {
     alertNode.textContent = "";
+    alertNode.classList.remove("visible");
   }
-}
-
-async function sha256(value) {
-  const encoded = new TextEncoder().encode(value);
-  const hash = await window.crypto.subtle.digest("SHA-256", encoded);
-  return Array.from(new Uint8Array(hash))
-    .map((part) => part.toString(16).padStart(2, "0"))
-    .join("");
 }
 
 if (eye) {
@@ -53,20 +51,34 @@ async function handleLogin() {
     return;
   }
 
-  const [enteredUserHash, enteredPassHash] = await Promise.all([
-    sha256(`u|${userInput}|${HASH_SALT}`),
-    sha256(`p|${pwdInput}|${HASH_SALT}`),
-  ]);
+  try {
+    const { data, error } = await supabaseClient
+      .from("admin_users")
+      .select("id, username, password")
+      .eq("username", userInput)
+      .limit(1);
 
-  if (enteredUserHash === USER_HASH && enteredPassHash === PASS_HASH) {
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      showInlineError("اسم المستخدم أو كلمة المرور غير صحيحة.");
+      return;
+    }
+
+    const user = data[0];
+    if (pwdInput !== user.password) {
+      showInlineError("اسم المستخدم أو كلمة المرور غير صحيحة.");
+      return;
+    }
+
     if (window.adminAuth?.createSession) {
-      window.adminAuth.createSession();
+      window.adminAuth.createSession(user.username);
     }
     window.location.replace("shacksf.html");
-    return;
+  } catch (err) {
+    console.error("Login error:", err);
+    showInlineError("حدث خطأ في الاتصال بقاعدة البيانات.");
   }
-
-  showInlineError("اسم المستخدم أو كلمة المرور غير صحيحة.");
 }
 
 if (loginForm) {

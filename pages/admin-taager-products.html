@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>منتجات تاجر — من المتجر</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/app-shell.css" />
+    <link rel="stylesheet" href="../css/admin.css" />
+    <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="./auth-guard.js"></script>
+    <style>
+      body { background:var(--surface,#f5f7fa); }
+      .ap-wrap { max-width:1400px; margin:0 auto; }
+      .ap-toolbar { display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:16px; padding:14px 20px; background:var(--card-bg,#fff); border-radius:14px; box-shadow:0 2px 12px rgba(0,0,0,0.04); }
+      .ap-toolbar h2 { font-size:1.05rem; margin:0; display:flex; align-items:center; gap:8px; }
+      .ap-toolbar h2 i { color:var(--brand-orange,#ff6b1a); }
+      .ap-stat { margin-right:auto; font-size:0.82rem; color:var(--muted,#667085); }
+      .ap-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 18px; border:none; border-radius:10px; font-size:0.85rem; font-weight:700; font-family:inherit; cursor:pointer; transition:background 0.2s; }
+      .ap-btn:disabled { opacity:0.5; cursor:not-allowed; }
+      .ap-btn.primary { background:var(--brand-teal,#00b8a9); color:#fff; }
+      .ap-btn.primary:hover:not(:disabled) { background:var(--brand-teal-deep,#02998d); }
+      .ap-btn.secondary { background:var(--surface-muted,#eef2f7); color:var(--text,#1f2937); }
+      .ap-btn.secondary:hover:not(:disabled) { background:var(--border,#d8dee9); }
+      .ap-search { display:flex; gap:8px; flex:1; }
+      .ap-search input { flex:1; min-width:120px; padding:7px 12px; border:1.5px solid var(--border,#d8dee9); border-radius:8px; font-family:inherit; font-size:0.85rem; outline:none; background:var(--card-bg,#fff); color:var(--text,#1f2937); }
+      .ap-search input:focus { border-color:var(--brand-teal,#00b8a9); }
+      .ap-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+      .ap-card { background:var(--card-bg,#fff); border-radius:14px; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,0.04); transition:box-shadow 0.2s; }
+      .ap-card:hover { box-shadow:0 4px 20px rgba(0,0,0,0.08); }
+      .ap-card-img { width:100%; height:170px; object-fit:cover; background:#eef2f7; display:block; }
+      .ap-card-body { padding:10px 12px 12px; }
+      .ap-card-name { font-weight:700; font-size:0.85rem; margin:0 0 3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .ap-card-price { font-size:0.82rem; color:var(--brand-orange,#ff6b1a); font-weight:700; }
+      .ap-card-meta { font-size:0.72rem; color:var(--muted,#667085); margin-top:3px; display:flex; gap:8px; flex-wrap:wrap; }
+      .ap-card-meta span { display:inline-flex; align-items:center; gap:3px; }
+      .ap-empty { grid-column:1/-1; text-align:center; padding:60px 20px; color:var(--muted,#667085); font-size:0.9rem; }
+      .ap-loading { text-align:center; padding:60px; }
+      .ap-loading .spinner { display:inline-block; width:36px; height:36px; border:3px solid var(--border,#d8dee9); border-top-color:var(--brand-teal,#00b8a9); border-radius:50%; animation:ap-spin 0.6s linear infinite; }
+      @keyframes ap-spin { to { transform:rotate(360deg); } }
+      .ap-status { padding:10px 16px; border-radius:10px; font-size:0.82rem; font-weight:600; margin-bottom:14px; display:none; }
+      .ap-status.show { display:block; }
+      .ap-status.success { background:#f0fdf4; color:#1f9d55; border:1px solid #bbf7d0; }
+      .ap-status.error { background:#fef2f2; color:#e03131; border:1px solid #fecaca; }
+      .ap-status.info { background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; }
+      body.dark-mode .ap-toolbar { background:var(--card-bg,#1e293b); }
+      body.dark-mode .ap-card { background:var(--card-bg,#1e293b); }
+    </style>
+  </head>
+  <body class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-badge">
+        <i class="fa-solid fa-cloud"></i>
+        <div><strong>Buda Admin</strong><small>إدارة المتجر</small></div>
+      </div>
+      <nav class="side-nav">
+        <a class="side-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>لوحة التحكم</span></a>
+        <a class="side-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>رسائل الدعم</span></a>
+        <a class="side-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة المنتجات</span></a>
+        <a class="side-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>الطلبات</span></a>
+        <a class="side-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>طلبات الشراكة</span></a>
+        <a class="side-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة المنتجات</span></a>
+        <a class="side-link" href="admin-ai-details.html"><i class="fa-solid fa-wand-magic-sparkles"></i><span>AI محتوى</span></a>
+        <a class="side-link active" href="admin-taager-products.html"><i class="fa-solid fa-cloud"></i><span>منتجات Taager</span></a>
+        <a class="side-link" href="admin-taager-verify.html"><i class="fa-solid fa-check-double"></i><span>تدقيق تاجر</span></a>
+        <a class="side-link" href="admin-sellers.html"><i class="fa-solid fa-store"></i><span>إدارة البائعين</span></a>
+        <a class="side-link" href="admin-coupons.html"><i class="fa-solid fa-tags"></i><span>إدارة الكوبونات</span></a>
+        <a class="side-link" href="admin-fake-prices.html"><i class="fa-solid fa-percent"></i><span>الأسعار الوهمية</span></a>
+        <a class="side-link" href="admin-taager-token.html"><i class="fa-solid fa-key"></i><span>توكن تاجر</span></a>
+      </nav>
+    </aside>
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-title">
+          <h1>منتجات تاجر</h1>
+          <p>عرض منتجات تاجر المخزّنة في قاعدة البيانات — إجمالي <strong id="ap-count">0</strong></p>
+        </div>
+      </header>
+      <section class="content-wrap admin-page ap-wrap">
+        <div id="ap-status" class="ap-status"></div>
+        <div class="ap-toolbar">
+          <h2><i class="fa-solid fa-truck-fast"></i> منتجات تاجر</h2>
+          <span class="ap-stat" id="ap-stat">--</span>
+          <div class="ap-search">
+            <input type="text" id="ap-search" placeholder="بحث باسم المنتج..." />
+          </div>
+          <button id="btn-refresh" class="ap-btn primary"><i class="fa-solid fa-rotate"></i> تحديث</button>
+        </div>
+        <div id="ap-loading" class="ap-loading" style="display:none;"><div class="spinner"></div><div style="margin-top:8px;color:var(--muted,#667085);">جاري التحميل من قاعدة البيانات...</div></div>
+        <div id="ap-grid" class="ap-grid"></div>
+      </section>
+    </main>
+    <script>
+      var _sb;
+      try { _sb = window._getSupabaseClient ? window._getSupabaseClient() : (window.__sb || window.supabase.createClient("https://msgqzgzoslearaprgiqq.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE")); } catch(e) { _sb = window.supabase.createClient("https://msgqzgzoslearaprgiqq.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE"); }
+
+      var allProducts = [];
+
+      function notify(msg, type) {
+        var el = document.getElementById("ap-status");
+        el.textContent = msg; el.className = "ap-status show " + type;
+        if (type !== "error") setTimeout(function() { el.classList.remove("show"); }, 5000);
+      }
+
+      function safeVal(v, fallback) { var n = Number(v); return Number.isFinite(n) ? n : (fallback || 0); }
+      function money(v) { return safeVal(v).toLocaleString("ar-EG", { minimumFractionDigits: 2 }) + " ج.م"; }
+
+      function renderGrid(list) {
+        var grid = document.getElementById("ap-grid");
+        var count = document.getElementById("ap-count");
+        if (count) count.textContent = list.length;
+        if (!list || !list.length) {
+          grid.innerHTML = '<div class="ap-empty"><i class="fa-solid fa-database" style="font-size:2.5rem;display:block;margin-bottom:10px;opacity:0.3;"></i>لا توجد منتجات. اضغط "تحديث" للتحميل.</div>';
+          return;
+        }
+        grid.innerHTML = list.map(function(p) {
+          var img = p.image || p.image_url || (Array.isArray(p.images) && p.images[0]) || p.image1 || "";
+          var name = p.name || p.title || p.product_name || "منتج";
+          var price = safeVal(p.price || p.current_price || p.final_price);
+          var cat = p.category || "";
+          var stock = p.stock || p.stock_status || "---";
+          var id = p.id || "";
+          return '<div class="ap-card"><img class="ap-card-img" src="' + img + '" alt="" loading="lazy" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 200 170%22><rect fill=%22%23eef2f7%22 width=%22200%22 height=%22170%22/><text x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2394a3b8%22 font-size=%2213%22>بدون صورة</text></svg>\'" /><div class="ap-card-body"><div class="ap-card-name" title="' + name.replace(/"/g,"&quot;") + '">' + name + '</div><div class="ap-card-price">' + money(price) + '</div><div class="ap-card-meta"><span><i class="fa-solid fa-tag"></i> ' + (cat || "بدون") + '</span><span><i class="fa-solid fa-cube"></i> ' + stock + '</span></div></div></div>';
+        }).join("");
+      }
+
+      function applySearch() {
+        var q = document.getElementById("ap-search").value.trim().toLowerCase();
+        var filtered = q ? allProducts.filter(function(p) {
+          return (p.name || p.title || "").toLowerCase().indexOf(q) !== -1;
+        }) : allProducts;
+        document.getElementById("ap-stat").textContent = filtered.length + " / " + allProducts.length + " منتج";
+        renderGrid(filtered);
+      }
+
+      async function loadProducts() {
+        var btn = document.getElementById("btn-refresh");
+        btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري...';
+        var loading = document.getElementById("ap-loading");
+        loading.style.display = "block";
+        document.getElementById("ap-grid").innerHTML = "";
+
+        try {
+          var { data, error } = await _sb.from("taager_products").select("*").order("created_at", { ascending: false });
+          if (error) throw error;
+          allProducts = Array.isArray(data) ? data : [];
+          loading.style.display = "none";
+          notify("تم تحميل " + allProducts.length + " منتج.", "success");
+          applySearch();
+        } catch(e) {
+          loading.style.display = "none";
+          notify("فشل التحميل: " + (e.message || e), "error");
+        }
+
+        btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-rotate"></i> تحديث';
+      }
+
+      document.getElementById("btn-refresh").addEventListener("click", loadProducts);
+      document.getElementById("ap-search").addEventListener("input", applySearch);
+
+      loadProducts();
+    </script>
+  </body>
+</html>

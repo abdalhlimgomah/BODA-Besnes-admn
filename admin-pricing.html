@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إدارة شرائح الأسعار - Buda</title>
+  <link href="assets/fonts/cairo.css" rel="stylesheet" />
+  <link href="assets/fonts/inter.css" rel="stylesheet" />
+  <link href="assets/fonts/material-icons-outlined.css" rel="stylesheet" />
+  <link href="assets/css/noon-theme.css" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Cairo', 'Inter', sans-serif;
+      background: #f5f6fa;
+      color: #1a1a2e;
+      padding: 20px;
+      direction: rtl;
+    }
+    .container { max-width: 1100px; margin: 0 auto; }
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 900;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    h1 small { font-size: 0.85rem; font-weight: 600; color: #666; }
+    .subtitle { color: #666; margin-bottom: 24px; font-size: 0.9rem; }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .card h2 { font-size: 1.1rem; font-weight: 800; margin-bottom: 16px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th, td { padding: 10px 12px; text-align: center; border-bottom: 1px solid #eee; }
+    th { background: #f8f9fc; font-weight: 800; color: #444; white-space: nowrap; }
+    td { vertical-align: middle; }
+    tr:hover td { background: #fafbff; }
+    .badge {
+      display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+    }
+    .badge-active { background: #d4edda; color: #155724; }
+    .badge-inactive { background: #f8d7da; color: #721c24; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+      border: none; border-radius: 10px; font-size: 0.82rem; font-weight: 700;
+      cursor: pointer; transition: all 0.15s; font-family: inherit;
+    }
+    .btn-primary { background: #ffc107; color: #1a1a2e; }
+    .btn-primary:hover { background: #e0a800; }
+    .btn-sm { padding: 5px 10px; font-size: 0.75rem; border-radius: 8px; }
+    .btn-danger { background: #dc3545; color: #fff; }
+    .btn-danger:hover { background: #c82333; }
+    .btn-success { background: #28a745; color: #fff; }
+    .btn-success:hover { background: #218838; }
+    .btn-warning { background: #ffc107; color: #1a1a2e; }
+    .btn-outline { background: transparent; border: 1.5px solid #ddd; color: #555; }
+    .btn-outline:hover { background: #f5f5f5; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .header-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      z-index: 1000; justify-content: center; align-items: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff; border-radius: 20px; padding: 28px;
+      width: 90%; max-width: 480px; max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+    }
+    .modal h3 { font-size: 1.05rem; font-weight: 800; margin-bottom: 20px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 0.82rem; font-weight: 700; color: #444; margin-bottom: 4px; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 10px 12px; border: 1.5px solid #ddd;
+      border-radius: 10px; font-size: 0.9rem; font-family: inherit; transition: border-color 0.15s;
+    }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #ffc107; }
+    .form-row { display: flex; gap: 12px; }
+    .form-row .form-group { flex: 1; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      padding: 12px 28px; border-radius: 12px; font-weight: 700; font-size: 0.85rem;
+      z-index: 2000; box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      display: none; animation: toastIn 0.3s ease;
+    }
+    .toast.show { display: block; }
+    .toast-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .toast-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+    .toggle { position: relative; display: inline-block; width: 44px; height: 24px; cursor: pointer; }
+    .toggle input { display: none; }
+    .toggle-slider {
+      position: absolute; inset: 0; background: #ccc; border-radius: 24px; transition: 0.25s;
+    }
+    .toggle-slider::before {
+      content: ""; position: absolute; width: 18px; height: 18px;
+      left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.25s;
+    }
+    .toggle input:checked + .toggle-slider { background: #28a745; }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+    .empty-state { text-align: center; padding: 40px 20px; color: #999; font-size: 0.9rem; }
+    .text-muted { color: #888; font-size: 0.8rem; }
+    .mt-2 { margin-top: 8px; }
+    .mb-2 { margin-bottom: 8px; }
+    .flex { display: flex; align-items: center; gap: 8px; }
+    .gap-2 { gap: 16px; }
+    .justify-between { justify-content: space-between; }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: #555; text-decoration: none; font-size: 0.85rem; font-weight: 600; margin-bottom: 16px;
+    }
+    .back-link:hover { color: #1a1a2e; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a class="back-link" href="index.html">
+      <span class="material-icons-outlined" style="font-size:18px;">arrow_back</span>
+      العودة للوحة التحكم
+    </a>
+
+    <div class="flex justify-between" style="margin-bottom:4px;">
+      <h1>
+        إدارة شرائح الأسعار
+        <small>Pricing Engine</small>
+      </h1>
+    </div>
+    <p class="subtitle">تحكم في شرائح حساب سعر البيع — سعر البيع = سعر المورد + قيمة الزيادة</p>
+
+    <div class="card">
+      <div class="flex justify-between mb-2">
+        <h2>الشرائح الحالية</h2>
+        <button class="btn btn-primary" onclick="AdminPricing.openAddModal()">
+          <span class="material-icons-outlined" style="font-size:16px;">add</span>
+          إضافة شريحة
+        </button>
+      </div>
+      <div id="tierTableWrap" class="table-wrap">
+        <div class="empty-state" id="loadingState">جاري تحميل الشرائح...</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>مُحاكي التسعير</h2>
+      <p class="text-muted" style="margin-bottom:12px;">اختبر كيف سيتم حساب سعر البيع لأي سعر مورد</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label>سعر المورد (جنيه)</label>
+          <input type="number" id="simulatorInput" placeholder="مثال: 420" oninput="AdminPricing.runSimulator()" />
+        </div>
+        <div class="form-group">
+          <label>الشريحة</label>
+          <input type="text" id="simulatorTier" readonly placeholder="—" />
+        </div>
+        <div class="form-group">
+          <label>الزيادة</label>
+          <input type="text" id="simulatorMarkup" readonly placeholder="—" />
+        </div>
+        <div class="form-group">
+          <label>سعر البيع</label>
+          <input type="text" id="simulatorResult" readonly style="font-weight:800;color:#28a745;" />
+        </div>
+      </div>
+    </div>
+
+    <p class="text-muted" style="text-align:center;padding:16px 0;">
+      التعديلات يتم تسجيلها في سجل المراجعة (Audit Log)
+    </p>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="tierModal">
+    <div class="modal">
+      <h3 id="modalTitle">إضافة شريحة جديدة</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>الحد الأدنى (جنيه)</label>
+          <input type="number" id="inputMin" min="0" step="0.01" />
+        </div>
+        <div class="form-group">
+          <label>الحد الأعلى (جنيه)</label>
+          <input type="number" id="inputMax" min="0" step="0.01" placeholder="فارغ = غير محدود" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>قيمة الزيادة (جنيه)</label>
+          <input type="number" id="inputMarkup" min="0" step="0.01" />
+        </div>
+        <div class="form-group">
+          <label>الترتيب</label>
+          <input type="number" id="inputSort" min="1" step="1" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="flex" style="gap:10px;">
+          <span>نشط</span>
+          <label class="toggle">
+            <input type="checkbox" id="inputActive" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="AdminPricing.closeModal()">إلغاء</button>
+        <button class="btn btn-primary" id="modalSaveBtn" onclick="AdminPricing.saveTier()">حفظ</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="assets/vendor/supabase/supabase-js@2.js"></script>
+  <script src="assets/js/supabase-client.js?v=20260630"></script>
+  <script src="assets/js/auth.config.js?v=20260630"></script>
+  <script src="assets/js/store.js?v=20260630d"></script>
+  <script src="assets/js/pricing-engine.js"></script>
+  <script src="admin-pricing.js"></script>
+</body>
+</html>

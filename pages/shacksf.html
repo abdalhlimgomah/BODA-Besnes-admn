@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
   <head>
     <meta charset="UTF-8" />
@@ -11,6 +11,8 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+    <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="./auth-guard.js"></script>
   </head>
   <body class="app-shell">
@@ -22,36 +24,73 @@
           <small>إدارة المتجر</small>
         </div>
       </div>
-
       <nav class="side-nav">
         <a class="side-link active" href="shacksf.html">
           <i class="fa-solid fa-chart-line"></i>
           <span>لوحة التحكم</span>
         </a>
-        <a class="side-link" href="admin.html">
+                <a class="side-link" href="admin.html">
           <i class="fa-solid fa-square-plus"></i>
           <span>إضافة المنتجات</span>
         </a>
-        <a class="side-link" href="admin-orders.html">
+                <a class="side-link" href="admin-orders.html">
           <i class="fa-solid fa-receipt"></i>
           <span>الطلبات</span>
         </a>
-        <a class="side-link" href="admin-partners.html">
+                <a class="side-link" href="admin-partners.html">
           <i class="fa-solid fa-handshake"></i>
           <span>طلبات الشراكة</span>
+        </a>
+        <a class="side-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>رسائل الدعم</span></a>
+                <a class="side-link" href="admin-complaints.html">
+          <i class="fa-solid fa-message"></i>
+          <span>الشكاوي</span>
+        </a>
+                <a class="side-link" href="admin-ai-details.html">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span>AI محتوى</span>
+        </a>
+                <a class="side-link" href="../admin-pricing.html">
+          <i class="fa-solid fa-coins"></i>
+          <span>شرائح الأسعار</span>
+        </a>
+                <a class="side-link" href="admin-coupons.html">
+          <i class="fa-solid fa-tags"></i>
+          <span>إدارة الكوبونات</span>
         </a>
         <a class="side-link" href="view-products.html">
           <i class="fa-solid fa-box-open"></i>
           <span>مراجعة المنتجات</span>
         </a>
+
+                <a class="side-link" href="admin-sellers.html">
+          <i class="fa-solid fa-store"></i>
+          <span>إدارة البائعين</span>
+        </a>
+
+        <a class="side-link" href="admin-fake-prices.html">
+          <i class="fa-solid fa-percent"></i>
+          <span>الأسعار الوهمية</span>
+        </a>
+        
+        <a class="side-link" href="taager-products.html">
+          <i class="fa-solid fa-database"></i>
+          <span>منتجات Taager</span>
+        </a>
+
+
+
+        <a class="side-link" href="admin-taager-token.html">
+          <i class="fa-solid fa-key"></i>
+          <span>توكن تاجر</span>
+        </a>       
       </nav>
     </aside>
-
     <main class="app-main">
       <header class="app-topbar">
         <div class="topbar-title">
           <h1>لوحة التحكم</h1>
-          <p>متابعة أداء المتجر وإعداداته من أي جهاز</p>
+          <p>نظرة عامة على أداء المتجر في لمحة</p>
         </div>
         <div class="topbar-actions">
           <button type="button" class="btn btn-secondary section-btn menu-link active" data-section="dashboard">
@@ -62,26 +101,24 @@
           </button>
         </div>
       </header>
-
       <section class="content-wrap">
         <section class="dashboard-hero card">
           <div class="owner-row">
             <div class="profile-image-container">
-              <img id="profileImage" src="https://via.placeholder.com/200?text=صورة+المالك" alt="صورة المالك" />
-              <label for="imageUpload" class="upload-btn" title="تحديث الصورة">
+              <img id="profileImage" src="https://via.placeholder.com/200?text=صورة+المتجر" alt="صورة المتجر" />
+              <label for="imageUpload" class="upload-btn" title="تغيير الصورة">
                 <i class="fa-solid fa-camera"></i>
               </label>
               <input type="file" id="imageUpload" accept="image/*" hidden />
             </div>
             <div>
-              <h2 id="ownerName">*ᬼ👑𓆩Buda*⚡</h2>
-              <p id="ownerEmail">قاعدة البيانات</p>
+              <h2 id="ownerName">*Buda*?</h2>
+              <p id="ownerEmail">البريد الإلكتروني</p>
             </div>
           </div>
         </section>
-
         <section id="dashboard" class="section active">
-          <h3 class="section-title">مؤشرات سريعة</h3>
+          <h3 class="section-title">إحصائيات سريعة</h3>
           <div class="stats-grid">
             <article class="stat-card card">
               <div class="stat-icon products-icon"><i class="fa-solid fa-box"></i></div>
@@ -111,50 +148,105 @@
                 <p id="revenueAmount" class="stat-value">0 ج.م</p>
               </div>
             </article>
+            <article class="stat-card card" onclick="window.location.href='taager-products.html'" style="cursor:pointer">
+              <div class="stat-icon products-icon"><i class="fa-solid fa-database"></i></div>
+              <div>
+                <p class="stat-label">منتجات Taager</p>
+                <p class="stat-value" id="taagerCount">0</p>
+              </div>
+            </article>
+            <article class="stat-card card" onclick="window.location.href='../admin-pricing.html'" style="cursor:pointer">
+              <div class="stat-icon" style="background:#fff3cd;color:#856404"><i class="fa-solid fa-coins"></i></div>
+              <div>
+                <p class="stat-label">شرائح الأسعار</p>
+                <p class="stat-value"></p>
+              </div>
+            </article>
+            <article class="stat-card card" onclick="window.location.href='admin-sellers.html'" style="cursor:pointer">
+              <div class="stat-icon" style="background:#e8f5e9;color:#2e7d32"><i class="fa-solid fa-store"></i></div>
+              <div>
+                <p class="stat-label">البائعون الوهميون</p>
+                <p class="stat-value" id="sellersCountDashboard">0</p>
+              </div>
+            </article>
+            <article class="stat-card card" onclick="window.location.href='admin-fake-prices.html'" style="cursor:pointer">
+              <div class="stat-icon" style="background:#fce4ec;color:#c62828"><i class="fa-solid fa-percent"></i></div>
+              <div>
+                <p class="stat-label">الأسعار الوهمية</p>
+                <p class="stat-value"></p>
+              </div>
+            </article>
+              <article class="stat-card card" onclick="window.location.href='admin-sections.html'" style="cursor:pointer">
+              <div class="stat-icon" style="background:#e8f5e9;color:#2e7d32"><i class="fa-solid fa-cog"></i></div>
+              <div>
+                <p class="stat-label">تحكم صفحه المتجر </p>
+              </div>
+            </article>
+                <article class="stat-card card" onclick="window.location.href='admin-ai-details.html'" style="cursor:pointer">
+              <div class="stat-icon" style="background:#e8f5e9;color:#2e7d32"><i class="fa-solid fa-robot"></i></div>
+              <div>
+                <p class="stat-label">إدارة تفاصيل الذكاء الاصطناعي</p>
+              </div>
+            </article>
+                <article class="stat-card card" onclick="window.location.href='admin-coupons.html'" style="cursor:pointer">
+              <div class="stat-icon" style="background:#e8f5e9;color:#2e7d32"><i class="fa-solid fa-percent"></i></div>
+              <div>
+                <p class="stat-label">اداره الكوبونات</p>
+              </div>
+            </article>
+              <article class="stat-card card" onclick="window.location.href='admin-taager-token.html'" style="cursor:pointer">
+              <div class="stat-icon" style="background:#e8f5e9;color:#2e7d32"><i class="fa-solid fa-key"></i></div>
+              <div>
+                <p class="stat-label">توكن Taager</p>
+              </div>
+            </article>
+                <article class="stat-card card" onclick="window.location.href='admin-complaints.html'" style="cursor:pointer">
+              <div class="stat-icon" style="background:#e8f5e9;color:#2e7d32"><i class="fa-solid fa-exclamation-triangle"></i></div>
+              <div>
+                <p class="stat-label">شكاوى المستخدمين</p>
+                <p class="stat-value" id="complaintsCount">0</p>
+              </div>
+            </article>
           </div>
         </section>
-
         <section id="settings" class="section">
           <h3 class="section-title">الإعدادات</h3>
           <div class="settings-grid">
             <article class="setting-item card">
-              <h4>بيانات المتجر</h4>
+              <h4>معلومات المتجر</h4>
               <form id="settingsForm">
                 <label for="storeName">اسم المتجر</label>
-                <input type="text" id="storeName" placeholder="اسم متجرك" />
+                <input type="text" id="storeName" placeholder="اسم المتجر" />
                 <label for="storeDescription">وصف المتجر</label>
-                <textarea id="storeDescription" placeholder="وصف قصير"></textarea>
+                <textarea id="storeDescription" placeholder="وصف الموقع"></textarea>
                 <button type="submit" class="btn btn-primary">
                   <i class="fa-solid fa-floppy-disk"></i>
-                  حفظ البيانات
+                  حفظ التغييرات
                 </button>
               </form>
             </article>
-
             <article class="setting-item card">
-              <h4>السمات</h4>
+              <h4>المظهر</h4>
               <label class="theme-toggle-label" for="themeToggle">
                 <input type="checkbox" id="themeToggle" class="theme-toggle" />
                 <span class="toggle-slider"></span>
-                <span id="themeLabel">تفعيل الوضع الليلي</span>
+                <span id="themeLabel">تفعيل الوضع الداكن</span>
               </label>
             </article>
-
             <article class="setting-item card">
               <h4>العملة</h4>
               <form id="currencyForm">
                 <label for="currencySelect">اختر العملة</label>
                 <select id="currencySelect" class="currency-select">
-                  <option value="EGP">الجنيه المصري (ج.م)</option>
+                  <option value="EGP">جنيه مصري (ج.م)</option>
                   <option value="USD">الدولار الأمريكي ($)</option>
                 </select>
                 <button type="submit" class="btn btn-secondary">
                   <i class="fa-solid fa-rotate"></i>
-                  حفظ العملة
+                  تحديث العملة
                 </button>
               </form>
             </article>
-
             <article class="setting-item card">
               <h4>الحساب</h4>
               <button id="logoutBtn" class="btn btn-danger">
@@ -166,43 +258,51 @@
         </section>
       </section>
     </main>
-
     <nav class="mobile-bottom-nav">
       <a class="mobile-link active" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>الرئيسية</span></a>
       <a class="mobile-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة</span></a>
       <a class="mobile-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>طلبات</span></a>
       <a class="mobile-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>شراكة</span></a>
+      <a class="mobile-link" href="admin-complaints.html"><i class="fa-solid fa-message"></i><span>شكاوي</span></a>
       <a class="mobile-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة</span></a>
     </nav>
-
     <script src="./dashboard-manager.page.js"></script>
+    <script>
+    (function() {
+      var url = "https://msgqzgzoslearaprgiqq.supabase.co";
+      var key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE";
+      var { createClient } = window.supabase;
+      var client = createClient(url, key);
+      client.from("product_sellers").select("product_id", { count: "exact", head: true }).then(function(res) {
+        var el = document.getElementById("sellersCountDashboard");
+        if (el) el.textContent = res.count || 0;
+      }).catch(function() {});
+    })();
+    </script>
     <script>
       function initializeNewSeller() {
         const params = new URLSearchParams(window.location.search);
         const sellerEmail = params.get("seller");
         const merchantId = params.get("merchantId");
         if (!sellerEmail || !merchantId) return;
-
         localStorage.setItem("currentSellerEmail", sellerEmail);
         localStorage.setItem("currentMerchantId", merchantId);
         window.history.replaceState({}, document.title, window.location.pathname);
-
         try {
           const seller = JSON.parse(localStorage.getItem(`seller_${sellerEmail}`));
           if (!seller) return;
           const ownerName = document.getElementById("ownerName");
           const ownerEmail = document.getElementById("ownerEmail");
-          if (ownerName) ownerName.textContent = seller.name || "مالك المتجر";
+          if (ownerName) ownerName.textContent = seller.name || "لم يتم التعيين";
           if (ownerEmail) ownerEmail.textContent = sellerEmail;
           const storeNameInput = document.getElementById("storeName");
           const storeDescInput = document.getElementById("storeDescription");
           if (storeNameInput) storeNameInput.value = seller.storeName || "";
           if (storeDescInput) storeDescInput.value = seller.storeDescription || "";
         } catch (error) {
-          console.error("خطأ في تحميل بيانات الشريك", error);
+          console.error("خطأ في تحميل بيانات البائع", error);
         }
       }
-
       window.addEventListener("load", initializeNewSeller);
     </script>
   </body>

@@ -34,6 +34,10 @@ function statusLabel(status) {
     preparing: "جارٍ التجهيز",
     shipped: "تم الشحن",
     delivered: "تم التسليم",
+    confirmed: "تم التأكيد",
+    cancelled: "ملغي",
+    onhold: "معلق مؤقتًا",
+    returned: "مرتجع",
   };
   return labels[status] || status || "-";
 }
@@ -44,6 +48,10 @@ function statusClass(status) {
     preparing: "status-preparing",
     shipped: "status-shipped",
     delivered: "status-delivered",
+    confirmed: "status-confirmed",
+    cancelled: "status-cancelled",
+    onhold: "status-onhold",
+    returned: "status-returned",
   }[status] || "status-pending";
 }
 
@@ -148,6 +156,42 @@ function extractImageFromOrderItem(item) {
     if (value) return value;
   }
   return "";
+}
+
+function extractProductNameFromOrder(order) {
+  if (!order || typeof order !== "object") return "";
+
+  const directName = normalizeText(order.product_name || order.productName);
+  if (directName) return directName;
+
+  const payloadFields = [order.items_json, order.items, order.order_items, order.items_snapshot, order.type];
+  for (const payload of payloadFields) {
+    const entries = normalizeToArray(payload);
+    if (entries.length > 0) {
+      const firstEntry = entries[0];
+      if (firstEntry && typeof firstEntry === "object") {
+        const name = normalizeText(firstEntry.name || firstEntry.product_name || firstEntry.title || firstEntry.productName);
+        if (name) return name;
+      }
+    }
+  }
+
+  return "";
+}
+
+function toggleProductName(btn) {
+  const wrap = btn.parentNode;
+  const fullEl = wrap.querySelector(".product-name-full");
+  const shortEl = wrap.querySelector(".product-name-short");
+  if (fullEl.classList.contains("hidden")) {
+    fullEl.classList.remove("hidden");
+    shortEl.classList.add("hidden");
+    btn.textContent = "عرض أقل";
+  } else {
+    fullEl.classList.add("hidden");
+    shortEl.classList.remove("hidden");
+    btn.textContent = "عرض المزيد";
+  }
 }
 
 function extractImageFromOrder(order) {
@@ -340,7 +384,7 @@ async function buildOrderImageMap(orders) {
 function updateHeaderCounters(ordersList) {
   document.getElementById("ordersCount").innerText = `${ordersList.length} طلب`;
   const todayDate = new Date().toDateString();
-  const todayOrders = ordersList.filter((order) => new Date(order.created_at).toDateString() === todayDate);
+  const todayOrders = allOrders.filter((order) => new Date(order.created_at).toDateString() === todayDate);
   document.getElementById("todayOrders").innerText = `${todayOrders.length} طلب`;
 }
 
@@ -359,7 +403,8 @@ function applyFilters() {
     filtered = filtered.filter((order) => {
       const name = (order.user_name || "").toLowerCase();
       const phone = (order.phone || "").toLowerCase();
-      return name.includes(query) || phone.includes(query);
+      const prod = (order.product_name || "").toLowerCase();
+      return name.includes(query) || phone.includes(query) || prod.includes(query);
     });
   }
 
@@ -396,6 +441,15 @@ function renderOrders(orders) {
           />
         </div>
         <div class="order-grid">
+          ${order.product_name ? `
+          <div class="order-row product-name-row">
+            <strong>المنتج</strong>
+            <span class="product-name-wrap">
+              <span class="product-name-short">${escapeAttr(order.product_name.length > 40 ? order.product_name.slice(0, 40) + "…" : order.product_name)}</span>
+              <span class="product-name-full hidden">${escapeAttr(order.product_name)}</span>
+              ${order.product_name.length > 40 ? '<button class="show-more-btn" onclick="toggleProductName(this)">عرض المزيد</button>' : ''}
+            </span>
+          </div>` : ''}
           <div class="order-row"><strong>الهاتف</strong><span>${order.phone || "-"}</span></div>
           <div class="order-row"><strong>الإيميل</strong><span>${order.email || "-"}</span></div>
           <div class="order-row"><strong>العنوان</strong><span>${order.address || "-"}</span></div>
@@ -405,9 +459,13 @@ function renderOrders(orders) {
         <div class="status-control-row">
           <select id="status_select_${order.id}">
             <option value="pending" ${order.status === "pending" ? "selected" : ""}>قيد الانتظار</option>
+            <option value="confirmed" ${order.status === "confirmed" ? "selected" : ""}>تم التأكيد</option>
             <option value="preparing" ${order.status === "preparing" ? "selected" : ""}>جارٍ التجهيز</option>
             <option value="shipped" ${order.status === "shipped" ? "selected" : ""}>تم الشحن</option>
             <option value="delivered" ${order.status === "delivered" ? "selected" : ""}>تم التسليم</option>
+            <option value="onhold" ${order.status === "onhold" ? "selected" : ""}>معلق مؤقتًا</option>
+            <option value="cancelled" ${order.status === "cancelled" ? "selected" : ""}>ملغي</option>
+            <option value="returned" ${order.status === "returned" ? "selected" : ""}>مرتجع</option>
           </select>
           <button class="btn btn-secondary status-btn" onclick="changeStatus('${order.id}')">تحديث</button>
         </div>
@@ -429,7 +487,8 @@ async function fetchOrders(showErrorToast = false) {
   allOrders = fetchedOrders.map((order) => {
     const orderId = toOrderId(order?.id);
     const productImage = normalizeImageSource(orderImageMap.get(orderId)) || ORDER_IMAGE_PLACEHOLDER;
-    return { ...order, product_image: productImage };
+    const productName = extractProductNameFromOrder(order);
+    return { ...order, product_image: productImage, product_name: productName };
   });
   applyFilters();
 }
@@ -455,6 +514,7 @@ document.getElementById("searchBtn").addEventListener("click", applyFilters);
 document.getElementById("statusFilter").addEventListener("change", applyFilters);
 
 window.changeStatus = changeStatus;
+window.toggleProductName = toggleProductName;
 
 fetchOrders(true);
-setInterval(fetchOrders, 4000);
+setInterval(fetchOrders, 30000);

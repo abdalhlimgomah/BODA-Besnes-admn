@@ -9,6 +9,10 @@
     "admin-orders.html",
     "admin-partners.html",
     "view-products.html",
+    "taager-products.html",
+    "taager-product-edit.html",
+    "admin-coupons.html",
+    "admin-support.html",
   ]);
 
   function getCurrentPage() {
@@ -54,9 +58,10 @@
     return !!readSession();
   }
 
-  function createSession() {
+  function createSession(username) {
     const session = {
       token: randomToken(),
+      username: username || "",
       createdAt: Date.now(),
       expiresAt: Date.now() + SESSION_TTL_MS,
     };
