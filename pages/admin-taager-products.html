@@ -143,9 +143,16 @@
         document.getElementById("ap-grid").innerHTML = "";
 
         try {
-          var { data, error } = await _sb.from("taager_products").select("*").order("created_at", { ascending: false });
-          if (error) throw error;
-          allProducts = Array.isArray(data) ? data : [];
+          var tpAll = [], tpOff = 0, tpPg = 1000;
+          while(true) {
+            var { data, error } = await _sb.from("taager_products").select("*").order("created_at", { ascending: false }).range(tpOff, tpOff + tpPg - 1);
+            if (error) throw error;
+            if (!data || !data.length) break;
+            tpAll = tpAll.concat(data);
+            tpOff += tpPg;
+            if (data.length < tpPg) break;
+          }
+          allProducts = tpAll;
           loading.style.display = "none";
           notify("تم تحميل " + allProducts.length + " منتج.", "success");
           applySearch();
