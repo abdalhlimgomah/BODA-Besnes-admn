@@ -56,12 +56,7 @@
     </aside>
 
     <main class="app-main" style="display: flex; flex-direction: column;">
-      <header class="app-topbar">
-        <div class="topbar-title">
-          <h1>رسائل الدعم الفني</h1>
-          <p>محادثات الدعم والمساعدة المباشرة مع العملاء</p>
-        </div>
-      </header>
+
 
       <!-- Main Chat Interface -->
       <section class="content-wrap" style="flex: 1; padding: 0 24px 24px; display: flex; flex-direction: column;">
@@ -134,12 +129,6 @@
                   <span id="active-ticket-msg-count" style="font-size: 0.72rem; color: #64748b; font-weight: bold; background: #e2e8f0; padding: 3px 8px; border-radius: 6px;">0 رسالة</span>
                   <span id="active-avg-response" style="font-size: 0.72rem; color: #22c55e; font-weight: bold; background: #dcfce7; padding: 3px 8px; border-radius: 6px; display: none;">متوسط الرد: 2 دقيقة</span>
                   <span class="chat-ticket-id" id="active-ticket-id">تذكرة: -</span>
-                  
-                  <select class="chat-status-select" id="active-status-select" title="تغيير حالة التذكرة">
-                    <option value="open">مفتوحة</option>
-                    <option value="pending">قيد المراجعة</option>
-                    <option value="closed">مغلقة</option>
-                  </select>
                 </div>
               </header>
 
@@ -183,7 +172,7 @@
                     type="file"
                     id="chat-file-input"
                     accept="image/*, application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                    style="display: none;"
+                    class="file-input-hidden"
                   />
                 </div>
 
@@ -199,7 +188,7 @@
 
                 <div class="chat-send-btn-wrap">
                   <button class="chat-send-btn" id="chat-send-btn" type="button" title="إرسال">
-                    <i class="fa-solid fa-paper-plane-rtl"></i>
+                    <i class="fa-solid fa-paper-plane"></i>
                   </button>
                 </div>
               </div>

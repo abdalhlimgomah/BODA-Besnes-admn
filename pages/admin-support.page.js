@@ -66,8 +66,6 @@
   const hdrMsgCount        = $("active-ticket-msg-count");
   const hdrAvgResp         = $("active-avg-response");
   const hdrTicketId        = $("active-ticket-id");
-  const statusSelect       = $("active-status-select");
-
   // Input
   const emojiBtn           = $("emoji-trigger-btn");
   const emojiPanel         = $("emoji-picker");
@@ -313,7 +311,6 @@
     hdrAvatar.textContent   = avatarLetters(conv.user_name);
     hdrName.textContent     = conv.user_name || "عميل";
     hdrTicketId.textContent = `تذكرة: ${conv.id.substring(0, 8).toUpperCase()}`;
-    statusSelect.value      = conv.status;
     updateHeaderStatus(conv);
 
     // Reset message state
@@ -747,7 +744,6 @@
     renderConversations();
     if (activeConv && activeConv.id === changed.id) {
       Object.assign(activeConv, changed);
-      statusSelect.value = changed.status;
     }
   }
 
@@ -792,19 +788,6 @@
     // Attachment
     attachBtn.addEventListener("click", () => fileInput.click());
     fileInput.addEventListener("change", handleFileUpload);
-
-    // Status dropdown
-    statusSelect.addEventListener("change", async function () {
-      if (!activeConv) return;
-      const val = this.value;
-      try {
-        await client.from("support_conversations")
-          .update({ status: val, updated_at: new Date().toISOString() })
-          .eq("id", activeConv.id);
-        activeConv.status = val;
-        renderConversations();
-      } catch (err) { console.error("[Support Admin] status update:", err); }
-    });
 
     // Auto-grow textarea
     textInput.addEventListener("input", function () {

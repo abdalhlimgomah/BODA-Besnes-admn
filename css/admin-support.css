@@ -876,13 +876,24 @@
 
 /* Mobile Views */
 @media (max-width: 768px) {
+  .app-main {
+    padding: 12px 0 calc(76px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .content-wrap {
+    padding: 0 12px 12px !important;
+  }
+
   .support-chat-container {
-    height: calc(100vh - 100px);
+    height: calc(100vh - 120px);
+    min-height: 400px;
     border-radius: 0;
+    margin: 0 -12px;
+    width: calc(100% + 24px);
   }
   
   .chat-list-panel {
-    width: 100% !important; /* Full width list on mobile */
+    width: 100% !important;
     display: flex;
   }
   
@@ -897,7 +908,6 @@
     display: flex;
   }
 
-  /* When a chat view is active, slide it in */
   .support-chat-container.chat-view-active .chat-view-panel {
     transform: translateX(0);
   }
@@ -907,4 +917,119 @@
     align-items: center;
     justify-content: center;
   }
+
+  .list-panel-header {
+    padding: 12px;
+  }
+
+  .chat-search-wrap {
+    margin-bottom: 8px;
+  }
+
+  .chat-tabs {
+    gap: 3px;
+  }
+
+  .chat-tab {
+    padding: 5px 10px;
+    font-size: 0.72rem;
+  }
+
+  .conv-card {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .conv-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 0.95rem;
+  }
+
+  .conv-name {
+    font-size: 0.82rem;
+  }
+
+  .chat-header {
+    padding: 10px 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .chat-header-meta {
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .chat-ticket-id {
+    font-size: 0.68rem;
+    padding: 2px 6px;
+  }
+
+  .chat-status-select {
+    font-size: 0.72rem;
+    padding: 4px 8px;
+  }
+
+  #active-ticket-msg-count {
+    font-size: 0.65rem !important;
+    padding: 2px 6px !important;
+  }
+
+  #active-avg-response {
+    font-size: 0.65rem !important;
+    padding: 2px 6px !important;
+  }
+
+  .chat-messages-area {
+    padding: 12px;
+  }
+
+  .chat-msg-row {
+    max-width: 85%;
+  }
+
+  .chat-input-bar {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .chat-input-actions {
+    gap: 4px;
+    padding-bottom: 4px;
+  }
+
+  .chat-action-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 1.1rem;
+  }
+
+  .chat-textarea-wrap {
+    padding: 4px 10px;
+  }
+
+  .chat-text-input {
+    font-size: 0.82rem;
+  }
+
+  .chat-send-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 1rem;
+  }
+
+  .emoji-picker-panel {
+    width: 240px;
+    right: 8px;
+    bottom: 56px;
+    padding: 8px;
+    gap: 4px;
+  }
+
+  .emoji-item {
+    font-size: 1.1rem;
+    padding: 2px;
+  }
+
 }
