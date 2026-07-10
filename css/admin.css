@@ -48,6 +48,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
 }
 
 .section-label i {
@@ -260,6 +261,13 @@
   font-size: 0.92rem;
   font-weight: 800;
   color: var(--text,#1f2937);
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.product-summary p {
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .price-row {
@@ -268,6 +276,7 @@
   align-items: center;
   font-weight: 700;
   font-size: 0.9rem;
+  flex-wrap: wrap;
 }
 
 .price-row del {
@@ -362,6 +371,14 @@
 .product-images-section {
   display: grid;
   gap: 10px;
+}
+
+.file-input-hidden {
+  position: absolute;
+  opacity: 0;
+  width: 0.1px;
+  height: 0.1px;
+  pointer-events: none;
 }
 
 .product-image-upload {
@@ -601,10 +618,18 @@
 }
 
 @media (max-width: 640px) {
+  .admin-page { gap: 14px; }
   .form-card { padding: 20px 16px; }
+  .form-card h2 { font-size: 1rem; }
+  .editor-grid { gap: 10px; }
+  .section-divider { margin: 16px 0 10px; }
   .form-actions-row { grid-template-columns: 1fr; }
   .products-grid { padding: 12px 16px 16px; grid-template-columns: 1fr; }
   .list-header { padding: 16px 16px 0; }
+  .product-summary { word-break: break-word; overflow-wrap: break-word; }
+  .product-image-upload { padding: 14px; min-height: 110px; }
+  .product-image-upload-icon { font-size: 32px !important; }
+  .price-preview { flex-wrap: wrap; }
 }
 
 /* ─── Dark Mode ─── */

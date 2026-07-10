@@ -474,4 +474,7 @@ window.openGalleryById = openGalleryById;
 window.closeGallery = closeGallery;
 window.galleryNav = galleryNav;
 
+document.getElementById("imageUploadArea").addEventListener("click", function () {
+  document.getElementById("imageFile").click();
+});
 document.getElementById("imageFile").addEventListener("change", renderImagePreviews);
