@@ -104,18 +104,35 @@ async function loadProducts() {
   const grid = document.getElementById("productsGrid");
   grid.innerHTML = '<div class="empty-text">جاري تحميل المنتجات...</div>';
 
-  const { data, error } = await supabaseClient
+  const { count } = await supabaseClient
     .from("taager_products")
-    .select("*")
-    .order("updated_at", { ascending: false });
+    .select("*", { count: "exact", head: true });
 
-  if (error) {
-    console.error(error);
-    grid.innerHTML = '<div class="empty-text">فشل تحميل المنتجات</div>';
-    return;
+  const totalCount = count || 0;
+  let all = [];
+
+  if (totalCount > 0) {
+    const batchSize = 1000;
+    const batches = Math.ceil(totalCount / batchSize);
+
+    for (let i = 0; i < batches; i++) {
+      const from = i * batchSize;
+      const to = from + batchSize - 1;
+      const { data, error } = await supabaseClient
+        .from("taager_products")
+        .select("*")
+        .order("updated_at", { ascending: false })
+        .range(from, to);
+
+      if (error) {
+        console.error(error);
+        continue;
+      }
+      all = all.concat(Array.isArray(data) ? data : []);
+    }
   }
 
-  allProducts = Array.isArray(data) ? data : [];
+  allProducts = all;
   displayedCount = Math.min(PAGE_SIZE, allProducts.length);
   renderProducts();
 }

@@ -6,8 +6,24 @@
 <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
 <style>
 body{margin:0;font-family:'Cairo',sans-serif;background:#f8fafc}
-.app-layout{display:flex;min-height:100vh}
+.app-layout{display:flex;min-height:100vh;padding-bottom:0}
 .sidebar{width:260px;background:#0f172a;color:#fff;padding:20px 0;position:fixed;top:0;right:0;bottom:0;overflow-y:auto;z-index:100;display:flex;flex-direction:column}
+.mobile-bottom-nav{display:none}
+.mobile-top-nav{display:none}
+@media(max-width:768px){
+  body{overflow-x:hidden}
+  .sidebar{display:none!important}
+  .main-content{margin-right:0!important;padding:16px}
+  .app-layout{padding-bottom:72px}
+  .mobile-bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:200;background:#fff;border-top:1px solid #e2e8f0;padding:6px 8px;justify-content:space-around;box-shadow:0 -2px 10px rgba(0,0,0,0.05)}
+  .mobile-bottom-nav a{display:flex;flex-direction:column;align-items:center;gap:2px;color:#94a3b8;text-decoration:none;font-size:0.65rem;font-weight:600;padding:4px 8px;border-radius:8px;transition:.1s}
+  .mobile-bottom-nav a.active{color:#facc15}
+  .mobile-bottom-nav a .material-icons-outlined{font-size:20px}
+  .mobile-top-nav{display:flex;flex-wrap:wrap;gap:6px;padding:12px 0;border-bottom:1px solid #e2e8f0;margin-bottom:16px}
+  .mobile-top-nav a{display:inline-flex;align-items:center;gap:6px;color:#475569;text-decoration:none;font-size:0.78rem;font-weight:600;padding:6px 12px;border-radius:8px;background:#f1f5f9;transition:.1s}
+  .mobile-top-nav a.active{background:#facc15;color:#0f172a}
+  .mobile-top-nav a .material-icons-outlined{font-size:18px}
+}
 .sidebar .brand{padding:0 20px 20px;border-bottom:1px solid #1e293b;font-size:1.2rem;font-weight:800;color:#facc15;display:flex;align-items:center;gap:10px}
 .sidebar nav{padding:10px 0;flex:1}
 .sidebar a{display:flex;align-items:center;gap:12px;padding:12px 20px;color:#94a3b8;text-decoration:none;font-size:.9rem;font-weight:500;transition:.15s;border-right:3px solid transparent}
@@ -53,6 +69,11 @@ td img{width:36px;height:36px;border-radius:6px;object-fit:cover;background:#f1f
 </nav>
 </aside>
 <main class="main-content">
+<nav class="mobile-top-nav">
+  <a href="admin-sections.html"><span class="material-icons-outlined">view_carousel</span> أقسام الهوم</a>
+  <a href="manage-products.html" class="active"><span class="material-icons-outlined">inventory</span> إدارة المنتجات</a>
+  <a href="review-partnership.html"><span class="material-icons-outlined">handshake</span> مراجعة الشراكه</a>
+</nav>
 <div class="page-header"><h1>إدارة المنتجات</h1><p style="color:#64748b;font-size:.85rem;margin:0">بحث وتعديل الأسعار والخصومات</p></div>
 <div class="tabs" id="mainTabs">
 <span class="tab active" onclick="switchTab('store',this)">المتجر</span>
@@ -68,6 +89,13 @@ td img{width:36px;height:36px;border-radius:6px;object-fit:cover;background:#f1f
 <div id="tableWrap"><p style="color:#94a3b8;">جارٍ التحميل...</p></div>
 <div class="pagination" id="pagination"></div>
 </main></div>
+<nav class="mobile-bottom-nav">
+  <a href="shacksf.html"><span class="material-icons-outlined">dashboard</span> الرئيسية</a>
+  <a href="admin.html"><span class="material-icons-outlined">add_box</span> إضافة</a>
+  <a href="admin-sections.html"><span class="material-icons-outlined">view_carousel</span> الأقسام</a>
+  <a href="admin-orders.html"><span class="material-icons-outlined">receipt</span> طلبات</a>
+  <a href="admin-support.html"><span class="material-icons-outlined">headset_mic</span> الدعم</a>
+</nav>
 <script src="../assets/vendor/supabase/supabase-js@2.js"></script>
 <script src="../assets/js/supabase-client.js"></script>
 <script src="../assets/js/store.js"></script>

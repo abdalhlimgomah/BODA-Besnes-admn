@@ -595,6 +595,7 @@
   display: flex;
   gap: 8px;
   padding-bottom: 8px;
+  position: relative;
 }
 .chat-action-btn {
   background: none;
@@ -1020,7 +1021,6 @@
   }
 
   .emoji-picker-panel {
-    width: 240px;
     right: 8px;
     bottom: 56px;
     padding: 8px;
