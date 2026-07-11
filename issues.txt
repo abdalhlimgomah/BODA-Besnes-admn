@@ -1,3 +1,0 @@
-shacksf.html Line 72: ? found: '              <img id="profileImage" src="https://via.placeholder.com/200?text=صورة+المتجر" alt="صورة المتجر" />'
-shacksf.html Line 79: ? found: '              <h2 id="ownerName">*Buda*?</h2>'
-view-products.html Line 88: ? found: '    <script src="./view-products.page.js?v=20260327-2"></script>'
