@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تخطيط الصفحة الرئيسية - Buda</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="../css/theme.css" />
+  <style>
+    :root {
+      --card: #fff;
+      --card-hover: #f8fafc;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --text-light: #94a3b8;
+      --accent: #facc15;
+      --accent-h: #eab308;
+      --danger: #ef4444;
+      --danger-h: #dc2626;
+      --success: #16a34a;
+      --success-bg: #dcfce7;
+      --info: #3b82f6;
+      --info-bg: #eff6ff;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.04);
+      --shadow-lg: 0 10px 15px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.04);
+      --radius: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body.dark-mode {
+      --card: #1e293b;
+      --card-hover: #0f172a;
+      --border: #334155;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-light: #64748b;
+      --shadow-sm: none;
+      --shadow: none;
+      --shadow-md: none;
+      --shadow-lg: none;
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:'Cairo',sans-serif; background:#f1f5f9; color:var(--text); }
+
+    /* ===== Layout ===== */
+    .sidebar { width:250px; background:linear-gradient(180deg,#0f172a,#1e293b); padding:0; position:fixed; top:0; right:0; bottom:0; z-index:100; display:flex; flex-direction:column; overflow-y:auto; }
+    .sidebar-brand { padding:20px 20px 16px; border-bottom:1px solid rgba(255,255,255,0.08); font-size:1.1rem; font-weight:800; color:#facc15; display:flex; align-items:center; gap:10px; }
+    .sidebar-brand i { font-size:1.3rem; }
+    .sidebar nav { padding:8px 0; flex:1; }
+    .sidebar a { display:flex; align-items:center; gap:12px; padding:12px 20px; color:#94a3b8; text-decoration:none; font-size:.88rem; font-weight:500; transition:var(--transition); border-right:3px solid transparent; }
+    .sidebar a:hover { background:rgba(255,255,255,0.04); color:#fff; }
+    .sidebar a.active { background:rgba(250,204,21,0.08); color:#facc15; border-right-color:#facc15; }
+    .sidebar a i { width:20px; text-align:center; font-size:1rem; }
+    .main-area { flex:1; margin-right:250px; padding:0; min-height:100vh; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; padding:16px 28px; background:var(--card); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:50; gap:12px; flex-wrap:wrap; }
+    .topbar h1 { margin:0; font-size:1.25rem; font-weight:800; display:flex; align-items:center; gap:10px; }
+    .topbar h1 i { color:var(--accent); }
+    .topbar-actions { display:flex; align-items:center; gap:10px; }
+    .topbar-status { font-size:0.78rem; color:var(--text-muted); font-weight:500; }
+
+    .content { padding:24px 28px 40px; max-width:1200px; }
+
+    /* ===== Country Switcher ===== */
+    .country-switcher { display:flex; gap:8px; margin-bottom:24px; background:var(--card); padding:6px; border-radius:var(--radius); border:1px solid var(--border); width:fit-content; }
+    .country-btn { padding:10px 28px; border-radius:8px; border:none; background:transparent; cursor:pointer; font-size:0.9rem; font-weight:700; font-family:inherit; transition:var(--transition); color:var(--text-muted); }
+    .country-btn:hover { background:var(--card-hover); }
+    .country-btn.active { background:var(--accent); color:#0f172a; box-shadow:var(--shadow-sm); }
+    .country-btn .flag { margin-left:6px; }
+
+    /* ===== Section Blocks ===== */
+    .section-block {
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius-lg);
+      margin-bottom:20px;
+      overflow:hidden;
+      transition:var(--transition);
+    }
+    .section-block:hover { box-shadow:var(--shadow-md); }
+    .section-block-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:16px 20px; border-bottom:1px solid var(--border);
+      flex-wrap:wrap; gap:10px;
+    }
+    .section-block-header h2 {
+      margin:0; font-size:1rem; font-weight:800;
+      display:flex; align-items:center; gap:8px;
+    }
+    .section-block-header h2 .badge-country {
+      font-size:0.65rem; font-weight:600;
+      padding:2px 10px; border-radius:20px;
+      background:var(--info-bg); color:var(--info);
+    }
+    .section-block-body { padding:16px 20px; }
+
+    /* ===== Item Cards ===== */
+    .items-grid { display:flex; flex-direction:column; gap:8px; }
+    .item-card {
+      display:flex; align-items:center; gap:14px;
+      padding:14px 16px; background:var(--card-hover);
+      border:2px solid var(--border); border-radius:var(--radius);
+      transition:var(--transition); position:relative;
+      cursor:default; user-select:none;
+    }
+    .item-card:hover { border-color:#cbd5e1; box-shadow:var(--shadow-sm); }
+    .item-card.dragging { opacity:0.4; border-style:dashed; }
+    .item-card.drag-over { border-color:var(--accent); background:#fefce8; border-style:dashed; }
+    .item-card .drag-handle {
+      cursor:grab; color:var(--text-light); font-size:1.1rem;
+      flex-shrink:0; padding:4px; border-radius:6px;
+      transition:var(--transition);
+    }
+    .item-card .drag-handle:hover { background:var(--border); color:var(--text-muted); }
+    .item-card .drag-handle:active { cursor:grabbing; }
+
+    .item-card .item-img-wrap {
+      width:72px; height:72px; border-radius:10px; overflow:hidden;
+      flex-shrink:0; border:2px solid var(--border); position:relative;
+      background:#f8fafc;
+    }
+    .item-card .item-img-wrap img { width:100%; height:100%; object-fit:cover; display:block; }
+    .item-card .item-img-wrap .img-size-badge {
+      position:absolute; bottom:3px; right:3px;
+      font-size:0.55rem; font-weight:700;
+      background:rgba(0,0,0,0.65); color:#fff;
+      padding:1px 6px; border-radius:4px;
+    }
+    .item-card .item-info { flex:1; min-width:0; }
+    .item-card .item-info .item-title {
+      font-weight:700; font-size:0.88rem; margin-bottom:2px;
+      display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+    }
+    .item-card .item-info .item-sub {
+      font-size:0.72rem; color:var(--text-muted);
+      overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    }
+    .item-card .item-info .item-link {
+      font-size:0.68rem; color:var(--info); font-weight:500;
+      overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    }
+    .item-card .item-actions {
+      display:flex; gap:4px; flex-shrink:0;
+    }
+    .item-card .order-num {
+      position:absolute; top:-6px; left:-6px;
+      width:22px; height:22px; border-radius:50%;
+      background:var(--accent); color:#0f172a;
+      font-size:0.65rem; font-weight:800;
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:var(--shadow-sm);
+    }
+    .empty-state {
+      text-align:center; padding:40px 20px;
+      color:var(--text-light); font-size:0.85rem;
+    }
+    .empty-state i { font-size:36px; margin-bottom:10px; display:block; }
+
+    /* ===== Buttons ===== */
+    .btn {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:8px 16px; border:none; border-radius:8px;
+      font-size:0.82rem; font-weight:600; font-family:inherit;
+      cursor:pointer; transition:var(--transition); text-decoration:none;
+      white-space:nowrap;
+    }
+    .btn:hover { transform:translateY(-1px); }
+    .btn:active { transform:translateY(0); }
+    .btn-primary { background:var(--accent); color:#0f172a; }
+    .btn-primary:hover { background:var(--accent-h); box-shadow:var(--shadow); }
+    .btn-danger { background:var(--danger); color:#fff; }
+    .btn-danger:hover { background:var(--danger-h); }
+    .btn-outline { background:transparent; border:1px solid var(--border); color:var(--text-muted); }
+    .btn-outline:hover { background:var(--card-hover); border-color:#cbd5e1; }
+    .btn-sm { padding:5px 10px; font-size:0.75rem; }
+    .btn-icon { width:32px; height:32px; padding:0; justify-content:center; border-radius:8px; }
+    .btn-xs { font-size:0.7rem; padding:3px 8px; border-radius:6px; }
+    .btn-success { background:var(--success); color:#fff; }
+    .btn-success:hover { background:#15803d; }
+    .mode-toggle { display:inline-flex; align-items:center; gap:3px; cursor:pointer; font-size:0.6rem; font-weight:600; padding:2px 8px; border-radius:20px; border:1px solid; transition:0.2s; user-select:none; }
+    .mode-toggle.manual { background:#e0f2fe; color:#0369a1; border-color:#bae6fd; }
+    .mode-toggle.auto { background:#fef3c7; color:#92400e; border-color:#fde68a; }
+
+    /* ===== Modal ===== */
+    .modal-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.5);
+      z-index:2000; display:flex; align-items:center; justify-content:center;
+      opacity:0; pointer-events:none; transition:0.2s;
+      backdrop-filter:blur(4px); padding:16px;
+    }
+    .modal-overlay.open { opacity:1; pointer-events:auto; }
+    .modal {
+      background:var(--card); border-radius:var(--radius-lg);
+      width:100%; max-width:650px; max-height:90vh; overflow-y:auto;
+      box-shadow:var(--shadow-lg); transform:scale(0.95);
+      transition:0.2s;
+    }
+    .modal-overlay.open .modal { transform:scale(1); }
+    .modal-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:18px 22px; border-bottom:1px solid var(--border);
+      position:sticky; top:0; background:var(--card); z-index:1;
+    }
+    .modal-header h2 { margin:0; font-size:1.05rem; font-weight:800; }
+    .modal-close {
+      width:32px; height:32px; border:none; background:var(--card-hover);
+      border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+      color:var(--text-muted); transition:var(--transition); font-size:1.1rem;
+    }
+    .modal-close:hover { background:var(--border); color:var(--text); }
+    .modal-body { padding:22px; }
+    .modal-footer {
+      display:flex; gap:8px; justify-content:flex-end;
+      padding:14px 22px; border-top:1px solid var(--border);
+      position:sticky; bottom:0; background:var(--card);
+    }
+
+    /* ===== Form ===== */
+    .form-group { margin-bottom:16px; }
+    .form-group label {
+      display:block; font-size:0.78rem; font-weight:700;
+      color:var(--text-muted); margin-bottom:5px;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      width:100%; padding:10px 14px; border:2px solid var(--border);
+      border-radius:8px; font-size:0.88rem; font-family:inherit;
+      background:var(--card); color:var(--text); transition:var(--transition);
+      box-sizing:border-box;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(250,204,21,0.15);
+    }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    @media(max-width:600px) { .form-row { grid-template-columns:1fr; } }
+    .form-hint { font-size:0.7rem; color:var(--text-light); margin-top:4px; }
+
+    /* ===== Upload Area ===== */
+    .upload-area {
+      border:2px dashed var(--border); border-radius:var(--radius);
+      padding:20px; text-align:center; cursor:pointer;
+      transition:var(--transition); position:relative;
+      background:var(--card-hover);
+    }
+    .upload-area:hover { border-color:var(--accent); background:#fefce8; }
+    .upload-area.dragover { border-color:var(--success); background:var(--success-bg); }
+    .upload-area .upload-icon { font-size:2rem; color:var(--text-light); margin-bottom:6px; }
+    .upload-area .upload-text { font-size:0.82rem; color:var(--text-muted); font-weight:600; }
+    .upload-area .upload-hint { font-size:0.68rem; color:var(--text-light); margin-top:4px; }
+    .upload-area.has-image { border-style:solid; border-color:var(--success); padding:12px; }
+    .upload-area .preview-wrap {
+      display:flex; align-items:center; gap:12px; text-align:right;
+    }
+    .upload-area .preview-wrap img {
+      width:80px; height:80px; border-radius:8px; object-fit:cover;
+      border:2px solid var(--border);
+    }
+    .upload-area .preview-wrap .preview-info { flex:1; }
+    .upload-area .preview-wrap .preview-info .preview-name {
+      font-weight:700; font-size:0.82rem; margin-bottom:2px;
+    }
+    .upload-area .preview-wrap .preview-info .preview-size {
+      font-size:0.72rem; color:var(--text-muted);
+    }
+    .upload-area .preview-wrap .preview-info .preview-dims {
+      font-size:0.68rem; color:var(--text-light);
+    }
+    .upload-progress {
+      width:100%; height:4px; background:var(--border); border-radius:2px;
+      margin-top:10px; overflow:hidden; display:none;
+    }
+    .upload-progress .bar {
+      height:100%; background:linear-gradient(90deg,var(--accent),var(--success));
+      border-radius:2px; transition:width 0.3s; width:0%;
+    }
+
+    /* ===== Color Picker ===== */
+    .color-row { display:flex; gap:8px; align-items:center; }
+    .color-row input[type="color"] {
+      width:40px; height:40px; padding:2px; border:2px solid var(--border);
+      border-radius:8px; cursor:pointer; flex-shrink:0;
+    }
+    .color-row input[type="text"] { flex:1; }
+
+    /* ===== Toast ===== */
+    .toast-container {
+      position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+      z-index:9999; display:flex; flex-direction:column; gap:8px; align-items:center;
+      pointer-events:none;
+    }
+    .toast {
+      padding:12px 20px; border-radius:var(--radius); font-size:0.82rem; font-weight:600;
+      box-shadow:var(--shadow-lg); display:flex; align-items:center; gap:8px;
+      pointer-events:auto; animation:toastIn 0.3s ease;
+      max-width:90vw;
+    }
+    .toast-success { background:var(--success-bg); color:var(--success); border:1px solid #bbf7d0; }
+    .toast-error { background:#fef2f2; color:var(--danger); border:1px solid #fecaca; }
+    .toast-info { background:var(--info-bg); color:var(--info); border:1px solid #bfdbfe; }
+    @keyframes toastIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+
+    /* ===== Badge Preview ===== */
+    .badge-type { display:inline-flex; align-items:center; gap:4px; font-size:0.7rem; font-weight:600; padding:2px 8px; border-radius:20px; }
+    .badge-icon { background:#fef3c7; color:#92400e; }
+    .badge-image { background:#dbeafe; color:#1d4ed8; }
+
+    /* ===== Empty / Mobile ===== */
+    @media(max-width:768px) {
+      .sidebar { display:none; }
+      .main-area { margin-right:0; }
+      .topbar { padding:12px 16px; }
+      .content { padding:16px; }
+      .country-switcher { width:100%; }
+      .country-btn { flex:1; text-align:center; }
+      .item-card { flex-wrap:wrap; }
+      .item-card .item-actions { width:100%; justify-content:flex-end; padding-top:6px; border-top:1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand"><i class="fa-solid fa-palette"></i> Buda Admin</div>
+    <nav>
+      <a href="shacksf.html"><i class="fa-solid fa-chart-pie"></i> لوحة التحكم</a>
+      <a href="admin.html"><i class="fa-solid fa-plus"></i> إضافة المنتجات</a>
+      <a href="admin-sections.html"><i class="fa-solid fa-cog"></i> أقسام المنتجات</a>
+      <a href="admin-orders.html"><i class="fa-solid fa-receipt"></i> الطلبات</a>
+      <a href="admin-home-layout.html" class="active"><i class="fa-solid fa-palette"></i> تخطيط الصفحة الرئيسية</a>
+    </nav>
+  </aside>
+
+  <main class="main-area">
+    <header class="topbar">
+      <h1><i class="fa-solid fa-palette"></i> تخطيط الصفحة الرئيسية</h1>
+      <div class="topbar-actions">
+        <span class="topbar-status" id="statusMsg">جاهز</span>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- Country Switcher -->
+      <div class="country-switcher">
+        <button class="country-btn active" data-country="EG" onclick="switchCountry('EG')">
+          <span class="flag">🇪🇬</span> مصر
+        </button>
+        <button class="country-btn" data-country="SA" onclick="switchCountry('SA')">
+          <span class="flag">🇸🇦</span> السعودية
+        </button>
+      </div>
+
+      <!-- ===== HERO SLIDER ===== -->
+      <div class="section-block">
+        <div class="section-block-header">
+          <h2>🏆 السلايدر الرئيسي <span class="badge-country" id="heroBadge">EG</span></h2>
+          <button class="btn btn-primary btn-sm" onclick="openSlideModal()"><i class="fa-solid fa-plus"></i> إضافة شريحة</button>
+        </div>
+        <div class="section-block-body">
+          <div class="items-grid" id="heroList"></div>
+        </div>
+      </div>
+
+      <!-- ===== CATEGORIES ===== -->
+      <div class="section-block">
+        <div class="section-block-header">
+          <h2>📦 التصنيفات <span class="badge-country" id="catBadge">EG</span></h2>
+          <button class="btn btn-primary btn-sm" onclick="openCategoryModal()"><i class="fa-solid fa-plus"></i> إضافة تصنيف</button>
+        </div>
+        <div class="section-block-body">
+          <div class="items-grid" id="catList"></div>
+        </div>
+      </div>
+
+      <!-- ===== BANNER ===== -->
+      <div class="section-block">
+        <div class="section-block-header">
+          <h2>🎯 البانر العلوي <span class="badge-country" id="bannerBadge">EG</span></h2>
+          <button class="btn btn-outline btn-sm" onclick="openBannerModal()"><i class="fa-solid fa-pen"></i> تعديل البانر</button>
+        </div>
+        <div class="section-block-body" id="bannerPreview"></div>
+      </div>
+
+      <!-- ===== MEGA OFFERS ===== -->
+      <div class="section-block">
+        <div class="section-block-header">
+          <h2>🛍️ الميجا أوفرز <span class="badge-country" id="megaBadge">EG</span></h2>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="btn btn-outline btn-sm" onclick="openMegaBannerModal()"><i class="fa-solid fa-image"></i> إضافة بانر</button>
+          </div>
+        </div>
+        <div class="section-block-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+            <!-- Col 1: اشتري أكثر -->
+            <div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:0.82rem;font-weight:700;color:var(--text-muted);margin-bottom:8px;">
+                <span class="material-icons-outlined" style="font-size:16px;">shopping_bag</span>
+                اشتري أكثر
+                <span class="mode-toggle" data-col="1" id="mode1Toggle"></span>
+              </div>
+              <div style="margin-bottom:6px;">
+                <button class="btn btn-primary btn-xs" onclick="openMegaProductModal(1)"><i class="fa-solid fa-plus"></i> إضافة</button>
+              </div>
+              <div class="items-grid" id="megaProductList1"></div>
+            </div>
+            <!-- Col 2: عروض ميجا -->
+            <div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:0.82rem;font-weight:700;color:var(--text-muted);margin-bottom:8px;">
+                <span class="material-icons-outlined" style="font-size:16px;">bolt</span>
+                عروض ميجا
+                <span class="mode-toggle" data-col="2" id="mode2Toggle"></span>
+              </div>
+              <div style="margin-bottom:6px;">
+                <button class="btn btn-primary btn-xs" onclick="openMegaProductModal(2)"><i class="fa-solid fa-plus"></i> إضافة</button>
+              </div>
+              <div class="items-grid" id="megaProductList2"></div>
+            </div>
+            <!-- Col 3: شوف كل الخصومات (بانرات) -->
+            <div>
+              <div style="font-size:0.82rem;font-weight:700;color:var(--text-muted);margin-bottom:8px;">
+                <span class="material-icons-outlined" style="font-size:16px;vertical-align:middle;">local_offer</span>
+                شوف كل الخصومات — البانرات
+              </div>
+              <div class="items-grid" id="megaBannerList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== AD BANNERS ===== -->
+      <div class="section-block">
+        <div class="section-block-header">
+          <h2>📢 إعلانات مدفوعة <span class="badge-country" id="adBadge">EG</span></h2>
+          <button class="btn btn-primary btn-sm" onclick="openAdBannerModal()"><i class="fa-solid fa-plus"></i> إضافة إعلان</button>
+        </div>
+        <div class="section-block-body">
+          <div class="items-grid" id="adBannerList"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE MODAL -->
+<!-- ============================================= -->
+<div class="modal-overlay" id="slideModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="slideModalTitle">إضافة شريحة جديدة</h2>
+      <button class="modal-close" onclick="closeModal('slideModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="slideForm" onsubmit="saveSlide(event)">
+      <div class="modal-body">
+        <div class="form-group">
+          <label>صورة الشريحة</label>
+          <div class="upload-area" id="slideUpload" onclick="document.getElementById('slideFile').click()">
+            <div id="slideUploadPlaceholder">
+              <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+              <div class="upload-text">اضغط لاختيار صورة من الجهاز</div>
+              <div class="upload-hint">أو اسحب وأفلت الصورة هنا</div>
+            </div>
+            <div id="slidePreviewWrap" class="preview-wrap" style="display:none;">
+              <img id="slidePreviewImg" src="" />
+              <div class="preview-info">
+                <div class="preview-name" id="slidePreviewName"></div>
+                <div class="preview-size" id="slidePreviewSize"></div>
+                <div class="preview-dims" id="slidePreviewDims"></div>
+              </div>
+            </div>
+            <div class="upload-progress" id="slideProgress"><div class="bar" id="slideProgressBar"></div></div>
+          </div>
+          <input id="slideFile" type="file" accept="image/*" style="display:none" onchange="handleFileSelect(this, 'slide')" />
+          <div class="form-hint">أقصى حجم: 5MB · الصيغ المدعومة: PNG, JPG, GIF, WebP · أبعاد مناسبة: 1200×600</div>
+        </div>
+        <div class="form-group" style="margin-top:4px;">
+          <label>أو أدخل رابط الصورة مباشرة</label>
+          <input id="slideUrlInput" type="url" placeholder="https://example.com/image.jpg" oninput="previewSlideUrl(this.value)" />
+        </div>
+        <div class="form-group">
+          <label>رابط النقر <span class="form-hint" style="display:inline;margin-right:4px;">(اختياري — اترك # إن لم ترد)</span></label>
+          <input id="slideLinkInput" type="text" placeholder="مثال: category.html?cat=phones" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>نص بديل للصورة (alt)</label>
+            <input id="slideAltInput" type="text" placeholder="وصف مختصر للصورة" />
+          </div>
+          <div class="form-group">
+            <label>الترتيب</label>
+            <input id="slideOrderInput" type="number" min="0" value="0" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('slideModal')">إلغاء</button>
+        <button type="submit" class="btn btn-primary" id="slideSubmitBtn"><i class="fa-solid fa-floppy-disk"></i> حفظ الشريحة</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- CATEGORY MODAL -->
+<!-- ============================================= -->
+<div class="modal-overlay" id="categoryModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="catModalTitle">إضافة تصنيف جديد</h2>
+      <button class="modal-close" onclick="closeModal('categoryModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="categoryForm" onsubmit="saveCategory(event)">
+      <div class="modal-body">
+        <div class="form-group">
+          <label>اسم التصنيف</label>
+          <input id="catNameInput" type="text" required placeholder="مثال: إلكترونيات" />
+        </div>
+        <div class="form-group">
+          <label>صورة التصنيف</label>
+          <div class="upload-area" id="catUpload" onclick="document.getElementById('catFile').click()">
+            <div id="catUploadPlaceholder">
+              <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+              <div class="upload-text">اضغط لاختيار صورة من الجهاز</div>
+              <div class="upload-hint">أو اسحب وأفلت الصورة هنا</div>
+            </div>
+            <div id="catPreviewWrap" class="preview-wrap" style="display:none;">
+              <img id="catPreviewImg" src="" />
+              <div class="preview-info">
+                <div class="preview-name" id="catPreviewName"></div>
+                <div class="preview-size" id="catPreviewSize"></div>
+                <div class="preview-dims" id="catPreviewDims"></div>
+              </div>
+            </div>
+            <div class="upload-progress" id="catProgress"><div class="bar" id="catProgressBar"></div></div>
+          </div>
+          <input id="catFile" type="file" accept="image/*" style="display:none" onchange="handleFileSelect(this, 'cat')" />
+          <div class="form-hint">أقصى حجم: 5MB · أبعاد مناسبة: 300×300</div>
+        </div>
+        <div class="form-group" style="margin-top:4px;">
+          <label>أو أدخل رابط الصورة مباشرة</label>
+          <input id="catUrlInput" type="url" placeholder="https://example.com/category.jpg" oninput="previewCatUrl(this.value)" />
+        </div>
+        <div class="form-group">
+          <label>رابط التصنيف</label>
+          <input id="catLinkInput" type="text" required placeholder="مثال: category.html?cat=electronics" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('categoryModal')">إلغاء</button>
+        <button type="submit" class="btn btn-primary" id="catSubmitBtn"><i class="fa-solid fa-floppy-disk"></i> حفظ التصنيف</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- BANNER MODAL -->
+<!-- ============================================= -->
+<div class="modal-overlay" id="bannerModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>تعديل البانر العلوي</h2>
+      <button class="modal-close" onclick="closeModal('bannerModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="bannerForm" onsubmit="saveBanner(event)">
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>نوع البانر</label>
+            <select id="bannerType" onchange="toggleBannerFields()">
+              <option value="icon_banner">🔤 نص مع أيقونة</option>
+              <option value="image_banner">🖼️ صورة بانر</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>الرابط</label>
+            <input id="bannerLink" type="text" placeholder="category.html?cat=..." />
+          </div>
+        </div>
+
+        <!-- Icon Banner Fields -->
+        <div id="iconBannerFields">
+          <div class="form-row">
+            <div class="form-group">
+              <label>الأيقونة</label>
+              <input id="bannerIcon" type="text" value="local_shipping" placeholder="local_shipping" />
+              <div class="form-hint">من <a href="https://fonts.google.com/icons" target="_blank">Material Icons</a></div>
+            </div>
+            <div class="form-group">
+              <label>النص العريض</label>
+              <input id="bannerHeading" type="text" placeholder="توصيل مجاني للطلبات فوق ٩٩ ر.س" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>النص الفرعي</label>
+            <input id="bannerSubtext" type="text" placeholder="عرض لفترة محدودة" />
+          </div>
+        </div>
+
+        <!-- Image Banner Fields -->
+        <div id="imageBannerFields" style="display:none;">
+          <div class="form-group">
+            <label>صورة البانر</label>
+            <div class="upload-area" id="bannerUpload" onclick="document.getElementById('bannerFile').click()">
+              <div id="bannerUploadPlaceholder">
+                <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                <div class="upload-text">اضغط لاختيار صورة من الجهاز</div>
+                <div class="upload-hint">أو اسحب وأفلت الصورة هنا</div>
+              </div>
+              <div id="bannerPreviewWrap" class="preview-wrap" style="display:none;">
+                <img id="bannerPreviewImg" src="" />
+                <div class="preview-info">
+                  <div class="preview-name" id="bannerPreviewName"></div>
+                  <div class="preview-size" id="bannerPreviewSize"></div>
+                  <div class="preview-dims" id="bannerPreviewDims"></div>
+                </div>
+              </div>
+              <div class="upload-progress" id="bannerProgress"><div class="bar" id="bannerProgressBar"></div></div>
+            </div>
+            <input id="bannerFile" type="file" accept="image/*" style="display:none" onchange="handleFileSelect(this, 'banner')" />
+            <div class="form-hint">أقصى حجم: 5MB · أبعاد مناسبة: 1200×400</div>
+          </div>
+          <div class="form-group" style="margin-top:4px;">
+            <label>أو أدخل رابط الصورة مباشرة</label>
+            <input id="bannerUrlInput" type="url" placeholder="https://example.com/banner.jpg" oninput="previewBannerUrl(this.value)" />
+          </div>
+        </div>
+
+        <!-- Colors -->
+        <div style="margin-top:10px;padding-top:14px;border-top:1px solid var(--border);">
+          <div style="font-size:0.82rem;font-weight:700;margin-bottom:10px;color:var(--text-muted);">🎨 الألوان</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>خلفية البانر</label>
+              <div class="color-row">
+                <input id="bannerBgColorPicker" type="color" value="#f8f4ff" oninput="document.getElementById('bannerBgColor').value=this.value" />
+                <input id="bannerBgColor" type="text" value="#f8f4ff" placeholder="#f8f4ff" oninput="document.getElementById('bannerBgColorPicker').value=this.value" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>لون الحدود</label>
+              <div class="color-row">
+                <input id="bannerBorderColorPicker" type="color" value="#f3e8ff" oninput="document.getElementById('bannerBorderColor').value=this.value" />
+                <input id="bannerBorderColor" type="text" value="#f3e8ff" placeholder="#f3e8ff" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>لون النص</label>
+              <div class="color-row">
+                <input id="bannerTextColorPicker" type="color" value="#1a2530" oninput="document.getElementById('bannerTextColor').value=this.value" />
+                <input id="bannerTextColor" type="text" value="#1a2530" placeholder="#1a2530" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>لون الإشارة</label>
+              <div class="color-row">
+                <input id="bannerAccentColorPicker" type="color" value="#7c3aed" oninput="document.getElementById('bannerAccentColor').value=this.value" />
+                <input id="bannerAccentColor" type="text" value="#7c3aed" placeholder="#7c3aed" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('bannerModal')">إلغاء</button>
+        <button type="submit" class="btn btn-primary" id="bannerSubmitBtn"><i class="fa-solid fa-floppy-disk"></i> حفظ البانر</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- MEGA PRODUCT MODAL -->
+<!-- ============================================= -->
+<div class="modal-overlay" id="megaProductModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="megaProductModalTitle">إضافة منتج إلى "اشتري أكثر"</h2>
+      <button class="modal-close" onclick="closeModal('megaProductModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="megaProductForm" onsubmit="saveMegaProduct(event)">
+      <div class="modal-body">
+        <div class="form-group">
+          <label>معرف المنتج (Product ID)</label>
+          <input id="megaProductIdInput" type="text" required placeholder="مثال: taager_4711 أو prod_123" />
+          <div class="form-hint">أدخل معرف المنتج كما يظهر في قاعدة البيانات (من صفحة admin.html أو من رابط المنتج)</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('megaProductModal')">إلغاء</button>
+        <button type="submit" class="btn btn-primary" id="megaProductSubmitBtn"><i class="fa-solid fa-plus"></i> إضافة</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- MEGA BANNER MODAL -->
+<!-- ============================================= -->
+<div class="modal-overlay" id="megaBannerModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="megaBannerModalTitle">إضافة بانر للخصومات</h2>
+      <button class="modal-close" onclick="closeModal('megaBannerModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="megaBannerForm" onsubmit="saveMegaBanner(event)">
+      <div class="modal-body">
+        <div class="form-group">
+          <label>صورة البانر</label>
+          <div class="upload-area" id="megaBannerUpload" onclick="document.getElementById('megaBannerFile').click()">
+            <div id="megaBannerUploadPlaceholder">
+              <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+              <div class="upload-text">اضغط لاختيار صورة من الجهاز</div>
+              <div class="upload-hint">أو استخدم رابط خارجي أدناه</div>
+            </div>
+            <div id="megaBannerPreviewWrap" class="preview-wrap" style="display:none;">
+              <img id="megaBannerPreviewImg" src="" />
+              <div class="preview-info">
+                <div class="preview-name" id="megaBannerPreviewName"></div>
+              </div>
+            </div>
+          </div>
+          <input id="megaBannerFile" type="file" accept="image/*" style="display:none" onchange="handleMegaBannerFile(this)" />
+        </div>
+        <div class="form-group">
+          <label>أو رابط الصورة</label>
+          <input id="megaBannerUrlInput" type="url" placeholder="https://..." />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>العنوان (النص على البانر)</label>
+            <input id="megaBannerTitle" type="text" placeholder="مثال: إلكترونيات" />
+          </div>
+          <div class="form-group">
+            <label>النص الفرعي</label>
+            <input id="megaBannerSubtitle" type="text" placeholder="مثال: خصم يصل إلى 50%" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>الرابط</label>
+          <input id="megaBannerLink" type="text" placeholder="category.html?cat=electronics" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('megaBannerModal')">إلغاء</button>
+        <button type="submit" class="btn btn-primary" id="megaBannerSubmitBtn"><i class="fa-solid fa-floppy-disk"></i> حفظ البانر</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- AD BANNER MODAL -->
+<!-- ============================================= -->
+<div class="modal-overlay" id="adBannerModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="adBannerModalTitle">إضافة إعلان مدفوع</h2>
+      <button class="modal-close" onclick="closeModal('adBannerModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="adBannerForm" onsubmit="saveAdBanner(event)">
+      <div class="modal-body">
+        <div class="form-group">
+          <label>صورة الإعلان</label>
+          <div class="upload-area" id="adUpload" onclick="document.getElementById('adFile').click()">
+            <div id="adUploadPlaceholder">
+              <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+              <div class="upload-text">اضغط لاختيار صورة من الجهاز</div>
+            </div>
+            <div id="adPreviewWrap" class="preview-wrap" style="display:none;">
+              <img id="adPreviewImg" src="" />
+              <div class="preview-info">
+                <div class="preview-name" id="adPreviewName"></div>
+              </div>
+            </div>
+          </div>
+          <input id="adFile" type="file" accept="image/*" style="display:none" onchange="handleAdFile(this)" />
+        </div>
+        <div class="form-group">
+          <label>أو رابط الصورة</label>
+          <input id="adUrlInput" type="url" placeholder="https://..." />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>الرابط</label>
+            <input id="adLinkInput" type="text" placeholder="category.html?cat=..." />
+          </div>
+          <div class="form-group">
+            <label>نص الوسم</label>
+            <input id="adBadgeInput" type="text" value="مدفوع" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('adBannerModal')">إلغاء</button>
+        <button type="submit" class="btn btn-primary" id="adSubmitBtn"><i class="fa-solid fa-floppy-disk"></i> حفظ الإعلان</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="../assets/vendor/supabase/supabase-js@2.js"></script>
+<script>
+// Initialize Supabase client directly (bypass supabase-client.js to avoid window.supabase dependency)
+var SUPABASE_URL = "https://msgqzgzoslearaprgiqq.supabase.co";
+var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE";
+var supabaseClient = window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+</script>
+<script>
+var currentCountry = 'EG';
+var editSlideId = null;
+var editCatId = null;
+var sectionIds = { hero: null, categories: null, banner_top: null };
+var supabaseUrl = SUPABASE_URL;
+var isUploading = false;
+
+function getClient() { return supabaseClient; }
+function getSupabaseAnonKey() { return SUPABASE_ANON_KEY; }
+
+// ===== INIT =====
+async function init() {
+  setStatus('جاري التحميل...');
+  await loadAll();
+  setStatus('✓ تم التحميل');
+}
+
+async function loadAll() {
+  await Promise.all([ loadHero(), loadCategories(), loadBanner(), loadMegaOffers(), loadAdBanners() ]);
+}
+
+// ===== COUNTRY =====
+function switchCountry(code) {
+  currentCountry = code;
+  document.querySelectorAll('.country-btn').forEach(function(t) {
+    t.classList.toggle('active', t.getAttribute('data-country') === code);
+  });
+  ['heroBadge','catBadge','bannerBadge','megaBadge','adBadge'].forEach(function(id) {
+    document.getElementById(id).textContent = code;
+  });
+  sectionIds = { hero: null, categories: null, banner_top: null, mega_offers: null, ad_banners: null };
+  loadAll();
+  setStatus('✓ تم التبديل إلى ' + (code === 'EG' ? 'مصر' : 'السعودية'));
+}
+
+// ===== SECTION ID =====
+async function getSectionId(type) {
+  var client = getClient();
+  if (!client) return null;
+  if (sectionIds[type]) return sectionIds[type];
+  var { data } = await client.from('home_page_sections').select('id').eq('section_type', type).eq('country', currentCountry).limit(1).maybeSingle();
+  if (data) { sectionIds[type] = data.id; return data.id; }
+  var { data: ins } = await client.from('home_page_sections').insert({ section_type: type, country: currentCountry }).select('id').single();
+  if (ins) { sectionIds[type] = ins.id; return ins.id; }
+  return null;
+}
+
+// ===== FILE UPLOAD =====
+function handleFileSelect(input, prefix) {
+  var file = input.files && input.files[0];
+  if (!file) return;
+  uploadFile(file, prefix);
+}
+
+function previewLocalFile(file, prefix) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var previewImg = document.getElementById(prefix + 'PreviewImg');
+    var previewWrap = document.getElementById(prefix + 'PreviewWrap');
+    var placeholder = document.getElementById(prefix + 'UploadPlaceholder');
+    var area = document.getElementById(prefix + 'Upload');
+    if (previewImg) previewImg.src = e.target.result;
+    if (previewWrap) previewWrap.style.display = 'flex';
+    if (placeholder) placeholder.style.display = 'none';
+    if (area) area.classList.add('has-image');
+    document.getElementById(prefix + 'PreviewName').textContent = file.name;
+    document.getElementById(prefix + 'PreviewSize').textContent = formatSize(file.size);
+  };
+  reader.readAsDataURL(file);
+  // Get dimensions
+  var img = new Image();
+  img.onload = function() {
+    document.getElementById(prefix + 'PreviewDims').textContent = img.width + ' × ' + img.height + ' بكسل';
+  };
+  img.src = URL.createObjectURL(file);
+}
+
+async function uploadFile(file, prefix) {
+  isUploading = true;
+  var submitBtn = document.getElementById(prefix + 'SubmitBtn');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'جاري الرفع...'; }
+  try {
+    var client = getClient();
+    if (!client) { toast('خطأ: Supabase غير متصل', 'error'); isUploading = false; if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> حفظ'; } return; }
+
+    previewLocalFile(file, prefix);
+
+    var ext = file.name.split('.').pop();
+    var fileName = prefix + '_' + Date.now() + '_' + Math.random().toString(36).substr(2,6) + '.' + ext;
+    var filePath = currentCountry + '/' + fileName;
+
+    var progressBar = document.getElementById(prefix + 'ProgressBar');
+    var progressWrap = document.getElementById(prefix + 'Progress');
+    if (progressWrap) progressWrap.style.display = 'block';
+    if (progressBar) progressBar.style.width = '30%';
+
+    // Check if storage is available
+    if (!client.storage) {
+      toast('❌ Supabase Storage غير متاح. استخدم رابط الصورة المباشر بدلاً من الرفع.', 'error');
+      if (progressWrap) progressWrap.style.display = 'none';
+      isUploading = false;
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> حفظ'; }
+      return;
+    }
+
+    var { data, error } = await client.storage.from('home-images').upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: true,
+    });
+
+    if (error) {
+      console.error('Upload error:', error);
+      var errorMsg = error.message || '';
+      if (errorMsg.includes('bucket') || errorMsg.includes('not found')) {
+        toast('❌ لم يتم إنشاء bucket "home-images" في Supabase. شغّل ملف SQL أولاً.\n\nأو استخدم رابط الصورة المباشر.', 'error');
+      } else if (errorMsg.includes('401') || errorMsg.includes('unauthorized') || errorMsg.includes('JWT')) {
+        toast('❌ يجب تسجيل الدخول أولاً لرفع الصور. أو استخدم رابط الصورة المباشر.', 'error');
+      } else {
+        toast('❌ فشل الرفع: ' + errorMsg + '\n\nاستخدم رابط الصورة المباشر كبديل.', 'error');
+      }
+      if (progressWrap) progressWrap.style.display = 'none';
+      isUploading = false;
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> حفظ'; }
+      return;
+    }
+
+    if (progressBar) progressBar.style.width = '70%';
+
+    // Get public URL
+    var { data: publicUrlData } = client.storage.from('home-images').getPublicUrl(filePath);
+    var publicUrl = publicUrlData ? publicUrlData.publicUrl : (supabaseUrl + '/storage/v1/object/public/home-images/' + filePath);
+
+    // Set the URL input
+    var urlInput = document.getElementById(prefix + 'UrlInput');
+    if (urlInput) urlInput.value = publicUrl;
+
+    if (progressBar) progressBar.style.width = '100%';
+    setTimeout(function() {
+      if (progressWrap) progressWrap.style.display = 'none';
+      if (progressBar) progressBar.style.width = '0%';
+    }, 500);
+
+    toast('✓ تم رفع الصورة بنجاح', 'success');
+  } catch(e) {
+    console.error('Upload exception:', e);
+    toast('❌ فشل رفع الصورة: ' + (e.message || e) + '\n\nاستخدم رابط الصورة المباشر.', 'error');
+  } finally {
+    isUploading = false;
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> حفظ'; }
+  }
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/1048576).toFixed(1) + ' MB';
+}
+
+// ===== PREVIEW IMAGE URL =====
+function previewSlideUrl(url) {
+  var img = document.getElementById('slidePreviewImg');
+  var wrap = document.getElementById('slidePreviewWrap');
+  var placeholder = document.getElementById('slideUploadPlaceholder');
+  var area = document.getElementById('slideUpload');
+  if (url && url.trim()) {
+    img.src = url.trim();
+    wrap.style.display = 'flex';
+    placeholder.style.display = 'none';
+    area.classList.add('has-image');
+    document.getElementById('slidePreviewName').textContent = 'رابط خارجي';
+    document.getElementById('slidePreviewSize').textContent = '';
+    document.getElementById('slidePreviewDims').textContent = '';
+  } else if (!document.getElementById('slideFile').files.length) {
+    wrap.style.display = 'none';
+    placeholder.style.display = 'block';
+    area.classList.remove('has-image');
+  }
+}
+function previewCatUrl(url) {
+  var img = document.getElementById('catPreviewImg');
+  var wrap = document.getElementById('catPreviewWrap');
+  var placeholder = document.getElementById('catUploadPlaceholder');
+  var area = document.getElementById('catUpload');
+  if (url && url.trim()) {
+    img.src = url.trim();
+    wrap.style.display = 'flex';
+    placeholder.style.display = 'none';
+    area.classList.add('has-image');
+    document.getElementById('catPreviewName').textContent = 'رابط خارجي';
+    document.getElementById('catPreviewSize').textContent = '';
+    document.getElementById('catPreviewDims').textContent = '';
+  } else if (!document.getElementById('catFile').files.length) {
+    wrap.style.display = 'none';
+    placeholder.style.display = 'block';
+    area.classList.remove('has-image');
+  }
+}
+function previewBannerUrl(url) {
+  var img = document.getElementById('bannerPreviewImg');
+  var wrap = document.getElementById('bannerPreviewWrap');
+  var placeholder = document.getElementById('bannerUploadPlaceholder');
+  var area = document.getElementById('bannerUpload');
+  if (url && url.trim()) {
+    img.src = url.trim();
+    wrap.style.display = 'flex';
+    placeholder.style.display = 'none';
+    area.classList.add('has-image');
+    document.getElementById('bannerPreviewName').textContent = 'رابط خارجي';
+    document.getElementById('bannerPreviewSize').textContent = '';
+    document.getElementById('bannerPreviewDims').textContent = '';
+  } else if (!document.getElementById('bannerFile').files.length) {
+    wrap.style.display = 'none';
+    placeholder.style.display = 'block';
+    area.classList.remove('has-image');
+  }
+}
+
+// ===== HERO SLIDES =====
+async function loadHero() {
+  var client = getClient();
+  if (!client) return;
+  var sid = await getSectionId('hero');
+  if (!sid) return;
+  var { data } = await client.from('home_hero_slides').select('*').eq('section_id', sid).order('sort_order');
+  var list = document.getElementById('heroList');
+  if (!data || !data.length) {
+    list.innerHTML = '<div class="empty-state"><i class="fa-solid fa-image"></i> لا توجد شرائح · أضف أول شريحة الآن</div>';
+    return;
+  }
+  list.innerHTML = data.map(function(s, i) {
+    var linkText = (s.link_url && s.link_url !== '#') ? s.link_url : 'بدون رابط';
+    return '<div class="item-card" draggable="true" data-id="' + s.id + '" data-type="hero">' +
+      '<span class="order-num">' + (i+1) + '</span>' +
+      '<span class="drag-handle"><i class="fa-solid fa-grip-vertical"></i></span>' +
+      '<div class="item-img-wrap"><img src="' + s.image_url + '" onerror="this.src=\'../assets/images/unnamed.png\'" /><span class="img-size-badge"><i class="fa-solid fa-image"></i></span></div>' +
+      '<div class="item-info"><div class="item-title">شريحة ' + (i+1) + '</div>' +
+      '<div class="item-link"><i class="fa-solid fa-link"></i> ' + linkText + '</div></div>' +
+      '<div class="item-actions">' +
+      '<button class="btn btn-outline btn-sm btn-icon" onclick="editSlide(\'' + s.id + '\')" title="تعديل"><i class="fa-solid fa-pen"></i></button>' +
+      '<button class="btn btn-danger btn-sm btn-icon" onclick="deleteSlide(\'' + s.id + '\')" title="حذف"><i class="fa-solid fa-trash"></i></button>' +
+      '</div></div>';
+  }).join('');
+  initDragDrop('hero');
+}
+
+function openSlideModal(data) {
+  editSlideId = null;
+  document.getElementById('slideModalTitle').textContent = 'إضافة شريحة جديدة';
+  document.getElementById('slideForm').reset();
+  document.getElementById('slideFile').value = '';
+  document.getElementById('slideUrlInput').value = '';
+  document.getElementById('slideLinkInput').value = '';
+  document.getElementById('slideAltInput').value = '';
+  document.getElementById('slideOrderInput').value = '0';
+  resetUpload('slide');
+  openModal('slideModal');
+}
+
+function editSlide(id) {
+  editSlideId = id;
+  document.getElementById('slideModalTitle').textContent = 'تعديل الشريحة';
+  var card = document.querySelector('#heroList .item-card[data-id="' + id + '"]');
+  if (!card) return;
+  var img = card.querySelector('.item-img-wrap img').src;
+  var linkEl = card.querySelector('.item-link');
+  var link = linkEl ? linkEl.textContent.replace(/^.*\/\/\s*/, '').trim() : '';
+  document.getElementById('slideUrlInput').value = img;
+  document.getElementById('slideLinkInput').value = (link && link !== 'بدون رابط') ? link : '';
+  previewSlideUrl(img);
+  openModal('slideModal');
+}
+
+async function saveSlide(e) {
+  e.preventDefault();
+  if (isUploading) { toast('جاري رفع الصورة... انتظر قليلاً', 'info'); return; }
+  var client = getClient();
+  if (!client) return;
+  var sid = await getSectionId('hero');
+  if (!sid) { toast('خطأ: لم يتم العثور على القسم', 'error'); return; }
+  var imageUrl = document.getElementById('slideUrlInput').value.trim();
+  var linkUrl = document.getElementById('slideLinkInput').value.trim() || '#';
+  var altText = document.getElementById('slideAltInput').value.trim();
+  var sortOrder = parseInt(document.getElementById('slideOrderInput').value) || 0;
+  if (!imageUrl) { toast('يرجى إضافة صورة للشريحة', 'error'); return; }
+  try {
+    if (editSlideId) {
+      await client.from('home_hero_slides').update({ image_url: imageUrl, link_url: linkUrl, alt_text: altText, sort_order: sortOrder }).eq('id', editSlideId);
+      toast('✓ تم تحديث الشريحة', 'success');
+    } else {
+      var { data: existing } = await client.from('home_hero_slides').select('sort_order').eq('section_id', sid).order('sort_order', { ascending: false }).limit(1);
+      var nextOrder = (existing && existing.length) ? existing[0].sort_order + 1 : 0;
+      await client.from('home_hero_slides').insert({ section_id: sid, image_url: imageUrl, link_url: linkUrl, alt_text: altText, sort_order: sortOrder || nextOrder });
+      toast('✓ تم إضافة الشريحة', 'success');
+    }
+    closeModal('slideModal');
+    await loadHero();
+  } catch(e) { toast('خطأ في الحفظ: ' + e.message, 'error'); }
+}
+
+async function deleteSlide(id) {
+  if (!confirm('هل أنت متأكد من حذف هذه الشريحة؟')) return;
+  var client = getClient();
+  if (!client) return;
+  await client.from('home_hero_slides').delete().eq('id', id);
+  await loadHero();
+  toast('✓ تم حذف الشريحة', 'success');
+}
+
+// ===== CATEGORIES =====
+async function loadCategories() {
+  var client = getClient();
+  if (!client) return;
+  var sid = await getSectionId('categories');
+  if (!sid) return;
+  var { data } = await client.from('home_categories').select('*').eq('section_id', sid).order('sort_order');
+  var list = document.getElementById('catList');
+  if (!data || !data.length) {
+    list.innerHTML = '<div class="empty-state"><i class="fa-solid fa-tag"></i> لا توجد تصنيفات · أضف أول تصنيف الآن</div>';
+    return;
+  }
+  list.innerHTML = data.map(function(c, i) {
+    return '<div class="item-card" draggable="true" data-id="' + c.id + '" data-type="cat">' +
+      '<span class="order-num">' + (i+1) + '</span>' +
+      '<span class="drag-handle"><i class="fa-solid fa-grip-vertical"></i></span>' +
+      '<div class="item-img-wrap"><img src="' + c.image_url + '" onerror="this.src=\'../assets/images/unnamed.png\'" /><span class="img-size-badge"><i class="fa-solid fa-image"></i></span></div>' +
+      '<div class="item-info"><div class="item-title">' + c.name + '</div>' +
+      '<div class="item-link"><i class="fa-solid fa-link"></i> ' + c.link_url + '</div></div>' +
+      '<div class="item-actions">' +
+      '<button class="btn btn-outline btn-sm btn-icon" onclick="editCategory(\'' + c.id + '\')" title="تعديل"><i class="fa-solid fa-pen"></i></button>' +
+      '<button class="btn btn-danger btn-sm btn-icon" onclick="deleteCategory(\'' + c.id + '\')" title="حذف"><i class="fa-solid fa-trash"></i></button>' +
+      '</div></div>';
+  }).join('');
+  initDragDrop('cat');
+}
+
+function openCategoryModal() {
+  editCatId = null;
+  document.getElementById('catModalTitle').textContent = 'إضافة تصنيف جديد';
+  document.getElementById('categoryForm').reset();
+  document.getElementById('catFile').value = '';
+  document.getElementById('catUrlInput').value = '';
+  document.getElementById('catNameInput').value = '';
+  document.getElementById('catLinkInput').value = '';
+  resetUpload('cat');
+  openModal('categoryModal');
+}
+
+function editCategory(id) {
+  editCatId = id;
+  document.getElementById('catModalTitle').textContent = 'تعديل التصنيف';
+  var card = document.querySelector('#catList .item-card[data-id="' + id + '"]');
+  if (!card) return;
+  var name = card.querySelector('.item-title').textContent;
+  var img = card.querySelector('.item-img-wrap img').src;
+  var linkEl = card.querySelector('.item-link');
+  var link = linkEl ? linkEl.textContent.replace(/^.*\/\/\s*/, '').trim() : '';
+  document.getElementById('catNameInput').value = name;
+  document.getElementById('catUrlInput').value = img;
+  document.getElementById('catLinkInput').value = (link && link !== 'بدون رابط') ? link : '';
+  previewCatUrl(img);
+  openModal('categoryModal');
+}
+
+async function saveCategory(e) {
+  e.preventDefault();
+  if (isUploading) { toast('جاري رفع الصورة... انتظر قليلاً', 'info'); return; }
+  var client = getClient();
+  if (!client) return;
+  var sid = await getSectionId('categories');
+  if (!sid) { toast('خطأ: لم يتم العثور على القسم', 'error'); return; }
+  var name = document.getElementById('catNameInput').value.trim();
+  var imageUrl = document.getElementById('catUrlInput').value.trim();
+  var linkUrl = document.getElementById('catLinkInput').value.trim() || '#';
+  if (!name || !imageUrl) { toast('يرجى ملء الاسم ورابط الصورة', 'error'); return; }
+  try {
+    if (editCatId) {
+      await client.from('home_categories').update({ name: name, image_url: imageUrl, link_url: linkUrl }).eq('id', editCatId);
+      toast('✓ تم تحديث التصنيف', 'success');
+    } else {
+      var { data: existing } = await client.from('home_categories').select('sort_order').eq('section_id', sid).order('sort_order', { ascending: false }).limit(1);
+      var nextOrder = (existing && existing.length) ? existing[0].sort_order + 1 : 0;
+      await client.from('home_categories').insert({ section_id: sid, name: name, image_url: imageUrl, link_url: linkUrl, sort_order: nextOrder });
+      toast('✓ تم إضافة التصنيف', 'success');
+    }
+    closeModal('categoryModal');
+    await loadCategories();
+  } catch(e) { toast('خطأ في الحفظ: ' + e.message, 'error'); }
+}
+
+async function deleteCategory(id) {
+  if (!confirm('هل أنت متأكد من حذف هذا التصنيف؟')) return;
+  var client = getClient();
+  if (!client) return;
+  await client.from('home_categories').delete().eq('id', id);
+  await loadCategories();
+  toast('✓ تم حذف التصنيف', 'success');
+}
+
+// ===== BANNER =====
+async function loadBanner() {
+  var client = getClient();
+  if (!client) return;
+  var sid = await getSectionId('banner_top');
+  if (!sid) { document.getElementById('bannerPreview').innerHTML = '<div class="empty-state"><i class="fa-solid fa-bullhorn"></i> لا يوجد بانر · أضف بانر الآن</div>'; return; }
+  var { data } = await client.from('home_banners').select('*').eq('section_id', sid).order('sort_order').limit(1);
+  var container = document.getElementById('bannerPreview');
+  if (!data || !data.length) {
+    container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-bullhorn"></i> لا يوجد بانر · أضف بانر الآن</div>';
+    return;
+  }
+  var b = data[0];
+  var html = '';
+  if (b.type === 'image_banner' && b.image_url) {
+    html = '<a href="' + (b.link_url || '#') + '" target="_blank" style="display:block;border-radius:10px;overflow:hidden;border:1px solid var(--border);">' +
+      '<img src="' + b.image_url + '" style="width:100%;display:block;border-radius:10px;" onerror="this.style.display=\'none\'" />' +
+      '</a>';
+  } else {
+    html = '<div style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:10px;background:' + (b.background_color || '#f8f4ff') + ';border:1px solid ' + (b.border_color || '#f3e8ff') + ';">' +
+      '<div style="width:40px;height:40px;border-radius:50%;background:' + (b.accent_color || '#7c3aed') + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
+      '<span class="material-icons-outlined" style="color:#fff;font-size:20px;">' + (b.icon || 'local_shipping') + '</span></div>' +
+      '<div style="flex:1;"><strong style="font-size:0.9rem;color:' + (b.text_color || '#1a2530') + ';">' + (b.heading || '') + '</strong>' +
+      (b.subtext ? '<div style="font-size:0.72rem;color:' + (b.accent_color || '#7c3aed') + ';font-weight:700;margin-top:2px;">' + b.subtext + '</div>' : '') + '</div>' +
+      '<span class="material-icons-outlined" style="color:' + (b.accent_color || '#7c3aed') + ';font-size:22px;">chevron_left</span></div>';
+  }
+  container.innerHTML = html;
+}
+
+function toggleBannerFields() {
+  var type = document.getElementById('bannerType').value;
+  document.getElementById('iconBannerFields').style.display = type === 'icon_banner' ? 'block' : 'none';
+  document.getElementById('imageBannerFields').style.display = type === 'image_banner' ? 'block' : 'none';
+}
+
+async function openBannerModal() {
+  var client = getClient();
+  if (!client) return;
+  var sid = await getSectionId('banner_top');
+  if (!sid) return;
+  var { data } = await client.from('home_banners').select('*').eq('section_id', sid).order('sort_order').limit(1);
+  var b = (data && data.length) ? data[0] : null;
+  document.getElementById('bannerForm').reset();
+  document.getElementById('bannerType').value = b ? b.type : 'icon_banner';
+  document.getElementById('bannerLink').value = b ? (b.link_url || '') : '';
+  document.getElementById('bannerIcon').value = b ? (b.icon || 'local_shipping') : 'local_shipping';
+  document.getElementById('bannerHeading').value = b ? (b.heading || '') : '';
+  document.getElementById('bannerSubtext').value = b ? (b.subtext || '') : '';
+  document.getElementById('bannerUrlInput').value = b ? (b.image_url || '') : '';
+  document.getElementById('bannerBgColor').value = b ? (b.background_color || '#f8f4ff') : '#f8f4ff';
+  document.getElementById('bannerBorderColor').value = b ? (b.border_color || '#f3e8ff') : '#f3e8ff';
+  document.getElementById('bannerTextColor').value = b ? (b.text_color || '#1a2530') : '#1a2530';
+  document.getElementById('bannerAccentColor').value = b ? (b.accent_color || '#7c3aed') : '#7c3aed';
+  document.getElementById('bannerFile').value = '';
+  resetUpload('banner');
+  if (b && b.image_url) previewBannerUrl(b.image_url);
+  toggleBannerFields();
+  openModal('bannerModal');
+}
+
+async function saveBanner(e) {
+  e.preventDefault();
+  if (isUploading) { toast('جاري رفع الصورة... انتظر قليلاً', 'info'); return; }
+  var client = getClient();
+  if (!client) return;
+  var sid = await getSectionId('banner_top');
+  if (!sid) { toast('خطأ في القسم', 'error'); return; }
+  var type = document.getElementById('bannerType').value;
+  var payload = {
+    section_id: sid, type: type,
+    link_url: document.getElementById('bannerLink').value.trim() || '#',
+    icon: document.getElementById('bannerIcon').value.trim() || 'local_shipping',
+    heading: document.getElementById('bannerHeading').value.trim(),
+    subtext: document.getElementById('bannerSubtext').value.trim(),
+    image_url: document.getElementById('bannerUrlInput').value.trim(),
+    background_color: document.getElementById('bannerBgColor').value.trim() || '#f8f4ff',
+    border_color: document.getElementById('bannerBorderColor').value.trim() || '#f3e8ff',
+    text_color: document.getElementById('bannerTextColor').value.trim() || '#1a2530',
+    accent_color: document.getElementById('bannerAccentColor').value.trim() || '#7c3aed',
+  };
+  try {
+    var { data: existing } = await client.from('home_banners').select('id').eq('section_id', sid).limit(1);
+    if (existing && existing.length) {
+      await client.from('home_banners').update(payload).eq('id', existing[0].id);
+    } else {
+      payload.sort_order = 0;
+      await client.from('home_banners').insert(payload);
+    }
+    closeModal('bannerModal');
+    await loadBanner();
+    toast('✓ تم حفظ البانر', 'success');
+  } catch(e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+// ===== DRAG & DROP =====
+function initDragDrop(type) {
+  var listId = type === 'hero' ? 'heroList' : 'catList';
+  var container = document.getElementById(listId);
+  if (!container) return;
+  var items = container.querySelectorAll('.item-card[draggable="true"]');
+  items.forEach(function(item) {
+    item.addEventListener('dragstart', function(e) {
+      e.dataTransfer.setData('text/plain', this.dataset.id);
+      this.classList.add('dragging');
+    });
+    item.addEventListener('dragend', function(e) {
+      this.classList.remove('dragging');
+      container.querySelectorAll('.drag-over').forEach(function(el) { el.classList.remove('drag-over'); });
+    });
+    item.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      this.classList.add('drag-over');
+    });
+    item.addEventListener('dragleave', function(e) {
+      this.classList.remove('drag-over');
+    });
+    item.addEventListener('drop', function(e) {
+      e.preventDefault();
+      this.classList.remove('drag-over');
+      var draggedId = e.dataTransfer.getData('text/plain');
+      var draggedEl = container.querySelector('.item-card[data-id="' + draggedId + '"]');
+      var targetEl = this;
+      if (!draggedEl || draggedEl === targetEl) return;
+      if (targetEl.nextSibling) {
+        container.insertBefore(draggedEl, targetEl.nextSibling);
+      } else {
+        container.appendChild(draggedEl);
+      }
+      // Update sort order
+      var allItems = container.querySelectorAll('.item-card');
+      var updates = [];
+      allItems.forEach(function(el, idx) {
+        el.querySelector('.order-num').textContent = idx + 1;
+        updates.push({ id: el.dataset.id, order: idx });
+      });
+      saveSortOrder(type, updates);
+    });
+  });
+}
+
+async function saveSortOrder(type, updates) {
+  var client = getClient();
+  if (!client || !updates.length) return;
+  var table = type === 'hero' ? 'home_hero_slides' : 'home_categories';
+  try {
+    for (var i = 0; i < updates.length; i++) {
+      await client.from(table).update({ sort_order: updates[i].order }).eq('id', updates[i].id);
+    }
+  } catch(e) {
+    console.warn('Sort update error:', e);
+  }
+}
+
+// ===== UTILS =====
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function setStatus(msg) { var el = document.getElementById('statusMsg'); if (el) el.textContent = msg; }
+function resetUpload(prefix) {
+  var wrap = document.getElementById(prefix + 'PreviewWrap');
+  var placeholder = document.getElementById(prefix + 'UploadPlaceholder');
+  var area = document.getElementById(prefix + 'Upload');
+  var progress = document.getElementById(prefix + 'Progress');
+  if (wrap) wrap.style.display = 'none';
+  if (placeholder) placeholder.style.display = 'block';
+  if (area) area.classList.remove('has-image');
+  if (progress) progress.style.display = 'none';
+}
+
+// ===== MEGA OFFERS =====
+var _megaCol = 1; // current col being edited (1 or 2)
+
+async function loadMegaOffers() {
+  var client = getClient();
+  if (!client) return;
+  var sid = await getSectionId('mega_offers');
+  if (!sid) return;
+  // Check if col column exists
+  if (window._hasColColumn === undefined) {
+    try {
+      await client.from('home_mega_products').select('col').limit(1);
+      window._hasColColumn = true;
+    } catch(e) {
+      window._hasColColumn = false;
+    }
+  }
+  await Promise.all([ loadMegaProducts(sid, 1), loadMegaProducts(sid, 2), loadMegaBanners(sid), loadMegaConfig(sid) ]);
+}
+
+async function loadMegaConfig(sid) {
+  var client = getClient();
+  try {
+    var { data } = await client.from('home_section_config').select('*').eq('section_id', sid);
+    if (!data) { fallbackModeToggles(); return; }
+    var cfg = {};
+    data.forEach(function(r) { cfg[r.config_key] = r.config_value; });
+    renderModeToggle('mode1Toggle', cfg.col1_mode || 'manual', 1, sid);
+    renderModeToggle('mode2Toggle', cfg.col2_mode || 'auto', 2, sid);
+  } catch(e) {
+    console.warn('Config table not ready, using defaults:', e.message);
+    fallbackModeToggles();
+  }
+}
+function fallbackModeToggles() {
+  renderModeToggle('mode1Toggle', 'manual', 1, null);
+  renderModeToggle('mode2Toggle', 'auto', 2, null);
+}
+
+function renderModeToggle(elId, mode, col, sid) {
+  var el = document.getElementById(elId);
+  if (!el) return;
+  el.className = 'mode-toggle ' + mode;
+  el.innerHTML = '<span class="mt-icon">' + (mode === 'manual' ? '&#128221;' : '&#9889;') + '</span> ' + (mode === 'manual' ? 'يدوي' : 'تلقائي');
+  el.onclick = function() {
+    var newMode = mode === 'manual' ? 'auto' : 'manual';
+    toggleMegaMode(col, newMode, sid);
+  };
+}
+
+async function toggleMegaMode(col, newMode, sid) {
+  var client = getClient();
+  if (!client) return;
+  if (!sid) sid = await getSectionId('mega_offers');
+  if (!sid) return;
+  var key = 'col' + col + '_mode';
+  await client.from('home_section_config').upsert({ section_id: sid, config_key: key, config_value: newMode }, { onConflict: 'section_id,config_key' });
+  toast('✓ تم التبديل إلى ' + (newMode === 'manual' ? 'يدوي' : 'تلقائي'), 'success');
+  await loadMegaConfig(sid);
+  var listId = 'megaProductList' + col;
+  if (newMode === 'auto') {
+    document.getElementById(listId).innerHTML = '<div class="empty-state"><i class="fa-solid fa-bolt"></i> تلقائي — يختار النظام تلقائياً</div>';
+  } else {
+    await loadMegaProducts(sid, col);
+  }
+}
+
+async function loadMegaProducts(sid, col) {
+  var client = getClient();
+  if (!col) col = 1;
+  // Try with col filter first, fallback to all if col column doesn't exist
+  var query = client.from('home_mega_products').select('*').eq('section_id', sid).order('sort_order');
+  if (window._hasColColumn !== false) {
+    query = query.eq('col', col);
+  }
+  var { data } = await query;
+  var listId = 'megaProductList' + col;
+  var list = document.getElementById(listId);
+  if (!list) return;
+  if (!data || !data.length) {
+    list.innerHTML = '<div class="empty-state"><i class="fa-solid fa-box"></i> لا توجد منتجات مختارة</div>';
+    return;
+  }
+  list.innerHTML = data.map(function(p, i) {
+    return '<div class="item-card" data-id="' + p.id + '">' +
+      '<span class="order-num">' + (i+1) + '</span>' +
+      '<div class="item-info"><div class="item-title"><i class="fa-solid fa-cube"></i> ' + p.product_id + '</div></div>' +
+      '<div class="item-actions">' +
+      '<button class="btn btn-outline btn-sm btn-icon" onclick="openMegaProductModal(' + col + ',\'' + p.id + '\',\'' + encodeURIComponent(p.product_id) + '\')" title="تعديل"><i class="fa-solid fa-pen"></i></button>' +
+      '<button class="btn btn-danger btn-sm btn-icon" onclick="deleteMegaProduct(\'' + p.id + '\',' + col + ')" title="حذف"><i class="fa-solid fa-trash"></i></button>' +
+      '</div></div>';
+  }).join('');
+}
+
+var editMegaProductId = null;
+
+function openMegaProductModal(col, id, encodedPid) {
+  _megaCol = col || 1;
+  editMegaProductId = null;
+  document.getElementById('megaProductForm').reset();
+  var colLabel = _megaCol === 1 ? 'اشتري أكثر' : 'عروض ميجا';
+  document.getElementById('megaProductModalTitle').textContent = 'إضافة منتج إلى "' + colLabel + '"';
+  document.getElementById('megaProductSubmitBtn').innerHTML = '<i class="fa-solid fa-plus"></i> إضافة';
+  if (id) {
+    editMegaProductId = id;
+    document.getElementById('megaProductModalTitle').textContent = 'تعديل المنتج - ' + colLabel;
+    document.getElementById('megaProductSubmitBtn').innerHTML = '<i class="fa-solid fa-check"></i> حفظ';
+    if (encodedPid) document.getElementById('megaProductIdInput').value = decodeURIComponent(encodedPid);
+  }
+  openModal('megaProductModal');
+}
+
+async function saveMegaProduct(e) {
+  e.preventDefault();
+  var client = getClient();
+  if (!client) return;
+  var pid = document.getElementById('megaProductIdInput').value.trim();
+  if (!pid) { toast('يرجى إدخال معرف المنتج', 'error'); return; }
+  var sid = await getSectionId('mega_offers');
+  if (!sid) { toast('خطأ في القسم', 'error'); return; }
+  if (editMegaProductId) {
+    await client.from('home_mega_products').update({ product_id: pid }).eq('id', editMegaProductId);
+    toast('✓ تم التعديل', 'success');
+  } else {
+    var chkQuery = client.from('home_mega_products').select('id').eq('section_id', sid).eq('product_id', pid);
+    var lstQuery = client.from('home_mega_products').select('sort_order').eq('section_id', sid).order('sort_order', { ascending: false }).limit(1);
+    var insPayload = { section_id: sid, product_id: pid, sort_order: 0 };
+    if (window._hasColColumn) {
+      chkQuery = chkQuery.eq('col', _megaCol);
+      lstQuery = lstQuery.eq('col', _megaCol);
+      insPayload.col = _megaCol;
+    }
+    var { data: existing } = await chkQuery;
+    if (existing && existing.length) { toast('المنتج موجود بالفعل', 'info'); closeModal('megaProductModal'); return; }
+    var { data: last } = await lstQuery;
+    insPayload.sort_order = (last && last.length) ? last[0].sort_order + 1 : 0;
+    await client.from('home_mega_products').insert(insPayload);
+    toast('✓ تم إضافة المنتج', 'success');
+  }
+  closeModal('megaProductModal');
+  document.getElementById('megaProductForm').reset();
+  editMegaProductId = null;
+  await loadMegaProducts(sid, _megaCol);
+}
+
+async function deleteMegaProduct(id, col) {
+  if (!confirm('حذف هذا المنتج؟')) return;
+  var client = getClient();
+  if (!client) return;
+  await client.from('home_mega_products').delete().eq('id', id);
+  toast('✓ تم الحذف', 'success');
+  var sid = await getSectionId('mega_offers');
+  if (sid) await loadMegaProducts(sid, col || 1);
+}
+
+async function loadMegaBanners(sid) {
+  var client = getClient();
+  var { data } = await client.from('home_mega_banners').select('*').eq('section_id', sid).order('sort_order');
+  _megaBannersData = data || [];
+  var list = document.getElementById('megaBannerList');
+  if (!data || !data.length) {
+    list.innerHTML = '<div class="empty-state"><i class="fa-solid fa-image"></i> لا توجد بانرات</div>';
+    return;
+  }
+  list.innerHTML = data.map(function(b, i) {
+    return '<div class="item-card" data-id="' + b.id + '">' +
+      '<span class="order-num">' + (i+1) + '</span>' +
+      '<div class="item-img-wrap"><img src="' + b.image_url + '" onerror="this.src=\'../assets/images/unnamed.png\'" /></div>' +
+      '<div class="item-info"><div class="item-title">' + (b.title || 'بدون عنوان') + '</div>' +
+      '<div class="item-sub">' + (b.subtitle || '') + '</div></div>' +
+      '<div class="item-actions">' +
+      '<button class="btn btn-outline btn-sm btn-icon" onclick="openMegaBannerModal(\'' + b.id + '\')" title="تعديل"><i class="fa-solid fa-pen"></i></button>' +
+      '<button class="btn btn-danger btn-sm btn-icon" onclick="deleteMegaBanner(\'' + b.id + '\')" title="حذف"><i class="fa-solid fa-trash"></i></button>' +
+      '</div></div>';
+  }).join('');
+}
+
+var _megaBannersData = [];
+var editMegaBannerId = null;
+function openMegaBannerModal(id) {
+  editMegaBannerId = null;
+  document.getElementById('megaBannerModalTitle').textContent = 'إضافة بانر جديد';
+  document.getElementById('megaBannerForm').reset();
+  document.getElementById('megaBannerFile').value = '';
+  document.getElementById('megaBannerUrlInput').value = '';
+  document.getElementById('megaBannerTitle').value = '';
+  document.getElementById('megaBannerSubtitle').value = '';
+  document.getElementById('megaBannerLink').value = '';
+  resetSimpleUpload('megaBanner');
+  document.getElementById('megaBannerSubmitBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> حفظ';
+  if (id) {
+    var b = null;
+    for (var j = 0; j < _megaBannersData.length; j++) {
+      if (_megaBannersData[j].id === id) { b = _megaBannersData[j]; break; }
+    }
+    if (b) {
+      editMegaBannerId = id;
+      document.getElementById('megaBannerModalTitle').textContent = 'تعديل البانر';
+      document.getElementById('megaBannerUrlInput').value = b.image_url || '';
+      document.getElementById('megaBannerTitle').value = b.title || '';
+      document.getElementById('megaBannerSubtitle').value = b.subtitle || '';
+      document.getElementById('megaBannerLink').value = b.link_url || '';
+      document.getElementById('megaBannerSubmitBtn').innerHTML = '<i class="fa-solid fa-check"></i> حفظ التعديل';
+      if (b.image_url) {
+        document.getElementById('megaBannerPreviewImg').src = b.image_url;
+        document.getElementById('megaBannerPreviewWrap').style.display = 'flex';
+        document.getElementById('megaBannerUploadPlaceholder').style.display = 'none';
+        document.getElementById('megaBannerPreviewName').textContent = 'الرابط: ' + b.image_url.slice(0, 40) + '...';
+      }
+    }
+  }
+  openModal('megaBannerModal');
+}
+
+async function saveMegaBanner(e) {
+  e.preventDefault();
+  var client = getClient();
+  if (!client) return;
+  var sid = await getSectionId('mega_offers');
+  if (!sid) { toast('خطأ في القسم', 'error'); return; }
+  var img = document.getElementById('megaBannerUrlInput').value.trim();
+  if (!img) { toast('يرجى إضافة صورة', 'error'); return; }
+  var payload = {
+    section_id: sid,
+    image_url: img,
+    link_url: document.getElementById('megaBannerLink').value.trim() || '#',
+    title: document.getElementById('megaBannerTitle').value.trim(),
+    subtitle: document.getElementById('megaBannerSubtitle').value.trim(),
+    sort_order: 0
+  };
+  if (editMegaBannerId) {
+    await client.from('home_mega_banners').update(payload).eq('id', editMegaBannerId);
+  } else {
+    var { data: last } = await client.from('home_mega_banners').select('sort_order').eq('section_id', sid).order('sort_order', { ascending: false }).limit(1);
+    payload.sort_order = (last && last.length) ? last[0].sort_order + 1 : 0;
+    await client.from('home_mega_banners').insert(payload);
+  }
+  toast('✓ تم حفظ البانر', 'success');
+  closeModal('megaBannerModal');
+  await loadMegaBanners(sid);
+}
+
+async function deleteMegaBanner(id) {
+  if (!confirm('حذف هذا البانر؟')) return;
+  var client = getClient();
+  if (!client) return;
+  await client.from('home_mega_banners').delete().eq('id', id);
+  toast('✓ تم الحذف', 'success');
+  var sid = await getSectionId('mega_offers');
+  if (sid) await loadMegaBanners(sid);
+}
+
+function handleMegaBannerFile(input) {
+  var file = input.files && input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('megaBannerPreviewImg').src = e.target.result;
+    document.getElementById('megaBannerPreviewWrap').style.display = 'flex';
+    document.getElementById('megaBannerUploadPlaceholder').style.display = 'none';
+    document.getElementById('megaBannerPreviewName').textContent = file.name;
+  };
+  reader.readAsDataURL(file);
+  // Upload to Supabase storage
+  uploadMegaFile(file);
+}
+
+async function uploadMegaFile(file) {
+  var client = getClient();
+  if (!client) return;
+  var ext = file.name.split('.').pop();
+  var fileName = 'mega_' + Date.now() + '_' + Math.random().toString(36).substr(2,6) + '.' + ext;
+  var filePath = currentCountry + '/' + fileName;
+  try {
+    var { error } = await client.storage.from('home-images').upload(filePath, file, { upsert: true });
+    if (error) { toast('خطأ في الرفع: ' + error.message, 'error'); return; }
+    var { data: pub } = client.storage.from('home-images').getPublicUrl(filePath);
+    var url = pub ? pub.publicUrl : (SUPABASE_URL + '/storage/v1/object/public/home-images/' + filePath);
+    document.getElementById('megaBannerUrlInput').value = url;
+    toast('✓ تم رفع الصورة', 'success');
+  } catch(e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+// ===== AD BANNERS =====
+async function loadAdBanners() {
+  var client = getClient();
+  if (!client) return;
+  var sid = await getSectionId('ad_banners');
+  if (!sid) return;
+  var { data } = await client.from('home_ad_banners').select('*').eq('section_id', sid).order('sort_order');
+  _adBannersData = data || [];
+  var list = document.getElementById('adBannerList');
+  if (!data || !data.length) {
+    list.innerHTML = '<div class="empty-state"><i class="fa-solid fa-bullhorn"></i> لا توجد إعلانات</div>';
+    return;
+  }
+  list.innerHTML = data.map(function(b, i) {
+    return '<div class="item-card" data-id="' + b.id + '">' +
+      '<span class="order-num">' + (i+1) + '</span>' +
+      '<div class="item-img-wrap"><img src="' + b.image_url + '" onerror="this.src=\'../assets/images/unnamed.png\'" /></div>' +
+      '<div class="item-info"><div class="item-title">إعلان ' + (i+1) + ' <span class="badge-type badge-icon" style="background:#fef3c7;color:#92400e;font-size:0.65rem;">' + (b.badge_text || 'مدفوع') + '</span></div>' +
+      '<div class="item-link"><i class="fa-solid fa-link"></i> ' + (b.link_url || '#') + '</div></div>' +
+      '<div class="item-actions">' +
+      '<button class="btn btn-outline btn-sm btn-icon" onclick="openAdBannerModal(\'' + b.id + '\')" title="تعديل"><i class="fa-solid fa-pen"></i></button>' +
+      '<button class="btn btn-danger btn-sm btn-icon" onclick="deleteAdBanner(\'' + b.id + '\')" title="حذف"><i class="fa-solid fa-trash"></i></button>' +
+      '</div></div>';
+  }).join('');
+}
+
+var _adBannersData = [];
+var editAdBannerId = null;
+function openAdBannerModal(id) {
+  editAdBannerId = null;
+  document.getElementById('adBannerModalTitle').textContent = 'إضافة إعلان مدفوع';
+  document.getElementById('adBannerForm').reset();
+  document.getElementById('adFile').value = '';
+  document.getElementById('adUrlInput').value = '';
+  document.getElementById('adLinkInput').value = '';
+  document.getElementById('adBadgeInput').value = 'مدفوع';
+  resetSimpleUpload('ad');
+  document.getElementById('adSubmitBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> حفظ الإعلان';
+  if (id) {
+    var b = null;
+    for (var j = 0; j < _adBannersData.length; j++) {
+      if (_adBannersData[j].id === id) { b = _adBannersData[j]; break; }
+    }
+    if (b) {
+      editAdBannerId = id;
+      document.getElementById('adBannerModalTitle').textContent = 'تعديل الإعلان';
+      document.getElementById('adUrlInput').value = b.image_url || '';
+      document.getElementById('adLinkInput').value = b.link_url || '';
+      document.getElementById('adBadgeInput').value = b.badge_text || 'مدفوع';
+      document.getElementById('adSubmitBtn').innerHTML = '<i class="fa-solid fa-check"></i> حفظ التعديل';
+      if (b.image_url) {
+        document.getElementById('adPreviewImg').src = b.image_url;
+        document.getElementById('adPreviewWrap').style.display = 'flex';
+        document.getElementById('adUploadPlaceholder').style.display = 'none';
+        document.getElementById('adPreviewName').textContent = 'الرابط: ' + b.image_url.slice(0, 40) + '...';
+      }
+    }
+  }
+  openModal('adBannerModal');
+}
+
+async function saveAdBanner(e) {
+  e.preventDefault();
+  var client = getClient();
+  if (!client) return;
+  var sid = await getSectionId('ad_banners');
+  if (!sid) { toast('خطأ في القسم', 'error'); return; }
+  var img = document.getElementById('adUrlInput').value.trim();
+  if (!img) { toast('يرجى إضافة صورة', 'error'); return; }
+  var payload = {
+    section_id: sid,
+    image_url: img,
+    link_url: document.getElementById('adLinkInput').value.trim() || '#',
+    badge_text: document.getElementById('adBadgeInput').value.trim() || 'مدفوع',
+    sort_order: 0
+  };
+  if (editAdBannerId) {
+    await client.from('home_ad_banners').update(payload).eq('id', editAdBannerId);
+  } else {
+    var { data: last } = await client.from('home_ad_banners').select('sort_order').eq('section_id', sid).order('sort_order', { ascending: false }).limit(1);
+    payload.sort_order = (last && last.length) ? last[0].sort_order + 1 : 0;
+    await client.from('home_ad_banners').insert(payload);
+  }
+  toast('✓ تم حفظ الإعلان', 'success');
+  closeModal('adBannerModal');
+  await loadAdBanners();
+}
+
+async function deleteAdBanner(id) {
+  if (!confirm('حذف هذا الإعلان؟')) return;
+  var client = getClient();
+  if (!client) return;
+  await client.from('home_ad_banners').delete().eq('id', id);
+  toast('✓ تم الحذف', 'success');
+  await loadAdBanners();
+}
+
+function handleAdFile(input) {
+  var file = input.files && input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('adPreviewImg').src = e.target.result;
+    document.getElementById('adPreviewWrap').style.display = 'flex';
+    document.getElementById('adUploadPlaceholder').style.display = 'none';
+    document.getElementById('adPreviewName').textContent = file.name;
+  };
+  reader.readAsDataURL(file);
+  uploadAdFile(file);
+}
+
+async function uploadAdFile(file) {
+  var client = getClient();
+  if (!client) return;
+  var ext = file.name.split('.').pop();
+  var fileName = 'ad_' + Date.now() + '_' + Math.random().toString(36).substr(2,6) + '.' + ext;
+  var filePath = currentCountry + '/' + fileName;
+  try {
+    var { error } = await client.storage.from('home-images').upload(filePath, file, { upsert: true });
+    if (error) { toast('خطأ في الرفع: ' + error.message, 'error'); return; }
+    var { data: pub } = client.storage.from('home-images').getPublicUrl(filePath);
+    var url = pub ? pub.publicUrl : (SUPABASE_URL + '/storage/v1/object/public/home-images/' + filePath);
+    document.getElementById('adUrlInput').value = url;
+    toast('✓ تم رفع الصورة', 'success');
+  } catch(e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+function resetSimpleUpload(prefix) {
+  var wrap = document.getElementById(prefix + 'PreviewWrap');
+  var placeholder = document.getElementById(prefix + 'UploadPlaceholder');
+  var area = document.getElementById(prefix + 'Upload');
+  if (wrap) wrap.style.display = 'none';
+  if (placeholder) placeholder.style.display = 'block';
+  if (area) area.classList.remove('has-image');
+}
+
+function toast(msg, type) {
+  type = type || 'info';
+  var container = document.getElementById('toastContainer');
+  var el = document.createElement('div');
+  el.className = 'toast toast-' + type;
+  var icons = { success: 'fa-circle-check', error: 'fa-circle-xmark', info: 'fa-circle-info' };
+  el.innerHTML = '<i class="fa-regular ' + (icons[type] || icons.info) + '"></i> ' + msg;
+  container.appendChild(el);
+  setTimeout(function() { el.style.opacity = '0'; el.style.transition = '0.3s'; setTimeout(function() { el.remove(); }, 300); }, 3000);
+}
+
+// Close modals on backdrop click
+document.querySelectorAll('.modal-overlay').forEach(function(m) {
+  m.addEventListener('click', function(e) { if (e.target === m) m.classList.remove('open'); });
+});
+
+init();
+</script>
+</body>
+</html>

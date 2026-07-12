@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>دليل API تاجر — استخراج التوكن وتجديده</title>
+    <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <style>
+      * { margin:0; padding:0; box-sizing:border-box; }
+      body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; background:#f5f7fa; color:#1f2937; line-height:1.8; padding:20px; }
+      .container { max-width:860px; margin:0 auto; }
+      .header { text-align:center; padding:30px 0; }
+      .header h1 { font-size:1.8rem; color:#00b8a9; margin-bottom:8px; }
+      .header p { color:#667085; font-size:0.95rem; }
+      .card { background:#fff; border-radius:16px; padding:28px; margin-bottom:20px; box-shadow:0 2px 12px rgba(0,0,0,0.04); }
+      .card h2 { font-size:1.2rem; color:#1f2937; margin-bottom:16px; display:flex; align-items:center; gap:10px; }
+      .card h2 .step { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:50%; background:#00b8a9; color:#fff; font-size:0.85rem; font-weight:800; flex-shrink:0; }
+      .card h3 { font-size:1rem; color:#1f2937; margin:16px 0 8px; }
+      .card p { margin-bottom:12px; color:#374151; font-size:0.92rem; }
+      .card ul, .card ol { margin:8px 0 16px 20px; }
+      .card li { margin-bottom:8px; font-size:0.9rem; }
+      .card code, .card tt { background:#f0f0f0; padding:2px 8px; border-radius:4px; font-size:0.85rem; }
+      .card pre { background:#1e293b; color:#e2e8f0; padding:14px 18px; border-radius:10px; font-size:0.82rem; overflow-x:auto; white-space:pre-wrap; direction:ltr; text-align:left; margin:10px 0; }
+      .card .note { background:#fff9db; border:1px solid #fce96a; border-radius:10px; padding:14px 18px; font-size:0.85rem; margin:12px 0; }
+      .card .note strong { color:#92400f; }
+      .card .tip { background:#e8f5e9; border:1px solid #a5d6a7; border-radius:10px; padding:14px 18px; font-size:0.85rem; margin:12px 0; }
+      .card .tip strong { color:#2e7d32; }
+      .card .warning { background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:14px 18px; font-size:0.85rem; margin:12px 0; }
+      .card .warning strong { color:#c62828; }
+      .card .flow-box { background:#f0f4ff; border:1px solid #bfdbfe; border-radius:12px; padding:18px; margin:14px 0; font-size:0.88rem; }
+      .card .flow-box strong { color:#2563eb; }
+      .footer { text-align:center; padding:20px; color:#94a3b8; font-size:0.82rem; }
+      .btn-back { display:inline-flex; align-items:center; gap:8px; padding:10px 22px; background:#00b8a9; color:#fff; text-decoration:none; border-radius:10px; font-weight:700; font-size:0.9rem; margin-top:10px; }
+      .btn-back:hover { background:#02998d; }
+      hr { border:none; border-top:1px solid #e5e7eb; margin:16px 0; }
+      .file-tree { background:#f8f9fb; border:1px solid #e5e7eb; border-radius:10px; padding:14px 20px; margin:10px 0; font-size:0.85rem; direction:ltr; text-align:left; font-family:monospace; line-height:2; }
+      .file-tree .folder { color:#2563eb; }
+      .file-tree .file { color:#374151; }
+      .badge { display:inline-block; padding:2px 10px; border-radius:12px; font-size:0.75rem; font-weight:700; }
+      .badge.green { background:#f0fdf4; color:#1f9d55; }
+      .badge.red { background:#fef2f2; color:#e03131; }
+      .badge.amber { background:#fff9db; color:#e67700; }
+      body.dark-mode{background:#0f172a;color:#e2e8f0}
+      body.dark-mode .card{background:#1e293b}
+      body.dark-mode .card h2,body.dark-mode .card h3{color:#f1f5f9}
+      body.dark-mode .card p,body.dark-mode .card li{color:#cbd5e1}
+      body.dark-mode code,body.dark-mode tt{background:#334155;color:#facc15}
+      body.dark-mode pre{background:#0f172a;border:1px solid #334155}
+      body.dark-mode .flow-box{background:#1e293b;border-color:#334155}
+      body.dark-mode .flow-box strong{color:#60a5fa}
+      body.dark-mode .file-tree{background:#0f172a;border-color:#334155}
+      body.dark-mode .file-tree .file{color:#cbd5e1}
+      body.dark-mode .footer{color:#64748b}
+      body.dark-mode .header h1{color:#00b8a9}
+      body.dark-mode .header p{color:#64748b}
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1><i class="fa-solid fa-key"></i> دليل API تاجر — استخراج التوكن وتجديده</h1>
+        <p>شرح كامل: استخراج التوكن، أين يُخزّن، كيف يتجدد تلقائياً، هيكل الملفات، والأوامر</p>
+      </div>
+
+      <!-- NAV -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;justify-content:center;">
+        <a href="#manual" style="padding:8px 16px;background:#e8f5e9;color:#2e7d32;border-radius:8px;text-decoration:none;font-size:0.85rem;font-weight:700;"><i class="fa-solid fa-hand"></i> استخراج يدوي</a>
+        <a href="#storage" style="padding:8px 16px;background:#f0f4ff;color:#2563eb;border-radius:8px;text-decoration:none;font-size:0.85rem;font-weight:700;"><i class="fa-solid fa-database"></i> أماكن التخزين</a>
+        <a href="#auto" style="padding:8px 16px;background:#fff9db;color:#e67700;border-radius:8px;text-decoration:none;font-size:0.85rem;font-weight:700;"><i class="fa-solid fa-robot"></i> التجديد التلقائي</a>
+        <a href="#files" style="padding:8px 16px;background:#f3e8ff;color:#7c3aed;border-radius:8px;text-decoration:none;font-size:0.85rem;font-weight:700;"><i class="fa-solid fa-folder-tree"></i> هيكل الملفات</a>
+        <a href="#flow" style="padding:8px 16px;background:#fef2f2;color:#c62828;border-radius:8px;text-decoration:none;font-size:0.85rem;font-weight:700;"><i class="fa-solid fa-arrow-right-arrow-left"></i> سير العمل</a>
+      </div>
+
+      <!-- ==================== 1. MANUAL EXTRACTION ==================== -->
+      <div class="card" id="manual">
+        <h2><span class="step">1</span> استخراج التوكن يدوياً من المتصفح</h2>
+
+        <h3>1.1 سجّل الدخول إلى تاجر</h3>
+        <p>افتح <a href="https://www.taager.com" target="_blank">taager.com</a> في المتصفح وسجّل الدخول بحسابك (Google أو بريد إلكتروني).</p>
+
+        <h3>1.2 افتح أدوات المطور</h3>
+        <p>اضغط <code>F12</code> (Windows) أو <code>Cmd+Option+I</code> (Mac).</p>
+
+        <h3>1.3 اذهب إلى Application → Local Storage</h3>
+        <p>اختر tab <strong>Application</strong> → من القائمة اليسرى <strong>Local Storage</strong> → اختر <code>https://www.taager.com</code>.</p>
+
+        <h3>1.4 استخرج القيم الثلاث</h3>
+        <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.88rem;">
+          <tr style="background:var(--surface-muted,#f8f9fb);"><th style="padding:10px 14px;text-align:right;border-bottom:2px solid #e5e7eb;">المفتاح</th><th style="padding:10px 14px;text-align:right;border-bottom:2px solid #e5e7eb;">المسمى</th><th style="padding:10px 14px;text-align:right;border-bottom:2px solid #e5e7eb;">ملاحظات</th></tr>
+          <tr><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;"><code>tgr--usr</code></td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;"><strong>API Key (JWT Token)</strong></td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">قيمة طويلة تبدأ بـ <code>eyJ</code>. صالحة 24 ساعة.</td></tr>
+          <tr><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;"><code>tgr--usr-s</code></td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;"><strong>Session Key</strong></td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">32 حرفاً. يتغير بتسجيل الخروج.</td></tr>
+          <tr><td style="padding:10px 14px;"><code>داخل tgr--usr</code></td><td style="padding:10px 14px;"><strong>Taager ID</strong></td><td style="padding:10px 14px;">رقم ثابت. جرب <a href="https://jwt.io" target="_blank">jwt.io</a> لاستخراجه.</td></tr>
+        </table>
+        <div class="tip"><strong>💡 أسهل طريقة:</strong> في صفحة <strong>"إدارة توكن تاجر"</strong> في لوحة التحكم، الصق قيمة <code>tgr--usr</code> كاملة في صندوق "استخراج البيانات من JSON" واضغط استخراج — يملأ الحقول تلقائياً.</div>
+        <div class="note"><strong>⚠️ التوكن ينتهي بعد 24 ساعة.</strong> يجب تجديده يومياً. لهذا صممنا التجديد التلقائي (انظر أدناه).</div>
+      </div>
+
+      <!-- ==================== 2. STORAGE LOCATIONS ==================== -->
+      <div class="card" id="storage">
+        <h2><span class="step">2</span> أماكن تخزين التوكن — 3 مستويات</h2>
+        <p>التوكن يُخزّن في 3 أماكن مختلفة لأغراض مختلفة:</p>
+
+        <div style="background:var(--surface-muted,#f8f9fb);border-radius:12px;padding:18px;margin:14px 0;">
+          <div style="display:flex;gap:14px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:200px;background:#fff;border-radius:10px;padding:14px;border:1.5px solid #bfdbfe;">
+              <div style="font-size:0.75rem;color:#2563eb;font-weight:700;margin-bottom:4px;">المستوى 1 — ملف ثابت</div>
+              <div style="font-weight:700;font-size:0.9rem;"><code>auth.config.js</code></div>
+              <div style="font-size:0.78rem;color:#667085;margin-top:4px;">قيم افتراضية. يُحدَّث عند تشغيل Python script.</div>
+            </div>
+            <div style="flex:1;min-width:200px;background:#fff;border-radius:10px;padding:14px;border:1.5px solid #a5d6a7;">
+              <div style="font-size:0.75rem;color:#1f9d55;font-weight:700;margin-bottom:4px;">المستوى 2 — قاعدة بيانات</div>
+              <div style="font-weight:700;font-size:0.9rem;"><code>app_settings</code> table</div>
+              <div style="font-size:0.78rem;color:#667085;margin-top:4px;">يُعدَّل من لوحة التحكم. يُجلب عند تحميل الصفحة.</div>
+            </div>
+            <div style="flex:1;min-width:200px;background:#fff;border-radius:10px;padding:14px;border:1.5px solid #fecaca;">
+              <div style="font-size:0.75rem;color:#c62828;font-weight:700;margin-bottom:4px;">المستوى 3 — سرّي (آمن)</div>
+              <div style="font-weight:700;font-size:0.9rem;"><code>Supabase Secrets</code></div>
+              <div style="font-size:0.78rem;color:#667085;margin-top:4px;">لـ Edge Function فقط. يُحدَّث عبر CLI أو Python script.</div>
+            </div>
+          </div>
+        </div>
+
+        <h3>2.1 ملف <code>assets/js/auth.config.js</code></h3>
+        <p>ملف ثابت يحتوي القيم الافتراضية. عندما يشغّل المستخدم <code>taager_token_refresh.py</code>، يقوم الـ script بتحديث هذا الملف باستخدام Regex (<code>re.sub</code>) للبحث عن <code>window.TAAGER_API_KEY</code> و <code>window.TAAGER_TAAGER_ID</code> و <code>window.TAAGER_SESSION_KEY</code> واستبدالها بالقيم الجديدة.</p>
+
+        <h3>2.2 جدول <code>app_settings</code> في Supabase</h3>
+        <p>هذا جدول في قاعدة البيانات (key-value store). عندما تحفظ البيانات من صفحة "إدارة توكن تاجر" (<code>admin-taager-token.html</code>)، تُخزَّن في هذا الجدول عبر <code>upsert</code>.</p>
+        <p>عند تحميل أي صفحة تستخدم API تاجر، الدالة <code>getTaagerCreds()</code> تجلب القيم من هذا الجدول وتخزّنها في <code>window</code> لتستخدمها بقية الدوال.</p>
+
+        <h3>2.3 Supabase Secrets (لـ Edge Function)</h3>
+        <p>الـ Edge function <code>taager-proxy</code> تحتاج التوكن لتتصل بـ Taager API نيابة عن المتصفح. القيم تُخزَّن كـ <code>supabase secrets</code> ولا يمكن لأي مستخدم الوصول إليها (حتى من لوحة التحكم).</p>
+        <p>الأسماء الدقيقة للـ Secrets:</p>
+        <ul>
+          <li><code>TAAGER_JWT_TOKEN</code> — التوكن نفسه</li>
+          <li><code>TAAGER_TAAGER_ID</code> — معرف التاجر</li>
+          <li><code>TAAGER_SESSION_KEY</code> — مفتاح الجلسة</li>
+          <li><code>TAAGER_SYNC_SECRET</code> — مفتاح سري إضافي للمزامنة (اختياري)</li>
+        </ul>
+        <div class="note"><strong>ملاحظة:</strong> وجود <code>SUPABASE_URL</code> و <code>SUPABASE_SERVICE_ROLE_KEY</code> كـ Secrets ضروري لكتابة المنتجات في قاعدة البيانات مباشرة من Edge Function.</div>
+      </div>
+
+      <!-- ==================== 3. AUTO REFRESH ==================== -->
+      <div class="card" id="auto">
+        <h2><span class="step">3</span> التجديد التلقائي — <code>taager_token_refresh.py</code></h2>
+        <p>سكربت Python يستخدم <strong>Selenium</strong> (متصفح آلي) لتسجيل الدخول إلى تاجر واستخراج التوكن الجديد. صمم ليشتغل يومياً عبر Scheduled Task في Windows.</p>
+
+        <h3>3.1 ماذا يفعل السكربت بالتفصيل؟</h3>
+        <ol>
+          <li><strong>فحص التوكن الحالي</strong> — يشغل <code>supabase secrets list</code> ويفحص JWT في <code>TAAGER_JWT_TOKEN</code>. إذا تبقى أكثر من 4 ساعات، يتخطى (<code>--force</code> يُجبره على التجديد).</li>
+          <li><strong>فتح Chrome</strong> — يستخدم <code>webdriver-manager</code> لتحميل ChromeDriver المناسب، ويفتح Chrome مع <code>user-data-dir</code> مخصص (عشان يحفظ الجلسات).</li>
+          <li><strong>محاولة headless</strong> — يحاول أولاً في وضع الخلفية (<code>--headless</code>) ويستخرج التوكن عبر JavaScript (<code>localStorage.getItem('tgr--usr')</code>).</li>
+          <li><strong>تسجيل الدخول اليدوي</strong> — إذا فشل الـ headless، يفتح Chrome ظاهر (visible) وينتظر المستخدم يسجل دخول لمدة 5 دقائق.</li>
+          <li><strong>استخراج البيانات</strong> — ينفّذ <code>driver.execute_script()</code> لقراءة <code>localStorage</code> واستخراج <code>accessToken</code> و <code>taagerId</code> و <code>sessionKey</code> و <code>email</code>.</li>
+          <li><strong>فك JWT</strong> — يفك base64 من التوكن ويعرض تاريخ الانتهاء في الـ log.</li>
+          <li><strong>تحديث Supabase Secrets</strong> — يشغّل الأمر <code>supabase secrets set TAAGER_JWT_TOKEN="..." TAAGER_TAAGER_ID="..." TAAGER_SESSION_KEY="..."</code>.</li>
+          <li><strong>تحديث <code>auth.config.js</code></strong> — يقرأ الملف ويستخدم Regex لاستبدال القيم القديمة بالجديدة.</li>
+          <li><strong>تسجيل الـ log</strong> — يكتب في ملف <code>taager_refresh.log</code> كل الخطوات مع توقيت.</li>
+        </ol>
+
+        <h3>3.2 المتطلبات</h3>
+        <ul>
+          <li><strong>Python 3.7+</strong> مثبت على الجهاز</li>
+          <li>مكتبة <code>selenium</code> و <code>webdriver-manager</code> — يتم تثبيتها بـ <code>pip install selenium webdriver-manager</code></li>
+          <li><strong>Supabase CLI</strong> مثبت — يُثبّت عبر <code>npm install -g supabase</code></li>
+          <li><strong>Node.js</strong> — ضروري لتشغيل Supabase CLI</li>
+          <li>حساب تاجر مسجل الدخول في Chrome (أو على الأقل مرة واحدة)</li>
+        </ul>
+
+        <h3>3.3 الأوامر</h3>
+        <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.88rem;">
+          <tr style="background:var(--surface-muted,#f8f9fb);"><th style="padding:10px 14px;text-align:right;border-bottom:2px solid #e5e7eb;">الغرض</th><th style="padding:10px 14px;text-align:right;border-bottom:2px solid #e5e7eb;">الأمر</th></tr>
+          <tr><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">تشغيل يدوي (خلفية)</td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;"><code>python taager_token_refresh.py</code></td></tr>
+          <tr><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">تشغيل مع متصفح ظاهر</td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;"><code>python taager_token_refresh.py --interactive</code></td></tr>
+          <tr><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">إجبار التجديد (حتى لو ساري)</td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;"><code>python taager_token_refresh.py --force</code></td></tr>
+          <tr><td style="padding:10px 14px;">تشغيل يومي تلقائي</td><td style="padding:10px 14px;"><code>.\setup-auto-refresh.ps1</code> (مرة واحدة)</td></tr>
+        </table>
+
+        <div class="card" style="box-shadow:none;padding:0;margin:0;">
+          <div class="tip"><strong>💡 ملف الـ BAT:</strong> <code>refresh_token_daily.bat</code> في جذر المشروع ينفّذ السكربت — شغّله يدوياً إذا أردت.</div>
+        </div>
+      </div>
+
+      <!-- ==================== 4. FILE STRUCTURE ==================== -->
+      <div class="card" id="files">
+        <h2><span class="step">4</span> هيكل الملفات المستخدمة</h2>
+        <p>هذه كل الملفات المتعلقة بـ API تاجر في المشروعين:</p>
+
+        <div class="file-tree">
+<span class="folder">📁 موقعي الخاص/</span>
+├── <span class="file">refresh_token_daily.bat</span> — شغّل السكربت يدوياً بنقرة
+├── <span class="file">setup-auto-refresh.ps1</span> — أنشئ Scheduled Task في Windows
+├── <span class="file">taager_refresh.log</span> — سجل جميع عمليات التجديد
+├── <span class="file">error_response.json</span> — استجابات خطأ للتصحيح
+├── 📁 assets/js/
+│   ├── <span class="file">auth.config.js</span> — ⭐ الإعدادات الثابتة (API URL + التوكن)
+│   └── <span class="file">taager_token_refresh.py</span> — ⭐ سكربت بايثون للتجديد
+└── 📁 supabase/functions/taager-proxy/
+    └── <span class="file">index.ts</span> — Edge Function الوسيط (آمن، سيراً سيراً)
+
+<span class="folder">📁 لوحة التحكم/</span>
+├── 📁 pages/
+│   ├── <span class="file">admin-taager-token.html</span> — إدارة التوكن (إدخال/عرض/حذف)
+│   ├── <span class="file">taager-token-guide.html</span> — ⭐ هذه الصفحة
+│   ├── <span class="file">admin-taager-products.html</span> — تصفح منتجات تاجر
+│   ├── <span class="file">admin-taager-verify.html</span> — تدقيق وجلب الصور والتفاصيل
+│   ├── <span class="file">taager-products.html</span> — عرض منتجات تاجر (المتجر)
+│   ├── <span class="file">taager-product-edit.html</span> — تعديل منتج تاجر
+│   └── <span class="file">taager-token-guide.html</span> — شرح الحصول على التوكن
+└── 📁 css/
+    └── <span class="file">taager-products.css</span> — تنسيقات المنتجات
+        </div>
+      </div>
+
+      <!-- ==================== 5. FLOW ==================== -->
+      <div class="card" id="flow">
+        <h2><span class="step">5</span> سير العمل — كيف يتصل المتجر بـ API تاجر</h2>
+
+        <div class="flow-box">
+          <strong>🔁 مسار الاتصال (مسارَين):</strong><br><br>
+
+          <strong>المسار الأول — Edge Function (مفضّل):</strong><br>
+          المتصفح ← <code>fetch(taager-proxy?action=products)</code> ← الخادم يُمرّر الـ JWT من Supabase Secrets ← Taager API ← يُعالج ويعيد المنتجات ← يُحدّث قاعدة البيانات مباشرة ← يرجع للمتصفح<br><br>
+
+          <strong>المسار الثاني — مباشر (احتياطي):</strong><br>
+          المتصفح ← <code>fetch(Taager API)</code> مع <code>Authorization: Bearer JWT</code> من <code>app_settings</code> ← Taager API يرجع منتجات ← يُعالج في المتصفح ويُحدّث قاعدة البيانات
+        </div>
+
+        <h3>5.1 خطوة بخطوة — عند فتح صفحة تدقيق تاجر</h3>
+        <ol>
+          <li><strong>تحميل الصفحة:</strong> <code>loadProducts()</code> تجلب كل المنتجات من Supabase (<code>taager_products</code>) وتظهرها في الجدول.</li>
+          <li><strong>عرض الإحصائيات:</strong> <code>renderStats()</code> تحسب عدد المنتجات الناقصة صور/تفاصيل/أفكار/طريقة استخدام.</li>
+          <li><strong>ضغط زر جلب:</strong> المستخدم يضغط "صور" أو "تفاصيل سريعة" أو "أفكار محتوى" إلخ.</li>
+          <li><strong>جلب API:</strong> <code>fetchAllTaagerProductsViaEdge('EG')</code> — يحاول Edge Function أولاً (30 ثانية timeout). لو فشل، <code>fetchTaagerAPIDirect()</code> — مباشر مع timeout 10 ثواني.</li>
+          <li><strong>بناء المطابقة:</strong> يُبنى <code>apiLookup</code> يربط كل ID ممكن (variantId, id, productId, sku, code, ...) بالمنتج من API.</li>
+          <li><strong>المعالجة واحداً واحداً:</strong> لكل منتج في قاعدة البيانات، يبحث عن مطابق في API، ثم يُحدّث الحقل المطلوب.</li>
+        </ol>
+
+        <h3>5.2 ماذا لو فشل كل شيء؟</h3>
+        <p>إذا رجع API تاجر <code>[]</code> فاضي (كما حصل لنا)، وأظهرت الشاشة "تم تحديث 0 منتج (تخطي X بدون تطابق)"، فالسبب غالباً:</p>
+        <ol>
+          <li><strong>التوكن منتهي الصلاحية</strong> — شغّل <code>taager_token_refresh.py</code> (أو جدد يدوياً من المتصفح)</li>
+          <li><strong>Session Key خطأ</strong> — إذا تغيرت الجلسة، الـ Session Key يختلف. جدّد من المتصفح.</li>
+          <li><strong>الـ Edge Function مش منشور</strong> — شغّل <code>supabase functions deploy taager-proxy --no-verify-jwt</code></li>
+        </ol>
+        <div class="warning"><strong>⚠️ تذكير:</strong> آخر مرة جُدّد فيها التوكن كانت في <strong>10 يوليو 2026</strong>. إذا مرّت 24 ساعة، جدد الآن.</div>
+
+        <h3>5.3 مزامنة Edge Function بعد التجديد</h3>
+        <p>بعد تجديد التوكن، يجب مزامنته مع Edge Function. السكربت <code>taager_token_refresh.py</code> يفعل ذلك تلقائياً (<code>supabase secrets set</code>).</p>
+        <p>إذا أردت يدوياً:</p>
+        <pre>supabase secrets set \
+  TAAGER_JWT_TOKEN="&lt;eyJ...&gt;" \
+  TAAGER_TAAGER_ID="&lt;2226119&gt;" \
+  TAAGER_SESSION_KEY="&lt;abc123...&gt;"
+
+supabase functions deploy taager-proxy --no-verify-jwt</pre>
+      </div>
+
+      <!-- ==================== 6. PYTHON SCRIPT DETAILS ==================== -->
+      <div class="card">
+        <h2><span class="step">6</span> تفاصيل السكربت Python — سطراً سطراً</h2>
+
+        <h3>6.1 الاستيرادات والمتغيرات</h3>
+        <pre>import json, sys, io, os, subprocess, time, base64, re
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager</pre>
+        <p><code>selenium</code> للتحكم في Chrome، <code>webdriver-manager</code> لتحميل ChromeDriver تلقائياً، <code>subprocess</code> لتشغيل <code>supabase</code> CLI.</p>
+
+        <h3>6.2 المسارات</h3>
+        <pre>PROJECT_DIR = r"C:\Users\BODa\Documents\Date bsnas Home BODA\موقع الخاص بك"
+LOG_FILE = os.path.join(PROJECT_DIR, "taager_refresh.log")
+PROFILE_DIR = os.path.join(os.environ["TEMP"], "opencode", "chrome-profile")
+SUPABASE_CLI = r"C:\Users\BODa\AppData\Roaming\npm\supabase.cmd"</pre>
+        <p><code>PROJECT_DIR</code> هو مجلد المشروع. <code>PROFILE_DIR</code> يحفظ جلسة Chrome عشان ما يحتاج تسجيل دخول كل مرة. <code>SUPABASE_CLI</code> مسار أمر <code>supabase</code>.</p>
+
+        <h3>6.3 فك JWT</h3>
+        <pre>def decode_jwt(token):
+    payload_b64 = token.split(".")[1]
+    payload_b64 += "=" * (4 - len(payload_b64) % 4)
+    return json.loads(base64.urlsafe_b64decode(payload_b64))
+
+def token_remaining_seconds(token):
+    payload = decode_jwt(token)
+    return float(payload["exp"]) - time.time()
+
+def has_fresh_token(token, min_remaining=300):
+    return token_remaining_seconds(token) > min_remaining</pre>
+        <p>يقسّم JWT إلى 3 أجزاء (header.payload.signature)، يفك base64 من الجزء الثاني (payload)، ويقرأ <code>exp</code> (تاريخ الانتهاء).</p>
+
+        <h3>6.4 فحص التوكن الحالي</h3>
+        <pre>def check_current_token():
+    proc = subprocess.run(f"{SUPABASE_CLI} secrets list", ...)
+    for line in proc.stdout:
+        if "TAAGER_JWT_TOKEN" in line:
+            token_val = line.strip().split()[-1]
+            remaining = payload["exp"] - time.time()
+            return remaining > 14400  # 4 ساعات</pre>
+        <p>يشغّل <code>supabase secrets list</code> ويقرأ قيمة <code>TAAGER_JWT_TOKEN</code>. إذا تبقى أكثر من 4 ساعات، يتخطى التجديد (عشان ما نضغط على تاجر كذا مرة).</p>
+
+        <h3>6.5 تشغيل Chrome</h3>
+        <pre>def build_driver(headless=True):
+    opts = Options()
+    if headless: opts.add_argument("--headless")
+    opts.add_argument(f"--user-data-dir={PROFILE_DIR}")
+    return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=opts)</pre>
+        <p><code>--user-data-dir</code> يخلّي Chrome يحفظ الجلسة (الكوكيز والتسجيل) في مجلد ثابت. أول مرة يحتاج تسجيل دخول يدوي، بعدها يشتغل في الخلفية.</p>
+
+        <h3>6.6 استخراج التوكن من المتصفح</h3>
+        <pre>def extract_token(driver):
+    return driver.execute_script("""
+        const raw = localStorage.getItem('tgr--usr');
+        const data = JSON.parse(raw).data || {};
+        const sessionRaw = localStorage.getItem('tgr--usr-s');
+        const sessionKey = sessionRaw ? JSON.parse(sessionRaw).data || '' : '';
+        return {
+            accessToken: data.accessToken || '',
+            taagerId: String(data.id || ''),
+            sessionKey: sessionKey,
+            email: data.email || ''
+        };
+    """)</pre>
+        <p>ينفّذ JavaScript داخل المتصفح لقراءة <code>localStorage</code>. يستخرج accessToken من <code>tgr--usr</code> و Session Key من <code>tgr--usr-s</code>.</p>
+
+        <h3>6.7 التحديث</h3>
+        <pre># تحديث Supabase Secrets
+proc = subprocess.run(
+    f'{SUPABASE_CLI} secrets set TAAGER_JWT_TOKEN="{token}" TAAGER_TAAGER_ID={taager_id} TAAGER_SESSION_KEY={session_key}',
+    ...)
+
+# تحديث auth.config.js
+content = re.sub(
+    r'(window\.TAAGER_API_KEY\s*=\s*")[^"]*(")',
+    lambda m: m.group(1) + token + m.group(2),
+    content
+)</pre>
+        <p>يستخدم <code>subprocess</code> لتشغيل أمر <code>supabase secrets set</code>. ثم يستخدم Regex لتعديل <code>auth.config.js</code>.</p>
+      </div>
+
+      <!-- ==================== 7. TROUBLESHOOTING ==================== -->
+      <div class="card">
+        <h2><span class="step">7</span> استكشاف الأخطاء</h2>
+
+        <div style="background:var(--surface-muted,#f8f9fb);border-radius:12px;padding:18px;margin:14px 0;">
+          <table style="width:100%;border-collapse:collapse;font-size:0.88rem;">
+            <tr style="background:var(--card-bg,#fff);"><th style="padding:10px 14px;text-align:right;border-bottom:2px solid #e5e7eb;">المشكلة</th><th style="padding:10px 14px;text-align:right;border-bottom:2px solid #e5e7eb;">السبب</th><th style="padding:10px 14px;text-align:right;border-bottom:2px solid #e5e7eb;">الحل</th></tr>
+            <tr><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">API يرجع <code>[]</code> فاضي</td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">التوكن منتهي أو Session Key خطأ</td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">جدّد التوكن</td></tr>
+            <tr><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">Edge Function 401</td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">Secrets قديمة في Supabase</td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">شغّل السكربت أو <code>supabase secrets set</code></td></tr>
+            <tr><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">طلبات مباشرة 401</td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">التوكن في <code>auth.config.js</code> أو <code>app_settings</code> منتهي</td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">جدّد واحفظ من صفحة التوكن</td></tr>
+            <tr><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">"تم تحديث 0 منتج"</td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">API رجع فاضي أو ID mismatch</td><td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;">افتح الكونسول وشوف أول منتج</td></tr>
+            <tr><td style="padding:10px 14px;">Python script يعلق</td><td style="padding:10px 14px;">Chrome قديم أو ChromeDriver mismatch</td><td style="padding:10px 14px;">شغّل <code>pip install --upgrade webdriver-manager</code></td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div style="text-align:center;">
+        <a href="admin-taager-token.html" class="btn-back"><i class="fa-solid fa-arrow-right"></i> العودة إلى إدارة التوكن</a>
+        <a href="admin-taager-verify.html" class="btn-back" style="background:#6366f1;margin-right:10px;"><i class="fa-solid fa-clipboard-check"></i> الذهاب لتدقيق تاجر</a>
+      </div>
+
+      <div class="footer">
+        <i class="fa-solid fa-shield-halved"></i> هذه البيانات حساسة — لا تشارك التوكن مع أي شخص
+      </div>
+    </div>
+  </body>
+</html>

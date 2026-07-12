@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تدقيق منتجات تاجر</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/app-shell.css" />
+    <link rel="stylesheet" href="../css/admin.css" />
+    <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="../assets/js/auth.config.js"></script>
+    <script src="./auth-guard.js"></script>
+    <style>
+      body { background:var(--surface,#f5f7fa); }
+      .tv-wrap { max-width:1400px; margin:0 auto; }
+      .tv-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:20px; }
+      .tv-stat-card { background:var(--card-bg,#fff); border-radius:14px; padding:16px; text-align:center; box-shadow:0 2px 12px rgba(0,0,0,0.04); }
+      .tv-stat-card .num { font-size:1.6rem; font-weight:800; }
+      .tv-stat-card .label { font-size:0.78rem; color:var(--muted,#667085); margin-top:4px; }
+      .tv-stat-card.ok .num { color:#1f9d55; }
+      .tv-stat-card.fail .num { color:#e03131; }
+      .tv-stat-card .sub { font-size:0.7rem; color:var(--muted,#667085); margin-top:2px; }
+      .tv-toolbar { display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:16px; padding:14px 20px; background:var(--card-bg,#fff); border-radius:14px; box-shadow:0 2px 12px rgba(0,0,0,0.04); }
+      .tv-toolbar h2 { font-size:1.05rem; margin:0; display:flex; align-items:center; gap:8px; }
+      .tv-toolbar h2 i { color:var(--brand-orange,#ff6b1a); }
+      .tv-toolbar .tv-stat-line { margin-right:auto; font-size:0.82rem; color:var(--muted,#667085); }
+      .tv-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 18px; border:none; border-radius:10px; font-size:0.85rem; font-weight:700; font-family:inherit; cursor:pointer; transition:background 0.2s; }
+      .tv-btn:hover { opacity:0.9; }
+      .tv-btn:disabled { opacity:0.5; cursor:not-allowed; }
+      .tv-btn.primary { background:var(--brand-teal,#00b8a9); color:#fff; }
+      .tv-btn.secondary { background:var(--surface-muted,#eef2f7); color:var(--text,#1f2937); }
+      .tv-table-wrap { overflow-x:auto; background:var(--card-bg,#fff); border-radius:14px; box-shadow:0 2px 12px rgba(0,0,0,0.04); }
+      .tv-table { width:100%; border-collapse:collapse; font-size:0.82rem; min-width:800px; }
+      .tv-table th { position:sticky; top:0; background:var(--surface-muted,#f8f9fc); text-align:center; padding:10px 8px; font-size:0.75rem; color:var(--muted,#667085); font-weight:700; text-transform:uppercase; z-index:1; }
+      .tv-table td { padding:10px 8px; border-bottom:1px solid var(--border,#f0f2f5); text-align:center; vertical-align:middle; }
+      .tv-table tr:hover td { background:var(--surface-muted,#f8f9fc); }
+      .tv-table .name-cell { text-align:right; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .tv-table .name-cell span { cursor:default; }
+      .tv-table .stock-cell { font-weight:600; color:var(--accent,#6c5ce7); font-size:0.78rem; }
+      .tv-icon { font-size:1rem; }
+      .tv-icon.pass { color:#1f9d55; }
+      .tv-icon.fail { color:#e03131; }
+      .tv-icon.edit { color:var(--brand-teal,#00b8a9); cursor:pointer; }
+      .tv-icon.edit:hover { opacity:0.7; }
+      .tv-progress { height:4px; background:var(--border,#eef2f7); border-radius:4px; overflow:hidden; margin:8px 0; }
+      .tv-progress-bar { height:100%; background:var(--brand-teal,#00b8a9); border-radius:4px; transition:width 0.3s; width:0%; }
+      .tv-status { padding:10px 16px; border-radius:10px; font-size:0.82rem; font-weight:600; margin-bottom:14px; display:none; }
+      .tv-status.show { display:block; }
+      .tv-status.success { background:#f0fdf4; color:#1f9d55; border:1px solid #bbf7d0; }
+      .tv-status.error { background:#fef2f2; color:#e03131; border:1px solid #fecaca; }
+      .tv-status.info { background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; }
+      .tv-filter { display:flex; gap:8px; flex-wrap:wrap; }
+      .tv-filter select, .tv-filter input { padding:6px 10px; border:1.5px solid var(--border,#d8dee9); border-radius:8px; font-family:inherit; font-size:0.82rem; outline:none; background:var(--card-bg,#fff); color:var(--text,#1f2937); }
+      .tv-filter select:focus, .tv-filter input:focus { border-color:var(--brand-teal,#00b8a9); }
+      .tv-edit-modal { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:none; justify-content:center; align-items:center; z-index:999; }
+      .tv-edit-modal.open { display:flex; }
+      .tv-edit-panel { background:var(--card-bg,#fff); border-radius:16px; padding:24px; width:90%; max-width:600px; max-height:90vh; overflow-y:auto; }
+      .tv-edit-panel h3 { margin:0 0 16px; font-size:1rem; display:flex; align-items:center; gap:8px; }
+      .tv-edit-panel label { display:block; font-size:0.78rem; font-weight:700; color:var(--muted,#667085); margin:10px 0 4px; }
+      .tv-edit-panel textarea, .tv-edit-panel input { width:100%; padding:8px 10px; border:1.5px solid var(--border,#d8dee9); border-radius:8px; font-family:inherit; font-size:0.85rem; resize:vertical; outline:none; box-sizing:border-box; background:var(--card-bg,#fff); color:var(--text,#1f2937); }
+      .tv-edit-panel textarea:focus, .tv-edit-panel input:focus { border-color:var(--brand-teal,#00b8a9); }
+      .tv-edit-actions { display:flex; gap:10px; margin-top:16px; justify-content:flex-end; }
+      body.dark-mode .tv-stat-card { background:var(--card-bg,#1e293b); }
+      body.dark-mode .tv-toolbar { background:var(--card-bg,#1e293b); }
+      body.dark-mode .tv-table-wrap { background:var(--card-bg,#1e293b); }
+      body.dark-mode .tv-edit-panel { background:var(--card-bg,#1e293b); }
+      body.dark-mode .tv-edit-panel textarea, body.dark-mode .tv-edit-panel input { background:var(--surface,#0f172a); color:#e2e8f0; }
+    </style>
+  </head>
+  <body class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-badge">
+        <i class="fa-solid fa-database"></i>
+        <div><strong>Buda Admin</strong><small>إدارة المتجر</small></div>
+      </div>
+      <nav class="side-nav">
+        <a class="side-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>لوحة التحكم</span></a>
+        <a class="side-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>رسائل الدعم</span></a>
+        <a class="side-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة المنتجات</span></a>
+        <a class="side-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>الطلبات</span></a>
+        <a class="side-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>طلبات الشراكة</span></a>
+        <a class="side-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة المنتجات</span></a>
+        <a class="side-link" href="admin-ai-details.html"><i class="fa-solid fa-wand-magic-sparkles"></i><span>AI محتوى</span></a>
+        <a class="side-link" href="taager-products.html"><i class="fa-solid fa-database"></i><span>منتجات Taager</span></a>
+        <a class="side-link active" href="admin-taager-verify.html"><i class="fa-solid fa-check-double"></i><span>تدقيق تاجر</span></a>
+        <a class="side-link" href="admin-sellers.html"><i class="fa-solid fa-store"></i><span>إدارة البائعين</span></a>
+        <a class="side-link" href="admin-coupons.html"><i class="fa-solid fa-tags"></i><span>إدارة الكوبونات</span></a>
+        <a class="side-link" href="admin-fake-prices.html"><i class="fa-solid fa-percent"></i><span>الأسعار الوهمية</span></a>
+        <a class="side-link" href="admin-taager-token.html"><i class="fa-solid fa-key"></i><span>توكن تاجر</span></a>
+      </nav>
+    </aside>
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-title">
+          <h1>تدقيق منتجات تاجر</h1>
+          <p>تحقق من اكتمال الصور والتفاصيل السريعة وأفكار المحتوى وطريقة الاستخدام</p>
+        </div>
+      </header>
+      <section class="content-wrap admin-page tv-wrap">
+        <div id="tv-status" class="tv-status"></div>
+        <div id="tv-stats" class="tv-stats"></div>
+        <div class="tv-toolbar">
+          <h2><i class="fa-solid fa-clipboard-check"></i> التدقيق</h2>
+          <span class="tv-stat-line" id="tv-stat-line">تحميل...</span>
+          <div class="tv-filter">
+            <select id="tv-filter">
+              <option value="all">الكل</option>
+              <option value="images">ناقص صور</option>
+              <option value="videos">ناقص فيديوهات</option>
+              <option value="quick_details">ناقص تفاصيل سريعة</option>
+              <option value="content_ideas">ناقص أفكار محتوى</option>
+              <option value="how_to_use">ناقص طريقة استخدام</option>
+              <option value="complete">مكتمل</option>
+            </select>
+            <input type="text" id="tv-search" placeholder="بحث..." />
+          </div>
+          <button id="btn-refresh" class="tv-btn secondary"><i class="fa-solid fa-rotate"></i> تحديث</button>
+          <button id="btn-save-all" class="tv-btn primary"><i class="fa-solid fa-save"></i> حفظ التغييرات</button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;padding:8px 14px;background:var(--card-bg,#fff);border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,0.04);align-items:center">
+          <span style="font-size:.78rem;font-weight:700;color:var(--muted,#667085)">جلب الكل:</span>
+          <button class="tv-btn primary" id="fetch-all" style="font-size:.78rem;padding:5px 12px"><i class="fa-solid fa-cloud-arrow-down"></i> تحديث</button>
+          <button class="tv-btn secondary" id="fetch-images" style="font-size:.78rem;padding:5px 12px"><i class="fa-solid fa-images"></i> صور</button>
+          <button class="tv-btn secondary" id="fetch-videos" style="font-size:.78rem;padding:5px 12px"><i class="fa-solid fa-video"></i> فيديو</button>
+          <button class="tv-btn secondary" id="fetch-qd" style="font-size:.78rem;padding:5px 12px"><i class="fa-solid fa-list"></i> تفاصيل سريعة</button>
+          <button class="tv-btn secondary" id="fetch-ci" style="font-size:.78rem;padding:5px 12px"><i class="fa-solid fa-lightbulb"></i> أفكار محتوى</button>
+          <button class="tv-btn secondary" id="fetch-htu" style="font-size:.78rem;padding:5px 12px"><i class="fa-solid fa-book-open"></i> طريقة استخدام</button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;padding:8px 14px;background:var(--card-bg,#fff);border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,0.04);align-items:center">
+          <span style="font-size:.78rem;font-weight:700;color:var(--muted,#667085)">جلب الناقص:</span>
+          <button class="tv-btn secondary" id="fetch-images-missing" style="font-size:.78rem;padding:5px 12px"><i class="fa-solid fa-images"></i> صور</button>
+          <button class="tv-btn secondary" id="fetch-videos-missing" style="font-size:.78rem;padding:5px 12px"><i class="fa-solid fa-video"></i> فيديو</button>
+          <button class="tv-btn secondary" id="fetch-qd-missing" style="font-size:.78rem;padding:5px 12px"><i class="fa-solid fa-list"></i> تفاصيل سريعة</button>
+          <button class="tv-btn secondary" id="fetch-ci-missing" style="font-size:.78rem;padding:5px 12px"><i class="fa-solid fa-lightbulb"></i> أفكار محتوى</button>
+          <button class="tv-btn secondary" id="fetch-htu-missing" style="font-size:.78rem;padding:5px 12px"><i class="fa-solid fa-book-open"></i> طريقة استخدام</button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;padding:8px 14px;background:var(--card-bg,#fff);border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,0.04);align-items:center">
+          <span style="font-size:.78rem;font-weight:700;color:#e74c3c">⚠ إعادة استيراد:</span>
+          <button class="tv-btn primary" id="btn-reimport" style="font-size:.78rem;padding:5px 12px;background:var(--accent,#6c5ce7)"><i class="fa-solid fa-cloud-download-alt"></i> سحب جميع المنتجات من تاجر</button>
+          <span style="font-size:.7rem;color:#999">(يحذف القديم ويستورد الجديد من API)</span>
+          <button class="tv-btn secondary" id="btn-debug-detail" style="font-size:.78rem;padding:5px 12px;background:#e74c3c;color:#fff"><i class="fa-solid fa-bug"></i> تجربة منتج واحد</button>
+        </div>
+        <div id="tv-progress" class="tv-progress" style="display:none;"><div id="tv-progress-bar" class="tv-progress-bar"></div></div>
+        <div id="tv-progress-label" style="text-align:center;font-size:13px;color:var(--muted,#667085);display:none;margin-top:4px;"></div>
+        <div id="tv-status" style="text-align:center;font-size:14px;color:var(--text,#1a1a2e);display:none;margin:8px 0;padding:8px 16px;background:var(--card-bg,#f8f9fc);border-radius:8px;border:1px solid var(--border,#eef2f7);"></div>
+        <div class="tv-table-wrap">
+          <table class="tv-table">
+            <thead><tr>
+              <th>#</th>
+              <th>المنتج</th>
+              <th>السعر</th>
+              <th>الكمية</th>
+              <th>صور</th>
+              <th>فيديو</th>
+              <th>تفاصيل سريعة</th>
+              <th>أفكار محتوى</th>
+              <th>طريقة استخدام</th>
+              <th>تعديل</th>
+            </tr></thead>
+            <tbody id="tv-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+    <div id="tv-edit-modal" class="tv-edit-modal">
+      <div class="tv-edit-panel">
+        <h3><i class="fa-solid fa-pen"></i> تعديل المنتج — <span id="tv-edit-name"></span></h3>
+        <label>معرف المنتج</label>
+        <input id="tv-edit-id" readonly style="background:var(--surface-muted,#f0f2f5);" />
+        <label>روابط الصور (سطر لكل رابط)</label>
+        <textarea id="tv-edit-images" rows="4"></textarea>
+        <label>روابط الفيديو (سطر لكل رابط)</label>
+        <textarea id="tv-edit-videos" rows="2"></textarea>
+        <label>تفاصيل سريعة</label>
+        <textarea id="tv-edit-quick-details" rows="4"></textarea>
+        <label>أفكار محتوى</label>
+        <textarea id="tv-edit-content-ideas" rows="4"></textarea>
+        <label>طريقة الاستخدام</label>
+        <textarea id="tv-edit-how-to-use" rows="4"></textarea>
+        <div class="tv-edit-actions">
+          <button id="tv-edit-cancel" class="tv-btn secondary">إلغاء</button>
+          <button id="tv-edit-save" class="tv-btn primary"><i class="fa-solid fa-floppy-disk"></i> حفظ</button>
+        </div>
+      </div>
+    </div>
+    <script>
+      var _sb;
+      try { _sb = window._getSupabaseClient ? window._getSupabaseClient() : (window.__sb || window.supabase.createClient("https://msgqzgzoslearaprgiqq.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE")); } catch(e) { _sb = window.supabase.createClient("https://msgqzgzoslearaprgiqq.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE"); }
+
+      var allRows = [];
+      var filteredRows = [];
+      var editedData = {};
+
+      function notify(msg, type) {
+        var el = document.getElementById("tv-status");
+        el.textContent = msg; el.className = "tv-status show " + type;
+        if (type !== "error") setTimeout(function() { el.classList.remove("show"); }, 5000);
+      }
+
+      function safeVal(v, fallback) { var n = Number(v); return Number.isFinite(n) ? n : (fallback || 0); }
+      function money(v) { return safeVal(v).toLocaleString("ar-EG", { minimumFractionDigits: 2 }) + " ج.م"; }
+
+      function getStockLabel(p) {
+        try {
+          var raw = typeof p.raw_data === 'string' ? JSON.parse(p.raw_data) : p.raw_data;
+          if (raw && raw.stockAvailability) {
+            var bucket = raw.stockAvailability.stockBucket;
+            if (bucket) return formatStockBucket(bucket);
+            var range = raw.stockAvailability.detailedStockRange;
+            if (range) return formatStockBucket(range);
+          }
+        } catch(e) {}
+        if (p.stock != null && p.stock !== 999) return p.stock + ' قطعة';
+        return '—';
+      }
+      function formatStockBucket(s) {
+        var m = s.match(/from_(\d+)_to_(\d+)/);
+        if (m) return m[1] + ' — ' + m[2] + ' قطعة';
+        var m2 = s.match(/above_(\d+)/);
+        if (m2) return m2[1] + '+ قطعة';
+        var m3 = s.match(/below_(\d+)/);
+        if (m3) return '0 — ' + m3[1] + ' قطعة';
+        var m4 = s.match(/^(\d+)$/);
+        if (m4) return m4[1] + ' قطعة';
+        return s;
+      }
+
+      function hasImages(p) {
+        var seen={};
+        var raw = p.images;
+        if (typeof raw === 'string') { try { var arr = JSON.parse(raw || "[]"); arr.forEach(function(u){if(u)seen[u]=1;}); } catch(e) {} }
+        else if (Array.isArray(raw)) { raw.forEach(function(u){if(u)seen[u]=1;}); }
+        if (p.image) seen[p.image]=1;
+        if (p.image1) seen[p.image1]=1;
+        if (p.image2) seen[p.image2]=1;
+        if (p.image3) seen[p.image3]=1;
+        if (p.image4) seen[p.image4]=1;
+        if (p.image5) seen[p.image5]=1;
+        return Object.keys(seen).length;
+      }
+
+      function hasField(p, field) {
+        var v = p[field] || "";
+        return v.trim().length > 10;
+      }
+
+      function hasVideos(p) {
+        try {
+          var v = p.videos;
+          if (typeof v === 'string') v = JSON.parse(v || '[]');
+          return Array.isArray(v) && v.length > 0;
+        } catch(e) { return false; }
+      }
+
+      function getChecks(p) {
+        return {
+          images: hasImages(p) >= 3,
+          videos: hasVideos(p),
+          quick_details: hasField(p, "quick_details"),
+          content_ideas: hasField(p, "content_ideas"),
+          how_to_use: hasField(p, "how_to_use"),
+        };
+      }
+
+      function renderStats() {
+        var total = allRows.length;
+        var imgsOk = 0, vidOk = 0, qdOk = 0, ciOk = 0, htuOk = 0, complete = 0;
+        allRows.forEach(function(p) {
+          var c = getChecks(p);
+          if (c.images) imgsOk++;
+          if (c.videos) vidOk++;
+          if (c.quick_details) qdOk++;
+          if (c.content_ideas) ciOk++;
+          if (c.how_to_use) htuOk++;
+          if (c.images && c.videos && c.quick_details && c.content_ideas && c.how_to_use) complete++;
+        });
+        var cont = document.getElementById("tv-stats");
+        cont.innerHTML = [
+          '<div class="tv-stat-card' + (imgsOk === total ? ' ok' : ' fail') + '"><div class="num">' + imgsOk + '/' + total + '</div><div class="label">صور (3+)</div><div class="sub">' + (total - imgsOk) + ' ناقص</div></div>',
+          '<div class="tv-stat-card' + (vidOk === total ? ' ok' : ' fail') + '"><div class="num">' + vidOk + '/' + total + '</div><div class="label">فيديو</div><div class="sub">' + (total - vidOk) + ' ناقص</div></div>',
+          '<div class="tv-stat-card' + (qdOk === total ? ' ok' : ' fail') + '"><div class="num">' + qdOk + '/' + total + '</div><div class="label">تفاصيل سريعة</div><div class="sub">' + (total - qdOk) + ' ناقص</div></div>',
+          '<div class="tv-stat-card' + (ciOk === total ? ' ok' : ' fail') + '"><div class="num">' + ciOk + '/' + total + '</div><div class="label">أفكار محتوى</div><div class="sub">' + (total - ciOk) + ' ناقص</div></div>',
+          '<div class="tv-stat-card' + (htuOk === total ? ' ok' : ' fail') + '"><div class="num">' + htuOk + '/' + total + '</div><div class="label">طريقة استخدام</div><div class="sub">' + (total - htuOk) + ' ناقص</div></div>',
+          '<div class="tv-stat-card' + (complete === total ? ' ok' : ' fail') + '"><div class="num">' + complete + '</div><div class="label">مكتمل بالكامل</div></div>',
+        ].join("");
+      }
+
+      function renderTable(list) {
+        var tbody = document.getElementById("tv-tbody");
+        if (!list || !list.length) {
+          tbody.innerHTML = '<tr><td colspan="10" style="padding:40px;color:var(--muted,#667085);">لا توجد منتجات مطابقة.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = list.map(function(p, i) {
+          var c = getChecks(p);
+          var imgIcon = c.images ? '<span class="tv-icon pass"><i class="fa-solid fa-check-circle"></i></span>' : '<span class="tv-icon fail"><i class="fa-solid fa-times-circle"></i></span>';
+          var vidIcon = c.videos ? '<span class="tv-icon pass"><i class="fa-solid fa-video"></i></span>' : '<span class="tv-icon fail"><i class="fa-solid fa-video-slash"></i></span>';
+          var qdIcon = c.quick_details ? '<span class="tv-icon pass"><i class="fa-solid fa-check-circle"></i></span>' : '<span class="tv-icon fail"><i class="fa-solid fa-times-circle"></i></span>';
+          var ciIcon = c.content_ideas ? '<span class="tv-icon pass"><i class="fa-solid fa-check-circle"></i></span>' : '<span class="tv-icon fail"><i class="fa-solid fa-times-circle"></i></span>';
+          var htuIcon = c.how_to_use ? '<span class="tv-icon pass"><i class="fa-solid fa-check-circle"></i></span>' : '<span class="tv-icon fail"><i class="fa-solid fa-times-circle"></i></span>';
+          var name = p.name || "منتج";
+          var price = money(p.price || p.current_price || p.final_price);
+          var stockLabel = getStockLabel(p);
+          var imgs = hasImages(p);
+          var vids = 0;
+          var rawV = p.videos;
+          if (typeof rawV === 'string') { try { var vp = JSON.parse(rawV || '[]'); if(Array.isArray(vp)) vids = vp.length; } catch(e) {} }
+          else if (Array.isArray(rawV)) { vids = rawV.length; }
+          return '<tr><td>' + (i + 1) + '</td><td class="name-cell"><span title="' + name.replace(/"/g,"&quot;") + '">' + name + '</span></td><td>' + price + '</td><td class="stock-cell">' + stockLabel + '</td><td>' + imgIcon + ' (' + imgs + ')</td><td>' + vidIcon + (vids ? ' ('+vids+')' : '') + '</td><td>' + qdIcon + '</td><td>' + ciIcon + '</td><td>' + htuIcon + '</td><td><span class="tv-icon edit" data-id="' + p.id + '" title="تعديل"><i class="fa-solid fa-pen-to-square"></i></span></td></tr>';
+        }).join("");
+      }
+
+      function applyFilters() {
+        var q = document.getElementById("tv-search").value.trim().toLowerCase();
+        var f = document.getElementById("tv-filter").value;
+        filteredRows = allRows.filter(function(p) {
+          var name = (p.name || "").toLowerCase();
+          if (q && name.indexOf(q) === -1) return false;
+          var c = getChecks(p);
+          if (f === "images" && c.images) return false;
+          if (f === "videos" && c.videos) return false;
+          if (f === "quick_details" && c.quick_details) return false;
+          if (f === "content_ideas" && c.content_ideas) return false;
+          if (f === "how_to_use" && c.how_to_use) return false;
+          if (f === "complete" && !(c.images && c.videos && c.quick_details && c.content_ideas && c.how_to_use)) return false;
+          return true;
+        });
+        document.getElementById("tv-stat-line").textContent = filteredRows.length + " / " + allRows.length + " منتج";
+        renderTable(filteredRows);
+      }
+
+      function setStatus(msg,isError){
+        var el=document.getElementById('tv-status');
+        if(!el)return;
+        if(!msg){el.style.display='none';return;}
+        el.style.display='block';
+        el.style.background=isError?'var(--danger-bg,#fff0f0)':'var(--card-bg,#f8f9fc)';
+        el.style.borderColor=isError?'var(--danger,#e74c3c)':'var(--border,#eef2f7)';
+        el.textContent=msg;
+      }
+      function showProgress(pct,done,total) {
+        var el = document.getElementById("tv-progress");
+        var bar = document.getElementById("tv-progress-bar");
+        var label = document.getElementById("tv-progress-label");
+        if (pct <= 0) { el.style.display = "none"; if(label)label.style.display="none"; setStatus(''); return; }
+        el.style.display = "block"; bar.style.width = Math.min(pct, 100) + "%";
+        if(label&&done!==undefined){label.style.display="block";label.textContent='جارٍ '+done+' / '+total+' منتج';}
+      }
+
+      async function loadProducts() {
+        var btn = document.getElementById("btn-refresh");
+        btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> تحميل...';
+        document.getElementById("tv-stat-line").textContent = "جاري التحميل...";
+        try {
+          var tpAll = [], tpOff = 0, tpPg = 1000;
+          while(true) {
+            var { data, error } = await _sb.from("taager_products").select("*").order("id", { ascending: false }).range(tpOff, tpOff + tpPg - 1);
+            if (error) throw error;
+            if (!data || !data.length) break;
+            tpAll = tpAll.concat(data);
+            tpOff += tpPg;
+            if (data.length < tpPg) break;
+          }
+          allRows = tpAll;
+          renderStats();
+          applyFilters();
+          notify("تم تحميل " + allRows.length + " منتج.", "success");
+        } catch(e) {
+          notify("فشل التحميل: " + (e.message || e), "error");
+        }
+        btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-rotate"></i> تحديث';
+      }
+
+      function openEdit(row) {
+        if (!row) return;
+        document.getElementById("tv-edit-name").textContent = row.name || "منتج";
+        document.getElementById("tv-edit-id").value = row.id;
+        var seen={};
+        try { var arr = JSON.parse(row.images || "[]"); arr.forEach(function(u){if(u)seen[u]=1;}); } catch(e) {}
+        if (row.image_url) seen[row.image_url]=1;
+        if (row.image1) seen[row.image1]=1;
+        if (row.image2) seen[row.image2]=1;
+        if (row.image3) seen[row.image3]=1;
+        if (row.image4) seen[row.image4]=1;
+        if (row.image5) seen[row.image5]=1;
+        document.getElementById("tv-edit-images").value = Object.keys(seen).join("\n");
+        var vids = [];
+        var rawV = row.videos;
+        if (typeof rawV === 'string') { try { vids = JSON.parse(rawV || '[]'); } catch(e) { vids = []; } }
+        else if (Array.isArray(rawV)) { vids = rawV; }
+        document.getElementById("tv-edit-videos").value = vids.join("\n");
+        document.getElementById("tv-edit-quick-details").value = row.quick_details || "";
+        document.getElementById("tv-edit-content-ideas").value = row.content_ideas || "";
+        document.getElementById("tv-edit-how-to-use").value = row.how_to_use || "";
+        document.getElementById("tv-edit-modal").classList.add("open");
+      }
+
+      document.getElementById("tv-tbody").addEventListener("click", function(e) {
+        var edit = e.target.closest(".tv-icon.edit");
+        if (!edit) return;
+        var id = edit.getAttribute("data-id");
+        var row = allRows.find(function(p) { return p.id === id; });
+        openEdit(row);
+      });
+
+      document.getElementById("tv-edit-cancel").addEventListener("click", function() {
+        document.getElementById("tv-edit-modal").classList.remove("open");
+      });
+
+      document.getElementById("tv-edit-save").addEventListener("click", async function() {
+        var id = document.getElementById("tv-edit-id").value;
+        var rawImages = document.getElementById("tv-edit-images").value.split("\n").map(function(s) { return s.trim(); }).filter(Boolean);
+        var rawVideos = document.getElementById("tv-edit-videos").value.split("\n").map(function(s) { return s.trim(); }).filter(Boolean);
+        var quickDetails = document.getElementById("tv-edit-quick-details").value.trim();
+        var contentIdeas = document.getElementById("tv-edit-content-ideas").value.trim();
+        var howToUse = document.getElementById("tv-edit-how-to-use").value.trim();
+        var update = {
+          images: rawImages,
+          image: rawImages[0] || "",
+          image1: rawImages[0] || "",
+          image2: rawImages[1] || "",
+          image3: rawImages[2] || "",
+          image4: rawImages[3] || "",
+          image5: rawImages[4] || "",
+          videos: rawVideos,
+          quick_details: quickDetails,
+          content_ideas: contentIdeas,
+          how_to_use: howToUse,
+        };
+        try {
+          var { error } = await _sb.from("taager_products").update(update).eq("id", id);
+          if (error) throw error;
+          notify("تم حفظ التغييرات.", "success");
+          document.getElementById("tv-edit-modal").classList.remove("open");
+          await loadProducts();
+        } catch(e) {
+          notify("فشل الحفظ: " + (e.message || e), "error");
+        }
+      });
+
+      document.getElementById("btn-refresh").addEventListener("click", loadProducts);
+
+      document.getElementById("btn-save-all").addEventListener("click", async function() {
+        var btn = document.getElementById("btn-save-all");
+        btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ...';
+        var targets = filteredRows.filter(function(p) {
+          var c = getChecks(p);
+          return !c.images || !c.videos || !c.quick_details || !c.content_ideas || !c.how_to_use;
+        });
+        if (!targets.length) { notify("جميع المنتجات مكتملة.", "info"); btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-save"></i> حفظ التغييرات'; return; }
+        // We just save the existing edits from the modal if any; for bulk, this will save in-place for the edited ones
+        // For simplicity, if there are pending edits we just notify
+        notify("تم العثور على " + targets.length + " منتج ناقص. استخدم زر التعديل لتحرير كل منتج.", "info");
+        btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-save"></i> حفظ التغييرات';
+      });
+
+      // ===== Taager API Fetch Functions =====
+      async function getTaagerCreds() {
+        try {
+          var {data}=await _sb.from('app_settings').select('key,value');
+          if(data){
+            var m={};data.forEach(function(r){m[r.key]=r.value});
+            if(m.taager_api_key)window.TAAGER_API_KEY=m.taager_api_key;
+            if(m.taager_taager_id)window.TAAGER_TAAGER_ID=m.taager_taager_id;
+            if(m.taager_session_key)window.TAAGER_SESSION_KEY=m.taager_session_key;
+            if(m.taager_merchant_api)window.TAAGER_MERCHANT_API=m.taager_merchant_api;
+          }
+        }catch(e){}
+        if(!window.TAAGER_MERCHANT_API)window.TAAGER_MERCHANT_API='https://merchant.api.taager.com/api';
+        return {apiKey:window.TAAGER_API_KEY,taagerId:window.TAAGER_TAAGER_ID,sessionKey:window.TAAGER_SESSION_KEY};
+      }
+      async function fetchWithTimeout(url,opts,ms){
+        var ctrl=new AbortController();var tmr=setTimeout(function(){ctrl.abort()},ms||10000);
+        opts=opts||{};opts.signal=ctrl.signal;
+        try{return await fetch(url,opts);}finally{clearTimeout(tmr);}
+      }
+      var COUNTRIES=['EG','SA'];
+      var COUNTRY_MAP={EG:'EGY',SA:'SAU',AE:'ARE',IQ:'IRQ',OM:'OMN'};
+      function mapCountry(c){return COUNTRY_MAP[c&&c.toUpperCase()]||(c&&c.toUpperCase())||'EGY';}
+      async function fetchTaagerAPIDirect(page,country){
+        var creds=await getTaagerCreds();
+        if(!creds.apiKey)throw new Error('Taager API key not found');
+        var url=window.TAAGER_MERCHANT_API+'/products/variants?country='+mapCountry(country||'EG')+'&page='+page+'&pageSize=100';
+        console.log('Direct API call:',url);
+        var res,status,text;
+        try{
+          res=await fetchWithTimeout(url,{headers:{
+            'Authorization':'Bearer '+creds.apiKey,
+            'taagerId':creds.taagerId,
+            'ui-session-key':creds.sessionKey
+          }},60000);
+          status=res.status;
+          text=await res.text();
+        }catch(fe){
+          throw new Error('API timeout or abort: '+(fe.message||fe).substring(0,80));
+        }
+        console.log('Direct API status:',status,'body length:',text.length);
+        if(!res.ok)throw new Error('Taager API returned '+status+': '+text.substring(0,300));
+        if(!text.length)throw new Error('Taager API returned empty body');
+        try{return JSON.parse(text);}catch(e){throw new Error('Invalid JSON from API: '+text.substring(0,300));}
+      }
+      async function fetchAllTaagerProductsViaEdge(country){
+        var edgeUrl=window.TAAGER_EDGE_FUNCTION_URL;
+        if(!edgeUrl)return null;
+        var anonKey='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE';
+        var url=edgeUrl+'?action=products'+(country?'&country='+country:'');
+        console.log('Edge function call:',url);
+        setStatus('جاري الاتصال بـ Edge Function...');
+        var res=await fetchWithTimeout(url,{
+          headers:{'apikey':anonKey}
+        },60000);
+        console.log('Edge function status:',res.status);
+        if(!res.ok){
+          var txt=await res.text();
+          throw new Error('Edge function returned '+res.status+': '+txt.substring(0,500));
+        }
+        var json=await res.json();
+        console.log('Edge function response length:',Array.isArray(json)?json.length:'not array');
+        return json;
+      }
+      async function fetchAllTaagerProducts(creds,onProgress){
+        var all=[],page=1;
+        while(true){
+          var json=await fetchTaagerAPIDirect(page,'EG');
+          var items=Array.isArray(json)?json:(json.data||json.products||json.items||json.result||[]);
+          if(!items.length)break;
+          all=all.concat(items);
+          if(onProgress)onProgress(all.length,items.length);
+          if(items.length<100)break;
+          page++;
+        }
+        return all;
+      }
+      function matchProduct(tId,taagerProducts){
+        return taagerProducts.find(function(tp){
+          var tpId=String(tp.id||tp.productId||tp.product_id||tp.variantId||tp.sku||'');
+          return tpId===String(tId);
+        });
+      }
+      function extractImages(tp){
+        var imgs=[];
+        if(tp.images&&Array.isArray(tp.images))imgs=tp.images.filter(Boolean);
+        else if(tp.image)imgs=[tp.image];
+        if(tp.thumbnail&&!imgs.includes(tp.thumbnail))imgs.push(tp.thumbnail);
+        if(tp.image_url&&!imgs.includes(tp.image_url))imgs.push(tp.image_url);
+        if(tp.image1)imgs.push(tp.image1);
+        return imgs.filter(Boolean);
+      }
+      function extractQuickDetails(tp){
+        var h=tp.highlights||tp.shortDescription||tp.brief||tp.tagline||'';
+        if(Array.isArray(h))return h.filter(Boolean).join(' • ');
+        if(h&&h.length>10)return h;
+        var d=tp.description||tp.details||tp.summary||'';
+        if(d.length>200)return d.substring(0,200)+'...';
+        return d;
+      }
+      function extractContentIdeas(tp){
+        var d=tp.description||tp.details||tp.summary||tp.longDescription||'';
+        if(d.length>50)return d;
+        var s=tp.specifications||tp.attributes||tp.features||[];
+        if(Array.isArray(s))return s.map(function(v){return typeof v==='object'?(v.name||v.value||''):v}).filter(Boolean).join(' • ');
+        return '';
+      }
+      function extractHowToUse(tp){
+        var u=tp.how_to_use||tp.usage_instructions||tp.howToUse||tp.instructions||tp.usage||'';
+        if(Array.isArray(u))return u.filter(Boolean).join('\n');
+        if(u.length>10)return u;
+        var s=tp.specifications||tp.attributes||[];
+        if(Array.isArray(s)){
+          var match=s.find(function(v){
+            var n=typeof v==='object'?String(v.name||v.label||'').toLowerCase():'';
+            return n.includes('usage')||n.includes('how')||n.includes('استخدام')||n.includes('طريقة');
+          });
+          if(match)return typeof match==='object'?String(match.value||match.description||''):String(match);
+        }
+        return '';
+      }
+      function taagerFields(tp,field){
+        if(field==='images')return JSON.stringify(extractImages(tp))+'|'+ (extractImages(tp)[0]||'');
+        if(field==='videos'){
+          var v=tp.videos||tp.video||[];
+          if(Array.isArray(v))return v;
+          if(typeof v==='string')return [v];
+          return [];
+        }
+        if(field==='quick_details')return extractQuickDetails(tp);
+        if(field==='content_ideas')return extractContentIdeas(tp);
+        if(field==='how_to_use')return extractHowToUse(tp);
+        return '';
+      }
+      function updateSupabaseField(id,field,value,imageUrl){
+        var upd={};
+        if(field==='images'){upd.images=value.split('|')[0];upd.image=value.split('|')[1]||'';upd.image1=value.split('|')[1]||'';}
+        else upd[field]=value;
+        return _sb.from('taager_products').update(upd).eq('id',id);
+      }
+      function showDebugJSON(json){
+        var existing=document.getElementById('api-sample-modal');
+        if(existing)existing.remove();
+        if(Array.isArray(json)){
+          showApiSample(json[0]||{});
+          return;
+        }
+        var keys=Object.keys(json);
+        var html='<div id="api-sample-modal" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)this.remove()">'+
+          '<div style="background:var(--bg,#fff);color:var(--text,#333);max-width:700px;width:100%;max-height:80vh;overflow:auto;border-radius:12px;padding:24px;direction:ltr;text-align:left;box-shadow:0 8px 40px rgba(0,0,0,0.3);">'+
+          '<h3 style="margin:0 0 8px;font-size:16px;direction:rtl;text-align:right;">🔍 استجابة API تاجر الخام</h3>'+
+          '<p style="margin:0 0 8px;font-size:13px;color:#888;direction:rtl;text-align:right;">الحقول الرئيسية: <b style="color:var(--accent,#6c5ce7)">'+keys.join(' | ')+'</b></p>'+
+          '<p style="margin:0 0 16px;font-size:13px;color:#888;direction:rtl;text-align:right;">انسخ الكود اللي تحت وابعتلي إياه</p>'+
+          '<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;font-size:12px;overflow:auto;max-height:50vh;white-space:pre-wrap;word-break:break-all;">'+JSON.stringify(json,null,2).replace(/</g,'&lt;').replace(/>/g,'&gt;').substring(0,5000)+'</pre>'+
+          '<button onclick="this.closest(\'#api-sample-modal\').remove()" style="margin-top:16px;padding:8px 24px;border:none;border-radius:8px;background:var(--accent,#6c5ce7);color:#fff;cursor:pointer;font-size:14px;">حسناً</button>'+
+          '</div></div>';
+        document.body.insertAdjacentHTML('beforeend',html);
+      }
+      function showApiSample(item){
+        var existing=document.getElementById('api-sample-modal');
+        if(existing)existing.remove();
+        var html='<div id="api-sample-modal" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)this.remove()">'+
+          '<div style="background:var(--bg,#fff);color:var(--text,#333);max-width:700px;width:100%;max-height:80vh;overflow:auto;border-radius:12px;padding:24px;direction:ltr;text-align:left;box-shadow:0 8px 40px rgba(0,0,0,0.3);">'+
+          '<h3 style="margin:0 0 8px;font-size:16px;direction:rtl;text-align:right;">🔍 أول منتج من API تاجر</h3>'+
+          '<p style="margin:0 0 16px;font-size:13px;color:#888;direction:rtl;text-align:right;">انسخ الكود اللي تحت وأرسله لي عشان أعرف الحقل الصح للـ ID</p>'+
+          '<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;font-size:12px;overflow:auto;max-height:50vh;white-space:pre-wrap;word-break:break-all;">'+JSON.stringify(item,null,2).replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</pre>'+
+          '<button onclick="this.closest(\'#api-sample-modal\').remove()" style="margin-top:16px;padding:8px 24px;border:none;border-radius:8px;background:var(--accent,#6c5ce7);color:#fff;cursor:pointer;font-size:14px;">حسناً</button>'+
+          '</div></div>';
+        document.body.insertAdjacentHTML('beforeend',html);
+      }
+      async function runTaagerFetch(field,mode){
+        var btnMap={'images':'fetch-images','videos':'fetch-videos','quick_details':'fetch-qd','content_ideas':'fetch-ci','how_to_use':'fetch-htu','all':'fetch-all'};
+        var baseId=btnMap[field]||'fetch-all';
+        var btnId=mode==='missing'&&field!=='all'?baseId+'-missing':baseId;
+        var btn=document.getElementById(btnId);
+        var origHtml=btn.innerHTML;btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> جاري...';
+        var bar=document.getElementById('tv-progress-bar');var wrap=document.getElementById('tv-progress');wrap.style.display='block';bar.style.width='0%';
+        try{
+          var creds=await getTaagerCreds();
+          if(!creds.apiKey)throw new Error('Taager API key not found');
+          // Build target list: all products or missing only
+          var targets=mode==='missing'?allRows.filter(function(p){
+            if(field==='images')return hasImages(p)<3;
+            if(field==='videos')return !hasVideos(p);
+            if(field==='quick_details')return !hasField(p,'quick_details');
+            if(field==='content_ideas')return !hasField(p,'content_ideas');
+            if(field==='how_to_use')return !hasField(p,'how_to_use');
+            return true;
+          }):allRows;
+          if(!targets.length){setStatus('لا توجد منتجات مستهدفة','error');notify('لا توجد منتجات مستهدفة.','info');btn.disabled=false;btn.innerHTML=origHtml;wrap.style.display='none';return;}
+          // First fetch ALL Taager API products — try edge function, fallback to paginated direct API
+          setStatus('جارٍ جلب المنتجات من تاجر...');
+          var apiProducts=[];
+          try{
+            setStatus('محاولة Edge Function (مصر+سعودية)...');
+            var edgeResult=await fetchAllTaagerProductsViaEdge('');
+            if(edgeResult&&Array.isArray(edgeResult)&&edgeResult.length){
+              apiProducts=edgeResult;
+              setStatus('Edge Function: تم جلب '+apiProducts.length+' منتج');
+            }else{
+              setStatus('Edge Function: لم يرجع منتجات','error');
+            }
+          }catch(e){
+            setStatus('Edge Function: '+e.message.substring(0,80),'error');
+          }
+          if(!apiProducts.length){
+            setStatus('API المباشر...');
+            for(var ci=0;ci<COUNTRIES.length;ci++){
+              var cc=COUNTRIES[ci];
+              setStatus('API المباشر: جلب من '+cc+'...');
+              var pg=1;
+              while(true){
+                setStatus('API المباشر: '+cc+' صفحة '+pg+'...');
+                try{
+                  var json=await fetchTaagerAPIDirect(pg,cc);
+                }catch(apiErr){
+                  setStatus('API المباشر: '+cc+' صفحة '+pg+' فشلت: '+(apiErr.message||apiErr).substring(0,60),'error');
+                  break;
+                }
+                if(pg===1&&ci===0)console.log('JSON TYPE:',typeof json,'IS ARRAY:',Array.isArray(json),'KEYS:',json&&typeof json==='object'&&!Array.isArray(json)?Object.keys(json).slice(0,10):'N/A');
+                var items=Array.isArray(json)?json:(json.data||json.products||json.items||json.result||[]);
+                if(!items.length){setStatus('API المباشر: '+cc+' الصفحة '+pg+' فاضية','error');break;}
+                apiProducts=apiProducts.concat(items);
+                setStatus('API المباشر: تم جلب '+apiProducts.length+' منتج حتى الآن');
+                if(items.length<100)break;
+                pg++;
+              }
+            }
+            if(apiProducts.length){setStatus('API المباشر: تم جلب '+apiProducts.length+' منتج');console.log('apiProducts LENGTH:',apiProducts.length,'FIRST:',apiProducts[0]);}
+            else setStatus('API المباشر: لم يتم جلب أي منتجات','error');
+          }
+          // Build lookup: map every possible ID from API → API product
+          setStatus('بناء جدول المطابقة...');
+          var apiLookup={};
+          apiProducts.forEach(function(ap){
+            var ids=[ap.id,ap.productId,ap.product_id,ap.variantId,ap.variant_id,ap.sku,ap.code,ap.taager_product_id,ap._id,ap.itemId,ap.externalId];
+            ids.forEach(function(id){
+              if(id!=null&&id!==undefined)apiLookup[String(id)]=ap;
+            });
+          });
+           // For videos/all: pre-fetch all product details in parallel batches
+          if(field==='videos'||field==='all'){
+            setStatus('جاري جلب تفاصيل المنتجات للفيديو...');
+            window._taagerVidCache={};
+            var prodIds={};
+            apiProducts.forEach(function(ap){if(ap.productId)prodIds[ap.productId]=1;});
+            var uniquePids=Object.keys(prodIds);
+            var BATCH=10;
+            for(var bi=0;bi<uniquePids.length;bi+=BATCH){
+              var batchPids=uniquePids.slice(bi,bi+BATCH);
+              await Promise.all(batchPids.map(function(pid){
+                return (async function(){
+                  try{
+                    var durl=window.TAAGER_MERCHANT_API+'/products/'+pid;
+                    return fetchWithTimeout(durl,{headers:{
+                      'Authorization':'Bearer '+creds.apiKey,
+                      'taagerId':creds.taagerId,
+                      'ui-session-key':creds.sessionKey
+                    }},30000).then(function(r){if(r.ok)return r.json();}).then(function(d){
+                      if(d&&d.variants&&d.variants[0]){
+                        var vids=d.variants[0].videos||[];
+                        window._taagerVidCache[pid]=Array.isArray(vids)?vids.filter(Boolean):[];
+                      }
+                    });
+                  }catch(e){}
+                })();
+              }));
+              setStatus('تفاصيل الفيديو: '+Math.min(bi+BATCH,uniquePids.length)+'/'+uniquePids.length);
+            }
+            setStatus('تم تجهيز '+uniquePids.length+' تفاصيل منتج');
+          }
+
+          // Process each product one by one
+          var done=0,errors=0,skipped=0;
+          setStatus('بدأ معالجة '+targets.length+' منتج...');
+          // DEBUG: show ID comparison for first product
+          if(apiProducts.length&&targets.length){
+            var firstApi=apiProducts[0];
+            var firstDb=targets[0];
+            var dbId=JSON.stringify(firstDb.taager_product_id);
+            var dbAlt=JSON.stringify(firstDb.id);
+            var dbName=JSON.stringify((firstDb.name||'').substring(0,30));
+            var dbSku=JSON.stringify(firstDb.sku||'');
+            var dbProductId=JSON.stringify(firstDb.product_id||'');
+            var apiPid=JSON.stringify(firstApi.productId);
+            var apiVid=JSON.stringify(firstApi.variantId);
+            var apiSku=JSON.stringify(firstApi.sku||'');
+            var apiName=JSON.stringify((firstApi.name||'').substring(0,30));
+            var fullDbStr=JSON.stringify(firstDb);
+            console.log('FULL DB FIRST PRODUCT:',fullDbStr);
+            var msg='API: productId='+apiPid+' variantId='+apiVid+' sku='+apiSku+' name='+apiName+'\nDB: taager_product_id='+dbId+' id='+dbAlt+' sku='+dbSku+' product_id='+dbProductId+' name='+dbName;
+            console.log('MATCH DEBUG:',msg);
+            setStatus('🔍 أول API: '+apiName+' | أول DB: '+dbName);
+          }
+          for(var i=0;i<targets.length;i++){
+            var p=targets[i];
+            // Find matching API product by taager_product_id or any other ID
+            var matchId=String(p.taager_product_id||p.id||'');
+            var apiItem=apiLookup[matchId];
+            // If not found by primary ID, try all IDs
+            if(!apiItem){
+              var altIds=[p.id,p.product_id,p.productId,p.sku].filter(Boolean);
+              for(var a=0;a<altIds.length;a++){
+                if(apiLookup[String(altIds[a])]){apiItem=apiLookup[String(altIds[a])];break;}
+              }
+            }
+            if(!apiItem){skipped++;showProgress(Math.round((i+1)/targets.length*100),i+1,targets.length);continue;}
+            try{
+              if(field==='videos'){
+                var pid=apiItem.productId;
+                var cachedVids=window._taagerVidCache&&window._taagerVidCache[pid]?window._taagerVidCache[pid]:[];
+                await _sb.from('taager_products').update({videos:cachedVids}).eq('id',p.id);
+              }else if(field==='all'){
+                var imgJSON=JSON.stringify(extractImages(apiItem));
+                var imgFirst=extractImages(apiItem)[0]||'';
+                var pid2=apiItem.productId;
+                var cachedVids2=window._taagerVidCache&&window._taagerVidCache[pid2]?window._taagerVidCache[pid2]:[];
+                await _sb.from('taager_products').update({
+                  images:imgJSON,image:imgFirst,image1:imgFirst,
+                  videos:cachedVids2,
+                  quick_details:extractQuickDetails(apiItem),
+                  content_ideas:extractContentIdeas(apiItem),
+                  how_to_use:extractHowToUse(apiItem)
+                }).eq('id',p.id);
+              } else {
+                var val=taagerFields(apiItem,field);
+                var upd={};
+                if(field==='images'){upd.images=val.split('|')[0];upd.image_url=val.split('|')[1]||'';upd.image=val.split('|')[1]||'';}
+                else upd[field]=val;
+                await _sb.from('taager_products').update(upd).eq('id',p.id);
+              }
+              done++;
+            }catch(e){errors++;}
+            showProgress(Math.round((i+1)/targets.length*100),i+1,targets.length);
+            if(i<targets.length-1)await new Promise(function(r){setTimeout(r,50);});
+          }
+          showProgress(0);
+          wrap.style.display='none';
+          var msg='تم تحديث '+done+' منتج';
+          if(skipped)msg+=' (تخطي '+skipped+' بدون تطابق)';
+          if(errors)msg+=' ('+errors+' خطأ)';
+          setStatus(msg,errors>0);
+          if(skipped===targets.length&&!done&&apiProducts.length){
+            var item=apiProducts[0];
+            var keys=Object.keys(item).join(' | ');
+            // Show sample API product ID fields
+            var apiIdFields=['id','variantId','productId','product_id','sku','code','_id','itemId','externalId'];
+            var apiIdVals=apiIdFields.map(function(f){return f+'='+JSON.stringify(item[f])}).filter(function(v){return v.includes('"')&&!v.endsWith('=null')&&!v.endsWith('=""')}).join(', ');
+            // Show sample DB product
+            var dbSample=targets[0]||{};
+            var dbIdInfo='taager_product_id='+JSON.stringify(dbSample.taager_product_id)+', id='+JSON.stringify(dbSample.id);
+            msg+=' — أول منتج API ['+apiIdVals+'] — أول DB ['+dbIdInfo+']';
+            console.log('MISMATCH DEBUG: API item',item,'DB item',dbSample);
+            showApiSample(item);
+          }
+          notify(msg,errors?'error':'success');
+          await loadProducts();
+        }catch(e){
+          wrap.style.display='none';
+          setStatus('خطأ: '+(e.message||e).substring(0,100),true);
+          notify('خطأ: '+(e.message||e),'error');
+        }
+        btn.disabled=false;btn.innerHTML=origHtml;
+      }
+      document.getElementById('fetch-all').addEventListener('click',function(){runTaagerFetch('all','all')});
+      document.getElementById('fetch-images').addEventListener('click',function(){runTaagerFetch('images','all')});
+      document.getElementById('fetch-qd').addEventListener('click',function(){runTaagerFetch('quick_details','all')});
+      document.getElementById('fetch-ci').addEventListener('click',function(){runTaagerFetch('content_ideas','all')});
+      document.getElementById('fetch-htu').addEventListener('click',function(){runTaagerFetch('how_to_use','all')});
+      document.getElementById('fetch-images-missing').addEventListener('click',function(){runTaagerFetch('images','missing')});
+      document.getElementById('fetch-qd-missing').addEventListener('click',function(){runTaagerFetch('quick_details','missing')});
+      document.getElementById('fetch-ci-missing').addEventListener('click',function(){runTaagerFetch('content_ideas','missing')});
+      document.getElementById('fetch-htu-missing').addEventListener('click',function(){runTaagerFetch('how_to_use','missing')});
+      document.getElementById('fetch-videos').addEventListener('click',function(){runTaagerFetch('videos','all')});
+      document.getElementById('fetch-videos-missing').addEventListener('click',function(){runTaagerFetch('videos','missing')});
+
+      // ===== Full Re-import from Taager API =====
+      document.getElementById('btn-reimport').addEventListener('click',async function(){
+        var btn=document.getElementById('btn-reimport');
+        btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> جاري السحب والاستيراد...';
+        var wrap=document.getElementById('tv-progress');wrap.style.display='block';document.getElementById('tv-progress-bar').style.width='0%';
+        try{
+          setStatus('جاري جلب جميع المنتجات من تاجر...');
+          var creds=await getTaagerCreds();
+          if(!creds.apiKey)throw new Error('Taager API key not found');
+          // Fetch all products from API
+          var allApi=[];
+          for(var ci=0;ci<COUNTRIES.length;ci++){
+            var cc=COUNTRIES[ci],pg=1;
+            while(true){
+              var json=await fetchTaagerAPIDirect(pg,cc);
+              var items=Array.isArray(json)?json:(json.data||json.products||json.items||json.result||[]);
+              if(!items.length)break;
+              // Tag each item with its country
+              for(var ti=0;ti<items.length;ti++)items[ti]._taager_country=cc;
+              allApi=allApi.concat(items);
+              var pct=Math.min(99,Math.round(allApi.length/50));
+              document.getElementById('tv-progress-bar').style.width=pct+'%';
+              if(items.length<100)break;
+              pg++;
+            }
+          }
+          setStatus('جاري جلب التفاصيل الكاملة لكل منتج...');
+          // Get unique productIds and fetch detail for each (in parallel batches)
+          var prodMap={};
+          for(var i=0;i<allApi.length;i++){
+            var pid=allApi[i].productId;
+            if(!prodMap[pid])prodMap[pid]=[];
+            prodMap[pid].push(allApi[i]);
+          }
+          var prodIds=Object.keys(prodMap);
+          var detailCache={};
+          // Fetch in parallel batches of 10
+          var BATCH_SIZE=10;
+          for(var d=0;d<prodIds.length;d+=BATCH_SIZE){
+            var batchIds=prodIds.slice(d,d+BATCH_SIZE);
+            var fetches=batchIds.map(function(pid){
+              return (async function(){
+                try{
+                  var detailUrl=window.TAAGER_MERCHANT_API+'/products/'+pid;
+                  var detRes=await fetchWithTimeout(detailUrl,{headers:{
+                    'Authorization':'Bearer '+creds.apiKey,
+                    'taagerId':creds.taagerId,
+                    'ui-session-key':creds.sessionKey
+                  }},30000);
+                  if(detRes.ok)detailCache[pid]=await detRes.json();
+                }catch(e){}
+              })();
+            });
+            await Promise.all(fetches);
+            var pctDetail=Math.round(Math.min(d+BATCH_SIZE,prodIds.length)/prodIds.length*100);
+            document.getElementById('tv-progress-bar').style.width=Math.min(40,pctDetail/2)+'%';
+          }
+          setStatus('تم جلب التفاصيل، جاري الحذف والإدراج...');
+          // Delete all existing products
+          var {error:delErr}=await _sb.from('taager_products').delete().neq('id','');
+          if(delErr)throw delErr;
+          // Build all rows with full detail data
+          var rowsToInsert=[];
+          for(var i=0;i<allApi.length;i++){
+            var ap=allApi[i];
+            var detail=detailCache[ap.productId];
+            // Get images from detail.variants matching this sku OR first variant
+            var detailVariant=null;
+            if(detail&&detail.variants){
+              detailVariant=detail.variants.find(function(v){return v.sku===ap.sku})||detail.variants[0]||null;
+            }
+            var rawImgs=[];
+            if(detailVariant&&detailVariant.images&&detailVariant.images.length)rawImgs=detailVariant.images.filter(Boolean);
+            else rawImgs=extractImages(ap);
+            // Videos from detail
+            var rawVids=[];
+            if(detailVariant&&detailVariant.videos&&detailVariant.videos.length)rawVids=detailVariant.videos.filter(Boolean);
+            // Build description/howToUse/specs from detail (Arabic)
+            var detDesc='',detHow='',detSpecs='';
+            if(detailVariant){
+              if(detailVariant.description&&detailVariant.description.ar&&detailVariant.description.ar.length>2)detDesc=detailVariant.description.ar;
+              if(detailVariant.howToUse&&detailVariant.howToUse.ar&&detailVariant.howToUse.ar.length>2)detHow=detailVariant.howToUse.ar;
+              if(detailVariant.specifications&&detailVariant.specifications.ar&&detailVariant.specifications.ar.length>2)detSpecs=detailVariant.specifications.ar;
+            }
+            var tpid=String(ap.variantId||ap.productId||ap.id||'');
+            var row={
+              id:tpid?'taager_'+tpid:'taager_'+Date.now()+'_'+i,
+              taager_product_id:tpid,
+              name:ap.name||'',
+              description:detDesc||extractQuickDetails(ap)||'',
+              price:ap.financials?ap.financials.price||0:0,
+              image:(rawImgs[0]||'')+'',
+              images:rawImgs,
+              image1:rawImgs[0]||'',
+              image2:rawImgs[1]||'',
+              image3:rawImgs[2]||'',
+              image4:rawImgs[3]||'',
+              image5:rawImgs[4]||'',
+              image6:rawImgs[5]||'',
+              image7:rawImgs[6]||'',
+              image8:rawImgs[7]||'',
+              videos:rawVids,
+              available_countries:[ap._taager_country||'EG'],
+              stock:999,
+              stock_status:'in_stock',
+              category:ap.type||'product',
+              seller:'تاجر',
+              source:'taager',
+              is_active:true,
+              raw_data:ap,
+              quick_details:detDesc||extractQuickDetails(ap),
+              content_ideas:detSpecs||extractContentIdeas(ap),
+              how_to_use:detHow||extractHowToUse(ap),
+              created_at:new Date().toISOString(),
+              updated_at:new Date().toISOString(),
+              last_synced_at:new Date().toISOString()
+            };
+            rowsToInsert.push(row);
+            var pct2=Math.round((i+1)/allApi.length*100);
+            if(i%50===0)document.getElementById('tv-progress-bar').style.width=Math.min(90,40+pct2/2)+'%';
+          }
+          // Insert in batches of 100 — try one first
+          var inserted=0,errors=0;
+          // Test single insert first
+          try{
+            var testRow=rowsToInsert[0];
+            if(testRow){
+              var {error:testErr}=await _sb.from('taager_products').insert(testRow);
+              if(testErr){
+                console.log('SINGLE INSERT ERROR:',testErr);
+                setStatus('خطأ: '+JSON.stringify(testErr).substring(0,300),true);
+                throw testErr;
+              }else{
+                inserted++;
+              }
+            }
+          }catch(e){
+            btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-cloud-download-alt"></i> سحب جميع المنتجات من تاجر';
+            throw e;
+          }
+          // If first worked, batch rest
+          for(var b=1;b<rowsToInsert.length;b+=100){
+            var batch=rowsToInsert.slice(b,b+100);
+            try{
+              var {error:batchErr}=await _sb.from('taager_products').insert(batch);
+              if(batchErr){
+                console.log('BATCH INSERT ERROR:',batchErr);
+                throw batchErr;
+              }
+              inserted+=batch.length;
+            }catch(e){errors+=batch.length;}
+            var pct3=Math.round(Math.min(b+100,rowsToInsert.length)/rowsToInsert.length*100);
+            document.getElementById('tv-progress-bar').style.width=Math.min(100,90+pct3/10)+'%';
+          }
+          document.getElementById('tv-progress-bar').style.width='0%';
+          wrap.style.display='none';
+          setStatus('تم استيراد '+inserted+' منتج'+(errors?' ('+errors+' خطأ)':''));
+          notify('تم استيراد '+inserted+' منتج من تاجر بنجاح'+(errors?' ('+errors+' فشل)':''),errors?'warning':'success');
+          await loadProducts();
+        }catch(e){
+          document.getElementById('tv-progress-bar').style.width='0%';
+          wrap.style.display='none';
+          setStatus('خطأ: '+(e.message||e).substring(0,100),true);
+          notify('خطأ: '+(e.message||e),'error');
+        }
+        btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-cloud-download-alt"></i> سحب جميع المنتجات من تاجر';
+      });
+
+      document.getElementById("tv-filter").addEventListener("change", applyFilters);
+      document.getElementById("tv-search").addEventListener("input", applyFilters);
+
+      // ===== Debug: try product detail endpoint =====
+      document.getElementById('btn-debug-detail').addEventListener('click',async function(){
+        var btn=document.getElementById('btn-debug-detail');
+        btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i>...';
+        try{
+          var creds=await getTaagerCreds();
+          var json=await fetchTaagerAPIDirect(1,'EG');
+          var items=Array.isArray(json)?json:(json.data||json.products||json.items||json.result||[]);
+          if(!items.length)throw new Error('No products');
+          var first=items[0];
+          var pid=first.productId;
+          var vid=first.variantId;
+          var results={listEndpoint:first};
+          // Try variant detail
+          try{
+            var url1=window.TAAGER_MERCHANT_API+'/products/variants/'+vid;
+            var res1=await fetchWithTimeout(url1,{headers:{'Authorization':'Bearer '+creds.apiKey,'taagerId':creds.taagerId,'ui-session-key':creds.sessionKey}},15000);
+            results.variantDetail=res1.ok?await res1.json():{error:'HTTP '+res1.status};
+          }catch(e){results.variantDetail={error:e.message};}
+          // Try product detail
+          try{
+            var url2=window.TAAGER_MERCHANT_API+'/products/'+pid;
+            var res2=await fetchWithTimeout(url2,{headers:{'Authorization':'Bearer '+creds.apiKey,'taagerId':creds.taagerId,'ui-session-key':creds.sessionKey}},15000);
+            results.productDetail=res2.ok?await res2.json():{error:'HTTP '+res2.status};
+          }catch(e){results.productDetail={error:e.message};}
+          // Try product media
+          try{
+            var url3=window.TAAGER_MERCHANT_API+'/products/'+pid+'/media';
+            var res3=await fetchWithTimeout(url3,{headers:{'Authorization':'Bearer '+creds.apiKey,'taagerId':creds.taagerId,'ui-session-key':creds.sessionKey}},15000);
+            results.productMedia=res3.ok?await res3.json():{error:'HTTP '+res3.status};
+          }catch(e){results.productMedia={error:e.message};}
+          showApiSample(results);
+        }catch(e){
+          notify('خطأ: '+(e.message||e),'error');
+        }
+        btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-bug"></i> تجربة منتج واحد';
+      });
+
+      loadProducts();
+    </script>
+  </body>
+</html>

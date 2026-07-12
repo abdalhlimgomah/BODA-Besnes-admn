@@ -1,0 +1,480 @@
+﻿const { createClient } = supabase;
+
+const supabaseClient = createClient(
+  "https://msgqzgzoslearaprgiqq.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE"
+);
+
+const CATEGORIES = [
+  "إلكترونيات",
+  "موبايلات وملحقاتها",
+  "ملابس وأحذية",
+  "تجميل وعناية",
+  "عطور",
+  "منتجات رياضية",
+  "منزل ومطبخ",
+  "مستلزمات المنزل",
+  "مكتب ودراسة",
+  "ساعات",
+  "حفاضات وأطفال",
+  "ألعاب",
+  "كتب ومجلات",
+  "حيوانات أليفة",
+  "سيارات",
+  "مجوهرات وإكسسوارات",
+  "كاميرات وتصوير",
+  "سماعات",
+  "هدايا",
+];
+
+function showToast(message, type = "info") {
+  let wrap = document.querySelector(".toast-wrap");
+  if (!wrap) {
+    wrap = document.createElement("div");
+    wrap.className = "toast-wrap";
+    document.body.appendChild(wrap);
+  }
+
+  const toast = document.createElement("div");
+  toast.className = `toast-item toast-${type}`;
+  toast.textContent = message;
+  wrap.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.transform = "translateY(-6px)";
+    setTimeout(() => toast.remove(), 220);
+  }, 2600);
+}
+
+async function uploadImage(file) {
+  if (!file) return "";
+  const fileName = `${Date.now()}_${file.name.replace(/ /g, "_")}`;
+  console.log("Uploading to Buda bucket:", fileName);
+  const { error } = await supabaseClient.storage.from("Buda").upload(fileName, file, { upsert: true });
+  if (error) {
+    console.error("Upload error:", error);
+    showToast("فشل رفع الصورة: " + (error.message || "خطأ غير معروف"), "error");
+    return "";
+  }
+  const { data } = await supabaseClient.storage.from("Buda").getPublicUrl(fileName);
+  console.log("Upload success, URL:", data?.publicUrl);
+  return data?.publicUrl || "";
+}
+
+function safeNumber(value, fallback = 0) {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? numberValue : fallback;
+}
+
+function readInputValue(id) {
+  const element = document.getElementById(id);
+  return element && typeof element.value === "string" ? element.value.trim() : "";
+}
+
+async function addProduct() {
+  const name = readInputValue("name");
+  const price = safeNumber(document.getElementById("price")?.value);
+  const discount = safeNumber(document.getElementById("discount")?.value);
+  const description = readInputValue("description");
+  const stock = safeNumber(document.getElementById("stock")?.value);
+  const category = readInputValue("category");
+
+  const finalPriceEl = document.getElementById("finalPriceDisplay");
+  if (finalPriceEl) finalPriceEl.textContent = "—";
+
+  if (!name || !price || !category) {
+    showToast("يرجى إدخال الاسم والسعر والقسم.", "error");
+    return;
+  }
+
+  const fileInput = document.getElementById("imageFile");
+  const files = fileInput?.files ? Array.from(fileInput.files) : [];
+  if (files.length > 5) {
+    showToast("يمكنك رفع 5 صور كحد أقصى.", "error");
+    return;
+  }
+
+  var uploadedUrls = [];
+  for (var i = 0; i < files.length; i++) {
+    var url = await uploadImage(files[i]);
+    if (url) uploadedUrls.push(url);
+  }
+
+  var imagePayload = {};
+  if (uploadedUrls.length > 0) imagePayload.image = uploadedUrls[0];
+  if (uploadedUrls.length > 1) imagePayload.image2 = uploadedUrls[1];
+  if (uploadedUrls.length > 2) imagePayload.image3 = uploadedUrls[2];
+  if (uploadedUrls.length > 3) imagePayload.image4 = uploadedUrls[3];
+  if (uploadedUrls.length > 4) imagePayload.image5 = uploadedUrls[4];
+
+  const discountedPrice = price - (price * discount) / 100;
+
+  const { error } = await supabaseClient.from("products").insert([
+    {
+      name,
+      price,
+      price_after_discount: discountedPrice,
+      description,
+      stock,
+      category,
+      extra_links: JSON.stringify(uploadedUrls),
+      ...imagePayload,
+    },
+  ]);
+
+  if (error) {
+    showToast(error.message, "error");
+    return;
+  }
+
+  showToast("تمت إضافة المنتج بنجاح", "success");
+  document.getElementById("name").value = "";
+  document.getElementById("price").value = "";
+  document.getElementById("discount").value = "";
+  document.getElementById("description").value = "";
+  document.getElementById("stock").value = "";
+  document.getElementById("category").value = "";
+  document.getElementById("imageFile").value = "";
+  document.getElementById("imagePreviews").innerHTML = "";
+
+  loadProducts();
+}
+
+async function updateProduct(id) {
+  const name = readInputValue(`name_${id}`);
+  const price = safeNumber(readInputValue(`price_${id}`));
+  const discount = safeNumber(readInputValue(`discount_${id}`));
+  const description = readInputValue(`description_${id}`);
+  const stock = safeNumber(readInputValue(`stock_${id}`));
+  const category = readInputValue(`category_${id}`);
+
+  const discountedPrice = price - (price * discount) / 100;
+
+  const { data: existing } = await supabaseClient.from("products").select("*").eq("id", id).single();
+  var updatePayload = {
+    name, price, price_after_discount: discountedPrice, description, stock, category,
+    image: existing?.image || null,
+    image2: existing?.image2 || null,
+    image3: existing?.image3 || null,
+    image4: existing?.image4 || null,
+    image5: existing?.image5 || null,
+    extra_links: existing?.extra_links || null,
+  };
+
+  const fileInput = document.getElementById("imageFile");
+  const files = fileInput?.files ? Array.from(fileInput.files) : [];
+  if (files.length > 0) {
+    var uploadedUrls = [];
+    for (var i = 0; i < Math.min(files.length, 5); i++) {
+      var url = await uploadImage(files[i]);
+      if (url) uploadedUrls.push(url);
+    }
+    if (uploadedUrls.length > 0) updatePayload.image = uploadedUrls[0];
+    if (uploadedUrls.length > 1) updatePayload.image2 = uploadedUrls[1];
+    if (uploadedUrls.length > 2) updatePayload.image3 = uploadedUrls[2];
+    if (uploadedUrls.length > 3) updatePayload.image4 = uploadedUrls[3];
+    if (uploadedUrls.length > 4) updatePayload.image5 = uploadedUrls[4];
+    updatePayload.extra_links = JSON.stringify(uploadedUrls);
+  }
+
+  const { error } = await supabaseClient.from("products").update(updatePayload).eq("id", id);
+
+  if (error) {
+    showToast(error.message, "error");
+    return;
+  }
+
+  showToast("تم تعديل المنتج", "success");
+  loadProducts();
+}
+
+async function deleteProduct(id) {
+  if (!confirm("هل أنت متأكد من حذف المنتج؟")) return;
+
+  const { error } = await supabaseClient.from("products").delete().eq("id", id);
+  if (error) {
+    showToast(error.message, "error");
+    return;
+  }
+
+  showToast("تم حذف المنتج", "success");
+  loadProducts();
+}
+
+function categoryOptions(selectedCategory = "") {
+  return CATEGORIES.map(
+    (category) => `<option value="${category}" ${category === selectedCategory ? "selected" : ""}>${category}</option>`
+  ).join("");
+}
+
+function estimatedDiscount(price, priceAfterDiscount) {
+  if (!price || !priceAfterDiscount || price <= 0 || priceAfterDiscount > price) return 0;
+  return Math.round(((price - priceAfterDiscount) / price) * 100);
+}
+
+function updatePricePreview() {
+  const price = safeNumber(document.getElementById("price")?.value);
+  const discount = safeNumber(document.getElementById("discount")?.value);
+  const display = document.getElementById("finalPriceDisplay");
+  if (!display) return;
+  if (!price) { display.textContent = "—"; return; }
+  const finalPrice = price - (price * discount) / 100;
+  display.textContent = finalPrice.toFixed(2) + " EGP";
+}
+
+function clearForm() {
+  document.getElementById("name").value = "";
+  document.getElementById("price").value = "";
+  document.getElementById("discount").value = "";
+  document.getElementById("description").value = "";
+  document.getElementById("stock").value = "";
+  document.getElementById("category").value = "";
+  document.getElementById("imageFile").value = "";
+  document.getElementById("imagePreviews").innerHTML = "";
+  const display = document.getElementById("finalPriceDisplay");
+  if (display) display.textContent = "—";
+}
+
+function renderImagePreviews() {
+  var previews = document.getElementById("imagePreviews");
+  var files = document.getElementById("imageFile").files;
+  previews.innerHTML = "";
+  for (var i = 0; i < files.length; i++) {
+    (function (file) {
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        var div = document.createElement("div");
+        div.className = "product-image-preview";
+        div.innerHTML = '<img src="' + e.target.result + '" alt="صورة" />' +
+          '<button type="button" class="product-image-preview-remove" data-index="' + i + '">&times;</button>';
+        div.querySelector(".product-image-preview-remove").addEventListener("click", function () {
+          removeImage(i);
+        });
+        previews.appendChild(div);
+      };
+      reader.readAsDataURL(file);
+    })(files[i]);
+  }
+}
+
+function removeImage(index) {
+  var fileInput = document.getElementById("imageFile");
+  var dt = new DataTransfer();
+  var files = fileInput.files;
+  for (var i = 0; i < files.length; i++) {
+    if (i !== index) dt.items.add(files[i]);
+  }
+  fileInput.files = dt.files;
+  renderImagePreviews();
+}
+
+function toggleEdit(id) {
+  const fields = document.getElementById(`editFields_${id}`);
+  const card = document.getElementById(`card_${id}`);
+  const btn = document.getElementById(`editBtn_${id}`);
+  if (!fields || !card || !btn) return;
+
+  const isOpen = fields.classList.contains("open");
+  if (isOpen) {
+    updateProduct(id);
+    fields.classList.remove("open");
+    card.classList.remove("editing");
+    btn.textContent = "تعديل";
+  } else {
+    fields.classList.add("open");
+    card.classList.add("editing");
+    btn.textContent = "حفظ التعديلات";
+  }
+}
+
+async function loadProducts() {
+  const container = document.getElementById("products");
+  container.innerHTML = '<div class="empty-state">جاري تحميل المنتجات...</div>';
+
+  const { data, error } = await supabaseClient.from("products").select("*").order("created_at", { ascending: false });
+  if (error) {
+    container.innerHTML = '<div class="empty-state">تعذر تحميل المنتجات</div>';
+    showToast(error.message, "error");
+    return;
+  }
+
+  if (!data || !data.length) {
+    container.innerHTML = '<div class="empty-state">لا توجد منتجات حالياً</div>';
+    return;
+  }
+
+  window.__adminProducts = data;
+  container.innerHTML = data
+    .map((product) => {
+      const discountValue =
+        product.price_after_discount != null
+          ? estimatedDiscount(Number(product.price), Number(product.price_after_discount))
+          : 0;
+
+      var imgCount = getProductImages(product).length;
+      return `
+      <article class="product-card" id="card_${product.id}">
+        <div class="product-image-wrap" onclick="openGalleryById('${product.id}')">
+          <img src="${product.image || product.image2 || product.image3 || product.image4 || product.image5 || ""}" alt="${product.name || "منتج"}" />
+          ${imgCount > 1 ? '<span class="image-count-badge"><i class="fa-regular fa-images"></i> ' + imgCount + '</span>' : ""}
+        </div>
+        <div class="product-summary">
+          <p class="product-name">${product.name || "-"}</p>
+          <div class="price-row">
+            <del>${safeNumber(product.price).toFixed(2)}</del>
+            <span>${safeNumber(product.price_after_discount).toFixed(2)}</span>
+          </div>
+          <p>القسم: ${product.category || "-"}</p>
+          <p>الكمية: ${safeNumber(product.stock)}</p>
+          <p>${product.description || ""}</p>
+        </div>
+        <div class="inline-grid" id="editFields_${product.id}">
+          <div class="edit-field">
+            <label for="name_${product.id}">اسم المنتج</label>
+            <input type="text" id="name_${product.id}" value="${product.name || ""}" />
+          </div>
+          <div class="edit-field">
+            <label for="price_${product.id}">السعر الأساسي</label>
+            <input type="number" id="price_${product.id}" value="${safeNumber(product.price)}" />
+          </div>
+          <div class="edit-field">
+            <label for="discount_${product.id}">الخصم %</label>
+            <input type="number" id="discount_${product.id}" value="${discountValue}" placeholder="الخصم %" />
+          </div>
+          <div class="edit-field">
+            <label for="description_${product.id}">الوصف</label>
+            <input type="text" id="description_${product.id}" value="${product.description || ""}" />
+          </div>
+          <div class="edit-field">
+            <label for="stock_${product.id}">الكمية</label>
+            <input type="number" id="stock_${product.id}" value="${safeNumber(product.stock)}" />
+          </div>
+          <div class="edit-field">
+            <label for="category_${product.id}">القسم</label>
+            <select id="category_${product.id}">
+              ${categoryOptions(product.category || "")}
+            </select>
+          </div>
+          <div class="edit-field" style="grid-column:1/-1;">
+            <label>صور المنتج (اختر ملفات جديدة لاستبدالها)</label>
+            <input type="file" accept="image/*" multiple onchange="renderImagePreviews()" />
+          </div>
+        </div>
+        <div class="product-actions">
+          <button class="update-btn" id="editBtn_${product.id}" onclick="toggleEdit('${product.id}')">تعديل</button>
+          <button class="delete-btn" onclick="deleteProduct('${product.id}')">حذف</button>
+        </div>
+      </article>`;
+    })
+    .join("");
+}
+
+/* ─── Image Gallery ─── */
+var galleryImages = [];
+var galleryIndex = 0;
+
+function getProductImages(product) {
+  var images = [];
+  if (product.image) images.push(product.image);
+  if (product.image2) images.push(product.image2);
+  if (product.image3) images.push(product.image3);
+  if (product.image4) images.push(product.image4);
+  if (product.image5) images.push(product.image5);
+  if (product.extra_links) {
+    try {
+      var parsed = JSON.parse(product.extra_links);
+      if (Array.isArray(parsed)) {
+        parsed.forEach(function (url) { if (url && images.indexOf(url) === -1) images.push(url); });
+      }
+    } catch (_) {}
+  }
+  return images;
+}
+
+function openGallery(product) {
+  galleryImages = getProductImages(product);
+  if (!galleryImages.length) return;
+  galleryIndex = 0;
+  document.getElementById("galleryOverlay").style.display = "flex";
+  showGalleryImage();
+}
+
+function openGalleryById(id) {
+  var products = window.__adminProducts || [];
+  for (var i = 0; i < products.length; i++) {
+    if (products[i].id == id) { openGallery(products[i]); return; }
+  }
+}
+
+function showGalleryImage() {
+  var img = document.getElementById("galleryImg");
+  if (galleryImages[galleryIndex]) img.src = galleryImages[galleryIndex];
+  img.alt = "صورة " + (galleryIndex + 1);
+  updateGalleryDots();
+  document.getElementById("galleryPrev").style.display = galleryIndex > 0 ? "" : "none";
+  document.getElementById("galleryNext").style.display = galleryIndex < galleryImages.length - 1 ? "" : "none";
+}
+
+function galleryNav(dir) {
+  galleryIndex += dir;
+  if (galleryIndex < 0) galleryIndex = 0;
+  if (galleryIndex >= galleryImages.length) galleryIndex = galleryImages.length - 1;
+  showGalleryImage();
+}
+
+function closeGallery(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById("galleryOverlay").style.display = "none";
+}
+
+function updateGalleryDots() {
+  var container = document.getElementById("galleryDots");
+  container.innerHTML = "";
+  for (var i = 0; i < galleryImages.length; i++) {
+    var dot = document.createElement("span");
+    dot.className = "gallery-dot" + (i === galleryIndex ? " active" : "");
+    dot.onclick = (function (idx) { return function () { galleryIndex = idx; showGalleryImage(); }; })(i);
+    container.appendChild(dot);
+  }
+}
+
+document.addEventListener("keydown", function (e) {
+  if (document.getElementById("galleryOverlay").style.display !== "flex") return;
+  if (e.key === "Escape") closeGallery();
+  if (e.key === "ArrowLeft") galleryNav(-1);
+  if (e.key === "ArrowRight") galleryNav(1);
+});
+
+loadProducts();
+
+function populateCategorySelect() {
+  var sel = document.getElementById("category");
+  if (!sel) return;
+  CATEGORIES.forEach(function (cat) {
+    var opt = document.createElement("option");
+    opt.value = cat;
+    opt.textContent = cat;
+    sel.appendChild(opt);
+  });
+}
+
+populateCategorySelect();
+
+window.addProduct = addProduct;
+window.updateProduct = updateProduct;
+window.deleteProduct = deleteProduct;
+window.toggleEdit = toggleEdit;
+window.updatePricePreview = updatePricePreview;
+window.clearForm = clearForm;
+window.renderImagePreviews = renderImagePreviews;
+window.removeImage = removeImage;
+window.openGallery = openGallery;
+window.openGalleryById = openGalleryById;
+window.closeGallery = closeGallery;
+window.galleryNav = galleryNav;
+
+document.getElementById("imageUploadArea").addEventListener("click", function () {
+  document.getElementById("imageFile").click();
+});
+document.getElementById("imageFile").addEventListener("change", renderImagePreviews);
