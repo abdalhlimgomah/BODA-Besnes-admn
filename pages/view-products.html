@@ -73,25 +73,44 @@
           </div>
           <div class="summary-item">
             <p>قيد الانتظار</p>
-            <strong id="pendingCount">0</strong>
+            <strong id="pendingCount" style="color:var(--warning);">0 <span id="pendingCountBadge"></span></strong>
           </div>
           <div class="summary-item">
-            <p>تمت المراجعة</p>
-            <strong id="reviewedCount">0</strong>
+            <p>تمت الموافقة</p>
+            <strong id="reviewedCount" style="color:var(--success);">0</strong>
+          </div>
+          <div class="summary-item">
+            <p>مرفوض</p>
+            <strong id="rejectedCount" style="color:var(--danger);">0</strong>
           </div>
         </section>
         <section class="card review-filters">
           <div class="field-block grow">
-            <label for="searchInput">ابحث عن منتج للبحث...</label>
-            <input type="text" id="searchInput" placeholder="بحث عن منتج..." />
+            <label for="searchInput">ابحث عن منتج</label>
+            <input type="text" id="searchInput" placeholder="اسم المنتج..." />
           </div>
           <div class="field-block">
-            <label for="reviewFilter">حالة المراجعة</label>
+            <label for="emailFilter">البريد الإلكتروني</label>
+            <input type="text" id="emailFilter" placeholder="فلتر بالتاجر..." />
+          </div>
+          <div class="field-block">
+            <label for="reviewFilter">الحالة</label>
             <select id="reviewFilter">
               <option value="all">الكل</option>
               <option value="pending">قيد الانتظار</option>
               <option value="reviewed">تمت المراجعة</option>
+              <option value="rejected">مرفوض</option>
             </select>
+          </div>
+          <div class="field-block" style="display:flex;align-items:flex-end;">
+            <button id="bulkApproveBtn" class="review-btn" title="موافقة على كل المنتجات الظاهرة">
+              <i class="fa-solid fa-check-double"></i> موافقة على الكل
+            </button>
+          </div>
+          <div class="field-block" style="display:flex;align-items:flex-end;">
+            <button id="exportBtn" class="review-btn" title="تصدير إلى CSV">
+              <i class="fa-solid fa-download"></i> تصدير
+            </button>
           </div>
         </section>
         <section class="products-grid" id="productsGrid"></section>
@@ -104,6 +123,6 @@
       <a class="mobile-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>شراكة</span></a>
       <a class="mobile-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>الدعم</span></a>
         </nav>
-    <script src="./view-products.page.js?v=20260327-2"></script>
+    <script src="./view-products.page.js?v=5"></script>
   </body>
 </html>

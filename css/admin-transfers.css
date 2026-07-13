@@ -1,0 +1,73 @@
+.transfer-requests-page {
+  display: flex; flex-direction: column; gap: 16px;
+}
+.transfer-summary {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+  padding: 24px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 16px; box-shadow: 0 4px 20px rgba(26,26,46,0.15);
+}
+.transfer-summary .summary-box p { color: rgba(255,255,255,0.5); font-size: 0.78rem; font-weight: 600; }
+.transfer-summary .summary-box strong { display: block; font-size: 1.4rem; font-weight: 900; color: #fff; }
+.transfer-list { display: flex; flex-direction: column; gap: 10px; }
+.transfer-card {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--surface, #fff); border: 1px solid var(--border, #e0e0e0);
+  border-radius: 12px; padding: 14px 16px; cursor: pointer;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.transfer-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); border-color: #0d6efd; }
+.transfer-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #e9ecef; }
+.transfer-avatar-fallback {
+  width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-weight: 800; font-size: 1.2rem; background: #0d6efd; color: #fff; flex-shrink: 0;
+}
+.transfer-card-info { flex: 1; min-width: 0; }
+.transfer-card-info strong { display: block; font-size: 0.95rem; font-weight: 700; }
+.transfer-card-info small { display: block; color: var(--muted, #888); font-size: 0.78rem; }
+.transfer-status-badge {
+  font-size: 0.75rem; font-weight: 700; padding: 4px 14px; border-radius: 20px; white-space: nowrap;
+}
+.transfer-status-badge.pending { background: #fff3cd; color: #856404; }
+.transfer-status-badge.approved { background: #d4edda; color: #155724; }
+.transfer-status-badge.rejected { background: #f8d7da; color: #721c24; }
+
+/* Modal */
+.transfer-modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999;
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.transfer-modal {
+  background: var(--surface, #fff); border-radius: 16px; max-width: 600px;
+  width: 100%; max-height: 90vh; overflow-y: auto; padding: 24px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.2); direction: rtl;
+}
+.transfer-modal h3 { margin-bottom: 16px; font-weight: 800; font-size: 1.2rem; }
+.transfer-modal .modal-field { margin-bottom: 12px; }
+.transfer-modal .modal-field label { display: block; font-weight: 600; font-size: 0.82rem; color: var(--muted, #888); margin-bottom: 2px; }
+.transfer-modal .modal-field p { font-size: 0.95rem; color: var(--text, #333); }
+.transfer-modal .modal-images { display: flex; gap: 12px; flex-wrap: wrap; margin: 12px 0; justify-content: center; }
+.transfer-modal .modal-images > div { flex: 0 0 auto; max-width: 100%; width: auto; }
+.transfer-modal .modal-images img {
+  max-width: 100%; max-height: 260px; border-radius: 12px; border: 1px solid #dee2e6;
+  object-fit: contain; cursor: zoom-in; transition: transform 0.2s; background: #f8f9fa;
+  display: block; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.transfer-modal .modal-images img:hover { transform: scale(1.02); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+/* Lightbox */
+.transfer-lightbox {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99999;
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  cursor: zoom-out; animation: fadeIn 0.2s ease;
+}
+.transfer-lightbox img {
+  max-width: 95vw; max-height: 95vh; object-fit: contain; border-radius: 8px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.transfer-modal-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.btn-confirm { background: #0e7c66; color: #fff; border: none; padding: 10px 24px; border-radius: 10px; font-weight: 700; cursor: pointer; }
+.btn-confirm:hover { background: #0b6654; }
+.btn-reject { background: #e74c3c; color: #fff; border: none; padding: 10px 24px; border-radius: 10px; font-weight: 700; cursor: pointer; }
+.btn-reject:hover { background: #c0392b; }
+.btn-close-modal { background: #6c757d; color: #fff; border: none; padding: 10px 24px; border-radius: 10px; font-weight: 700; cursor: pointer; }
+.btn-close-modal:hover { background: #5a6268; }

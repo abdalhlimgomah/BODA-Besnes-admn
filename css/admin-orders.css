@@ -105,11 +105,99 @@
   box-shadow: 0 4px 12px rgba(255,193,7,0.3);
 }
 
-/* ─── Orders Grid ─── */
+/* ─── User Cards (grouped by email) ─── */
 .orders-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 14px;
+}
+
+.user-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  border-radius: 16px;
+  background: var(--card-bg,#fff);
+  border: 1px solid #f3f4f6;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.user-card:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  transform: translateY(-1px);
+  border-color: #f59e0b;
+}
+
+.user-count-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  font-weight: 900;
+  font-size: 0.85rem;
+  min-width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  padding: 0 8px;
+  box-shadow: 0 2px 8px rgba(245,158,11,0.3);
+}
+
+.user-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.user-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  font-weight: 900;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(245,158,11,0.25);
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.user-email {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text,#1f2937);
+  direction: ltr;
+  text-align: left;
+  word-break: break-all;
+}
+
+.user-name {
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.user-latest {
+  font-size: 0.72rem;
+  color: #9ca3af;
+  font-weight: 500;
 }
 
 .order-card {
@@ -218,6 +306,26 @@
   box-shadow: 0 4px 12px rgba(13,148,136,0.3);
 }
 
+/* ─── Topbar back link ─── */
+.topbar-nav {
+  margin-bottom: 6px;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #f59e0b;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.back-link:hover {
+  color: #d97706;
+}
+
 /* ─── Empty state ─── */
 .empty-text {
   text-align: center;
@@ -296,6 +404,7 @@
 }
 
 .status-pending { background: #fef3c7; color: #92400e; }
+.status-review { background: #e0f2fe; color: #075985; }
 .status-confirmed { background: #dcfce7; color: #166534; }
 .status-preparing { background: #dbeafe; color: #1e40af; }
 .status-shipped { background: #e0e7ff; color: #3730a3; }
@@ -331,6 +440,13 @@
 }
 
 /* ─── Dark Mode ─── */
+body.dark-mode .user-card {
+  background: rgba(17, 27, 38, 0.85);
+  border-color: rgba(69, 84, 101, 0.9);
+}
+body.dark-mode .user-email { color: #e8edf4; }
+body.dark-mode .user-name { color: #a9b5c5; }
+body.dark-mode .user-latest { color: #6b7b8f; }
 body.dark-mode .order-card {
   background: rgba(17, 27, 38, 0.85);
   border-color: rgba(69, 84, 101, 0.9);

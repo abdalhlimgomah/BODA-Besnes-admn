@@ -39,10 +39,7 @@ body {
   color: var(--text);
   direction: rtl;
   font-family: "Cairo", sans-serif;
-  background:
-    radial-gradient(1200px 450px at 100% -10%, rgba(255, 107, 26, 0.12), transparent 65%),
-    radial-gradient(1200px 450px at -10% 0%, rgba(0, 184, 169, 0.15), transparent 60%),
-    linear-gradient(180deg, #f9fbff 0%, #f1f5fa 100%);
+
 }
 
 h1,

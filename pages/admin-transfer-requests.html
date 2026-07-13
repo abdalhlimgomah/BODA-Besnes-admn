@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>طلبات التحويل</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/app-shell.css" />
+    <link rel="stylesheet" href="../css/partner-accounts.css" />
+    <link rel="stylesheet" href="../css/admin-transfers.css" />
+    <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="./auth-guard.js"></script>
+  </head>
+  <body class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-badge">
+        <i class="fa-solid fa-bag-shopping"></i>
+        <div><strong>Buda Admin</strong><small>إدارة المتجر</small></div>
+      </div>
+      <nav class="side-nav">
+        <a class="side-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>لوحة التحكم</span></a>
+        <a class="side-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>رسائل الدعم</span></a>
+        <a class="side-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة المنتجات</span></a>
+        <a class="side-link" href="admin-orders.html"><i class="fa-solid fa-truck"></i><span>الطلبات</span></a>
+        <a class="side-link" href="view-products.html"><i class="fa-solid fa-eye"></i><span>مراجعة المنتجات</span></a>
+        <a class="side-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>طلبات الشراكة</span></a>
+        <a class="side-link" href="admin-sellers.html"><i class="fa-solid fa-store"></i><span>البائعين</span></a>
+        <a class="side-link" href="admin-coupons.html"><i class="fa-solid fa-tag"></i><span>الكوبونات</span></a>
+        <a class="side-link" href="admin-sections.html"><i class="fa-solid fa-layer-group"></i><span>الأقسام</span></a>
+        <a class="side-link" href="admin-home-layout.html"><i class="fa-solid fa-palette"></i><span>تخطيط الصفحة الرئيسية</span></a>
+        <a class="side-link active" href="admin-transfer-requests.html"><i class="fa-solid fa-file-invoice"></i><span>طلبات التحويل</span></a>
+      </nav>
+    </aside>
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-title">
+          <h1>طلبات التحويل</h1>
+          <p>إدارة طلبات تحويل إيصالات الدفع من الشركاء</p>
+        </div>
+      </header>
+      <section class="content-wrap transfer-requests-page">
+        <div class="card" style="padding:16px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:200px;">
+            <label style="display:block;font-weight:700;font-size:0.82rem;color:var(--muted,#888);margin-bottom:2px;">رقم المحفظة الذي يظهر للشركاء</label>
+            <span id="storeWalletDisplay" style="font-size:1.3rem;font-weight:900;color:#0e7c66;direction:ltr;display:inline-block;">01000000000</span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="tel" id="storeWalletInput" class="form-control" style="display:none;width:180px;" placeholder="أدخل رقم المحفظة" />
+            <button id="editWalletBtn" class="btn btn-secondary" style="padding:8px 16px;font-size:0.85rem;white-space:nowrap;"><i class="fa-solid fa-pen"></i> تعديل</button>
+            <button id="saveWalletBtn" class="btn btn-primary" style="display:none;padding:8px 16px;font-size:0.85rem;white-space:nowrap;"><i class="fa-solid fa-check"></i> حفظ</button>
+          </div>
+        </div>
+        <div class="transfer-summary" id="transferSummary">
+          <div class="summary-box"><p>قيد المراجعة</p><strong id="pendingCount">0</strong></div>
+          <div class="summary-box"><p>مقبولة</p><strong id="approvedCount">0</strong></div>
+          <div class="summary-box"><p>إجمالي الطلبات</p><strong id="totalCount">0</strong></div>
+        </div>
+        <div class="card" style="padding:20px;">
+          <div class="field-block">
+            <input type="text" id="transferSearchInput" class="form-control" placeholder="بحث بالبريد الإلكتروني أو رقم الهاتف..." style="width:100%;" />
+          </div>
+        </div>
+        <div class="card" style="padding:20px;">
+          <div id="transferList" class="transfer-list"><p class="muted">جاري التحميل...</p></div>
+        </div>
+      </section>
+    </main>
+    <script>
+    (function() {
+      'use strict';
+
+      var SUPABASE_URL = 'https://msgqzgzoslearaprgiqq.supabase.co';
+      var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE';
+      var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+      var allTransfers = [];
+      var currentTransfer = null;
+
+      function safeText(v) { return String(v || '').trim(); }
+
+      function $(id) { return document.getElementById(id); }
+
+      function formatDate(d) {
+        if (!d) return '-';
+        return new Date(d).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      }
+
+      function loadTransfers() {
+        var list = $('transferList');
+        if (!list) return;
+        list.innerHTML = '<p class="muted">جاري التحميل...</p>';
+        supabase.from('transfer_requests').select('id,email,full_name,phone,wallet_type,transfer_phone,notes,status,created_at,updated_at').order('created_at', { ascending: false }).then(function(res) {
+          if (res.error) { list.innerHTML = '<p class="muted">خطأ في تحميل الطلبات.</p>'; return; }
+          allTransfers = res.data || [];
+          renderTransfers(allTransfers);
+          updateSummary(allTransfers);
+        });
+      }
+
+      function updateSummary(data) {
+        var pending = data.filter(function(r) { return r.status === 'pending'; }).length;
+        var approved = data.filter(function(r) { return r.status === 'approved'; }).length;
+        $('pendingCount').textContent = pending;
+        $('approvedCount').textContent = approved;
+        $('totalCount').textContent = data.length;
+      }
+
+      function renderTransfers(data) {
+        var list = $('transferList');
+        if (!list) return;
+        if (!data || data.length === 0) { list.innerHTML = '<p class="muted">لا توجد طلبات تحويل.</p>'; return; }
+        list.innerHTML = '';
+        data.forEach(function(r) {
+          var card = document.createElement('div');
+          card.className = 'transfer-card';
+          card.setAttribute('data-id', r.id);
+
+          var initial = (r.email || '?')[0].toUpperCase();
+          var avatarHtml = '<div class="transfer-avatar-fallback">' + initial + '</div>';
+
+          var statusClass = r.status === 'approved' ? 'approved' : (r.status === 'rejected' ? 'rejected' : 'pending');
+          var statusText = r.status === 'approved' ? 'مقبول' : (r.status === 'rejected' ? 'مرفوض' : 'قيد المراجعة');
+
+          card.innerHTML = avatarHtml +
+            '<div class="transfer-card-info"><strong>' + safeText(r.email) + '</strong><small>' + (r.transfer_phone ? 'هاتف: ' + safeText(r.transfer_phone) : '') + ' · ' + formatDate(r.created_at) + '</small></div>' +
+            '<span class="transfer-status-badge ' + statusClass + '">' + statusText + '</span>';
+
+          card.addEventListener('click', function() { window.location.href = 'admin-transfer-detail.html?id=' + r.id; });
+          list.appendChild(card);
+        });
+      }
+
+      function openTransferModal(r) {
+        currentTransfer = r;
+        var overlay = document.createElement('div');
+        overlay.className = 'transfer-modal-overlay';
+        overlay.id = 'transferModal';
+
+        var statusText = r.status === 'approved' ? 'مقبول' : (r.status === 'rejected' ? 'مرفوض' : 'قيد المراجعة');
+
+        overlay.innerHTML = '<div class="transfer-modal">' +
+          '<h3>تفاصيل طلب التحويل</h3>' +
+          '<div class="modal-field"><label>البريد الإلكتروني</label><p>' + safeText(r.email) + '</p></div>' +
+          (r.full_name ? '<div class="modal-field"><label>الاسم</label><p>' + safeText(r.full_name) + '</p></div>' : '') +
+          '<div class="modal-field"><label>طريقة التحويل</label><p>محفظة إلكترونية</p></div>' +
+          '<div class="modal-field"><label>رقم الهاتف المحول إليه</label><p>' + safeText(r.transfer_phone || '—') + '</p></div>' +
+          (r.notes ? '<div class="modal-field"><label>ملاحظات</label><p>' + safeText(r.notes) + '</p></div>' : '') +
+          '<div class="modal-field"><label>الحالة</label><p>' + statusText + '</p></div>' +
+          '<div class="modal-field"><label>التاريخ</label><p>' + formatDate(r.created_at) + '</p></div>' +
+          '<div class="modal-field"><label>صور الإيصال</label><div class="modal-images" id="modalImagesContainer"></div></div>';
+
+        if (r.status === 'pending') {
+          overlay.innerHTML += '<div class="transfer-modal-actions">' +
+            '<button class="btn-confirm" id="confirmTransferBtn">✔ تأكيد الدفع</button>' +
+            '<button class="btn-reject" id="rejectTransferBtn">✖ رفض الطلب</button>' +
+            '<button class="btn-close-modal" id="closeModalBtn">إغلاق</button>' +
+            '</div>';
+        } else {
+          overlay.innerHTML += '<div class="transfer-modal-actions">' +
+            '<button class="btn-close-modal" id="closeModalBtn">إغلاق</button>' +
+            '</div>';
+        }
+
+        overlay.innerHTML += '</div>';
+        document.body.appendChild(overlay);
+
+        // Fetch images separately and display programmatically
+        var imgContainer = $('modalImagesContainer');
+        if (imgContainer) {
+          imgContainer.innerHTML = '<p class="muted" style="padding:12px;text-align:center;">جاري تحميل الصور...</p>';
+          supabase.from('transfer_requests').select('receipt_image1,receipt_image2').eq('id', r.id).single().then(function(imgRes) {
+            if (imgRes.error || !imgRes.data) {
+              imgContainer.innerHTML = '<p class="muted" style="padding:12px;text-align:center;">لا توجد صور</p>';
+              return;
+            }
+            imgContainer.innerHTML = '';
+            var added = false;
+            [imgRes.data.receipt_image1, imgRes.data.receipt_image2].forEach(function(url) {
+              if (url && url.length > 20) {
+                var wrap = document.createElement('div');
+                var img = document.createElement('img');
+                img.src = url;
+                img.alt = 'الإيصال';
+                img.style.cssText = 'max-width:100%;max-height:260px;border-radius:12px;border:1px solid #dee2e6;object-fit:contain;cursor:zoom-in;display:block;background:#f8f9fa;box-shadow:0 2px 8px rgba(0,0,0,0.06);';
+                img.addEventListener('click', function(e) {
+                  e.stopPropagation();
+                  var lb = document.createElement('div');
+                  lb.className = 'transfer-lightbox';
+                  var lbImg = document.createElement('img');
+                  lbImg.src = this.src;
+                  lbImg.alt = this.alt;
+                  lb.appendChild(lbImg);
+                  lb.addEventListener('click', function() { lb.remove(); });
+                  document.body.appendChild(lb);
+                });
+                wrap.appendChild(img);
+                imgContainer.appendChild(wrap);
+                added = true;
+              }
+            });
+            if (!added) {
+              imgContainer.innerHTML = '<p class="muted" style="padding:12px;text-align:center;">لا توجد صور</p>';
+            }
+          });
+        }
+
+        $('closeModalBtn').addEventListener('click', function() { overlay.remove(); });
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+
+        if (r.status === 'pending') {
+          $('confirmTransferBtn').addEventListener('click', function() { confirmTransfer(r.id, r.email, overlay); });
+          $('rejectTransferBtn').addEventListener('click', function() { rejectTransfer(r.id, overlay); });
+        }
+      }
+
+      function confirmTransfer(id, email, overlay) {
+        if (!confirm('تأكيد دفع الرسوم لهذا الشريك؟')) return;
+        supabase.from('transfer_requests').update({ status: 'approved', updated_at: new Date().toISOString() }).eq('id', id).then(function(res) {
+          if (res.error) { alert('خطأ: ' + res.error.message); return; }
+          sendNotification(email, 'تم تأكيد الدفع', 'تم استلام الدفع بنجاح. تم تفعيل حسابك.');
+          overlay.remove();
+          loadTransfers();
+        });
+      }
+
+      function rejectTransfer(id, overlay) {
+        if (!confirm('رفض طلب التحويل هذا؟')) return;
+        var partnerEmail = currentTransfer ? currentTransfer.email : '';
+        supabase.from('transfer_requests').update({ status: 'rejected', updated_at: new Date().toISOString() }).eq('id', id).then(function(res) {
+          if (res.error) { alert('خطأ: ' + res.error.message); return; }
+          sendNotification(partnerEmail, 'تم رفض الدفع', 'لم يتم تأكيد الدفع. يرجى التواصل مع الدعم.');
+          overlay.remove();
+          loadTransfers();
+        });
+      }
+
+      function sendNotification(partnerEmail, title, message) {
+        supabase.from('partner_notifications').insert({
+          partner_email: partnerEmail,
+          partner_id: partnerEmail,
+          type: 'payment',
+          title: title,
+          message: message,
+          is_read: false,
+          created_at: new Date().toISOString()
+        }).then(function(res) {
+          if (res.error) console.error('Notification error:', res.error);
+        });
+      }
+
+      function loadStorePhone() {
+        supabase.from('store_config').select('value').eq('key', 'wallet_phone').maybeSingle().then(function(res) {
+          if (res.data && res.data.value) {
+            $('storeWalletDisplay').textContent = res.data.value;
+            $('storeWalletInput').value = res.data.value;
+          }
+        });
+      }
+
+      $('editWalletBtn').addEventListener('click', function() {
+        $('storeWalletDisplay').style.display = 'none';
+        $('storeWalletInput').style.display = 'inline-block';
+        $('editWalletBtn').style.display = 'none';
+        $('saveWalletBtn').style.display = 'inline-block';
+        $('storeWalletInput').focus();
+      });
+
+      $('saveWalletBtn').addEventListener('click', function() {
+        var val = $('storeWalletInput').value.trim();
+        if (!val) { alert('يرجى إدخال رقم المحفظة'); return; }
+        supabase.from('store_config').upsert({ key: 'wallet_phone', value: val, updated_at: new Date().toISOString() }).then(function(res) {
+          if (res.error) { alert('خطأ في الحفظ: ' + res.error.message); return; }
+          $('storeWalletDisplay').textContent = val;
+          $('storeWalletDisplay').style.display = 'inline-block';
+          $('storeWalletInput').style.display = 'none';
+          $('editWalletBtn').style.display = 'inline-block';
+          $('saveWalletBtn').style.display = 'none';
+        });
+      });
+
+      $('transferSearchInput').addEventListener('input', function() {
+        var q = this.value.trim().toLowerCase();
+        if (!q) { renderTransfers(allTransfers); return; }
+        var filtered = allTransfers.filter(function(r) {
+          return (r.email && r.email.toLowerCase().includes(q)) ||
+                 (r.transfer_phone && r.transfer_phone.includes(q));
+        });
+        renderTransfers(filtered);
+      });
+
+      document.addEventListener('DOMContentLoaded', function() {
+        loadTransfers();
+        loadStorePhone();
+      });
+    })();
+    </script>
+  </body>
+</html>

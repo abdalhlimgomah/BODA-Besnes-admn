@@ -31,6 +31,7 @@ function showToast(message, type = "info") {
 function statusLabel(status) {
   const labels = {
     pending: "قيد الانتظار",
+    review: "قيد المراجعة",
     preparing: "جارٍ التجهيز",
     shipped: "تم الشحن",
     delivered: "تم التسليم",
@@ -45,6 +46,7 @@ function statusLabel(status) {
 function statusClass(status) {
   return {
     pending: "status-pending",
+    review: "status-review",
     preparing: "status-preparing",
     shipped: "status-shipped",
     delivered: "status-delivered",
@@ -404,7 +406,8 @@ function applyFilters() {
       const name = (order.user_name || "").toLowerCase();
       const phone = (order.phone || "").toLowerCase();
       const prod = (order.product_name || "").toLowerCase();
-      return name.includes(query) || phone.includes(query) || prod.includes(query);
+      const email = (order.email || "").toLowerCase();
+      return name.includes(query) || phone.includes(query) || prod.includes(query) || email.includes(query);
     });
   }
 
@@ -423,55 +426,42 @@ function renderOrders(orders) {
     return;
   }
 
-  grid.innerHTML = orders
-    .map(
-      (order) => `
-      <article class="order-card">
-        <div class="order-head">
-          <p class="order-name">${order.user_name || "-"}</p>
-          <span class="status-pill ${statusClass(order.status)}">${statusLabel(order.status)}</span>
+  const grouped = {};
+  orders.forEach(order => {
+    const email = (order.email || "غير معروف").trim().toLowerCase();
+    if (!grouped[email]) {
+      grouped[email] = { email: order.email || "غير معروف", name: order.user_name || "", orders: [] };
+    }
+    grouped[email].orders.push(order);
+  });
+
+  const entries = Object.values(grouped);
+  entries.sort((a, b) => b.orders.length - a.orders.length);
+
+  grid.innerHTML = entries.map(entry => {
+    const firstLetter = (entry.email || "?").charAt(0).toUpperCase();
+    const count = entry.orders.length;
+    const encodedEmail = encodeURIComponent(entry.email);
+    const latestOrder = entry.orders[0];
+    const latestDate = formatDate(latestOrder?.created_at);
+    return `
+      <article class="user-card" onclick="goToUserOrders('${encodedEmail}')">
+        <div class="user-count-badge">${count}</div>
+        <div class="user-row">
+          <div class="user-avatar">${escapeAttr(firstLetter)}</div>
+          <div class="user-details">
+            <span class="user-email">${escapeAttr(entry.email)}</span>
+            ${entry.name ? `<span class="user-name">${escapeAttr(entry.name)}</span>` : ''}
+            <span class="user-latest">آخر طلب: ${latestDate}</span>
+          </div>
         </div>
-        <div class="order-product-preview">
-          <img
-            class="order-product-image"
-            src="${escapeAttr(order.product_image || ORDER_IMAGE_PLACEHOLDER)}"
-            alt="Product image"
-            loading="lazy"
-            onerror="this.onerror=null;this.src='${ORDER_IMAGE_PLACEHOLDER}'"
-          />
-        </div>
-        <div class="order-grid">
-          ${order.product_name ? `
-          <div class="order-row product-name-row">
-            <strong>المنتج</strong>
-            <span class="product-name-wrap">
-              <span class="product-name-short">${escapeAttr(order.product_name.length > 40 ? order.product_name.slice(0, 40) + "…" : order.product_name)}</span>
-              <span class="product-name-full hidden">${escapeAttr(order.product_name)}</span>
-              ${order.product_name.length > 40 ? '<button class="show-more-btn" onclick="toggleProductName(this)">عرض المزيد</button>' : ''}
-            </span>
-          </div>` : ''}
-          <div class="order-row"><strong>الهاتف</strong><span>${order.phone || "-"}</span></div>
-          <div class="order-row"><strong>الإيميل</strong><span>${order.email || "-"}</span></div>
-          <div class="order-row"><strong>العنوان</strong><span>${order.address || "-"}</span></div>
-          <div class="order-row"><strong>السعر</strong><span>${order.total_price || 0}</span></div>
-          <div class="order-row"><strong>التاريخ</strong><span>${formatDate(order.created_at)}</span></div>
-        </div>
-        <div class="status-control-row">
-          <select id="status_select_${order.id}">
-            <option value="pending" ${order.status === "pending" ? "selected" : ""}>قيد الانتظار</option>
-            <option value="confirmed" ${order.status === "confirmed" ? "selected" : ""}>تم التأكيد</option>
-            <option value="preparing" ${order.status === "preparing" ? "selected" : ""}>جارٍ التجهيز</option>
-            <option value="shipped" ${order.status === "shipped" ? "selected" : ""}>تم الشحن</option>
-            <option value="delivered" ${order.status === "delivered" ? "selected" : ""}>تم التسليم</option>
-            <option value="onhold" ${order.status === "onhold" ? "selected" : ""}>معلق مؤقتًا</option>
-            <option value="cancelled" ${order.status === "cancelled" ? "selected" : ""}>ملغي</option>
-            <option value="returned" ${order.status === "returned" ? "selected" : ""}>مرتجع</option>
-          </select>
-          <button class="btn btn-secondary status-btn" onclick="changeStatus('${order.id}')">تحديث</button>
-        </div>
-      </article>`
-    )
-    .join("");
+      </article>
+    `;
+  }).join("");
+}
+
+function goToUserOrders(email) {
+  window.location.href = `admin-user-orders.html?email=${email}`;
 }
 
 async function fetchOrders(showErrorToast = false) {

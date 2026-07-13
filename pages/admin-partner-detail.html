@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تفاصيل الشريك</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/app-shell.css" />
+    <link rel="stylesheet" href="../css/admin-partners.css" />
+    <style>
+      .partner-detail-header { display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:20px; }
+      .partner-detail-avatar { width:64px; height:64px; border-radius:50%; object-fit:cover; background:#e9ecef; display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:800; color:#6c757d; flex-shrink:0; }
+      .partner-detail-avatar img { width:100%; height:100%; border-radius:50%; object-fit:cover; }
+      .partner-detail-name { font-size:1.2rem; font-weight:800; }
+      .partner-detail-email { color:var(--muted); font-size:0.9rem; }
+      .detail-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px; margin-top:16px; }
+      .detail-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; }
+      .detail-card h3 { margin:0 0 12px; font-size:1rem; font-weight:700; display:flex; align-items:center; gap:8px; }
+      .detail-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0f2f5; font-size:0.9rem; }
+      .detail-row:last-child { border-bottom:none; }
+      .detail-row .label { color:var(--muted); }
+      .detail-row .value { font-weight:700; }
+      .btn-suspend { background:#dc3545; color:#fff; border:none; padding:10px 20px; border-radius:8px; font-weight:700; cursor:pointer; transition:all var(--duration-fast); }
+      .btn-suspend:hover { background:#b02a37; }
+      .btn-activate { background:#198754; color:#fff; border:none; padding:10px 20px; border-radius:8px; font-weight:700; cursor:pointer; }
+      .btn-activate:hover { background:#146c43; }
+      .btn-notify { background:#0d6efd; color:#fff; border:none; padding:10px 20px; border-radius:8px; font-weight:700; cursor:pointer; }
+      .btn-notify:hover { background:#0b5ed7; }
+      .action-bar { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+      .invoice-table { width:100%; border-collapse:collapse; font-size:0.88rem; }
+      .invoice-table th { background:#f8f9fa; padding:10px; text-align:right; font-weight:700; border-bottom:2px solid #dee2e6; }
+      .invoice-table td { padding:10px; border-bottom:1px solid #f0f2f5; }
+      .product-tag { display:inline-block; padding:3px 10px; background:#e8f4fd; border-radius:20px; font-size:0.8rem; color:#0d6efd; margin:2px; }
+      .suspended-overlay-preview { background:#f8f9fa; border:2px dashed #dee2e6; border-radius:12px; padding:20px; text-align:center; color:#6c757d; margin-top:12px; }
+    </style>
+    <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="./auth-guard.js"></script>
+  </head>
+  <body class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-badge">
+        <i class="fa-solid fa-bag-shopping"></i>
+        <div>
+          <strong>Buda Admin</strong>
+          <small>إدارة المتجر</small>
+        </div>
+      </div>
+      <nav class="side-nav">
+        <a class="side-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>لوحة التحكم</span></a>
+        <a class="side-link" href="admin-partner-accounts.html"><i class="fa-solid fa-users-gear"></i><span>حسابات الشركاء</span></a>
+        <a class="side-link" href="admin-transfer-requests.html"><i class="fa-solid fa-file-invoice"></i><span>طلبات التحويل</span></a>
+        <a class="side-link active" href="#"><i class="fa-solid fa-user"></i><span>تفاصيل الشريك</span></a>
+      </nav>
+    </aside>
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-title">
+          <h1><i class="fa-solid fa-user"></i> تفاصيل الشريك</h1>
+          <p id="partnerDetailSubtitle">تحميل...</p>
+        </div>
+        <div class="topbar-actions">
+          <a href="admin-partner-accounts.html" class="btn btn-secondary"><i class="fa-solid fa-arrow-right"></i> العودة</a>
+        </div>
+      </header>
+      <section class="content-wrap">
+        <div id="partnerDetailContent"></div>
+        <div id="partnerInvoicesContent" style="margin-top:20px;"></div>
+        <div id="partnerProductsContent" style="margin-top:20px;"></div>
+        <div id="partnerOrdersContent" style="margin-top:20px;"></div>
+      </section>
+    </main>
+    <script src="./admin-partner-detail.page.js"></script>
+  </body>
+</html>

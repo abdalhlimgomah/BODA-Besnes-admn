@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تفاصيل طلب التحويل</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/app-shell.css" />
+    <link rel="stylesheet" href="../css/admin-partners.css" />
+    <link rel="stylesheet" href="../css/admin-transfers.css" />
+    <style>
+      .td-page { max-width: 800px; margin: 0 auto; }
+      .td-header {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        border-radius: 20px; padding: 28px 24px; margin-bottom: 20px;
+        display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+      }
+      .td-header .td-h-avatar {
+        width: 60px; height: 60px; border-radius: 50%;
+        background: rgba(255,255,255,0.1); display: flex; align-items: center;
+        justify-content: center; font-size: 1.6rem; font-weight: 900; color: #ffc107;
+        flex-shrink: 0;
+      }
+      .td-header .td-h-info { flex: 1; min-width: 0; }
+      .td-header .td-h-info h2 { color: #fff; margin: 0; font-size: 1.2rem; font-weight: 800; }
+      .td-header .td-h-info p { color: rgba(255,255,255,0.6); margin: 2px 0 0; font-size: 0.85rem; }
+      .td-header .td-h-badge {
+        font-size: 0.75rem; font-weight: 700; padding: 5px 16px; border-radius: 20px;
+      }
+      .td-header .td-h-badge.pending { background: #fff3cd; color: #856404; }
+      .td-header .td-h-badge.approved { background: #d4edda; color: #155724; }
+      .td-header .td-h-badge.rejected { background: #f8d7da; color: #721c24; }
+
+      .td-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+      @media (max-width:600px) { .td-grid { grid-template-columns: 1fr; } }
+      .td-card {
+        background: var(--surface,#fff); border: 1px solid var(--border,#e0e0e0);
+        border-radius: 16px; padding: 20px;
+      }
+      .td-card h3 {
+        font-size: 0.9rem; font-weight: 800; margin: 0 0 14px;
+        display: flex; align-items: center; gap: 8px; color: #1a2332;
+      }
+      .td-card h3 i { color: #0e7c66; }
+      .td-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.88rem; }
+      .td-row:last-child { border-bottom: none; }
+      .td-row .td-label { color: var(--muted,#888); }
+      .td-row .td-value { font-weight: 700; color: var(--text,#1f2937); }
+
+      .td-images { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px; }
+      .td-images .td-img-wrap { flex: 0 0 auto; max-width: 100%; }
+      .td-images img {
+        max-width: 100%; max-height: 280px; border-radius: 12px;
+        border: 1px solid #dee2e6; object-fit: contain; cursor: zoom-in;
+        transition: transform 0.2s; background: #f8f9fa; display: block;
+      }
+      .td-images img:hover { transform: scale(1.02); }
+
+      .td-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+      .td-actions button {
+        padding: 12px 24px; border: none; border-radius: 12px;
+        font-weight: 700; font-size: 0.9rem; cursor: pointer;
+        transition: all 0.2s; display: flex; align-items: center; gap: 8px;
+      }
+      .btn-confirm-pay {
+        background: linear-gradient(135deg, #0e7c66, #0a5f4e);
+        color: #fff; box-shadow: 0 4px 16px rgba(14,124,102,0.25);
+      }
+      .btn-confirm-pay:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(14,124,102,0.35); }
+      .btn-reject-pay {
+        background: #fef2f2; color: #dc2626; border: 2px solid #fecaca !important;
+      }
+      .btn-reject-pay:hover { background: #fee2e2; }
+      .btn-back {
+        background: #f1f5f9; color: #475569; border: 2px solid #e2e8f0 !important;
+      }
+      .btn-back:hover { background: #e2e8f0; }
+
+      .td-warning {
+        background: #fff8e1; border: 1px solid #ffecb5; border-radius: 12px;
+        padding: 14px 18px; font-size: 0.82rem; color: #6d4c00; margin-top: 16px;
+      }
+    </style>
+    <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="./auth-guard.js"></script>
+  </head>
+  <body class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-badge">
+        <i class="fa-solid fa-bag-shopping"></i>
+        <div><strong>Buda Admin</strong><small>إدارة المتجر</small></div>
+      </div>
+      <nav class="side-nav">
+        <a class="side-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>لوحة التحكم</span></a>
+        <a class="side-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>رسائل الدعم</span></a>
+        <a class="side-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة المنتجات</span></a>
+        <a class="side-link" href="admin-orders.html"><i class="fa-solid fa-truck"></i><span>الطلبات</span></a>
+        <a class="side-link" href="view-products.html"><i class="fa-solid fa-eye"></i><span>مراجعة المنتجات</span></a>
+        <a class="side-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>طلبات الشراكة</span></a>
+        <a class="side-link" href="admin-sellers.html"><i class="fa-solid fa-store"></i><span>البائعين</span></a>
+        <a class="side-link" href="admin-coupons.html"><i class="fa-solid fa-tag"></i><span>الكوبونات</span></a>
+        <a class="side-link" href="admin-sections.html"><i class="fa-solid fa-layer-group"></i><span>الأقسام</span></a>
+        <a class="side-link" href="admin-home-layout.html"><i class="fa-solid fa-palette"></i><span>تخطيط الصفحة الرئيسية</span></a>
+        <a class="side-link active" href="admin-transfer-requests.html"><i class="fa-solid fa-file-invoice"></i><span>طلبات التحويل</span></a>
+      </nav>
+    </aside>
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-title">
+          <h1 id="tdPageTitle">تفاصيل طلب التحويل</h1>
+          <p id="tdPageSubtitle">تحميل...</p>
+        </div>
+      </header>
+      <section class="content-wrap td-page" id="tdContent">
+        <p class="muted">جاري التحميل...</p>
+      </section>
+    </main>
+    <script>
+    (function() {
+      'use strict';
+
+      var SUPABASE_URL = 'https://msgqzgzoslearaprgiqq.supabase.co';
+      var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE';
+      var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+      function $(id) { return document.getElementById(id); }
+      function esc(v) { return String(v || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+      function fmt(v) { return new Intl.NumberFormat('ar-EG', { style: 'currency', currency: 'EGP', minimumFractionDigits: 2 }).format(v); }
+      function fmtDate(d) { if (!d) return '-'; return new Date(d).toLocaleDateString('ar-EG', { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }); }
+      function statusText(s) { return s === 'approved' ? 'مقبول' : s === 'rejected' ? 'مرفوض' : 'قيد المراجعة'; }
+      function statusClass(s) { return s === 'approved' ? 'approved' : s === 'rejected' ? 'rejected' : 'pending'; }
+
+      function showToast(msg, type) {
+        var t = document.querySelector('.app-toast');
+        if (t) t.remove();
+        var el = document.createElement('div');
+        el.className = 'app-toast ' + (type || 'info');
+        el.textContent = msg;
+        document.body.appendChild(el);
+        setTimeout(function() { el.remove(); }, 5000);
+      }
+
+      function getTransferId() {
+        return new URLSearchParams(window.location.search).get('id');
+      }
+
+      async function loadDetail() {
+        var id = getTransferId();
+        if (!id) {
+          $('tdContent').innerHTML = '<p class="muted">لم يتم تحديد طلب تحويل.</p><a href="admin-transfer-requests.html" class="btn-back" style="display:inline-flex;padding:10px 20px;border-radius:10px;text-decoration:none;margin-top:16px;"><i class="fa-solid fa-arrow-right"></i> العودة للطلبات</a>';
+          return;
+        }
+
+        var { data: transfer, error } = await supabase.from('transfer_requests').select('*').eq('id', id).maybeSingle();
+        if (error || !transfer) {
+          $('tdContent').innerHTML = '<p class="muted">خطأ في تحميل البيانات.</p><a href="admin-transfer-requests.html">العودة</a>';
+          return;
+        }
+
+        $('tdPageTitle').textContent = 'تفاصيل طلب تحويل';
+        $('tdPageSubtitle').textContent = transfer.email + ' - ' + fmtDate(transfer.created_at);
+
+        // Fetch partner_accounts — try exact match first, then case-insensitive
+        var email = transfer.email;
+        var { data: account } = await supabase.from('partner_accounts').select('*').eq('email', email).maybeSingle();
+        if (!account) {
+          var { data: accIl } = await supabase.from('partner_accounts').select('*').ilike('email', email).maybeSingle();
+          if (accIl) account = accIl;
+        }
+
+        // If still no account, try fetching by the same email format used in auth
+        if (!account) {
+          var { data: allAcc } = await supabase.from('partner_accounts').select('email').limit(50);
+          if (allAcc) {
+            var found = allAcc.find(function(a) { return a.email && a.email.toLowerCase() === email.toLowerCase(); });
+            if (found) {
+              var { data: accFound } = await supabase.from('partner_accounts').select('*').eq('email', found.email).maybeSingle();
+              if (accFound) account = accFound;
+            }
+          }
+        }
+
+        // Fetch invoices for this partner
+        var { data: invoices } = await supabase.from('partner_invoices').select('*').ilike('email', email).order('created_at', { ascending: false });
+
+        // Fetch notifications history for this partner
+        var { data: notifications } = await supabase.from('partner_notifications').select('*').eq('partner_email', email).order('created_at', { ascending: false }).limit(20);
+
+        var loadedInvoices = invoices || [];
+        renderDetail(transfer, account, loadedInvoices, notifications || []);
+      }
+
+      function renderDetail(t, account, invoices, notifications) {
+        var isPending = t.status === 'pending';
+        var isApproved = t.status === 'approved';
+
+        var initial = (t.email || '?')[0].toUpperCase();
+        var partnerName = (t.full_name || t.email || 'شريك');
+
+        // Calculate fees from account OR from invoices OR show 0 with message
+        var hasAccount = !!account;
+        var fees = account ? (account.total_fees || 0) : 0;
+        var tax = account ? (account.total_tax || 0) : 0;
+        var totalAmount = account ? (account.total_amount || 0) : 0;
+
+        // If account has zeros but invoices exist, calculate from invoices
+        if ((!hasAccount || (fees === 0 && tax === 0 && totalAmount === 0)) && invoices && invoices.length > 0) {
+          var calcFees = 0, calcTax = 0, calcTotal = 0;
+          invoices.forEach(function(inv) {
+            if (inv.status !== 'paid') {
+              calcFees += Number(inv.total_fees || 0);
+              calcTax += Number(inv.total_tax || 0);
+              calcTotal += Number(inv.total_amount || 0);
+            }
+          });
+          if (calcFees > 0 || calcTax > 0) {
+            fees = calcFees; tax = calcTax; totalAmount = calcTotal;
+          }
+        }
+
+        var hasImages = false;
+        var html = '';
+
+        // Header
+        html += '<div class="td-header">' +
+          '<div class="td-h-avatar">' + initial + '</div>' +
+          '<div class="td-h-info"><h2>' + esc(partnerName) + '</h2><p>' + esc(t.email) + '</p></div>' +
+          '<span class="td-h-badge ' + statusClass(t.status) + '">' + statusText(t.status) + '</span>' +
+        '</div>';
+
+        // Grid
+        html += '<div class="td-grid">';
+
+        // Transfer details card
+        html += '<div class="td-card">' +
+          '<h3><i class="fa-solid fa-file-invoice"></i> بيانات التحويل</h3>' +
+          '<div class="td-row"><span class="td-label">طريقة التحويل</span><span class="td-value">محفظة إلكترونية</span></div>' +
+          '<div class="td-row"><span class="td-label">رقم الهاتف المحول إليه</span><span class="td-value" style="direction:ltr;font-family:monospace;">' + esc(t.transfer_phone || '—') + '</span></div>' +
+          (t.notes ? '<div class="td-row"><span class="td-label">ملاحظات</span><span class="td-value">' + esc(t.notes) + '</span></div>' : '') +
+          '<div class="td-row"><span class="td-label">تاريخ الطلب</span><span class="td-value">' + fmtDate(t.created_at) + '</span></div>' +
+        '</div>';
+
+        // Financial summary card
+        var finBody = '';
+        if (fees > 0 || tax > 0 || totalAmount > 0) {
+          finBody = '<div class="td-row"><span class="td-label">إجمالي رسوم المنصة</span><span class="td-value">' + fmt(fees) + '</span></div>' +
+            '<div class="td-row"><span class="td-label">إجمالي الضريبة المضافة</span><span class="td-value">' + fmt(tax) + '</span></div>' +
+            '<div class="td-row"><span class="td-label" style="font-weight:800;">الإجمالي المستحق</span><span class="td-value" style="color:#0d6efd;font-size:1.1rem;font-weight:900;">' + fmt(totalAmount) + '</span></div>';
+        } else {
+          finBody = '<p class="muted" style="text-align:center;padding:8px 0;">لا يوجد رصيد مستحق — الفواتير مدفوعة أو لا يوجد حساب مالي</p>';
+        }
+        html += '<div class="td-card">' +
+          '<h3><i class="fa-solid fa-coins"></i> الملخص المالي للشريك</h3>' + finBody +
+        '</div>';
+
+        html += '</div>';
+
+        // Invoices table
+        if (invoices && invoices.length > 0) {
+          html += '<div class="td-card" style="margin-bottom:16px;">' +
+            '<h3><i class="fa-solid fa-receipt"></i> الفواتير (' + invoices.length + ')</h3>' +
+            '<table class="invoice-table"><thead><tr><th>التاريخ</th><th>الفترة</th><th>الإيرادات</th><th>الرسوم</th><th>الضريبة</th><th>الإجمالي</th><th>الحالة</th></tr></thead><tbody>';
+          invoices.forEach(function(inv) {
+            var invStatus = inv.status === 'paid' ? 'مدفوع' : inv.status === 'overdue' ? 'متأخر' : 'معلق';
+            var invClass = inv.status === 'paid' ? 'status-delivered' : 'status-pending';
+            html += '<tr><td>' + (inv.created_at ? inv.created_at.slice(0,10) : '-') + '</td>' +
+              '<td>' + (inv.period_start || '-') + ' - ' + (inv.period_end || '-') + '</td>' +
+              '<td>' + fmt(inv.total_revenue || 0) + '</td>' +
+              '<td>' + fmt(inv.total_fees || 0) + '</td>' +
+              '<td>' + fmt(inv.total_tax || 0) + '</td>' +
+              '<td><strong>' + fmt(inv.total_amount || 0) + '</strong></td>' +
+              '<td><span class="status-badge ' + invClass + '">' + invStatus + '</span></td></tr>';
+          });
+          html += '</tbody></table></div>';
+        }
+
+        // Images
+        html += '<div class="td-card" style="margin-bottom:16px;">' +
+          '<h3><i class="fa-solid fa-image"></i> صور الإيصال</h3>' +
+          '<div class="td-images" id="tdImagesContainer">';
+
+        if (t.receipt_image1 && t.receipt_image1.length > 20) {
+          html += '<div class="td-img-wrap"><img src="' + esc(t.receipt_image1) + '" alt="الإيصال 1" class="td-click-img" /></div>';
+          hasImages = true;
+        }
+        if (t.receipt_image2 && t.receipt_image2.length > 20) {
+          html += '<div class="td-img-wrap"><img src="' + esc(t.receipt_image2) + '" alt="الإيصال 2" class="td-click-img" /></div>';
+          hasImages = true;
+        }
+        if (!hasImages) {
+          html += '<p class="muted">لا توجد صور مرفوعة</p>';
+        }
+        html += '</div></div>';
+
+        // Actions
+        html += '<div class="td-card" style="margin-bottom:16px;">' +
+          '<h3><i class="fa-solid fa-sliders"></i> الإجراءات</h3>';
+
+        html += '<div class="td-actions">' +
+          '<a href="admin-transfer-requests.html" class="btn-back" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:12px;text-decoration:none;font-weight:700;font-size:0.9rem;"><i class="fa-solid fa-arrow-right"></i> العودة</a>';
+
+        if (isPending) {
+          html += '<button class="btn-confirm-pay" id="confirmPayBtn"><i class="fa-solid fa-check-circle"></i> تأكيد الدفع وتصفير الفواتير</button>' +
+            '<button class="btn-reject-pay" id="rejectPayBtn"><i class="fa-solid fa-times-circle"></i> رفض الطلب</button>';
+        } else if (isApproved) {
+          html += '<span style="padding:12px 24px;background:#d4edda;color:#155724;border-radius:12px;font-weight:700;"><i class="fa-solid fa-check"></i> تم تأكيد الدفع مسبقاً</span>';
+        } else {
+          html += '<span style="padding:12px 24px;background:#f8d7da;color:#721c24;border-radius:12px;font-weight:700;"><i class="fa-solid fa-times"></i> تم الرفض مسبقاً</span>';
+        }
+
+        html += '</div>';
+
+        if (isPending) {
+          html += '<div class="td-warning"><i class="fa-solid fa-info-circle"></i> عند تأكيد الدفع: سيتم إرسال إشعار للشريك، وتصفير رسوم المنصة والضريبة من حسابه، وستظهر الفواتير كمدفوعة.</div>';
+        }
+
+        // Notification section
+        html += '<div style="margin-top:20px;padding-top:16px;border-top:1px solid #e2e8f0;">' +
+          '<h3 style="font-size:0.9rem;font-weight:800;margin:0 0 12px;display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-bell"></i> إرسال إشعار مخصص</h3>' +
+          '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
+            '<input type="text" id="customNotifTitle" class="form-control" placeholder="عنوان الإشعار" value="إشعار من الإدارة" style="flex:1;min-width:150px;" />' +
+            '<input type="text" id="customNotifMsg" class="form-control" placeholder="نص الإشعار" value="يرجى دفع الفواتير المستحقة." style="flex:2;min-width:200px;" />' +
+            '<button class="btn-notify" id="sendNotifBtn" style="white-space:nowrap;"><i class="fa-solid fa-paper-plane"></i> إرسال</button>' +
+          '</div>' +
+        '</div>';
+
+        html += '</div>';
+
+        // Notifications history section
+        html += '<div class="td-card" style="margin-bottom:16px;">' +
+          '<h3><i class="fa-solid fa-message"></i> سجل الرسائل المرسلة</h3>';
+
+        if (!notifications || notifications.length === 0) {
+          html += '<p class="muted">لا توجد رسائل مرسلة لهذا الشريك.</p>';
+        } else {
+          html += '<div style="display:flex;flex-direction:column;gap:8px;">';
+          notifications.forEach(function(n) {
+            var nIcon = n.type === 'payment' ? (n.title && n.title.includes('❌') ? '❌' : '✅') : '📢';
+            var nDate = n.created_at ? new Date(n.created_at).toLocaleDateString('ar-EG', { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }) : '-';
+            html += '<div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:#f8fafc;border-radius:12px;border:1px solid #f1f5f9;">' +
+              '<span style="font-size:1.2rem;">' + nIcon + '</span>' +
+              '<div style="flex:1;min-width:0;">' +
+                '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">' +
+                  '<strong style="font-size:0.85rem;">' + esc(n.title || '') + '</strong>' +
+                  '<small style="color:#94a3b8;font-size:0.7rem;">' + nDate + '</small>' +
+                '</div>' +
+                '<p style="margin:4px 0 0;font-size:0.8rem;color:#64748b;">' + esc(n.message || '') + '</p>' +
+              '</div>' +
+            '</div>';
+          });
+          html += '</div>';
+        }
+        html += '</div>';
+
+        $('tdContent').innerHTML = html;
+
+        // Lightbox for images
+        document.querySelectorAll('.td-click-img').forEach(function(img) {
+          img.addEventListener('click', function() {
+            var lb = document.createElement('div');
+            lb.className = 'transfer-lightbox';
+            var lbImg = document.createElement('img');
+            lbImg.src = this.src;
+            lb.appendChild(lbImg);
+            lb.addEventListener('click', function() { lb.remove(); });
+            document.body.appendChild(lb);
+          });
+        });
+
+        // Confirm payment
+        if (isPending) {
+          $('confirmPayBtn').addEventListener('click', function() { confirmPayment(t, account); });
+          $('rejectPayBtn').addEventListener('click', function() { rejectTransfer(t); });
+        }
+
+        $('sendNotifBtn').addEventListener('click', function() {
+          var title = $('customNotifTitle').value.trim();
+          var msg = $('customNotifMsg').value.trim();
+          if (!title || !msg) { showToast('يرجى إدخال عنوان ونص الإشعار', 'error'); return; }
+          sendNotification(t.email, t.id, title, msg);
+        });
+      }
+
+      async function confirmPayment(t, account) {
+        if (!confirm('تأكيد دفع الفواتير المستحقة؟\nسيتم إرسال إشعار للشريك وتصفير الرسوم.')) return;
+
+        showToast('جاري تأكيد الدفع...', 'info');
+
+        // 1. Update transfer status
+        var { error: err1 } = await supabase.from('transfer_requests').update({ status: 'approved', updated_at: new Date().toISOString() }).eq('id', t.id);
+        if (err1) { showToast('خطأ في تحديث حالة الطلب: ' + err1.message, 'error'); return; }
+
+        // 2. Clear partner_accounts fees/tax if account exists
+        var accountCleared = false;
+        if (account && account.id) {
+          var { error: err2 } = await supabase.from('partner_accounts').update({
+            total_fees: 0,
+            total_tax: 0,
+            total_amount: 0,
+            updated_at: new Date().toISOString()
+          }).eq('id', account.id);
+          if (err2) {
+            showToast('خطأ في تصفير الحساب: ' + err2.message, 'error');
+            console.error('Error clearing account:', err2);
+          } else {
+            accountCleared = true;
+          }
+        }
+
+        // 3. Mark partner_invoices as paid
+        var invoicesUpdated = false;
+        var { data: invoicesList } = await supabase.from('partner_invoices').select('id').ilike('email', t.email);
+        if (invoicesList && invoicesList.length > 0) {
+          var ids = invoicesList.map(function(inv) { return inv.id; });
+          var { error: err3 } = await supabase.from('partner_invoices').update({ status: 'paid', updated_at: new Date().toISOString() }).in('id', ids);
+          if (err3) {
+            showToast('خطأ في تحديث الفواتير: ' + err3.message, 'error');
+            console.error('Error updating invoices:', err3);
+          } else {
+            invoicesUpdated = true;
+          }
+        }
+
+        // 4. Send notification to partner
+        var notifTitle = '✅ تم تأكيد الدفع';
+        var notifMsg = 'تم دفع المبالغ المستحقة بنجاح (رسوم المنصة + الضريبة). تم تصفير الفواتير، وجاري حساب الفواتير الجديدة.';
+        var { error: err4 } = await supabase.from('partner_notifications').insert({
+          partner_email: t.email,
+          partner_id: t.id || '',
+          type: 'payment',
+          title: notifTitle,
+          message: notifMsg,
+          is_read: false,
+          created_at: new Date().toISOString()
+        });
+        if (err4) console.error('Error sending notification:', err4);
+
+        var resultMsg = '✅ تم تأكيد الدفع';
+        if (accountCleared) resultMsg += ' وتصفير الحساب';
+        if (invoicesUpdated) resultMsg += ' وتحديث الفواتير';
+        showToast(resultMsg, 'success');
+        setTimeout(function() { window.location.reload(); }, 1500);
+      }
+
+      async function rejectTransfer(t) {
+        if (!confirm('رفض طلب التحويل؟ سيتم إرسال إشعار للشريك.')) return;
+
+        var { error } = await supabase.from('transfer_requests').update({ status: 'rejected', updated_at: new Date().toISOString() }).eq('id', t.id);
+        if (error) { showToast('خطأ: ' + error.message, 'error'); return; }
+
+        await supabase.from('partner_notifications').insert({
+          partner_email: t.email,
+          partner_id: t.id || '',
+          type: 'payment',
+          title: '❌ تم رفض الدفع',
+          message: 'لم يتم تأكيد الدفع. لم يتم استلام تحويل مالي على رقم المحفظة الرسمي. للاستفسار، يرجى التواصل مع الدعم.',
+          is_read: false,
+          created_at: new Date().toISOString()
+        });
+
+        showToast('تم رفض الطلب وإرسال إشعار للشريك', 'info');
+        setTimeout(function() { window.location.reload(); }, 1500);
+      }
+
+      async function sendNotification(email, partnerId, title, msg) {
+        showToast('جاري الإرسال...', 'info');
+        var { error } = await supabase.from('partner_notifications').insert({
+          partner_email: email,
+          partner_id: partnerId || '',
+          type: 'admin_note',
+          title: title,
+          message: msg,
+          is_read: false,
+          created_at: new Date().toISOString()
+        });
+        if (error) { showToast('خطأ: ' + error.message, 'error'); return; }
+        showToast('✅ تم إرسال الإشعار', 'success');
+      }
+
+      document.addEventListener('DOMContentLoaded', loadDetail);
+    })();
+    </script>
+  </body>
+</html>

@@ -117,6 +117,54 @@ async function loadProducts(showErrorToast = false) {
 }
 
 async function updateProductReview(id, status) {
+  if (status === "reviewed") {
+    const { data: product, error: fetchError } = await supabaseClient
+      .from("my_products")
+      .select("*")
+      .eq("id", id)
+      .limit(1)
+      .single();
+    if (fetchError || !product) {
+      console.error(fetchError);
+      showToast("فشل جلب المنتج", "error");
+      return;
+    }
+
+    const price = Number(product.price) || 0;
+    const discount = Number(product.discount_percent) || 0;
+    const discountedPrice = price - (price * discount) / 100;
+
+    const { error: insertError } = await supabaseClient.from("products").insert([{
+      name: product.product_name || product.name || "",
+      price: price,
+      price_after_discount: discountedPrice,
+      description: product.description || "",
+      stock: product.quantity || product.stock || 0,
+      category: product.category || "",
+      image: product.img1 || product.image || "",
+      image2: product.img2 || "",
+      image3: product.img3 || "",
+      image4: product.img4 || "",
+      image5: product.img5 || "",
+      extra_links: product.extra_links || "",
+      legacy_my_products_id: id,
+    }]);
+    if (insertError) {
+      console.error(insertError);
+      showToast("فشل نسخ المنتج للموقع", "error");
+      return;
+    }
+  } else {
+    const { error: deleteError } = await supabaseClient
+      .from("products")
+      .delete()
+      .eq("legacy_my_products_id", id);
+    if (deleteError) {
+      console.error(deleteError);
+      showToast("فشل إزالة المنتج من الموقع", "error");
+    }
+  }
+
   const { error } = await supabaseClient.from("my_products").update({ review_status: status }).eq("id", id);
   if (error) {
     console.error(error);
@@ -129,6 +177,7 @@ async function updateProductReview(id, status) {
 
 async function deleteProduct(id) {
   if (!confirm("هل أنت متأكد أنك تريد حذف المنتج؟")) return;
+  await supabaseClient.from("products").delete().eq("legacy_my_products_id", id);
   const { error } = await supabaseClient.from("my_products").delete().eq("id", id);
   if (error) {
     console.error(error);

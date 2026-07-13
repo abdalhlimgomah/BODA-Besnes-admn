@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/app-shell.css" />
     <link rel="stylesheet" href="../css/admin.css" />
+    <link rel="stylesheet" href="../css/view-products.css" />
     <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link
@@ -126,9 +127,28 @@
                   <input type="file" id="imageFile" accept="image/*" multiple class="file-input-hidden" />
                   <span class="material-icons product-image-upload-icon">add_photo_alternate</span>
                   <span class="product-image-upload-text">اختر صور المنتج</span>
-                  <span class="product-image-upload-hint">JPG, PNG, WebP — حتى 5 صور</span>
+                  <span class="product-image-upload-hint">JPG, PNG, WebP — حتى 8 صور</span>
                 </label>
                 <div class="product-image-previews" id="imagePreviews"></div>
+              </div>
+            </div>
+          </div>
+          <div class="section-divider">
+            <span class="section-label"><i class="fa-solid fa-video"></i> فيديو المنتج</span>
+          </div>
+          <div class="editor-grid">
+            <div class="field-block span-2">
+              <label class="product-video-upload" id="videoUploadArea">
+                <input type="file" id="videoFile" accept="video/*" class="file-input-hidden" />
+                <span class="material-icons product-image-upload-icon">videocam</span>
+                <span class="product-image-upload-text" id="videoUploadText">اختر فيديو المنتج</span>
+                <span class="product-image-upload-hint">MP4, WebM — فيديو واحد</span>
+              </label>
+              <div id="videoPreviewBox" class="hidden" style="margin-top:8px;">
+                <video id="videoPreview" controls style="width:100%;max-height:200px;border-radius:10px;"></video>
+                <button type="button" class="btn btn-secondary" onclick="removeVideo()" style="margin-top:6px;padding:6px 14px;font-size:0.8rem;">
+                  <i class="fa-solid fa-trash"></i> إزالة الفيديو
+                </button>
               </div>
             </div>
           </div>
@@ -158,14 +178,21 @@
       <a class="mobile-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>شراكة</span></a>
       <a class="mobile-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>الدعم</span></a>
     </nav>
-    <div class="gallery-overlay" id="galleryOverlay" onclick="closeGallery(event)">
-      <button class="gallery-close" onclick="closeGallery()">&times;</button>
-      <button class="gallery-nav gallery-prev" id="galleryPrev" onclick="galleryNav(-1)">&#10094;</button>
-      <button class="gallery-nav gallery-next" id="galleryNext" onclick="galleryNav(1)">&#10095;</button>
-      <div class="gallery-content">
-        <img id="galleryImg" src="" alt="صورة المنتج" />
+    <div class="admin-gallery-overlay" id="galleryOverlay" onclick="closeGallery(event)" style="display:none;">
+      <div class="admin-gallery-inner">
+        <button class="admin-gallery-close" onclick="closeGallery()"><i class="fa-solid fa-xmark"></i></button>
+        <div class="admin-gallery-main">
+          <button class="admin-gallery-arrow" id="galleryPrev" onclick="galleryNav(-1)"><i class="fa-solid fa-chevron-right"></i></button>
+          <div class="admin-gallery-stage gallery-content">
+            <img id="galleryImg" class="admin-gallery-slide active" src="" alt="صورة المنتج" />
+          </div>
+          <button class="admin-gallery-arrow" id="galleryNext" onclick="galleryNav(1)"><i class="fa-solid fa-chevron-left"></i></button>
+        </div>
+        <div class="admin-gallery-bottom">
+          <div class="admin-gallery-dots" id="galleryDots"></div>
+          <span class="admin-gallery-counter" id="galleryCounter"></span>
+        </div>
       </div>
-      <div class="gallery-dots" id="galleryDots"></div>
     </div>
     <script src="./admin.page.js"></script>
   </body>

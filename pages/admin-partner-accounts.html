@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>حسابات الشركاء</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/app-shell.css" />
+    <link rel="stylesheet" href="../css/admin-partners.css" />
+    <link rel="stylesheet" href="../css/partner-accounts.css" />
+    <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="./auth-guard.js"></script>
+  </head>
+  <body class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-badge">
+        <i class="fa-solid fa-bag-shopping"></i>
+        <div>
+          <strong>Buda Admin</strong>
+          <small>إدارة المتجر</small>
+        </div>
+      </div>
+      <nav class="side-nav">
+        <a class="side-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>لوحة التحكم</span></a>
+        <a class="side-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>رسائل الدعم</span></a>
+        <a class="side-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة المنتجات</span></a>
+        <a class="side-link" href="admin-orders.html"><i class="fa-solid fa-truck"></i><span>الطلبات</span></a>
+        <a class="side-link" href="view-products.html"><i class="fa-solid fa-eye"></i><span>مراجعة المنتجات</span></a>
+        <a class="side-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>طلبات الشراكة</span></a>
+        <a class="side-link" href="admin-sellers.html"><i class="fa-solid fa-store"></i><span>البائعين</span></a>
+        <a class="side-link" href="admin-coupons.html"><i class="fa-solid fa-tag"></i><span>الكوبونات</span></a>
+        <a class="side-link" href="admin-sections.html"><i class="fa-solid fa-layer-group"></i><span>الأقسام</span></a>
+        <a class="side-link" href="admin-home-layout.html"><i class="fa-solid fa-palette"></i><span>تخطيط الصفحة الرئيسية</span></a>
+        <a class="side-link active" href="admin-partner-accounts.html"><i class="fa-solid fa-users-gear"></i><span>حسابات الشركاء</span></a>
+        <a class="side-link" href="admin-transfer-requests.html"><i class="fa-solid fa-file-invoice"></i><span>طلبات التحويل</span></a>
+      </nav>
+    </aside>
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-title">
+          <h1><i class="fa-solid fa-users-gear"></i> حسابات الشركاء</h1>
+          <p>إدارة حسابات الشركاء والفواتير والتحكم في حالة الحساب</p>
+        </div>
+      </header>
+      <section class="content-wrap partners-page">
+        <div id="partnerAccountsList" class="partner-accounts-list"></div>
+      </section>
+    </main>
+    <nav class="mobile-bottom-nav">
+      <a href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>الرئيسية</span></a>
+      <a href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة</span></a>
+      <a href="admin-orders.html"><i class="fa-solid fa-truck"></i><span>الطلبات</span></a>
+      <a class="active" href="admin-partner-accounts.html"><i class="fa-solid fa-users-gear"></i><span>الشركاء</span></a>
+      <a href="admin-home-layout.html"><i class="fa-solid fa-palette"></i><span>تخطيط</span></a>
+    </nav>
+    <script src="./admin-partner-accounts.page.js"></script>
+  </body>
+</html>
