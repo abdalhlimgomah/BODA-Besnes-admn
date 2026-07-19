@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة التحكم - صفحات الهبوط</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --primary-light: #eef2ff;
+      --success: #10b981;
+      --success-dark: #059669;
+      --warning: #f59e0b;
+      --warning-dark: #d97706;
+      --danger: #ef4444;
+      --danger-dark: #dc2626;
+      --gray-50: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-300: #cbd5e1;
+      --gray-400: #94a3b8;
+      --gray-500: #64748b;
+      --gray-600: #475569;
+      --gray-700: #334155;
+      --gray-800: #1e293b;
+      --gray-900: #0f172a;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+      --radius: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Tajawal',sans-serif;
+      background: linear-gradient(135deg, #f0f4ff 0%, #fdf2f8 50%, #f0fdf4 100%);
+      min-height: 100vh;
+      color: var(--gray-800);
+    }
+    .admin-container { max-width:1440px; margin:0 auto; padding:24px 20px; }
+    .page-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+    }
+    .page-header h1 {
+      font-size: 1.5rem; font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), #a855f7);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .page-header h1 .material-icons-outlined { font-size: 28px; }
+    .page-header .header-actions { display: flex; gap: 8px; }
+    .page-header .header-actions button {
+      padding: 8px 16px; border: none; border-radius: var(--radius);
+      cursor: pointer; font-family: inherit; font-size: 0.85rem; font-weight: 500;
+      background: white; color: var(--gray-600);
+      box-shadow: var(--shadow-sm); transition: all 0.2s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .page-header .header-actions button:hover {
+      box-shadow: var(--shadow); color: var(--gray-900);
+    }
+    .tabs {
+      display: flex; flex-wrap: wrap; gap: 4px;
+      margin-bottom: 24px; padding: 4px;
+      background: rgba(255,255,255,0.7); backdrop-filter: blur(10px);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+    }
+    .tab-btn {
+      padding: 10px 16px; border: none; background: transparent;
+      border-radius: var(--radius); cursor: pointer;
+      font-size: 0.82rem; font-family: inherit; font-weight: 500;
+      color: var(--gray-500); transition: all 0.25s;
+      white-space: nowrap; display: flex; align-items: center; gap: 6px;
+    }
+    .tab-btn:hover { color: var(--gray-700); background: rgba(99,102,241,0.06); }
+    .tab-btn.active {
+      background: var(--primary); color: #fff; box-shadow: var(--shadow-md);
+    }
+    .tab-btn.active:hover { background: var(--primary-dark); }
+    .tab-content { display:none; animation: fadeIn 0.3s ease; }
+    .tab-content.active { display:block; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    .toolbar {
+      display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+      margin-bottom: 16px; padding: 12px 16px;
+      background: white; border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm); border: 1px solid var(--gray-100);
+    }
+    .toolbar button {
+      padding: 8px 18px; border: none; border-radius: var(--radius);
+      cursor: pointer; font-family: inherit; font-size: 0.85rem; font-weight: 500;
+      transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+    }
+    .btn-add {
+      background: linear-gradient(135deg, var(--success), #059669);
+      color: #fff; box-shadow: 0 2px 8px rgba(16,185,129,0.3);
+    }
+    .btn-add:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16,185,129,0.4); }
+    .btn-refresh {
+      background: var(--gray-100); color: var(--gray-600);
+    }
+    .btn-refresh:hover { background: var(--gray-200); }
+    .btn-delete {
+      background: rgba(239,68,68,0.1); color: var(--danger);
+      padding: 4px 10px; border: none; border-radius: 6px;
+      cursor: pointer; font-size: 0.78rem; font-weight: 500;
+      transition: all 0.2s;
+    }
+    .btn-delete:hover { background: var(--danger); color: #fff; }
+    .btn-edit {
+      background: rgba(245,158,11,0.1); color: var(--warning-dark);
+      padding: 4px 10px; border: none; border-radius: 6px;
+      cursor: pointer; font-size: 0.78rem; font-weight: 500;
+      transition: all 0.2s;
+    }
+    .btn-edit:hover { background: var(--warning); color: #fff; }
+    .table-wrap {
+      overflow-x: auto; background: white;
+      border-radius: var(--radius-lg); box-shadow: var(--shadow);
+      border: 1px solid var(--gray-100);
+    }
+    table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+    th {
+      padding: 12px 14px; text-align: right;
+      background: linear-gradient(135deg, var(--gray-50), #fefefe);
+      border-bottom: 2px solid var(--gray-200);
+      font-weight: 600; white-space: nowrap;
+      color: var(--gray-600); font-size: 0.8rem;
+      text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    td {
+      padding: 10px 14px; border-bottom: 1px solid var(--gray-100);
+      vertical-align: middle; max-width: 300px;
+      overflow: hidden; text-overflow: ellipsis;
+      color: var(--gray-700);
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--primary-light); }
+    tr:nth-child(even) td { background: var(--gray-50); }
+    tr:nth-child(even):hover td { background: var(--primary-light); }
+    .actions { display:flex; gap:4px; }
+    .modal-overlay {
+      display:none; position:fixed; inset:0;
+      background: rgba(15,23,42,0.6); backdrop-filter: blur(4px);
+      z-index:1000; justify-content:center; align-items:center;
+      animation: fadeInOverlay 0.2s ease;
+    }
+    .modal-overlay.show { display:flex; }
+    @keyframes fadeInOverlay { from { opacity:0; } to { opacity:1; } }
+    .modal {
+      background: white; border-radius: var(--radius-xl);
+      padding: 28px; width: 92%; max-width: 680px;
+      max-height: 88vh; overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp { from { opacity:0; transform:translateY(20px) scale(0.97); } to { opacity:1; transform:translateY(0) scale(1); } }
+    .modal h2 {
+      margin-bottom: 20px; font-size: 1.2rem;
+      color: var(--gray-900); display: flex; align-items: center; gap: 8px;
+      padding-bottom: 14px; border-bottom: 2px solid var(--gray-100);
+    }
+    .modal .field { margin-bottom: 16px; }
+    .modal label {
+      display: block; font-weight: 600; margin-bottom: 6px;
+      font-size: 0.85rem; color: var(--gray-700);
+    }
+    .modal input, .modal textarea, .modal select {
+      width:100%; padding: 10px 14px;
+      border: 1.5px solid var(--gray-200); border-radius: var(--radius);
+      font-family: inherit; font-size: 0.9rem;
+      transition: all 0.2s; background: var(--gray-50);
+    }
+    .modal input:focus, .modal textarea:focus, .modal select:focus {
+      outline: none; border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+      background: white;
+    }
+    .modal textarea { min-height:80px; resize:vertical; }
+    .modal .btn-row {
+      display: flex; gap: 10px; justify-content: flex-end;
+      margin-top: 22px; padding-top: 16px;
+      border-top: 1px solid var(--gray-100);
+    }
+    .modal .btn-row button {
+      padding: 10px 24px; border: none; border-radius: var(--radius);
+      cursor: pointer; font-family: inherit; font-weight: 600; font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .btn-save {
+      background: linear-gradient(135deg, var(--primary), #818cf8);
+      color: #fff; box-shadow: 0 2px 8px rgba(99,102,241,0.3);
+    }
+    .btn-save:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99,102,241,0.4); }
+    .btn-cancel { background: var(--gray-100); color: var(--gray-600); }
+    .btn-cancel:hover { background: var(--gray-200); }
+    .status-badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 0.72rem; font-weight: 600;
+    }
+    .status-active {
+      background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+      color: #065f46;
+    }
+    .status-inactive {
+      background: linear-gradient(135deg, #fee2e2, #fecaca);
+      color: #991b1b;
+    }
+    .ref-box {
+      margin-bottom: 20px; padding: 14px 18px;
+      background: linear-gradient(135deg, #f0f9ff, #eef2ff);
+      border: 1px solid #bae6fd; border-radius: var(--radius-lg);
+      font-size: 0.85rem;
+    }
+    .ref-box strong { color: var(--primary-dark); }
+    .ref-box a {
+      color: var(--primary); text-decoration: none; margin-left: 14px;
+      font-weight: 500; transition: all 0.2s;
+    }
+    .ref-box a:hover { color: var(--primary-dark); text-decoration: underline; }
+    .empty-state { padding: 60px 40px; text-align: center; color: var(--gray-400); }
+    .empty-state .material-icons-outlined { font-size: 48px; margin-bottom: 8px; }
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      padding: 14px 24px; border-radius: var(--radius-lg);
+      color: #fff; font-weight: 500; font-size: 0.9rem;
+      z-index: 2000; box-shadow: var(--shadow-lg);
+      animation: slideIn 0.35s ease;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .toast.success { background: linear-gradient(135deg, var(--success), #059669); }
+    .toast.error { background: linear-gradient(135deg, var(--danger), #dc2626); }
+    @keyframes slideIn { from { transform:translateX(120px);opacity:0; } to { transform:translateX(0);opacity:1; } }
+    .search-input {
+      padding: 8px 14px; border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius); font-family: inherit;
+      font-size: 0.85rem; width: 220px;
+      background: var(--gray-50); transition: all 0.2s;
+    }
+    .search-input:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(99,102,241,0.15); background:white; }
+    .img-thumb {
+      width: 44px; height: 44px; object-fit: cover;
+      border-radius: var(--radius); box-shadow: var(--shadow-sm);
+      border: 2px solid white;
+    }
+    .id-cell { font-size:0.75rem; color:var(--gray-400); max-width:100px; overflow:hidden; text-overflow:ellipsis; }
+    .stat-cards {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px; margin-bottom: 20px;
+    }
+    .stat-card {
+      background: white; border-radius: var(--radius-lg);
+      padding: 16px 18px; box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-100);
+      display: flex; align-items: center; gap: 14px;
+      transition: all 0.2s;
+    }
+    .stat-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+    .stat-card .icon {
+      width: 42px; height: 42px; border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 20px;
+    }
+    .stat-card .info h3 { font-size: 1.3rem; font-weight: 700; color: var(--gray-900); }
+    .stat-card .info p { font-size: 0.78rem; color: var(--gray-400); margin-top: 2px; }
+    .country-tabs {
+      display: flex; gap: 8px; margin-bottom: 16px;
+    }
+    .country-btn {
+      padding: 10px 24px; border: 2px solid transparent; border-radius: var(--radius);
+      cursor: pointer; font-family: inherit; font-size: 0.9rem; font-weight: 600;
+      transition: all 0.25s; display: flex; align-items: center; gap: 8px;
+      background: white; color: var(--gray-500); box-shadow: var(--shadow-sm);
+    }
+    .country-btn:hover { border-color: var(--gray-200); color: var(--gray-700); }
+    .country-btn.active-eg {
+      background: linear-gradient(135deg, #dc2626, #ef4444);
+      color: #fff; border-color: #dc2626; box-shadow: 0 2px 12px rgba(220,38,38,0.3);
+    }
+    .country-btn.active-sa {
+      background: linear-gradient(135deg, #16a34a, #22c55e);
+      color: #fff; border-color: #16a34a; box-shadow: 0 2px 12px rgba(22,163,74,0.3);
+    }
+    .country-btn .flag { font-size: 1.2rem; }
+    .setup-banner {
+      margin-bottom: 16px; padding: 16px 20px;
+      background: linear-gradient(135deg, #fef3c7, #fee2e2);
+      border: 1px solid #f87171; border-radius: var(--radius-lg);
+      color: #991b1b; font-size: 0.85rem; line-height: 1.7;
+    }
+    .setup-banner strong { color: #7c3aed; }
+    .setup-banner code {
+      display:block; margin-top:8px; padding:10px 14px;
+      background: #1e293b; color: #a5f3fc; border-radius: var(--radius);
+      font-family: 'Consolas','Courier New',monospace; font-size:0.78rem;
+      direction: ltr; text-align: left; white-space: pre-wrap;
+      max-height: 200px; overflow-y: auto;
+    }
+    .setup-banner .material-icons-outlined { font-size: 20px; vertical-align: middle; }
+    .loading-skeleton {
+      padding: 40px; display: flex; flex-direction: column;
+      align-items: center; gap: 16px; color: var(--gray-400);
+    }
+    .loading-skeleton .spinner {
+      width: 32px; height: 32px; border: 3px solid var(--gray-200);
+      border-top-color: var(--primary); border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+<div class="admin-container">
+  <div class="page-header">
+    <h1><span class="material-icons-outlined">dashboard_customize</span> لوحة تحكم صفحات الهبوط</h1>
+    <div class="header-actions">
+      <button onclick="location.reload()"><span class="material-icons-outlined" style="font-size:18px;">refresh</span> تحديث</button>
+    </div>
+  </div>
+
+
+  <div class="country-tabs">
+    <button class="country-btn active-eg" id="countryEg" onclick="switchCountry('EG')">
+      <span class="flag">🇪🇬</span> مصر
+    </button>
+    <button class="country-btn" id="countrySa" onclick="switchCountry('SA')">
+      <span class="flag">🇸🇦</span> السعودية
+    </button>
+  </div>
+
+  <div class="ref-box" id="refBox">
+    <strong>روابط الصفحات:</strong>
+    <span id="refLinks">
+      <a href="../../موقع الخاص بك/pages/category-landing.html?slug=fashion" target="_blank">category-landing.html?slug=fashion</a>
+      <a href="../../موقع الخاص بك/pages/category-landing.html?slug=electronics" target="_blank">?slug=electronics</a>
+      <a href="../../موقع الخاص بك/pages/category-landing.html?slug=shoes" target="_blank">?slug=shoes</a>
+      <a href="../../موقع الخاص بك/pages/category-landing.html?slug=skincare" target="_blank">?slug=skincare</a>
+    </span>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div id="tabContents"></div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalContent">
+    <h2 id="modalTitle"><span class="material-icons-outlined" style="color:var(--primary);">edit_note</span> إضافة</h2>
+    <form id="modalForm" onsubmit="return false;"></form>
+    <div class="btn-row">
+      <button class="btn-cancel" onclick="closeModal()">إلغاء</button>
+      <button class="btn-save" onclick="saveItem()">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://msgqzgzoslearaprgiqq.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE';
+
+const TABLES = {
+  smart_category_showcase: { label: 'الشريط الذكي', icon: 'dashboard', fields: ['id','title','subtitle','image_url','link_url','gradient_from','gradient_to','sort_order','is_active','country_code','created_at'] },
+  category_banners: { label: 'بنرات التصنيفات', icon: 'view_carousel', fields: ['id','category_id','image_url','title','subtitle','button_text','button_link','sort_order','is_active','country_code','created_at'] },
+  promotional_banners: { label: 'البانرات الترويجية', icon: 'landscape', fields: ['id','slug','title','subtitle','image_url','link_url','bg_color','brand_id','brand_slug','is_active','sort_order','country_code','created_at','updated_at'] },
+  category_sections: { label: 'أقسام التصنيفات', icon: 'inventory', fields: ['id','category_id','section_type','title','subtitle','badge','sort_order','is_active','display_count','selection_mode','country_code','created_at','updated_at'] },
+  category_section_products: { label: 'منتجات الأقسام', icon: 'checklist', fields: ['id','section_id','product_id','sort_order','country_code','created_at'] },
+  brands: { label: 'الماركات', icon: 'handshake', fields: ['id','slug','name','name_en','logo_url','description','website','is_active','sort_order','country_code','created_at','updated_at'] },
+  brand_banners: { label: 'بنرات الماركات', icon: 'photo_library', fields: ['id','brand_id','image_url','title','subtitle','button_text','button_link','sort_order','is_active','country_code','created_at'] },
+  brand_sections: { label: 'أقسام الماركات', icon: 'view_list', fields: ['id','brand_id','section_type','title','subtitle','badge','sort_order','is_active','display_count','selection_mode','country_code','created_at','updated_at'] },
+  brand_section_products: { label: 'منتجات أقسام الماركات', icon: 'checklist', fields: ['id','section_id','product_id','sort_order','country_code','created_at'] },
+  featured_collections: { label: 'المجموعات المميزة', icon: 'collections', fields: ['id','category_id','title','subtitle','image_url','link_url','sort_order','is_active','country_code','created_at','updated_at'] },
+  collection_products: { label: 'منتجات المجموعات', icon: 'checklist', fields: ['id','collection_slug','product_id','product_name','product_image','product_price','product_old_price','product_rating','sort_order','country_code','created_at'] },
+  categories: { label: 'التصنيفات', icon: 'category', fields: ['id','slug','name','name_en','image_url','icon','description','is_active','sort_order','country_code','created_at','updated_at'] },
+  brand_submissions: { label: 'طلبات الماركات', icon: 'app_registration', fields: ['id','brand_name','owner_name','phone','email','website','instagram','category','message','status','country_code','created_at','updated_at'] }
+};
+
+const TABLE_NAMES = Object.keys(TABLES);
+const COUNTRIES = [
+  { code: 'EG', label: 'مصر', flag: '🇪🇬' },
+  { code: 'SA', label: 'السعودية', flag: '🇸🇦' }
+];
+let currentCountry = 'EG';
+let currentTable = TABLE_NAMES[0];
+let editingId = null;
+let dataCache = {};
+const SQL_SETUP_URL = '../sql/setup_landing_pages.sql';
+
+function supabaseFetch(path, opts = {}) {
+  const url = `${SUPABASE_URL}${path}`;
+  const headers = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` };
+  if (opts.body && !(opts.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+    headers['Prefer'] = 'return=representation';
+  }
+  return fetch(url, { ...opts, headers });
+}
+
+function toast(msg, type = 'success') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function init() {
+  renderTabs();
+  checkConnection();
+}
+
+function switchCountry(code) {
+  currentCountry = code;
+  document.querySelectorAll('.country-btn').forEach(b => b.className = 'country-btn');
+  const btn = document.getElementById(code === 'EG' ? 'countryEg' : 'countrySa');
+  if (btn) btn.className = `country-btn active-${code.toLowerCase()}`;
+  updateRefLinks(code);
+  if (document.getElementById('tabContents').querySelector('.stat-cards')) {
+    renderStats();
+    switchTab(currentTable);
+  }
+}
+
+function updateRefLinks(code) {
+  const el = document.getElementById('refLinks');
+  const slugs = code === 'SA' ? ['fashion','electronics','shoes'] : ['fashion','electronics','shoes','skincare'];
+  el.innerHTML = slugs.map(s => `<a href="../../موقع الخاص بك/pages/category-landing.html?slug=${s}" target="_blank">?slug=${s}</a>`).join('\n');
+}
+
+function countryFilter(table) {
+  return `country_code=eq.${currentCountry}`;
+}
+
+async function checkConnection() {
+  const container = document.getElementById('tabContents');
+  container.innerHTML = '<div class="loading-skeleton"><div class="spinner"></div><span>جاري الاتصال بقاعدة البيانات...</span></div>';
+  try {
+    const res = await supabaseFetch(`/rest/v1/categories?select=id&limit=1`);
+    if (res.ok) {
+      renderStats();
+      switchTab(TABLE_NAMES[0]);
+    } else {
+      throw new Error(`HTTP ${res.status}`);
+    }
+  } catch (e) {
+    container.innerHTML = `
+      <div class="setup-banner">
+        <span class="material-icons-outlined">warning</span>
+        <strong>جداول قاعدة البيانات غير موجودة!</strong><br>
+        يرجى إنشاء الجداول أولاً عن طريق تشغيل ملف SQL في Supabase SQL Editor:
+        <code>افتح Supabase Dashboard ← SQL Editor ← الصق هذا الكود ← Run</code>
+        <div style="margin-top:10px;">
+          <button onclick="showSqlSetup()" style="padding:8px 18px;background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:500;">
+            <span class="material-icons-outlined" style="font-size:18px;vertical-align:middle;">code</span> عرض كود SQL
+          </button>
+        </div>
+      </div>`;
+  }
+}
+
+function showSqlSetup() {
+  const container = document.getElementById('tabContents');
+  container.innerHTML = `
+    <div class="setup-banner" style="border-color:#6366f1;background:linear-gradient(135deg,#eef2ff,#f5f3ff);color:#1e293b;">
+      <strong>كود إنشاء الجداول</strong><br>
+      <span style="font-size:0.78rem;color:#64748b;">انسخ هذا الكود وافتح Supabase Dashboard ← SQL Editor ← الصق ← Run</span>
+      <code id="sqlCode">جارٍ تحميل كود SQL...</code>
+    </div>
+    <div style="text-align:center;margin-top:16px;">
+      <button onclick="copySqlCode()" style="padding:8px 18px;background:var(--success);color:#fff;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:500;">
+        <span class="material-icons-outlined" style="font-size:18px;vertical-align:middle;">content_copy</span> نسخ الكود
+      </button>
+      <button onclick="init()" style="padding:8px 18px;background:var(--gray-100);color:var(--gray-600);border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:500;margin-right:8px;">
+        <span class="material-icons-outlined" style="font-size:18px;vertical-align:middle;">refresh</span> التحقق مرة أخرى
+      </button>
+    </div>`;
+  fetch('../sql/setup_landing_pages.sql')
+    .then(r => r.text())
+    .then(sql => document.getElementById('sqlCode').textContent = sql)
+    .catch(() => document.getElementById('sqlCode').textContent = 'تعذر تحميل الملف - افتح sql/setup_landing_pages.sql يدوياً');
+}
+
+function copySqlCode() {
+  const el = document.getElementById('sqlCode');
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(() => toast('تم نسخ الكود')).catch(() => toast('تعذر النسخ', 'error'));
+}
+
+function renderStats() {
+  const container = document.getElementById('tabContents');
+  const icons = ['dashboard', 'view_carousel', 'landscape', 'inventory', 'checklist', 'handshake', 'photo_library', 'view_list', 'checklist', 'collections', 'checklist', 'category', 'app_registration'];
+  const colors = ['#6366f1','#f59e0b','#10b981','#ef4444','#8b5cf6','#ec4899','#14b8a6','#f97316','#06b6d4','#84cc16','#a855f7','#0ea5e9','#e11d48'];
+  const countryLabel = COUNTRIES.find(c => c.code === currentCountry)?.flag || '';
+  const cardsHTML = TABLE_NAMES.map((t, i) => `
+    <div class="stat-card" onclick="switchTab('${t}')" style="cursor:pointer;">
+      <div class="icon" style="background:linear-gradient(135deg,${colors[i % colors.length]},${colors[(i+3) % colors.length]});">
+        <span class="material-icons-outlined">${icons[i % icons.length]}</span>
+      </div>
+      <div class="info">
+        <h3 id="statCount_${t}">-</h3>
+        <p>${TABLES[t].label}</p>
+      </div>
+    </div>
+  `).join('');
+  container.innerHTML = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;"><span style="font-size:1.2rem;">${countryLabel}</span><span style="font-size:0.85rem;color:var(--gray-500);">${currentCountry === 'EG' ? 'مصر' : 'السعودية'}</span></div><div class="stat-cards">${cardsHTML}</div>`;
+
+  TABLE_NAMES.forEach(t => {
+    supabaseFetch(`/rest/v1/${t}?select=id&limit=1000&${countryFilter(t)}`)
+      .then(r => r.ok ? r.json() : [])
+      .then(data => { const el = document.getElementById(`statCount_${t}`); if (el) el.textContent = (data || []).length; })
+      .catch(() => {});
+  });
+}
+
+function renderTabs() {
+  const container = document.getElementById('tabs');
+  container.innerHTML = TABLE_NAMES.map(t => `<button class="tab-btn${t === currentTable ? ' active' : ''}" onclick="switchTab('${t}')"><span class="material-icons-outlined" style="font-size:18px;vertical-align:middle;margin-left:4px;">${TABLES[t].icon}</span>${TABLES[t].label}</button>`).join('');
+}
+
+function switchTab(table) {
+  currentTable = table;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.tab-btn[onclick*="${table}"]`)?.classList.add('active');
+  editingId = null;
+  loadTable(table);
+}
+
+async function loadTable(table) {
+  const container = document.getElementById('tabContents');
+  container.innerHTML = '<div class="loading-skeleton"><div class="spinner"></div><span>جاري التحميل...</span></div>';
+
+  try {
+    const res = await supabaseFetch(`/rest/v1/${table}?select=*&${countryFilter(table)}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    dataCache[table] = data || [];
+    renderTable(table, data || []);
+  } catch (e) {
+    container.innerHTML = `
+      <div class="setup-banner">
+        <span class="material-icons-outlined">error</span>
+        <strong>خطأ في تحميل الجدول "${TABLES[table].label}"</strong><br>
+        ${e.message.includes('HTTP 404') ? 'الجدول غير موجود في Supabase — يرجى إنشاء الجداول أولاً.' : e.message.includes('HTTP 40') ? 'غير مصرح لك بالوصول.' : `تعذر الاتصال بقاعدة البيانات: ${e.message}`}
+        <div style="margin-top:10px;">
+          <button onclick="showSqlSetup()" style="padding:6px 14px;background:#6366f1;color:#fff;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:500;font-size:0.8rem;">
+            عرض تعليمات الإعداد
+          </button>
+        </div>
+      </div>`;
+  }
+}
+
+function renderTable(table, data) {
+  const container = document.getElementById('tabContents');
+  const fields = TABLES[table].fields;
+  const displayFields = fields.filter(f => f !== 'id' && f !== 'created_at' && f !== 'updated_at' && f !== 'product_image');
+
+  const label = TABLES[table].label;
+  container.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="material-icons-outlined" style="color:var(--primary);font-size:22px;">${TABLES[table].icon}</span>
+        <h2 style="font-size:1.1rem;font-weight:700;color:var(--gray-900);margin:0;">${label}</h2>
+        <span style="font-size:0.78rem;color:var(--gray-400);background:var(--gray-100);padding:2px 10px;border-radius:12px;">${data.length} عنصر</span>
+      </div>
+    </div>
+    <div class="toolbar">
+      <button class="btn-add" onclick="openAdd('${table}')"><span class="material-icons-outlined" style="font-size:18px;">add</span> إضافة</button>
+      <button class="btn-refresh" onclick="loadTable('${table}')"><span class="material-icons-outlined" style="font-size:18px;">refresh</span></button>
+      <span class="material-icons-outlined" style="color:var(--gray-400);font-size:20px;">search</span>
+      <input type="text" class="search-input" placeholder="بحث في ${displayFields.length} حقل..." oninput="filterTable('${table}',this.value)" />
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th style="width:40px;">#</th>
+          ${displayFields.map(f => `<th>${f}</th>`).join('')}
+          <th style="width:100px;">إجراءات</th>
+        </tr></thead>
+        <tbody id="tableBody">
+          ${data.length === 0 ? `<tr><td colspan="${displayFields.length + 2}" class="empty-state"><div><span class="material-icons-outlined">inbox</span></div>لا توجد بيانات</td></tr>` : ''}
+          ${data.map((row, idx) => `
+            <tr>
+              <td style="color:var(--gray-400);font-size:0.8rem;">${idx + 1}</td>
+              ${displayFields.map(f => `<td>${formatCell(f, row[f], row)}</td>`).join('')}
+              <td><div class="actions">
+                <button class="btn-edit" onclick="openEdit('${table}','${row.id}')"><span class="material-icons-outlined" style="font-size:14px;">edit</span></button>
+                <button class="btn-delete" onclick="deleteItem('${table}','${row.id}')"><span class="material-icons-outlined" style="font-size:14px;">delete</span></button>
+              </div></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function formatCell(field, val, row) {
+  if (val == null) return '<span style="color:#94a3b8;">-</span>';
+  if (field === 'image_url' || field === 'logo_url' || field === 'product_image') {
+    const img = val || row.image_url || row.logo_url;
+    return img ? `<img src="${escapeHtml(img)}" class="img-thumb" onerror="this.style.display='none'" />` : '-';
+  }
+  if (field === 'is_active') return val ? '<span class="status-badge status-active">نشط</span>' : '<span class="status-badge status-inactive">غير نشط</span>';
+  if (field === 'sort_order') return val;
+  if (typeof val === 'boolean') return val ? 'نعم' : 'لا';
+  if (typeof val === 'object') return '<span style="color:#94a3b8;">[كائن]</span>';
+  const s = String(val);
+  if (s.length > 80) return escapeHtml(s.slice(0, 80)) + '...';
+  return escapeHtml(s);
+}
+
+function filterTable(table, query) {
+  const data = dataCache[table] || [];
+  if (!query.trim()) { renderTable(table, data); return; }
+  const q = query.toLowerCase();
+  const filtered = data.filter(row => Object.values(row).some(v => String(v).toLowerCase().includes(q)));
+  renderTable(table, filtered);
+}
+
+async function openAdd(table) {
+  editingId = null;
+  document.getElementById('modalTitle').innerHTML = `<span class="material-icons-outlined" style="color:var(--success);">add_circle</span> إضافة - ${TABLES[table].label}`;
+  buildForm(table, {});
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+async function openEdit(table, id) {
+  editingId = id;
+  const item = dataCache[table]?.find(r => String(r.id) === String(id));
+  if (!item) { toast('العنصر غير موجود', 'error'); return; }
+  document.getElementById('modalTitle').innerHTML = `<span class="material-icons-outlined" style="color:var(--warning);">edit</span> تعديل - ${TABLES[table].label}`;
+  buildForm(table, item);
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function buildForm(table, data) {
+  const fields = TABLES[table].fields.filter(f => f !== 'id' && f !== 'created_at' && f !== 'updated_at' && f !== 'country_code');
+  const form = document.getElementById('modalForm');
+  form.innerHTML = (data.country_code ? `<input type="hidden" name="country_code" value="${data.country_code}" />` : `<input type="hidden" name="country_code" value="${currentCountry}" />`) + fields.map(f => {
+    const val = data[f] ?? '';
+    if (f === 'is_active') {
+      return `<div class="field"><label>${f}</label><select name="${f}"><option value="true"${val === true || val === 'true' ? ' selected' : ''}>نشط</option><option value="false"${val === false || val === 'false' ? ' selected' : ''}>غير نشط</option></select></div>`;
+    }
+    if (f === 'description' || f === 'message') {
+      return `<div class="field"><label>${f}</label><textarea name="${f}">${escapeHtml(val)}</textarea></div>`;
+    }
+    return `<div class="field"><label>${f}</label><input name="${f}" value="${escapeHtml(val)}" /></div>`;
+  }).join('');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+  editingId = null;
+}
+
+async function saveItem() {
+  const form = document.getElementById('modalForm');
+  const inputs = form.querySelectorAll('input, textarea, select');
+  const body = {};
+  inputs.forEach(inp => {
+    let val = inp.value;
+    if (inp.name === 'is_active') val = val === 'true';
+    if (inp.name === 'sort_order') val = parseInt(val) || 0;
+    body[inp.name] = val;
+  });
+
+  const table = currentTable;
+
+  try {
+    let res;
+    if (editingId) {
+      res = await supabaseFetch(`/rest/v1/${table}?id=eq.${editingId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(body)
+      });
+    } else {
+      res = await supabaseFetch(`/rest/v1/${table}`, {
+        method: 'POST',
+        body: JSON.stringify(body)
+      });
+    }
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`HTTP ${res.status}: ${errText.slice(0, 200)}`);
+    }
+    toast(editingId ? 'تم التحديث' : 'تمت الإضافة');
+    closeModal();
+    loadTable(table);
+  } catch (e) {
+    toast(`خطأ: ${e.message}`, 'error');
+  }
+}
+
+async function deleteItem(table, id) {
+  if (!confirm('هل أنت متأكد من حذف هذا العنصر؟')) return;
+  try {
+    const res = await supabaseFetch(`/rest/v1/${table}?id=eq.${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    toast('تم الحذف');
+    loadTable(table);
+  } catch (e) {
+    toast(`خطأ: ${e.message}`, 'error');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
