@@ -4,7 +4,7 @@ const SUPABASE_ANON_KEY =
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const ORDER_IMAGE_PLACEHOLDER =
-  "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='14' fill='%23f3f4f6'/%3E%3Cpath d='M60 32a14 14 0 110 28 14 14 0 010-28zm-24 46c0-10 8-18 18-18h12c10 0 18 8 18 18v8H36v-8z' fill='%2394a3b8'/%3E%3C/svg%3E";
+  "data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 120 120%27%3E%3Crect width=%27120%27 height=%27120%27 rx=%2714%27 fill=%27%23f3f4f6%27/%3E%3Cpath d=%27M60 32a14 14 0 110 28 14 14 0 010-28zm-24 46c0-10 8-18 18-18h12c10 0 18 8 18 18v8H36v-8z%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E";
 
 let allOrders = [];
 
@@ -444,15 +444,18 @@ function renderOrders(orders) {
     const encodedEmail = encodeURIComponent(entry.email);
     const latestOrder = entry.orders[0];
     const latestDate = formatDate(latestOrder?.created_at);
+    var latestImage = normalizeImageSource(latestOrder?.product_image) || "";
+    var totalSpent = entry.orders.reduce(function (s, o) { return s + (Number(o.total_price) || 0); }, 0);
     return `
       <article class="user-card" onclick="goToUserOrders('${encodedEmail}')">
         <div class="user-count-badge">${count}</div>
         <div class="user-row">
-          <div class="user-avatar">${escapeAttr(firstLetter)}</div>
+          ${latestImage ? '<div class="user-thumb"><img src="' + escapeAttr(latestImage) + '" alt="" onerror="this.onerror=null;this.parentElement.classList.add(\'user-thumb-fallback\')" /></div>' : '<div class="user-avatar">' + escapeAttr(firstLetter) + '</div>'}
           <div class="user-details">
             <span class="user-email">${escapeAttr(entry.email)}</span>
             ${entry.name ? `<span class="user-name">${escapeAttr(entry.name)}</span>` : ''}
             <span class="user-latest">آخر طلب: ${latestDate}</span>
+            <span class="user-total">الإجمالي: ${totalSpent}</span>
           </div>
         </div>
       </article>

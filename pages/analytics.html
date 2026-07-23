@@ -1,0 +1,139 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة التحليلات - Buda Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/app-shell.css" />
+  <link rel="stylesheet" href="../css/admin.css" />
+  <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="./auth-guard.js"></script>
+</head>
+<body class="app-shell">
+  <aside class="app-sidebar">
+    <div class="brand-badge">
+      <i class="fa-solid fa-bag-shopping"></i>
+      <div>
+        <strong>Buda Admin</strong>
+        <small>لوحة التحكم</small>
+      </div>
+    </div>
+    <nav class="side-nav">
+      <a class="side-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>إحصائيات عامة</span></a>
+      <a class="side-link" href="admin-landing-pages.html"><i class="fa-solid fa-file-lines"></i><span>صفحات الهبوط</span></a>
+      <a class="side-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>الدعم الفني</span></a>
+      <a class="side-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة منتجات</span></a>
+      <a class="side-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>الطلبات</span></a>
+      <a class="side-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>الشركاء</span></a>
+      <a class="side-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>عرض المنتجات</span></a>
+      <a class="side-link" href="admin-ai-details.html"><i class="fa-solid fa-wand-magic-sparkles"></i><span>AI تفاصيل</span></a>
+      <a class="side-link" href="taager-products.html"><i class="fa-solid fa-database"></i><span>منتجات Taager</span></a>
+      <a class="side-link" href="admin-taager-verify.html"><i class="fa-solid fa-check-double"></i><span>التحقق من Taager</span></a>
+      <a class="side-link" href="admin-sellers.html"><i class="fa-solid fa-store"></i><span>إدارة البائعين</span></a>
+      <a class="side-link" href="admin-coupons.html"><i class="fa-solid fa-tags"></i><span>الكوبونات</span></a>
+      <a class="side-link" href="admin-fake-prices.html"><i class="fa-solid fa-percent"></i><span>أسعار وهمية</span></a>
+      <a class="side-link" href="admin-taager-sizes.html"><i class="fa-solid fa-ruler-combined"></i><span>أحجام Taager</span></a>
+      <a class="side-link" href="admin-taager-token.html"><i class="fa-solid fa-key"></i><span>مفتاح Taager</span></a>
+      <a class="side-link active" href="analytics.html"><i class="fa-solid fa-chart-pie"></i><span>لوحة التحليلات</span></a>
+    </nav>
+  </aside>
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-title">
+        <h1>لوحة التحليلات</h1>
+        <p>حالة أدوات Google و Microsoft المتصلة بالموقع</p>
+      </div>
+    </header>
+    <section class="content-wrap">
+      <div class="analytics-page" style="max-width: 1200px; margin: 0 auto; padding: 32px 20px;">
+        <div class="analytics-grid" id="analytics-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 20px; margin-bottom: 32px;"></div>
+        <div class="analytics-settings" id="analytics-settings" style="background: #fff; border-radius: 16px; padding: 24px; border: 1px solid #f1f5f9; max-width: 600px;"></div>
+      </div>
+    </section>
+  </main>
+  <nav class="mobile-bottom-nav">
+    <a class="mobile-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>الإحصائيات</span></a>
+    <a class="mobile-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة</span></a>
+    <a class="mobile-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>الطلبات</span></a>
+    <a class="mobile-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>الشركاء</span></a>
+    <a class="mobile-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>الدعم</span></a>
+  </nav>
+  <script>
+    (function () {
+      var config = {
+        GA4_MEASUREMENT_ID: "G-XXXXXXXXXX",
+        GSC_VERIFICATION: "pending",
+        BING_VERIFICATION: "pending",
+        CLARITY_PROJECT_ID: "pending",
+      };
+
+      try {
+        var stored = localStorage.getItem("buda_analytics_config");
+        if (stored) Object.assign(config, JSON.parse(stored));
+      } catch (e) {}
+
+      function renderGrid() {
+        var grid = document.getElementById("analytics-grid");
+        if (!grid) return;
+
+        var cards = [
+          { title: "Google Analytics 4", desc: "تتبع الزوار والسلوك والأحداث", status: config.GA4_MEASUREMENT_ID !== "G-XXXXXXXXXX" && config.GA4_MEASUREMENT_ID !== "pending", icon: "fa-chart-line", id: "GA4" },
+          { title: "Google Search Console", desc: "مراقبة ظهور الموقع في البحث", status: config.GSC_VERIFICATION !== "pending", icon: "fa-search", id: "GSC" },
+          { title: "Bing Webmaster", desc: "إدارة ظهور الموقع في Bing", status: config.BING_VERIFICATION !== "pending", icon: "fa-globe", id: "Bing" },
+          { title: "Microsoft Clarity", desc: "تسجيل جلسات المستخدمين", status: config.CLARITY_PROJECT_ID !== "pending", icon: "fa-eye", id: "Clarity" },
+        ];
+
+        grid.innerHTML = cards.map(function (c) {
+          var statusClass = c.status ? "active" : "inactive";
+          var statusText = c.status ? "متصل" : "غير متصل";
+          var iconHtml = c.status ? '<i class="fa-solid fa-check-circle"></i>' : '<i class="fa-solid fa-times-circle"></i>';
+          return '<div class="card" style="background: #fff; border-radius: 16px; padding: 24px; border: 1px solid #f1f5f9;">' +
+            '<h3 style="font-size: 16px; color: #1a2530; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">' +
+              '<i class="fa-solid ' + c.icon + '" style="font-size: 20px; color: #facc15;"></i> ' + c.title + '</h3>' +
+            '<p style="color: #64748b; font-size: 14px; margin-bottom: 12px; line-height: 1.6;">' + c.desc + '</p>' +
+            '<div style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; ' + (c.status ? 'background: #dcfce7; color: #16a34a;' : 'background: #fef2f2; color: #ef4444;') + '">' +
+              iconHtml + ' ' + statusText + '</div></div>';
+        }).join("");
+      }
+
+      function renderSettings() {
+        var container = document.getElementById("analytics-settings");
+        if (!container) return;
+
+        container.innerHTML =
+          '<h3 style="font-size: 18px; color: #1a2530; margin-bottom: 20px;">إعدادات أدوات التحليلات</h3>' +
+          '<div style="margin-bottom: 20px;"><label style="display: block; font-size: 14px; font-weight: 600; color: #1a2530; margin-bottom: 6px;">Google Analytics 4 ID (Measurement ID)</label><input type="text" id="cfg-ga4" value="' + config.GA4_MEASUREMENT_ID + '" placeholder="G-XXXXXXXXXX" style="width: 100%; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 14px; direction: ltr; text-align: left; box-sizing: border-box;"><div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">من حساب Google Analytics → Admin → Data Streams</div></div>' +
+          '<div style="margin-bottom: 20px;"><label style="display: block; font-size: 14px; font-weight: 600; color: #1a2530; margin-bottom: 6px;">Google Search Console — كود التحقق (meta tag)</label><input type="text" id="cfg-gsc" value="' + config.GSC_VERIFICATION + '" placeholder="google-site-verification-code" style="width: 100%; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 14px; direction: ltr; text-align: left; box-sizing: border-box;"><div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">من GSC → Settings → Ownership verification → HTML tag</div></div>' +
+          '<div style="margin-bottom: 20px;"><label style="display: block; font-size: 14px; font-weight: 600; color: #1a2530; margin-bottom: 6px;">Bing Webmaster — كود التحقق</label><input type="text" id="cfg-bing" value="' + config.BING_VERIFICATION + '" placeholder="bing-verification-code" style="width: 100%; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 14px; direction: ltr; text-align: left; box-sizing: border-box;"><div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">من Bing Webmaster Tools → Configure → Meta tag</div></div>' +
+          '<div style="margin-bottom: 20px;"><label style="display: block; font-size: 14px; font-weight: 600; color: #1a2530; margin-bottom: 6px;">Microsoft Clarity — Project ID</label><input type="text" id="cfg-clarity" value="' + config.CLARITY_PROJECT_ID + '" placeholder="clarity-project-id" style="width: 100%; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 14px; direction: ltr; text-align: left; box-sizing: border-box;"><div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">من Clarity → Settings → Project ID</div></div>' +
+          '<button onclick="saveConfig()" style="padding: 10px 24px; background: #facc15; color: #0f172a; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;">حفظ الإعدادات</button>' +
+          '<div style="margin-top:16px;padding:12px;background:#f8fafc;border-radius:10px;font-size:13px;color:#64748b"><strong>ملاحظة:</strong> بعد الحفظ، يتم تخزين الإعدادات محلياً (localStorage). للتفعيل الكامل، غيّر القيم في <code>assets/js/seo/analytics-manager.js</code></div>' +
+          '<div style="margin-top:24px"><h4 style="margin-bottom:8px">الروابط السريعة</h4>' +
+          '<a href="https://analytics.google.com" target="_blank" rel="noopener" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #f8fafc; border-radius: 10px; margin-bottom: 12px; text-decoration: none; color: inherit;"><div><div style="font-weight: 600; color: #1a2530;">Google Analytics</div><div style="font-size: 13px; color: #64748b;">analytics.google.com</div></div><i class="fa-solid fa-arrow-up-right-from-square"></i></a>' +
+          '<a href="https://search.google.com/search-console" target="_blank" rel="noopener" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #f8fafc; border-radius: 10px; margin-bottom: 12px; text-decoration: none; color: inherit;"><div><div style="font-weight: 600; color: #1a2530;">Google Search Console</div><div style="font-size: 13px; color: #64748b;">search.google.com/search-console</div></div><i class="fa-solid fa-arrow-up-right-from-square"></i></a>' +
+          '<a href="https://www.bing.com/webmasters" target="_blank" rel="noopener" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #f8fafc; border-radius: 10px; margin-bottom: 12px; text-decoration: none; color: inherit;"><div><div style="font-weight: 600; color: #1a2530;">Bing Webmaster Tools</div><div style="font-size: 13px; color: #64748b;">bing.com/webmasters</div></div><i class="fa-solid fa-arrow-up-right-from-square"></i></a>' +
+          '<a href="https://clarity.microsoft.com" target="_blank" rel="noopener" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #f8fafc; border-radius: 10px; text-decoration: none; color: inherit;"><div><div style="font-weight: 600; color: #1a2530;">Microsoft Clarity</div><div style="font-size: 13px; color: #64748b;">clarity.microsoft.com</div></div><i class="fa-solid fa-arrow-up-right-from-square"></i></a>' +
+          '</div>';
+      }
+
+      window.saveConfig = function () {
+        config.GA4_MEASUREMENT_ID = document.getElementById("cfg-ga4")?.value || "G-XXXXXXXXXX";
+        config.GSC_VERIFICATION = document.getElementById("cfg-gsc")?.value || "pending";
+        config.BING_VERIFICATION = document.getElementById("cfg-bing")?.value || "pending";
+        config.CLARITY_PROJECT_ID = document.getElementById("cfg-clarity")?.value || "pending";
+        try { localStorage.setItem("buda_analytics_config", JSON.stringify(config)); } catch (e) {}
+        renderGrid();
+        alert("تم حفظ الإعدادات");
+      };
+
+      renderGrid();
+      renderSettings();
+    })();
+  </script>
+  <script src="./admin.page.js"></script>
+</body>
+</html>

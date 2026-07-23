@@ -4,7 +4,14 @@ const SUPABASE_ANON_KEY =
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const ORDER_IMAGE_PLACEHOLDER =
-  "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='14' fill='%23f3f4f6'/%3E%3Cpath d='M60 32a14 14 0 110 28 14 14 0 010-28zm-24 46c0-10 8-18 18-18h12c10 0 18 8 18 18v8H36v-8z' fill='%2394a3b8'/%3E%3C/svg%3E";
+  "data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 120 120%27%3E%3Crect width=%27120%27 height=%27120%27 rx=%2714%27 fill=%27%23f3f4f6%27/%3E%3Cpath d=%27M60 32a14 14 0 110 28 14 14 0 010-28zm-24 46c0-10 8-18 18-18h12c10 0 18 8 18 18v8H36v-8z%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E";
+
+function extractTaagerId(item) {
+  if (item.taager_product_id) return item.taager_product_id;
+  var id = String(item.id || item.product_id || "");
+  if (id.startsWith("taager_")) return id.slice(7);
+  return "";
+}
 
 let userEmail = "";
 let userOrders = [];
@@ -139,6 +146,61 @@ function getFilteredOrders() {
   return userOrders.filter(order => order.status === status);
 }
 
+function extractOrderItems(order) {
+  const payloadFields = [order.items_json, order.items, order.order_items, order.items_snapshot, order.type];
+  for (const payload of payloadFields) {
+    const items = normalizeToArray(payload);
+    if (items.length) return items;
+  }
+  return [];
+}
+
+function renderOrderItems(items, order) {
+  if (!items || !items.length) return '<div class="order-row"><strong>المنتجات</strong><span>-</span></div>';
+  var orderDiscount = order && Number(order.discount) > 0 ? Number(order.discount) : 0;
+  var subtotal = items.reduce(function(s, it) {
+    return s + (Number(it.price) || 0) * (Number(it.quantity) || 1);
+  }, 0);
+  var html = items.map(function(item) {
+    var img = normalizeImageSource(
+      item.image || item.image_url || item.product_image || item.thumbnail || item.img ||
+      (Array.isArray(item.images) ? item.images[0] : item.images) || ""
+    ) || ORDER_IMAGE_PLACEHOLDER;
+    var name = item.name || item.product_name || item.title || "منتج";
+    var qty = Number(item.quantity) || 1;
+    var price = Number(item.price) || 0;
+    var total = price * qty;
+    var taagerId = extractTaagerId(item);
+    var sku = item.sku || item.code || "";
+    var itemDiscount = orderDiscount > 0 && subtotal > 0
+      ? Math.round((total / subtotal) * orderDiscount)
+      : 0;
+    return '<div class="order-item-row">'
+      + '<img class="order-item-img" src="' + escapeAttr(img) + '" alt="' + escapeAttr(name) + '" loading="lazy" onerror="this.onerror=null;this.src=\'' + ORDER_IMAGE_PLACEHOLDER + '\'" />'
+      + '<div class="order-item-info">'
+      + '<div class="order-item-name">' + escapeAttr(name.length > 35 ? name.slice(0, 35) + "…" : name) + '</div>'
+      + '<div class="order-item-details">'
+      + '<span class="oid-label">السعر:</span><span class="oid-value">' + price + '</span>'
+      + '<span class="oid-label">الكمية:</span><span class="oid-value">' + qty + '</span>'
+      + '<span class="oid-label">الإجمالي:</span><span class="oid-value oid-total">' + total + '</span>'
+      + (itemDiscount > 0 ? '<span class="oid-label">الخصم:</span><span class="oid-value oid-discount">-' + itemDiscount + '</span>' : '')
+      + '</div>'
+      + (taagerId || sku ? '<div class="order-item-codes">' : '')
+      + (taagerId ? '<span class="oid-code">تاجر: ' + escapeAttr(taagerId) + '</span>' : '')
+      + (sku ? '<span class="oid-code">كود: ' + escapeAttr(sku) + '</span>' : '')
+      + (taagerId || sku ? '</div>' : '')
+      + '</div>'
+      + '</div>';
+  }).join("");
+  if (orderDiscount > 0) {
+    html += '<div class="order-discount-summary">'
+      + '<span>إجمالي الخصم: <strong>' + orderDiscount + '</strong></span>'
+      + (order.coupon_code ? '<span class="oid-code">كود: ' + escapeAttr(order.coupon_code) + '</span>' : '')
+      + '</div>';
+  }
+  return html;
+}
+
 function renderOrders() {
   const filtered = getFilteredOrders();
   const grid = document.getElementById("ordersGrid");
@@ -148,29 +210,21 @@ function renderOrders() {
   }
 
   grid.innerHTML = filtered.map(order => {
-    const productName = extractProductNameFromOrder(order);
-    const productImage = normalizeImageSource(order.product_image) || ORDER_IMAGE_PLACEHOLDER;
+    const items = extractOrderItems(order);
     return `
       <article class="order-card">
         <div class="order-head">
           <p class="order-name">${escapeAttr(order.user_name || "-")}</p>
           <span class="status-pill ${statusClass(order.status)}">${statusLabel(order.status)}</span>
         </div>
-        <div class="order-product-preview">
-          <img class="order-product-image" src="${escapeAttr(productImage)}"
-            alt="Product" loading="lazy"
-            onerror="this.onerror=null;this.src='${ORDER_IMAGE_PLACEHOLDER}'" />
-        </div>
+        <div class="order-items-list">${renderOrderItems(items, order)}</div>
         <div class="order-grid">
-          ${productName ? `
-          <div class="order-row">
-            <strong>المنتج</strong>
-            <span>${escapeAttr(productName.length > 50 ? productName.slice(0, 50) + "…" : productName)}</span>
-          </div>` : ''}
           <div class="order-row"><strong>الهاتف</strong><span>${escapeAttr(order.phone || "-")}</span></div>
           <div class="order-row"><strong>الإيميل</strong><span>${escapeAttr(order.email || "-")}</span></div>
           <div class="order-row"><strong>العنوان</strong><span>${escapeAttr(order.address || "-")}</span></div>
           <div class="order-row"><strong>السعر</strong><span>${order.total_price || 0}</span></div>
+          ${order.discount && Number(order.discount) > 0 ? '<div class="order-row"><strong>الخصم</strong><span style="color:#16a34a;">-' + order.discount + '</span></div>' : ''}
+          ${order.coupon_code ? '<div class="order-row"><strong>كوبون</strong><span>' + escapeAttr(order.coupon_code) + '</span></div>' : ''}
           <div class="order-row"><strong>التاريخ</strong><span>${formatDate(order.created_at)}</span></div>
         </div>
         <div class="status-control-row">
