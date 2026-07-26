@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إدارة المسابقة - Buda Admin</title>
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/app-shell.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="./auth-guard.js"></script>
+  <style>
+    /* ===== Admin Contest Page Styles ===== */
+    .contest-admin-wrap { display:flex;flex-direction:column;gap:16px; }
+    
+    /* Tabs */
+    .admin-tabs { display:flex;gap:4px;overflow-x:auto;padding:4px 0;flex-wrap:nowrap;border-bottom:1px solid #e2e8f0; }
+    .admin-tab { padding:10px 16px;border:none;background:none;cursor:pointer;font-size:0.85rem;font-weight:700;color:#64748b;border-radius:8px 8px 0 0;transition:all 0.2s;white-space:nowrap;font-family:inherit;border-bottom:2px solid transparent; }
+    .admin-tab:hover { color:#334155;background:#f8fafc; }
+    .admin-tab.active { color:#6D28D9;border-bottom-color:#6D28D9;background:#f5f3ff; }
+    .admin-tab i { margin-left:6px; }
+    
+    /* Tab panels */
+    .tab-panel { display:none;animation:fadeIn 0.25s ease; }
+    .tab-panel.active { display:block; }
+    @keyframes fadeIn { from { opacity:0;transform:translateY(8px); } to { opacity:1;transform:translateY(0); } }
+    
+    /* Metrics */
+    .admin-metrics { display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:16px; }
+    .admin-metric { background:#fff;border-radius:12px;padding:16px;border:1px solid #e2e8f0;text-align:center; }
+    .admin-metric-num { font-size:1.6rem;font-weight:800;color:#6D28D9;display:block; }
+    .admin-metric-label { font-size:0.75rem;color:#64748b;margin-top:4px;display:block;font-weight:600; }
+    
+    /* Table */
+    .admin-table-wrap { overflow-x:auto;background:#fff;border-radius:12px;border:1px solid #e2e8f0; }
+    .admin-table { width:100%;border-collapse:collapse;font-size:0.82rem; }
+    .admin-table th { text-align:right;padding:12px 14px;font-weight:700;color:#334155;border-bottom:2px solid #e2e8f0;background:#f8fafc;white-space:nowrap; }
+    .admin-table td { padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#475569; }
+    .admin-table tr:hover td { background:#fafafa; }
+    .admin-table .actions-cell { display:flex;gap:6px; }
+    
+    /* Mobile cards (for small screens) */
+    .mobile-cards { display:none;flex-direction:column;gap:8px; }
+    .mobile-card { background:#fff;border-radius:10px;padding:14px;border:1px solid #e2e8f0; }
+    .mobile-card-row { display:flex;justify-content:space-between;padding:3px 0;font-size:0.8rem; }
+    .mobile-card-label { color:#64748b;font-weight:600; }
+    .mobile-card-value { color:#0f172a;font-weight:700; }
+    @media (max-width:768px) {
+      .admin-table-wrap { display:none; }
+      .mobile-cards { display:flex; }
+    }
+    
+    /* Status badges */
+    .status-badge { display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;font-size:0.72rem;font-weight:700; }
+    .status-pending { background:#fef3c7;color:#92400e; }
+    .status-qualified { background:#d1fae5;color:#065f46; }
+    .status-won { background:#dbeafe;color:#1e40af; }
+    .status-contacted { background:#ede9fe;color:#5b21b6; }
+    .status-fulfilled { background:#d1fae5;color:#065f46; }
+    .status-not_won { background:#fee2e2;color:#991b1b; }
+    .status-rejected { background:#fee2e2;color:#991b1b; }
+    .status-active { background:#d1fae5;color:#065f46; }
+    .status-ended { background:#f1f5f9;color:#475569; }
+    .status-draft { background:#f1f5f9;color:#475569; }
+    
+    /* Search & filters */
+    .admin-toolbar { display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center; }
+    .admin-search { flex:1;min-width:200px;padding:10px 14px;border:1px solid #d1d5db;border-radius:8px;font-size:0.85rem;font-family:inherit; }
+    .admin-search:focus { border-color:#6D28D9;outline:none;box-shadow:0 0 0 2px rgba(109,40,217,0.1); }
+    .admin-filter { padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:0.82rem;font-family:inherit;background:#fff; }
+    
+    /* Actions bar */
+    .admin-actions { display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px; }
+    .admin-btn { display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:none;border-radius:8px;font-size:0.82rem;font-weight:700;font-family:inherit;cursor:pointer;transition:all 0.2s; }
+    .admin-btn-primary { background:linear-gradient(135deg,#6D28D9,#7C3AED);color:#fff; }
+    .admin-btn-primary:hover { transform:translateY(-1px);box-shadow:0 4px 12px rgba(109,40,217,0.25); }
+    .admin-btn-secondary { background:#f1f5f9;color:#334155;border:1px solid #e2e8f0; }
+    .admin-btn-secondary:hover { background:#e2e8f0; }
+    .admin-btn-danger { background:#fee2e2;color:#991b1b; }
+    .admin-btn-danger:hover { background:#fecaca; }
+    .admin-btn-sm { padding:6px 10px;font-size:0.75rem; }
+    
+    /* Modal */
+    .admin-modal-backdrop { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9999;align-items:center;justify-content:center;padding:20px; }
+    .admin-modal-backdrop.open { display:flex; }
+    .admin-modal { background:#fff;border-radius:16px;padding:24px;max-width:500px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.15);animation:modalIn 0.25s ease; }
+    @keyframes modalIn { from { opacity:0;transform:scale(0.95) translateY(10px); } to { opacity:1;transform:scale(1) translateY(0); } }
+    .admin-modal h3 { margin:0 0 16px;font-size:1.1rem;font-weight:800;color:#0f172a; }
+    .admin-modal .modal-field { display:flex;flex-direction:column;gap:4px;margin-bottom:14px; }
+    .admin-modal .modal-field label { font-size:0.82rem;font-weight:700;color:#334155; }
+    .admin-modal .modal-field input,
+    .admin-modal .modal-field textarea,
+    .admin-modal .modal-field select { padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:0.85rem;font-family:inherit; }
+    .admin-modal .modal-field textarea { resize:vertical;min-height:80px; }
+    .admin-modal .modal-actions { display:flex;gap:8px;justify-content:flex-end;margin-top:16px; }
+    
+    /* Detail Drawer */
+    .detail-drawer { position:fixed;top:0;left:0;bottom:0;width:420px;max-width:100vw;background:#fff;z-index:9998;box-shadow:4px 0 30px rgba(0,0,0,0.1);transform:translateX(-100%);transition:transform 0.3s ease;overflow-y:auto; }
+    .detail-drawer.open { transform:translateX(0); }
+    .detail-drawer .drawer-header { display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e2e8f0;position:sticky;top:0;background:#fff;z-index:1; }
+    .detail-drawer .drawer-header h3 { margin:0;font-size:1rem;font-weight:800; }
+    .detail-drawer .drawer-close { background:none;border:none;font-size:20px;cursor:pointer;color:#64748b;padding:4px; }
+    .detail-drawer .drawer-body { padding:20px; }
+    .detail-drawer .detail-section { margin-bottom:16px; }
+    .detail-drawer .detail-section h4 { font-size:0.85rem;font-weight:700;color:#6D28D9;margin:0 0 8px;padding-bottom:4px;border-bottom:1px solid #e2e8f0; }
+    .detail-drawer .detail-row { display:flex;justify-content:space-between;padding:4px 0;font-size:0.82rem; }
+    .detail-drawer .detail-label { color:#64748b;font-weight:600; }
+    .detail-drawer .detail-value { color:#0f172a;font-weight:700; }
+    
+    /* Rewards cards */
+    .rewards-admin-grid { display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); }
+    .reward-admin-card { background:#fff;border-radius:12px;padding:16px;border:1px solid #e2e8f0;display:flex;flex-direction:column;gap:8px; }
+    .reward-admin-card .reward-header { display:flex;align-items:center;justify-content:space-between; }
+    .reward-admin-card .reward-title { font-weight:700;font-size:0.95rem;color:#0f172a; }
+    .reward-admin-card .reward-actions { display:flex;gap:4px; }
+    .reward-admin-card .reward-body { font-size:0.82rem;color:#64748b; }
+    
+    /* Form styles */
+    .settings-form { display:flex;flex-direction:column;gap:14px;max-width:500px; }
+    .settings-form .form-field { display:flex;flex-direction:column;gap:4px; }
+    .settings-form .form-field label { font-size:0.82rem;font-weight:700;color:#334155; }
+    .settings-form .form-field input,
+    .settings-form .form-field select,
+    .settings-form .form-field textarea { padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:0.85rem;font-family:inherit; }
+    
+    /* Empty state */
+    .empty-state { text-align:center;padding:40px 20px;color:#94a3b8; }
+    .empty-state i { font-size:48px;margin-bottom:12px;display:block; }
+    .empty-state h3 { font-size:1rem;font-weight:700;color:#64748b;margin:0 0 6px; }
+    .empty-state p { font-size:0.85rem;margin:0; }
+    
+    /* Toast */
+    .contest-toast-wrap { position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:99999;display:flex;flex-direction:column;gap:8px; }
+    .contest-toast-item { padding:12px 20px;border-radius:10px;font-size:0.85rem;font-weight:600;color:#fff;animation:toastIn 0.3s ease;box-shadow:0 4px 14px rgba(0,0,0,0.12); }
+    .contest-toast-item.toast-success { background:#16a34a; }
+    .contest-toast-item.toast-error { background:#dc2626; }
+    .contest-toast-item.toast-info { background:#1e293b; }
+    @keyframes toastIn { from { opacity:0;transform:translateY(10px); } to { opacity:1;transform:translateY(0); } }
+    
+    /* Skeleton */
+    .sk-pulse { background:linear-gradient(-90deg,#f0f0f0 0%,#e0e0e0 50%,#f0f0f0 100%);background-size:400% 400%;animation:skPulse 1.2s ease-in-out infinite;border-radius:8px; }
+    @keyframes skPulse { 0%{background-position:0% 0%}100%{background-position:-135% 0%} }
+    .sk-metric { height:80px; }
+    .sk-table-row { height:40px;margin-bottom:4px; }
+    
+    /* Responsive table scroll */
+    @media (max-width:1024px) {
+      .admin-tabs { font-size:0.8rem; }
+      .admin-tab { padding:8px 12px; }
+    }
+    @media (max-width:480px) {
+      .admin-metrics { grid-template-columns:repeat(2,1fr); }
+      .admin-toolbar { flex-direction:column; }
+      .admin-search { width:100%; }
+      .detail-drawer { width:100%; }
+    }
+  </style>
+</head>
+<body class="app-shell">
+  <aside class="app-sidebar">
+    <div class="brand-badge">
+      <i class="fa-solid fa-trophy"></i>
+      <div><strong>Buda Admin</strong><small>إدارة المسابقة</small></div>
+    </div>
+    <nav class="side-nav">
+      <a class="side-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>لوحة التحكم</span></a>
+      <a class="side-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>رسائل الدعم</span></a>
+      <a class="side-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة المنتجات</span></a>
+      <a class="side-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>الطلبات</span></a>
+      <a class="side-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>طلبات الشراكة</span></a>
+      <a class="side-link" href="admin-partner-accounts.html"><i class="fa-solid fa-users-gear"></i><span>حسابات الشركاء</span></a>
+      <a class="side-link active" href="admin-buda-rewards.html"><i class="fa-solid fa-trophy"></i><span>مسابقة Buda Rewards</span></a>
+    </nav>
+  </aside>
+
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-title">
+        <i class="fa-solid fa-trophy"></i>
+        <h2>إدارة المسابقة</h2>
+      </div>
+      <div class="topbar-actions">
+        <button onclick="window.location.reload()" class="admin-btn admin-btn-secondary admin-btn-sm"><i class="fa-solid fa-rotate"></i> تحديث</button>
+      </div>
+    </header>
+
+    <section class="content-wrap">
+      <div class="contest-admin-wrap">
+        <!-- Tabs -->
+        <nav class="admin-tabs" role="tablist">
+          <button class="admin-tab active" data-tab="participants" role="tab"><i class="fa-solid fa-users"></i>المشاركون</button>
+          <button class="admin-tab" data-tab="referrals" role="tab"><i class="fa-solid fa-link"></i>الإحالات</button>
+          <button class="admin-tab" data-tab="stats" role="tab"><i class="fa-solid fa-chart-bar"></i>الإحصائيات</button>
+          <button class="admin-tab" data-tab="rewards" role="tab"><i class="fa-solid fa-gift"></i>الجوائز</button>
+          <button class="admin-tab" data-tab="winners" role="tab"><i class="fa-solid fa-crown"></i>الفائزون</button>
+          <button class="admin-tab" data-tab="messages" role="tab"><i class="fa-solid fa-envelope"></i>الرسائل</button>
+          <button class="admin-tab" data-tab="settings" role="tab"><i class="fa-solid fa-gear"></i>الإعدادات</button>
+        </nav>
+
+        <!-- ===== TAB: Participants ===== -->
+        <div class="tab-panel active" id="tabParticipants" role="tabpanel">
+          <div class="admin-toolbar">
+            <input type="text" id="participantSearch" class="admin-search" placeholder="بحث بالاسم أو البريد أو الهاتف أو كود الدعوة..." />
+            <select id="participantFilter" class="admin-filter">
+              <option value="all">الكل</option>
+              <option value="registered">مسجل جديد</option>
+              <option value="has_referrals">لديه إحالات</option>
+              <option value="winner">فائز</option>
+              <option value="contacted">تم التواصل</option>
+              <option value="not_contacted">لم يتم التواصل</option>
+            </select>
+          </div>
+          <div id="participantSkeleton" class="admin-metrics">
+            <div class="sk-pulse sk-metric"></div><div class="sk-pulse sk-metric"></div>
+          </div>
+          <div class="admin-table-wrap"><table class="admin-table"><thead><tr>
+            <th>الاسم</th><th>البريد</th><th>الهاتف</th><th>المدينة</th><th>كود الدعوة</th><th>الإحالات</th><th>تاريخ التسجيل</th><th>الجائزة</th><th></th>
+          </tr></thead><tbody id="participantsTableBody"></tbody></table></div>
+          <div id="participantsMobileCards" class="mobile-cards"></div>
+          <div id="participantsEmpty" class="empty-state hidden"><i class="fa-solid fa-users-slash"></i><h3>لا يوجد مشاركون حتى الآن</h3><p>عند تسجيل المستخدمين في المسابقة، سيظهرون هنا.</p></div>
+        </div>
+
+        <!-- ===== TAB: Referrals ===== -->
+        <div class="tab-panel" id="tabReferrals" role="tabpanel">
+          <div class="admin-toolbar">
+            <input type="text" id="referralSearch" class="admin-search" placeholder="بحث بكود الدعوة أو اسم المدعو..." />
+          </div>
+          <div class="admin-table-wrap"><table class="admin-table"><thead><tr>
+            <th>الداعي</th><th>كود الدعوة</th><th>المدعو</th><th>الحالة</th><th>التاريخ</th>
+          </tr></thead><tbody id="referralsTableBody"></tbody></table></div>
+          <div id="referralsMobileCards" class="mobile-cards"></div>
+          <div id="referralsEmpty" class="empty-state hidden"><i class="fa-solid fa-link-slash"></i><h3>لا توجد إحالات حتى الآن</h3></div>
+        </div>
+
+        <!-- ===== TAB: Statistics ===== -->
+        <div class="tab-panel" id="tabStats" role="tabpanel">
+          <div id="statsSkeleton" style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:16px;">
+            <div class="sk-pulse" style="height:80px"></div><div class="sk-pulse" style="height:80px"></div>
+            <div class="sk-pulse" style="height:80px"></div><div class="sk-pulse" style="height:80px"></div>
+          </div>
+          <div id="statsMetrics" class="admin-metrics"></div>
+        </div>
+
+        <!-- ===== TAB: Rewards ===== -->
+        <div class="tab-panel" id="tabRewards" role="tabpanel">
+          <div class="admin-actions">
+            <button id="addRewardBtn" class="admin-btn admin-btn-primary"><i class="fa-solid fa-plus"></i> إضافة جائزة</button>
+          </div>
+          <div id="rewardsLoading" class="admin-metrics">
+            <div class="sk-pulse sk-metric"></div><div class="sk-pulse sk-metric"></div>
+          </div>
+          <div id="rewardsGrid" class="rewards-admin-grid"></div>
+          <div id="rewardsEmpty" class="empty-state hidden"><i class="fa-solid fa-gift"></i><h3>لا توجد جوائز</h3><p>أضف جائزة جديدة باستخدام الزر أعلاه.</p></div>
+        </div>
+
+        <!-- ===== TAB: Winners ===== -->
+        <div class="tab-panel" id="tabWinners" role="tabpanel">
+          <div class="admin-toolbar">
+            <select id="winnerFilter" class="admin-filter">
+              <option value="all">الكل</option>
+              <option value="won">فائز</option>
+              <option value="contacted">تم التواصل</option>
+              <option value="fulfilled">تم التسليم</option>
+              <option value="pending">قيد المراجعة</option>
+            </select>
+          </div>
+          <div class="admin-table-wrap"><table class="admin-table"><thead><tr>
+            <th>الاسم</th><th>البريد</th><th>الهاتف</th><th>كود الدعوة</th><th>الجائزة</th><th>نوعها</th><th>الحالة</th><th></th>
+          </tr></thead><tbody id="winnersTableBody"></tbody></table></div>
+          <div id="winnersMobileCards" class="mobile-cards"></div>
+          <div id="winnersEmpty" class="empty-state hidden"><i class="fa-solid fa-crown"></i><h3>لم يتم إعلان أي فائز حتى الآن</h3></div>
+        </div>
+
+        <!-- ===== TAB: Messages ===== -->
+        <div class="tab-panel" id="tabMessages" role="tabpanel">
+          <div class="admin-actions">
+            <button id="sendMessageBtn" class="admin-btn admin-btn-primary"><i class="fa-solid fa-paper-plane"></i> إرسال رسالة</button>
+          </div>
+          <div class="admin-table-wrap" style="margin-top:12px;"><table class="admin-table"><thead><tr>
+            <th>العنوان</th><th>الرسالة</th><th>المستخدم</th><th>نوع الجائزة</th><th>مقروءة</th><th>التاريخ</th>
+          </tr></thead><tbody id="messagesTableBody"></tbody></table></div>
+          <div id="messagesMobileCards" class="mobile-cards"></div>
+          <div id="messagesEmpty" class="empty-state hidden"><i class="fa-solid fa-envelope-open"></i><h3>لا توجد رسائل</h3></div>
+        </div>
+
+        <!-- ===== TAB: Settings ===== -->
+        <div class="tab-panel" id="tabSettings" role="tabpanel">
+          <div id="settingsForm" class="settings-form"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Detail Drawer -->
+  <aside class="detail-drawer" id="detailDrawer">
+    <div class="drawer-header">
+      <h3>تفاصيل المشارك</h3>
+      <button class="drawer-close" onclick="closeDrawer()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="drawer-body" id="drawerBody">
+      <div class="detail-section"><h4>الملف الشخصي</h4><div id="drawerProfile"></div></div>
+      <div class="detail-section"><h4>الإحالات</h4><div id="drawerReferrals"></div></div>
+      <div class="detail-section"><h4>الجوائز</h4><div id="drawerRewards"></div></div>
+      <div class="detail-section"><h4>التواصل</h4><div id="drawerMessages"></div></div>
+    </div>
+  </aside>
+
+  <!-- Reward Modal -->
+  <div class="admin-modal-backdrop" id="rewardModal">
+    <div class="admin-modal">
+      <h3 id="rewardModalTitle">إضافة جائزة</h3>
+      <div class="modal-field"><label>النوع</label><select id="rewardType"><option value="cash">جائزة مالية</option><option value="product">منتجات</option><option value="coupon">كوبونات</option></select></div>
+      <div class="modal-field"><label>العنوان</label><input type="text" id="rewardTitle" /></div>
+      <div class="modal-field"><label>الوصف</label><textarea id="rewardDescription" rows="2"></textarea></div>
+      <div class="modal-field"><label>القيمة</label><input type="text" id="rewardValue" placeholder="مثال: 70,000 EGP" /></div>
+      <div class="modal-field"><label>العدد/الكمية</label><input type="number" id="rewardQuantity" min="0" /></div>
+      <div class="modal-field"><label>رابط الصورة</label><input type="url" id="rewardImage" /></div>
+      <div class="modal-actions">
+        <button class="admin-btn admin-btn-secondary" onclick="closeRewardModal()">إلغاء</button>
+        <button class="admin-btn admin-btn-primary" id="saveRewardBtn">حفظ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assign Winner Modal -->
+  <div class="admin-modal-backdrop" id="winnerModal">
+    <div class="admin-modal">
+      <h3>تعيين جائزة لمشارك</h3>
+      <div id="winnerModalBody"></div>
+      <div class="modal-actions">
+        <button class="admin-btn admin-btn-secondary" onclick="closeWinnerModal()">إلغاء</button>
+        <button class="admin-btn admin-btn-primary" id="saveWinnerBtn">تعيين</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Send Message Modal -->
+  <div class="admin-modal-backdrop" id="messageModal">
+    <div class="admin-modal">
+      <h3>إرسال رسالة</h3>
+      <div class="modal-field"><label>المستخدم</label><select id="msgUserId"></select></div>
+      <div class="modal-field"><label>عنوان الرسالة</label><input type="text" id="msgTitle" /></div>
+      <div class="modal-field"><label>نص الرسالة</label><textarea id="msgText" rows="3"></textarea></div>
+      <div class="modal-field"><label>نوع الجائزة (اختياري)</label><select id="msgRewardType"><option value="">---</option><option value="cash">جائزة مالية</option><option value="product">منتجات</option><option value="coupon">كوبونات</option></select></div>
+      <div class="modal-actions">
+        <button class="admin-btn admin-btn-secondary" onclick="closeMessageModal()">إلغاء</button>
+        <button class="admin-btn admin-btn-primary" id="sendMsgBtn">إرسال</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="contest-toast-wrap" id="contestToastWrap"></div>
+
+  <nav class="mobile-bottom-nav">
+    <a class="mobile-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>الرئيسية</span></a>
+    <a class="mobile-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة</span></a>
+    <a class="mobile-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>طلبات</span></a>
+    <a class="mobile-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>شراكة</span></a>
+    <a class="mobile-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>الدعم</span></a>
+  </nav>
+
+  <script src="admin-buda-rewards.page.js"></script>
+</body>
+</html>

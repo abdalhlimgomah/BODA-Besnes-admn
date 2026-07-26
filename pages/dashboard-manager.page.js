@@ -157,7 +157,7 @@ class DashboardManager {
     const [{ count: productCount }, { count: orderCount }, { data: deliveredOrders }, { count: taagerCount }, { count: complaintsCount }, { count: variantGroupsCount }] = await Promise.all([
       supabaseClient.from("products").select("*", { count: "exact", head: true }),
       supabaseClient.from("orders").select("*", { count: "exact", head: true }),
-      supabaseClient.from("orders").select("total_price,total,amount").eq("status", "delivered"),
+      supabaseClient.from("orders").select("total_price,total").eq("status", "completed"),
       supabaseClient.from("taager_products").select("*", { count: "exact", head: true }),
       supabaseClient.from("complaints").select("*", { count: "exact", head: true }).eq("status", "pending"),
       supabaseClient.from("taager_variant_groups").select("*", { count: "exact", head: true }),

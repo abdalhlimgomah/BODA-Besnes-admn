@@ -155,6 +155,11 @@ function extractOrderItems(order) {
   return [];
 }
 
+function getItemCountry(item, order) {
+  var c = item.country || item.country_code || order.country || order.country_code || "";
+  return c.toUpperCase();
+}
+
 function renderOrderItems(items, order) {
   if (!items || !items.length) return '<div class="order-row"><strong>المنتجات</strong><span>-</span></div>';
   var orderDiscount = order && Number(order.discount) > 0 ? Number(order.discount) : 0;
@@ -175,10 +180,14 @@ function renderOrderItems(items, order) {
     var itemDiscount = orderDiscount > 0 && subtotal > 0
       ? Math.round((total / subtotal) * orderDiscount)
       : 0;
+    var countryCode = getItemCountry(item, order);
+    var countryBadge = countryCode
+      ? '<span class="country-badge country-' + countryCode.toLowerCase() + '">' + countryCode + '</span>'
+      : '';
     return '<div class="order-item-row">'
       + '<img class="order-item-img" src="' + escapeAttr(img) + '" alt="' + escapeAttr(name) + '" loading="lazy" onerror="this.onerror=null;this.src=\'' + ORDER_IMAGE_PLACEHOLDER + '\'" />'
       + '<div class="order-item-info">'
-      + '<div class="order-item-name">' + escapeAttr(name.length > 35 ? name.slice(0, 35) + "…" : name) + '</div>'
+      + '<div class="order-item-name">' + escapeAttr(name.length > 35 ? name.slice(0, 35) + "…" : name) + countryBadge + '</div>'
       + '<div class="order-item-details">'
       + '<span class="oid-label">السعر:</span><span class="oid-value">' + price + '</span>'
       + '<span class="oid-label">الكمية:</span><span class="oid-value">' + qty + '</span>'

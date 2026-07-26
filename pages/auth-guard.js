@@ -13,6 +13,7 @@
     "taager-product-edit.html",
     "admin-coupons.html",
     "admin-support.html",
+    "admin-categories.html",
   ]);
 
   function getCurrentPage() {

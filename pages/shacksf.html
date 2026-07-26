@@ -58,9 +58,13 @@
           <i class="fa-solid fa-tags"></i>
           <span>إدارة الكوبونات</span>
         </a>
-        <a class="side-link" href="view-products.html">
+<a class="side-link" href="view-products.html">
           <i class="fa-solid fa-box-open"></i>
           <span>مراجعة المنتجات</span>
+        </a>
+        <a class="side-link" href="admin-categories.html">
+          <i class="fa-solid fa-layer-group"></i>
+          <span>إدارة الأقسام</span>
         </a>
 
                 <a class="side-link" href="admin-sellers.html">
@@ -103,6 +107,10 @@
         <a class="side-link" href="admin-transfer-requests.html">
           <i class="fa-solid fa-file-invoice"></i>
           <span>طلبات التحويل</span>
+        </a>
+        <a class="side-link" href="admin-buda-rewards.html">
+          <i class="fa-solid fa-trophy"></i>
+          <span>مسابقة Buda Rewards</span>
         </a>       </nav>
     </aside>
     <main class="app-main">
@@ -197,14 +205,14 @@
                         <article class="stat-card card" onclick="window.location.href='admin-fake-prices.html'" style="cursor:pointer">
               <div class="stat-icon" style="background:#fce4ec;color:#c62828"><i class="fa-solid fa-percent"></i></div>
               <div>
-                <p class="stat-label">الأسعار الوهمية</p>
+                <p class="stat-label">الأسعار</p>
                 <p class="stat-value" id="fakePricesCount">0</p>
               </div>
             </article>
                         <article class="stat-card card" onclick="window.location.href='admin-sellers.html'" style="cursor:pointer">
               <div class="stat-icon" style="background:#e8f5e9;color:#2e7d32"><i class="fa-solid fa-store"></i></div>
               <div>
-                <p class="stat-label">البائعون الوهميون</p>
+                <p class="stat-label">البائعون</p>
                 <p class="stat-value" id="sellersCountDashboard">0</p>
               </div>
             </article>
@@ -267,10 +275,22 @@
                 <p class="stat-label">طلبات التحويل</p>
               </div>
             </article>   
-                                      <article class="stat-card card" onclick="window.location.href='view-products.html'" style="cursor:pointer">
+                                      <article class="stat-card card" onclick="window.location.href='admin-categories.html'" style="cursor:pointer">
+              <div class="stat-icon" style="background:#EDE5FF;color:#6D28D9"><i class="fa-solid fa-layer-group"></i></div>
+              <div>
+                <p class="stat-label">إدارة الأقسام</p>
+              </div>
+            </article>   
+            <article class="stat-card card" onclick="window.location.href='view-products.html'" style="cursor:pointer">
               <div class="stat-icon" style="background:#fef3c7;color:#92400e"><i class="fa-solid fa-box-open"></i></div>
               <div>
                 <p class="stat-label">عرض المنتجات الشراكه</p>
+              </div>
+            </article>    
+            <article class="stat-card card" onclick="window.location.href='admin-buda-rewards.html'" style="cursor:pointer">
+              <div class="stat-icon" style="background:#fef3c7;color:#92400e"><i class="fa-solid fa-trophy"></i></div>
+              <div>
+                <p class="stat-label">مسابقة Buda Rewards</p>
               </div>
             </article>   
           </div>

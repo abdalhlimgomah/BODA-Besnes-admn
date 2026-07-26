@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>إدارة الأقسام - Buda Admin</title>
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/app-shell.css" />
+  <link rel="stylesheet" href="../css/admin-categories.css?v=20260724" />
+  <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="./auth-guard.js"></script>
+</head>
+<body class="app-shell">
+  <aside class="app-sidebar">
+    <div class="brand-badge">
+      <i class="fa-solid fa-bag-shopping"></i>
+      <div>
+        <strong>Buda Admin</strong>
+        <small>إدارة المتجر</small>
+      </div>
+    </div>
+    <nav class="side-nav">
+      <a class="side-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>لوحة التحكم</span></a>
+      <a class="side-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة المنتجات</span></a>
+      <a class="side-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>الطلبات</span></a>
+      <a class="side-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>طلبات الشراكة</span></a>
+      <a class="side-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>رسائل الدعم</span></a>
+      <a class="side-link" href="admin-complaints.html"><i class="fa-solid fa-message"></i><span>الشكاوي</span></a>
+      <a class="side-link" href="admin-ai-details.html"><i class="fa-solid fa-wand-magic-sparkles"></i><span>AI محتوى</span></a>
+      <a class="side-link" href="admin-coupons.html"><i class="fa-solid fa-tags"></i><span>إدارة الكوبونات</span></a>
+      <a class="side-link active" href="admin-categories.html"><i class="fa-solid fa-layer-group"></i><span>إدارة الأقسام</span></a>
+      <a class="side-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة المنتجات</span></a>
+      <a class="side-link" href="admin-sellers.html"><i class="fa-solid fa-store"></i><span>إدارة البائعين</span></a>
+      <a class="side-link" href="taager-products.html"><i class="fa-solid fa-database"></i><span>منتجات Taager</span></a>
+      <a class="side-link" href="analytics.html"><i class="fa-solid fa-chart-pie"></i><span>لوحة التحليلات</span></a>
+      <a class="side-link" href="admin-home-layout.html"><i class="fa-solid fa-palette"></i><span>تخطيط الصفحة الرئيسية</span></a>
+      <a class="side-link" href="admin-landing-pages.html"><i class="fa-solid fa-layer-group"></i><span>صفحات الفئات الذكية</span></a>
+    </nav>
+  </aside>
+
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-title">
+        <h1>إدارة الأقسام</h1>
+        <p>إضافة وتعديل وحذف الأقسام والفروع</p>
+      </div>
+      <div class="topbar-actions">
+        <button type="button" class="btn btn-primary" id="addCategoryBtn">
+          <i class="fa-solid fa-plus"></i>
+          إضافة قسم جديد
+        </button>
+      </div>
+    </header>
+
+    <section class="content-wrap">
+      <!-- Stats Cards -->
+      <div class="cat-stats-row" id="catStatsRow">
+        <div class="cat-stat-card">
+          <div class="cat-stat-icon" style="background:#EDE5FF;color:#6D28D9;"><i class="fa-solid fa-layer-group"></i></div>
+          <div>
+            <p class="cat-stat-label">إجمالي الأقسام</p>
+            <p class="cat-stat-value" id="totalCategories">0</p>
+          </div>
+        </div>
+        <div class="cat-stat-card">
+          <div class="cat-stat-icon" style="background:#DCFCE7;color:#16A34A;"><i class="fa-solid fa-check-circle"></i></div>
+          <div>
+            <p class="cat-stat-label">نشط</p>
+            <p class="cat-stat-value" id="activeCategories">0</p>
+          </div>
+        </div>
+        <div class="cat-stat-card">
+          <div class="cat-stat-icon" style="background:#FEF3C7;color:#D97706;"><i class="fa-solid fa-pause-circle"></i></div>
+          <div>
+            <p class="cat-stat-label">غير نشط</p>
+            <p class="cat-stat-value" id="inactiveCategories">0</p>
+          </div>
+        </div>
+        <div class="cat-stat-card">
+          <div class="cat-stat-icon" style="background:#DBEAFE;color:#2563EB;"><i class="fa-solid fa-code-branch"></i></div>
+          <div>
+            <p class="cat-stat-label">إجمالي الفروع</p>
+            <p class="cat-stat-value" id="totalBranches">0</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Categories List -->
+      <div class="cat-table-card">
+        <div class="cat-table-header">
+          <h3><i class="fa-solid fa-list"></i> قائمة الأقسام</h3>
+          <div class="cat-table-search">
+            <i class="fa-solid fa-search"></i>
+            <input type="text" id="catSearchInput" placeholder="بحث عن قسم..." oninput="debouncedSearch()" />
+          </div>
+        </div>
+        <div class="cat-table-wrap" id="catTableWrap">
+          <div class="cat-loading" id="catLoading">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            <span>جاري تحميل الأقسام...</span>
+          </div>
+          <table class="cat-table" id="catTable">
+            <thead>
+              <tr>
+                <th style="width:50px;">#</th>
+                <th style="width:60px;">الصورة</th>
+                <th>اسم القسم</th>
+                <th style="width:100px;">المنتجات</th>
+                <th style="width:80px;">الفروع</th>
+                <th style="width:100px;">الحالة</th>
+                <th style="width:180px;">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="catTableBody"></tbody>
+          </table>
+          <div class="cat-empty" id="catEmpty" style="display:none;">
+            <i class="fa-solid fa-layer-group"></i>
+            <h4>لا توجد أقسام</h4>
+            <p>أضف أول قسم الآن باستخدام زر "إضافة قسم جديد"</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="mobile-bottom-nav">
+    <a class="mobile-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>الرئيسية</span></a>
+    <a class="mobile-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة</span></a>
+    <a class="mobile-link active" href="admin-categories.html"><i class="fa-solid fa-layer-group"></i><span>الأقسام</span></a>
+    <a class="mobile-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>طلبات</span></a>
+    <a class="mobile-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>الدعم</span></a>
+  </nav>
+
+  <!-- Add/Edit Category Modal -->
+  <div class="cat-modal-overlay" id="catModal">
+    <div class="cat-modal">
+      <div class="cat-modal-header">
+        <h2 id="catModalTitle">إضافة قسم جديد</h2>
+        <button class="cat-modal-close" onclick="closeCatModal()" type="button" aria-label="إغلاق">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form id="catForm" onsubmit="saveCategory(event)">
+        <div class="cat-form-grid">
+          <div class="cat-field full">
+            <label>اسم القسم</label>
+            <input id="f_cat_name" required placeholder="مثال: إلكترونيات" />
+          </div>
+          <div class="cat-field">
+            <label>رابط مختصر (slug)</label>
+            <input id="f_cat_slug" required placeholder="electronics" dir="ltr" />
+          </div>
+          <div class="cat-field">
+            <label>ترتيب الظهور</label>
+            <input id="f_cat_sort" type="number" value="0" min="0" />
+          </div>
+          <div class="cat-field">
+            <label>الحالة</label>
+            <label class="cat-toggle">
+              <input id="f_cat_active" type="checkbox" checked />
+              <span class="cat-toggle-slider"></span>
+            </label>
+            <span class="cat-toggle-label" id="catActiveLabel">فعال</span>
+          </div>
+          <div class="cat-field full">
+            <label>صورة القسم</label>
+            <div class="cat-img-upload">
+              <div class="cat-img-preview" id="catImgPreview">
+                <i class="fa-solid fa-image"></i>
+                <span>صورة القسم</span>
+              </div>
+              <div class="cat-img-actions">
+                <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('catImgFile').click()">
+                  <i class="fa-solid fa-upload"></i> رفع صورة
+                </button>
+                <span class="cat-or">أو</span>
+                <input id="catImgUrl" placeholder="أدخل رابط الصورة" />
+                <button type="button" class="btn btn-outline btn-sm" onclick="setCatImageFromUrl()">
+                  <i class="fa-solid fa-link"></i> استخدام الرابط
+                </button>
+              </div>
+              <input type="file" id="catImgFile" accept="image/*" style="display:none" onchange="uploadCatImage(this)" />
+            </div>
+          </div>
+          <div class="cat-field full">
+            <label>الكلمات المفتاحية <small>(كلمة واحدة في كل سطر)</small></label>
+            <textarea id="f_cat_keywords" rows="5" placeholder="هاتف&#10;موبايل&#10;سامسونج&#10;آيفون&#10;شاومي"></textarea>
+          </div>
+          <div class="cat-field full">
+            <label>الوصف <small>(اختياري)</small></label>
+            <textarea id="f_cat_desc" rows="3" placeholder="وصف مختصر للقسم"></textarea>
+          </div>
+        </div>
+        <div class="cat-modal-actions">
+          <button type="button" class="btn btn-outline" onclick="closeCatModal()">إلغاء</button>
+          <button type="submit" class="btn btn-primary" id="catSaveBtn">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>حفظ القسم</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Branches Modal -->
+  <div class="cat-modal-overlay" id="branchModal">
+    <div class="cat-modal cat-modal-lg">
+      <div class="cat-modal-header">
+        <h2 id="branchModalTitle">إدارة الفروع</h2>
+        <button class="cat-modal-close" onclick="closeBranchModal()" type="button" aria-label="إغلاق">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div id="branchModalBody">
+        <div class="branch-list-header">
+          <h4><i class="fa-solid fa-code-branch"></i> فروع <span id="branchCategoryName"></span></h4>
+          <button class="btn btn-primary btn-sm" onclick="openAddBranchForm()">
+            <i class="fa-solid fa-plus"></i> إضافة فرع
+          </button>
+        </div>
+        <div class="branch-list" id="branchList">
+          <div class="cat-loading"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل الفروع...</div>
+        </div>
+        <div class="branch-form-wrap" id="branchFormWrap" style="display:none;">
+          <hr class="branch-divider" />
+          <h4 id="branchFormTitle">إضافة فرع جديد</h4>
+          <form id="branchForm" onsubmit="saveBranch(event)">
+            <div class="cat-form-grid">
+              <div class="cat-field full">
+                <label>اسم الفرع</label>
+                <input id="f_branch_name" required placeholder="مثال: هواتف سامسونج" />
+              </div>
+              <div class="cat-field full">
+                <label>صورة الفرع</label>
+                <div class="cat-img-upload">
+                  <div class="cat-img-preview" id="branchImgPreview">
+                    <i class="fa-solid fa-image"></i>
+                    <span>صورة الفرع</span>
+                  </div>
+                  <div class="cat-img-actions">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('branchImgFile').click()">
+                      <i class="fa-solid fa-upload"></i> رفع صورة
+                    </button>
+                    <span class="cat-or">أو</span>
+                    <input id="branchImgUrl" placeholder="أدخل رابط الصورة" />
+                    <button type="button" class="btn btn-outline btn-sm" onclick="setBranchImageFromUrl()">
+                      <i class="fa-solid fa-link"></i> استخدام الرابط
+                    </button>
+                  </div>
+                  <input type="file" id="branchImgFile" accept="image/*" style="display:none" onchange="uploadBranchImage(this)" />
+                </div>
+              </div>
+              <div class="cat-field full">
+                <label>الكلمات المفتاحية للفرع <small>(كلمة في كل سطر)</small></label>
+                <textarea id="f_branch_keywords" rows="4" placeholder="سامسونج جالاكسي&#10;S24&#10;S24 Ultra&#10;هواتف سامسونج"></textarea>
+              </div>
+              <div class="cat-field">
+                <label>ترتيب الظهور</label>
+                <input id="f_branch_sort" type="number" value="0" min="0" />
+              </div>
+              <div class="cat-field">
+                <label>الحالة</label>
+                <label class="cat-toggle">
+                  <input id="f_branch_active" type="checkbox" checked />
+                  <span class="cat-toggle-slider"></span>
+                </label>
+                <span class="cat-toggle-label" id="branchActiveLabel">فعال</span>
+              </div>
+            </div>
+            <div class="cat-modal-actions">
+              <button type="button" class="btn btn-outline" onclick="cancelBranchForm()">إلغاء</button>
+              <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>حفظ الفرع</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="cat-modal-overlay" id="deleteModal">
+    <div class="cat-modal cat-modal-sm">
+      <div class="cat-modal-header">
+        <h2>تأكيد الحذف</h2>
+        <button class="cat-modal-close" onclick="closeDeleteModal()" type="button" aria-label="إغلاق">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="cat-delete-body">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <p id="deleteModalText">هل أنت متأكد من حذف هذا القسم؟</p>
+        <p class="cat-delete-note">سيتم حذف جميع الفروع المرتبطة بهذا القسم.</p>
+      </div>
+      <div class="cat-modal-actions">
+        <button type="button" class="btn btn-outline" onclick="closeDeleteModal()">إلغاء</button>
+        <button type="button" class="btn btn-danger" id="deleteConfirmBtn">
+          <i class="fa-solid fa-trash-can"></i> حذف
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/vendor/supabase/supabase-js@2.js"></script>
+  <script src="./admin-categories.js?v=20260724"></script>
+</body>
+</html>
