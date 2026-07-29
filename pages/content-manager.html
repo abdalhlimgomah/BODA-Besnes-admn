@@ -1,0 +1,37 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مدير المحتوى - BudoQ CMS</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link href="../assets/fonts/cairo.css" rel="stylesheet">
+  <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/admin-content.css">
+  <link rel="icon" type="image/png" href="../assets/icons/favicon.png">
+  <meta property="og:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
+  <meta name="twitter:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
+  <script src="./auth-guard.js"></script>
+</head>
+<body>
+  <div id="content-manager-root">
+    <div class="cm-login">
+      <div class="cm-login-card">
+        <div class="skeleton-loader" style="height:24px;width:200px;margin:0 auto 12px;border-radius:6px"></div>
+        <div class="skeleton-loader" style="height:16px;width:300px;margin:0 auto 24px;border-radius:4px"></div>
+        <div class="skeleton-loader" style="height:40px;width:160px;margin:0 auto;border-radius:10px"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/seo/admin-content-manager.js"></script>
+  <script src="../assets/js/supabase-client.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      AdminContent.init();
+    });
+  </script>
+</body>
+</html>
+
+

@@ -87,6 +87,7 @@
             <input type="text" id="ap-search" placeholder="بحث باسم المنتج..." />
           </div>
           <button id="btn-refresh" class="ap-btn primary"><i class="fa-solid fa-rotate"></i> تحديث</button>
+          <button id="btn-sync" class="ap-btn secondary"><i class="fa-solid fa-cloud-arrow-down"></i> مزامنة من Taager</button>
         </div>
         <div id="ap-loading" class="ap-loading" style="display:none;"><div class="spinner"></div><div style="margin-top:8px;color:var(--muted,#667085);">جاري التحميل من قاعدة البيانات...</div></div>
         <div id="ap-grid" class="ap-grid"></div>
@@ -164,7 +165,27 @@
         btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-rotate"></i> تحديث';
       }
 
+      async function syncFromTaager() {
+        var btn = document.getElementById("btn-sync");
+        btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري المزامنة...';
+        notify("جاري مزامنة المنتجات من Taager...", "info");
+
+        try {
+          var res = await fetch("https://msgqzgzoslearaprgiqq.supabase.co/functions/v1/taager-proxy?action=products", {
+            headers: { "Content-Type": "application/json" },
+          });
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          var data = await res.json();
+          notify("تمت المزامنة بنجاح. اضغط تحديث لعرض المنتجات.", "success");
+        } catch(e) {
+          notify("فشلت المزامنة: " + (e.message || e), "error");
+        }
+
+        btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i> مزامنة من Taager';
+      }
+
       document.getElementById("btn-refresh").addEventListener("click", loadProducts);
+      document.getElementById("btn-sync").addEventListener("click", syncFromTaager);
       document.getElementById("ap-search").addEventListener("input", applySearch);
 
       loadProducts();

@@ -1,4 +1,4 @@
-/* ===== Admin Buda Rewards Page ===== */
+﻿/* ===== Admin Buda Rewards Page ===== */
 const SUPABASE_URL = "https://msgqzgzoslearaprgiqq.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE";
 const budaSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -667,7 +667,7 @@ function openDrawer(participantId) {
   var qualifiedCnt = userReferrals.filter(function(r) { return r.status === 'qualified'; }).length;
   document.getElementById('drawerReferrals').innerHTML = '' +
     rowHtml('كود الدعوة', '<span style="direction:ltr;font-family:monospace;color:#6D28D9;font-weight:700;">' + escapeHtml(p.referral_code) + '</span>') +
-    rowHtml('الرابط', '<span style="direction:ltr;font-size:0.72rem;word-break:break-all;">https://buda-rho.vercel.app/pages/contest.html?ref=' + encodeURIComponent(p.referral_code) + '</span>') +
+    rowHtml('الرابط', '<span style="direction:ltr;font-size:0.72rem;word-break:break-all;">https://budoq.vercel.app/pages/contest.html?ref=' + encodeURIComponent(p.referral_code) + '</span>') +
     rowHtml('عدد الإحالات', userReferrals.length) +
     rowHtml('الإحالات المؤهلة', qualifiedCnt);
 

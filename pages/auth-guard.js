@@ -1,4 +1,4 @@
-(() => {
+﻿(() => {
   const SESSION_KEY = "__boda_admin_session_v2";
   const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
   const LOGIN_PAGE = "login.html";
@@ -14,6 +14,10 @@
     "admin-coupons.html",
     "admin-support.html",
     "admin-categories.html",
+    "analytics.html",
+    "merchant-center.html",
+    "seo-dashboard.html",
+    "content-manager.html",
   ]);
 
   function getCurrentPage() {
@@ -120,3 +124,4 @@
 
   enforceRouteGuard();
 })();
+

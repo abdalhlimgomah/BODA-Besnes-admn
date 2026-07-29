@@ -1,0 +1,196 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Merchant Center - BudoQ</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link href="../assets/fonts/cairo.css" rel="stylesheet">
+  <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/admin-content.css">
+  <style>
+    .mc-page { max-width: 1000px; margin: 0 auto; padding: 32px 20px; direction: rtl; }
+    .mc-page h1 { font-size: 28px; color: #1a2530; margin-bottom: 4px; }
+    .mc-page .subtitle { color: #64748b; margin-bottom: 32px; }
+    .mc-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 16px; margin-bottom: 32px; }
+    .mc-stat-card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #f1f5f9; text-align: center; }
+    .mc-stat-card .number { font-size: 28px; font-weight: 800; color: #1a2530; }
+    .mc-stat-card .label { font-size: 13px; color: #64748b; margin-top: 4px; }
+    .mc-card { background: #fff; border-radius: 16px; padding: 24px; border: 1px solid #f1f5f9; margin-bottom: 20px; }
+    .mc-card h3 { font-size: 16px; color: #1a2530; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .mc-card p, .mc-card li { font-size: 14px; color: #475569; line-height: 1.7; }
+    .mc-card ol { padding-right: 20px; }
+    .mc-card ol li { margin-bottom: 8px; }
+    .mc-code { background: #f1f5f9; padding: 12px 16px; border-radius: 8px; font-family: monospace; font-size: 13px; direction: ltr; text-align: left; word-break: break-all; margin: 8px 0; }
+    .mc-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: #1a2530; color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; text-decoration: none; transition: background 0.2s; }
+    .mc-btn:hover { background: #0f172a; }
+    .mc-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .mc-btn-secondary { background: #f1f5f9; color: #475569; }
+    .mc-btn-secondary:hover { background: #e2e8f0; }
+    .mc-btn-success { background: #16a34a; color: #fff; }
+    .mc-btn-success:hover { background: #15803d; }
+    .mc-status { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; }
+    .mc-status.ok { background: #dcfce7; color: #16a34a; }
+    .mc-status.warn { background: #fef9c3; color: #ca8a04; }
+    .mc-status.error { background: #fef2f2; color: #ef4444; }
+    .mc-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .mc-table th { text-align: right; padding: 10px 12px; border-bottom: 2px solid #e2e8f0; color: #64748b; font-weight: 600; }
+    .mc-table td { padding: 8px 12px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+    .mc-field { margin-bottom: 16px; }
+    .mc-field label { display: block; font-size: 14px; font-weight: 600; color: #1a2530; margin-bottom: 4px; }
+    .mc-field input { width: 100%; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 14px; box-sizing: border-box; direction: ltr; text-align: left; }
+    .mc-field .hint { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+    .mc-steps { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+    .mc-step { flex: 1; min-width: 200px; background: #f8fafc; border-radius: 12px; padding: 16px; text-align: center; }
+    .mc-step .step-num { width: 28px; height: 28px; border-radius: 50%; background: #1a2530; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+    .mc-step h4 { font-size: 14px; color: #1a2530; margin-bottom: 4px; }
+    .mc-step p { font-size: 13px; color: #64748b; }
+    @media (max-width: 768px) { .mc-steps { flex-direction: column; } }
+  </style>
+  <link rel="icon" type="image/png" href="../assets/icons/favicon.png">
+  <meta property="og:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
+  <meta name="twitter:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
+  <script src="./auth-guard.js"></script>
+</head>
+<body>
+  <div id="shell-root"></div>
+  <div class="mc-page">
+    <h1>Google Merchant Center</h1>
+    <p class="subtitle">ربط المنتجات بـ Google Shopping — إعداد المنتجات للظهور في نتائج التسوق</p>
+
+    <div class="mc-steps">
+      <div class="mc-step"><div class="step-num">1</div><h4>إنشاء الحساب</h4><p>merchant.google.com → حساب جديد</p></div>
+      <div class="mc-step"><div class="step-num">2</div><h4>إضافة المنتجات</h4><p>استخدم رابط الـ Feed أدناه</p></div>
+      <div class="mc-step"><div class="step-num">3</div><h4>مراجعة المشاكل</h4><p>صلّح الأخطاء في صفحة التشخيص</p></div>
+      <div class="mc-step"><div class="step-num">4</div><h4>تفعيل Shopping</h4><p>المنتجات تظهر في Google Shopping</p></div>
+    </div>
+
+    <div class="mc-stats" id="mc-stats">
+      <div class="mc-stat-card"><div class="number" id="mc-total">-</div><div class="label">إجمالي المنتجات</div></div>
+      <div class="mc-stat-card"><div class="number" id="mc-active">-</div><div class="label">منتجات نشطة</div></div>
+      <div class="mc-stat-card"><div class="number" id="mc-with-price">-</div><div class="label">بسعر صالح</div></div>
+      <div class="mc-stat-card"><div class="number" id="mc-with-image">-</div><div class="label">بصورة رئيسية</div></div>
+      <div class="mc-stat-card"><div class="number" id="mc-with-brand">-</div><div class="label">بعلامة تجارية</div></div>
+      <div class="mc-stat-card"><div class="number" id="mc-with-gtin">-</div><div class="label">مع GTIN</div></div>
+    </div>
+
+    <div class="mc-card">
+      <h3><span class="material-icons-outlined">link</span> رابط Feed المباشر</h3>
+      <p>استخدم هذا الرابط في Google Merchant Center → Products → Feeds → Add feed:</p>
+      <div class="mc-code" id="feed-url">https://budoq.vercel.app/api/merchant-feed/feed.xml</div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="mc-btn mc-btn-secondary" onclick="copyFeedUrl()"><span class="material-icons-outlined" style="font-size:16px">content_copy</span> نسخ الرابط</button>
+      </div>
+    </div>
+
+    <div class="mc-card">
+      <h3><span class="material-icons-outlined">fact_check</span> متطلبات Google Shopping</h3>
+      <table class="mc-table" id="mc-requirements">
+        <thead><tr><th>الحقل</th><th>الحالة</th><th>العدد</th></tr></thead>
+        <tbody id="mc-requirements-body"></tbody>
+      </table>
+    </div>
+
+    <div class="mc-card">
+      <h3><span class="material-icons-outlined">info</span> تعليمات التفعيل</h3>
+      <ol>
+        <li>ادخل على <a href="https://merchant.google.com" target="_blank" style="color:#1a2530;font-weight:600">merchant.google.com</a></li>
+        <li>أنشئ حساب Merchant Center جديد أو استخدم حساب موجود</li>
+        <li>اذهب إلى <strong>Products → Feeds</strong></li>
+        <li>اختر <strong>Add feed</strong> → Scheduled fetch</li>
+        <li>الصق رابط الـ Feed: <code id="feed-url-inline" style="background:#f1f5f9;padding:2px 6px;border-radius:4px">https://budoq.vercel.app/api/merchant-feed/feed.xml</code></li>
+        <li>حدد التكرار: <strong>Daily</strong></li>
+        <li>بعد الرفع، اذهب إلى <strong>Products → Diagnostics</strong> لإصلاح المشاكل</li>
+        <li>بعد الموافقة، المنتجات تظهر في <strong>Google Shopping</strong> خلال 3-5 أيام</li>
+      </ol>
+    </div>
+
+    <div class="mc-card">
+      <h3><span class="material-icons-outlined">settings</span> إعدادات Merchant Center (اختياري)</h3>
+      <p>يمكنك إدخال معرف التاجر لتتبع المنتجات في Google:</p>
+      <div class="mc-field">
+        <label>Merchant Center ID</label>
+        <input type="text" id="mc-merchant-id" placeholder="123456789" value="">
+        <div class="hint">من Google Merchant Center → Settings → Business Information</div>
+      </div>
+      <button class="mc-btn" onclick="saveMerchantId()">حفظ</button>
+      <span id="mc-save-msg" style="margin-right:12px;font-size:13px;color:#16a34a;display:none">تم الحفظ ✓</span>
+    </div>
+  </div>
+  <div id="shell-footer"></div>
+
+  <script src="../assets/js/seo/blog-engine.js"></script>
+  <script src="../assets/js/seo/merchant-feed.js"></script>
+  <script>
+    function copyFeedUrl() {
+      var url = document.getElementById('feed-url');
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(url.textContent.trim()).then(function () {
+          var btn = document.querySelector('.mc-btn-secondary');
+          btn.textContent = 'تم النسخ ✓';
+          btn.classList.add('mc-btn-success');
+          setTimeout(function () { btn.textContent = 'نسخ الرابط'; btn.classList.remove('mc-btn-success'); }, 2000);
+        });
+      }
+    }
+
+    function saveMerchantId() {
+      var id = document.getElementById('mc-merchant-id').value.trim();
+      if (id) {
+        try { localStorage.setItem('buda_merchant_id', id); } catch (e) {}
+        document.getElementById('mc-save-msg').style.display = 'inline';
+        setTimeout(function () { document.getElementById('mc-save-msg').style.display = 'none'; }, 3000);
+      }
+    }
+
+    (function () {
+      try {
+        var stored = localStorage.getItem('buda_merchant_id');
+        if (stored) document.getElementById('mc-merchant-id').value = stored;
+      } catch (e) {}
+
+      var sb = window.supabaseClient || window._supabase;
+      if (sb) {
+        sb.from('products').select('id,currentPrice,price,image,images,brand,seller_name,gtin,ean,upc,is_active').limit(10000).then(function (res) {
+          if (res.error) return;
+          var products = res.data || [];
+          var enriched = MerchantFeed.enrichProducts(products);
+          var stats = MerchantFeed.getFeedStats(products);
+
+          document.getElementById('mc-total').textContent = stats.total;
+          document.getElementById('mc-active').textContent = stats.inStock;
+          document.getElementById('mc-with-price').textContent = stats.hasPrice;
+          document.getElementById('mc-with-image').textContent = stats.hasImage;
+          document.getElementById('mc-with-brand').textContent = stats.hasBrand;
+          document.getElementById('mc-with-gtin').textContent = stats.hasGtin;
+
+          var items = [
+            { field: 'id', count: stats.total, ok: stats.total },
+            { field: 'title (name)', count: stats.total, ok: stats.hasTitle },
+            { field: 'description', count: stats.total, ok: stats.hasDescription },
+            { field: 'image_link', count: stats.total, ok: stats.hasImage },
+            { field: 'price', count: stats.total, ok: stats.hasPrice },
+            { field: 'availability (in stock)', count: stats.total, ok: stats.inStock },
+            { field: 'brand', count: stats.total, ok: stats.hasBrand },
+            { field: 'gtin / mpn', count: stats.total, ok: Math.max(stats.hasGtin, stats.hasMpn) },
+          ];
+
+          var tbody = document.getElementById('mc-requirements-body');
+          if (tbody) {
+            tbody.innerHTML = items.map(function (item) {
+              var pct = item.count > 0 ? Math.round((item.ok / item.count) * 100) : 0;
+              var statusClass = pct === 100 ? 'ok' : (pct >= 80 ? 'warn' : 'error');
+              var statusText = pct === 100 ? 'ممتاز' : (pct >= 80 ? 'جيد' : 'بحاجة لتحسين');
+              return '<tr><td><strong>' + item.field + '</strong></td><td><span class="mc-status ' + statusClass + '">' + statusText + ' (' + pct + '%)</span></td><td>' + item.ok + ' / ' + item.count + '</td></tr>';
+            }).join('');
+          }
+        });
+      }
+    })();
+  </script>
+  <script src="../assets/js/noon-shell.js"></script>
+  <script src="../assets/js/supabase-client.js"></script>
+</body>
+</html>
+
+
