@@ -15,7 +15,9 @@
     }
 
     if (!cachedClient) {
-      cachedClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      cachedClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        global: { headers: { "x-user-email": "admin@example.com" } },
+      });
     }
 
     return cachedClient;

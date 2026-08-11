@@ -1,4 +1,16 @@
 ﻿(() => {
+  if (window.supabase && !window.__bodaAdminHeaderPatched) {
+    window.__bodaAdminHeaderPatched = true;
+    const originalCreateClient = window.supabase.createClient.bind(window.supabase);
+    window.supabase.createClient = (url, key, options) => {
+      options = options || {};
+      const global = typeof options.global === "object" && options.global ? options.global : {};
+      const headers = typeof global.headers === "object" && global.headers ? Object.assign({}, global.headers) : {};
+      headers["x-user-email"] = "admin@example.com";
+      return originalCreateClient(url, key, Object.assign({}, options, { global: Object.assign({}, global, { headers }) }));
+    };
+  }
+
   const SESSION_KEY = "__boda_admin_session_v2";
   const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
   const LOGIN_PAGE = "login.html";
