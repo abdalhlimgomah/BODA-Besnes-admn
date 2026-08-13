@@ -56,25 +56,8 @@ const CATEGORIES = [
 ];
 
 const COUNTRIES = [
-  { code: "ALL", name: "الكل" },
   { code: "EG", name: "مصر" },
   { code: "SA", name: "السعودية" },
-  { code: "AE", name: "الإمارات" },
-  { code: "KW", name: "الكويت" },
-  { code: "QA", name: "قطر" },
-  { code: "BH", name: "البحرين" },
-  { code: "OM", name: "عُمان" },
-  { code: "JO", name: "الأردن" },
-  { code: "LB", name: "لبنان" },
-  { code: "IQ", name: "العراق" },
-  { code: "LY", name: "ليبيا" },
-  { code: "MA", name: "المغرب" },
-  { code: "DZ", name: "الجزائر" },
-  { code: "TN", name: "تونس" },
-  { code: "PS", name: "فلسطين" },
-  { code: "YE", name: "اليمن" },
-  { code: "SD", name: "السودان" },
-  { code: "SY", name: "سوريا" },
 ];
 
 /* ── حالة محررات المقاسات/الألوان (للإضافة الجديدة) ── */
@@ -479,12 +462,13 @@ async function addProduct() {
     if (url) uploadedUrls.push(url);
   }
 
-  if (uploadedUrls.length) {
-    payload.image = uploadedUrls[0];
-    payload.images = uploadedUrls;
-    for (let i = 0; i < uploadedUrls.length; i++) {
-      payload["img" + (i + 1)] = uploadedUrls[i];
-      payload["image" + (i + 1)] = uploadedUrls[i];
+  const linkUrls = collectImageLinks();
+  const allImages = uploadedUrls.concat(linkUrls).slice(0, 8);
+  if (allImages.length) {
+    payload.image = allImages[0];
+    payload.images = allImages;
+    for (let i = 0; i < allImages.length; i++) {
+      payload["image" + (i + 1)] = allImages[i];
     }
   }
 
@@ -1036,6 +1020,7 @@ function clearForm() {
   document.getElementById("return_allowed").value = "true";
   document.getElementById("imageFile").value = "";
   document.getElementById("imagePreviews").innerHTML = "";
+  clearImageLinks();
   const videoUrlInput = document.getElementById("videoUrlInput");
   if (videoUrlInput) videoUrlInput.value = "";
   newSizes = [];
@@ -1051,6 +1036,78 @@ function clearForm() {
   updatePricePreview();
   renderSizesList();
   renderColorsList();
+}
+
+/* ═══════════════ روابط الصور (8 حقول) ═══════════════ */
+function renderImageLinkInputs() {
+  const list = document.getElementById("imageLinksList");
+  if (!list || list.children.length) return;
+  for (let i = 1; i <= 8; i++) {
+    const row = document.createElement("div");
+    row.className = "img-link-row";
+    const input = document.createElement("input");
+    input.type = "text";
+    input.id = "imageLink" + i;
+    input.className = "form-input";
+    input.dir = "ltr";
+    input.placeholder = "رابط الصورة " + i + " — https://...";
+    input.addEventListener("input", function () { updateLinkPreview(i); });
+    const preview = document.createElement("img");
+    preview.id = "imageLinkPreview" + i;
+    preview.className = "img-link-preview hidden";
+    preview.alt = "صورة " + i;
+    preview.addEventListener("error", function () { this.classList.add("hidden"); });
+    const clearBtn = document.createElement("button");
+    clearBtn.type = "button";
+    clearBtn.className = "img-link-clear";
+    clearBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+    clearBtn.title = "مسح الرابط";
+    clearBtn.addEventListener("click", function () {
+      input.value = "";
+      preview.classList.add("hidden");
+      preview.removeAttribute("src");
+      input.focus();
+    });
+    row.appendChild(input);
+    row.appendChild(preview);
+    row.appendChild(clearBtn);
+    list.appendChild(row);
+  }
+}
+
+function updateLinkPreview(index) {
+  const input = document.getElementById("imageLink" + index);
+  const preview = document.getElementById("imageLinkPreview" + index);
+  if (!input || !preview) return;
+  const value = input.value.trim();
+  if (value) {
+    preview.src = value;
+    preview.classList.remove("hidden");
+  } else {
+    preview.classList.add("hidden");
+    preview.removeAttribute("src");
+  }
+}
+
+function collectImageLinks() {
+  const links = [];
+  for (let i = 1; i <= 8; i++) {
+    const input = document.getElementById("imageLink" + i);
+    if (input) {
+      const value = input.value.trim();
+      if (value) links.push(value);
+    }
+  }
+  return links;
+}
+
+function clearImageLinks() {
+  for (let i = 1; i <= 8; i++) {
+    const input = document.getElementById("imageLink" + i);
+    const preview = document.getElementById("imageLinkPreview" + i);
+    if (input) input.value = "";
+    if (preview) { preview.classList.add("hidden"); preview.removeAttribute("src"); }
+  }
 }
 
 /* ═══════════════ معاينات الصور ═══════════════ */
@@ -1228,6 +1285,7 @@ function populateCategorySelect() {
 function init() {
   populateCategorySelect();
   renderCountryChips();
+  renderImageLinkInputs();
   renderSizesState();
   renderColorsState();
   renderSizesList();
@@ -1244,6 +1302,8 @@ window.toggleEdit = toggleEdit;
 window.updatePricePreview = updatePricePreview;
 window.clearForm = clearForm;
 window.renderImagePreviews = renderImagePreviews;
+window.updateLinkPreview = updateLinkPreview;
+window.clearImageLinks = clearImageLinks;
 window.removeImage = removeImage;
 window.removeVideo = removeVideo;
 window.openGallery = openGallery;

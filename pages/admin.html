@@ -56,6 +56,11 @@
       .product-image-upload { pointer-events:none; }
       .pick-img-btn { pointer-events:auto; display:inline-flex; align-items:center; gap:8px; padding:11px 22px; background:var(--brand-teal,#00b8a9); color:#fff; border:none; border-radius:10px; font-family:inherit; font-size:0.88rem; font-weight:700; cursor:pointer; }
       .pick-img-btn:hover { background:var(--brand-teal-deep,#02998d); }
+      .img-link-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+      .img-link-row .form-input { flex:1; direction:ltr; text-align:left; }
+      .img-link-preview { width:52px; height:52px; object-fit:cover; border-radius:8px; border:1px solid var(--border,#d8dee9); flex:0 0 auto; background:#f1f3f7; }
+      .img-link-clear { flex:0 0 auto; width:32px; height:32px; border:none; border-radius:8px; background:var(--surface-muted,#eef2f7); color:var(--muted,#667085); cursor:pointer; font-size:0.85rem; }
+      .img-link-clear:hover { background:#fde8e8; color:#e11d48; }
       /* ── التعديل داخل البطاقة ── */
       .edit-field textarea { width:100%; padding:8px 10px; border:1px solid var(--border,#d8dee9); border-radius:8px; font-family:inherit; font-size:0.8rem; background:var(--card-bg,#fff); color:var(--text,#1f2937); resize:vertical; min-height:56px; }
       .edit-field select { width:100%; padding:8px 10px; border:1px solid var(--border,#d8dee9); border-radius:8px; font-family:inherit; font-size:0.8rem; background:var(--card-bg,#fff); color:var(--text,#1f2937); }
@@ -320,6 +325,11 @@
                 <input type="file" id="imageFile" accept="image/*" multiple style="display:none;" />
                 <div class="form-hint" style="margin-top:6px;">JPG, PNG, WebP — حتى 8 صور — تُحفظ في أعمدة image / images داخل taager_products</div>
                 <div class="product-image-previews" id="imagePreviews" style="margin-top:10px;"></div>
+                <div class="img-links-section" style="margin-top:14px;">
+                  <div class="field-label" style="margin-bottom:6px;"><i class="fa-solid fa-link"></i> أو روابط الصور (8 روابط):</div>
+                  <div id="imageLinksList"></div>
+                  <div class="form-hint" style="margin-top:6px;">الصق رابط صورة في كل خانة — تُعرض معاينة فورية — تُحفظ في img1-8 / images / image1-8</div>
+                </div>
               </div>
             </div>
           </div>
