@@ -15,6 +15,52 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <script src="./auth-guard.js"></script>
+    <style>
+      /* ── محرر المقاسات والألوان ── */
+      .opt-panel { border:1px solid var(--border,#d8dee9); border-radius:12px; padding:14px; background:var(--surface-muted,#f8f9fb); margin-top:10px; }
+      .opt-toggle-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+      .opt-toggle-label { font-weight:700; font-size:0.9rem; display:flex; align-items:center; gap:8px; cursor:pointer; }
+      .opt-toggle-label input { width:18px; height:18px; accent-color:var(--brand-teal,#00b8a9); cursor:pointer; }
+      .opt-editor { margin-top:12px; display:none; }
+      .opt-editor.show { display:block; }
+      .opt-add-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+      .opt-add-row input[type="text"] { flex:1; min-width:140px; padding:8px 12px; border:1px solid var(--border,#d8dee9); border-radius:8px; font-family:inherit; font-size:0.85rem; background:var(--card-bg,#fff); color:var(--text,#1f2937); }
+      .opt-add-row input[type="color"] { width:46px; height:40px; border:1px solid var(--border,#d8dee9); border-radius:8px; background:var(--card-bg,#fff); cursor:pointer; padding:2px; }
+      .opt-list { display:flex; flex-wrap:wrap; gap:8px; }
+      .opt-chip { display:inline-flex; align-items:center; gap:6px; background:var(--card-bg,#fff); border:1px solid var(--border,#d8dee9); border-radius:20px; padding:5px 12px; font-size:0.8rem; font-weight:600; }
+      .opt-chip .swatch { width:16px; height:16px; border-radius:50%; border:1px solid rgba(0,0,0,0.15); }
+      .opt-chip .chip-actions { display:inline-flex; gap:4px; margin-inline-start:2px; }
+      .opt-chip .chip-actions button { border:none; background:none; cursor:pointer; font-size:0.75rem; color:var(--muted,#667085); padding:2px 4px; border-radius:4px; }
+      .opt-chip .chip-actions button:hover { color:var(--danger,#e03131); background:var(--surface-muted,#eef2f7); }
+      .opt-chip .chip-actions button.move-up:hover, .opt-chip .chip-actions button.move-down:hover { color:var(--brand-teal,#00b8a9); }
+      .opt-empty { font-size:0.8rem; color:var(--muted,#667085); padding:6px 2px; }
+      /* ── حقول متعددة القيم (دول) ── */
+      .country-chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+      .country-chip { display:inline-flex; align-items:center; gap:6px; border:1px solid var(--border,#d8dee9); border-radius:20px; padding:4px 12px; font-size:0.78rem; font-weight:600; cursor:pointer; background:var(--card-bg,#fff); user-select:none; transition:all 0.15s; }
+      .country-chip input { display:none; }
+      .country-chip.on { background:var(--brand-teal,#00b8a9); color:#fff; border-color:var(--brand-teal,#00b8a9); }
+      .field-block textarea { width:100%; padding:10px 12px; border:1px solid var(--border,#d8dee9); border-radius:10px; font-family:inherit; font-size:0.85rem; background:var(--card-bg,#fff); color:var(--text,#1f2937); resize:vertical; min-height:70px; }
+      .field-block textarea:focus, .field-block input:focus { outline:none; border-color:var(--brand-teal,#00b8a9); box-shadow:0 0 0 3px rgba(0,184,169,0.12); }
+      .form-hint { font-size:0.72rem; color:var(--muted,#667085); margin-top:4px; }
+      .edit-field textarea { width:100%; padding:8px 10px; border:1px solid var(--border,#d8dee9); border-radius:8px; font-family:inherit; font-size:0.8rem; background:var(--card-bg,#fff); color:var(--text,#1f2937); resize:vertical; min-height:56px; }
+      .edit-field select { width:100%; padding:8px 10px; border:1px solid var(--border,#d8dee9); border-radius:8px; font-family:inherit; font-size:0.8rem; background:var(--card-bg,#fff); color:var(--text,#1f2937); }
+      .edit-field input[type="text"], .edit-field input[type="number"], .edit-field input[type="url"] { width:100%; padding:8px 10px; border:1px solid var(--border,#d8dee9); border-radius:8px; font-family:inherit; font-size:0.8rem; background:var(--card-bg,#fff); color:var(--text,#1f2937); }
+      .edit-opt-list { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+      .edit-opt-chip { display:inline-flex; align-items:center; gap:5px; background:var(--surface-muted,#eef2f7); border-radius:16px; padding:3px 10px; font-size:0.72rem; font-weight:600; }
+      .edit-opt-chip .swatch { width:12px; height:12px; border-radius:50%; border:1px solid rgba(0,0,0,0.15); }
+      .edit-opt-chip button { border:none; background:none; cursor:pointer; color:var(--muted,#667085); font-size:0.7rem; padding:0 2px; }
+      .edit-opt-chip button:hover { color:var(--danger,#e03131); }
+      .mini-info-row { display:flex; flex-wrap:wrap; gap:8px 16px; font-size:0.78rem; color:var(--muted,#667085); }
+      .mini-info-row span { display:inline-flex; align-items:center; gap:5px; }
+      .mini-info-row i { color:var(--brand-teal,#00b8a9); font-size:0.72rem; }
+      .admin-status-pill { display:inline-flex; align-items:center; gap:4px; padding:2px 10px; border-radius:20px; font-size:0.7rem; font-weight:700; }
+      .admin-status-pill.ok { background:#f0fdf4; color:#1f9d55; border:1px solid #bbf7d0; }
+      .admin-status-pill.no { background:#fef2f2; color:#e03131; border:1px solid #fecaca; }
+      body.dark-mode .opt-chip { background:var(--card-bg,#1e293b); }
+      body.dark-mode .country-chip { background:var(--card-bg,#1e293b); }
+      body.dark-mode .admin-status-pill.ok { background:#0f2e1c; color:#4ade80; border-color:#14532d; }
+      body.dark-mode .admin-status-pill.no { background:#2e1010; color:#f87171; border-color:#7f1d1d; }
+    </style>
   </head>
   <body class="app-shell">
     <aside class="app-sidebar">
@@ -38,7 +84,8 @@
           <i class="fa-solid fa-database"></i>
           <span>منتجات Taager</span>
         </a>
-                <a class="side-link" href="analytics.html"><i class="fa-solid fa-chart-pie"></i><span>لوحة التحليلات</span></a>`n<a class="side-link" href="admin-taager-verify.html"><i class="fa-solid fa-check-double"></i><span>تدقيق تاجر</span></a>
+        <a class="side-link" href="analytics.html"><i class="fa-solid fa-chart-pie"></i><span>لوحة التحليلات</span></a>
+        <a class="side-link" href="admin-taager-verify.html"><i class="fa-solid fa-check-double"></i><span>تدقيق تاجر</span></a>
         <a class="side-link" href="admin-sellers.html">
           <i class="fa-solid fa-store"></i>
           <span>إدارة البائعين</span>
@@ -58,19 +105,21 @@
         <a class="side-link" href="admin-taager-token.html">
           <i class="fa-solid fa-key"></i>
           <span>توكن تاجر</span>
-        </a>`n        <a class="side-link" href="analytics.html"><i class="fa-solid fa-chart-bar"></i><span>لوحة التحليلات</span></a>
+        </a>
+        <a class="side-link" href="analytics.html"><i class="fa-solid fa-chart-bar"></i><span>لوحة التحليلات</span></a>
       </nav>
     </aside>
     <main class="app-main">
       <header class="app-topbar">
         <div class="topbar-title">
           <h1>إضافة المنتجات</h1>
-          <p>قم بإضافة منتج جديد إلى المتجر بسهولة</p>
+          <p>إضافة وإدارة منتجات Taager من مجلد taager_products</p>
         </div>
       </header>
       <section class="content-wrap admin-page">
         <section class="card form-card">
           <h2><i class="fa-solid fa-cube"></i> إضافة منتج جديد</h2>
+
           <div class="section-divider">
             <span class="section-label"><i class="fa-solid fa-info-circle"></i> المعلومات الأساسية</span>
           </div>
@@ -85,11 +134,17 @@
                 <option value="">اختر القسم</option>
               </select>
             </div>
+            <div class="field-block">
+              <label for="taager_product_id">كود المنتج</label>
+              <input type="text" id="taager_product_id" placeholder="مثال: 14950" dir="ltr" style="text-align:left;" />
+              <div class="form-hint">يُحفظ في عمود taager_product_id</div>
+            </div>
             <div class="field-block span-2">
               <label for="description">الوصف</label>
               <input type="text" id="description" placeholder="وصف مختصر للمنتج..." />
             </div>
           </div>
+
           <div class="section-divider">
             <span class="section-label"><i class="fa-solid fa-tags"></i> التسعير</span>
           </div>
@@ -99,25 +154,157 @@
               <input type="number" id="price" placeholder="مثال: 999" oninput="updatePricePreview()" />
             </div>
             <div class="field-block">
-              <label for="discount">الخصم %</label>
-              <input type="number" id="discount" placeholder="مثال: 20" oninput="updatePricePreview()" />
+              <label for="original_price">السعر قبل الخصم</label>
+              <input type="number" id="original_price" placeholder="مثال: 1299" oninput="updatePricePreview()" />
+              <div class="form-hint">يُحفظ في عمود original_price</div>
             </div>
             <div class="field-block span-2">
               <div class="price-preview" id="pricePreview">
-                <span>السعر بعد الخصم: </span>
-                <strong id="finalPriceDisplay">0.00 ج.م</strong>
+                <span>الخصم: </span>
+                <strong id="discountDisplay">0%</strong>
+                <span style="margin-inline-start:12px;">السعر بعد الخصم: </span>
+                <strong id="finalPriceDisplay">—</strong>
               </div>
             </div>
           </div>
+
           <div class="section-divider">
-            <span class="section-label"><i class="fa-solid fa-box"></i> المخزون</span>
+            <span class="section-label"><i class="fa-solid fa-box"></i> المخزون والمبيعات</span>
           </div>
           <div class="editor-grid">
             <div class="field-block">
-              <label for="stock">الكمية</label>
+              <label for="stock">الكمية المتاحة</label>
               <input type="number" id="stock" placeholder="مثال: 50" />
             </div>
+            <div class="field-block">
+              <label for="sales_count">عدد المأخوذين (المبيع)</label>
+              <input type="number" id="sales_count" placeholder="مثال: 120" />
+              <div class="form-hint">يُحفظ في عمود sales_count</div>
+            </div>
           </div>
+
+          <div class="section-divider">
+            <span class="section-label"><i class="fa-solid fa-file-lines"></i> النظرة العامة والمواصفات</span>
+          </div>
+          <div class="editor-grid">
+            <div class="field-block span-2">
+              <label for="quick_details">نظرة عامة</label>
+              <textarea id="quick_details" placeholder="نظرة عامة سريعة على المنتج..." rows="3"></textarea>
+              <div class="form-hint">يُحفظ في عمود quick_details</div>
+            </div>
+            <div class="field-block span-2">
+              <label for="content_ideas">المواصفات</label>
+              <textarea id="content_ideas" placeholder="المواصفات التفصيلية..." rows="3"></textarea>
+              <div class="form-hint">يُحفظ في عمود content_ideas</div>
+            </div>
+          </div>
+
+          <div class="section-divider">
+            <span class="section-label"><i class="fa-solid fa-user-tie"></i> البائع والتاجر</span>
+          </div>
+          <div class="editor-grid">
+            <div class="field-block">
+              <label for="seller">اسم التاجر</label>
+              <input type="text" id="seller" placeholder="اسم التاجر" />
+              <div class="form-hint">يُحفظ في عمود seller</div>
+            </div>
+            <div class="field-block">
+              <label for="vendor">اسم الـ Vendor</label>
+              <input type="text" id="vendor" placeholder="اسم المورد" />
+              <div class="form-hint">عمود جديد vendor</div>
+            </div>
+            <div class="field-block span-2">
+              <label for="company_name">اسم الشركة (إن اختلف عن التاجر)</label>
+              <input type="text" id="company_name" placeholder="اسم الشركة (اختياري)" />
+              <div class="form-hint">عمود جديد company_name</div>
+            </div>
+            <div class="field-block">
+              <label for="source">المصدر</label>
+              <select id="source">
+                <option value="">اختر المصدر</option>
+                <option value="taager">Taager</option>
+                <option value="manual">إضافة يدوية</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="section-divider">
+            <span class="section-label"><i class="fa-solid fa-shield-halved"></i> الإرجاع والضمان</span>
+          </div>
+          <div class="editor-grid">
+            <div class="field-block">
+              <label for="return_allowed">هل المنتج قابل للإرجاع؟</label>
+              <select id="return_allowed">
+                <option value="true">نعم، قابل للإرجاع</option>
+                <option value="false">لا، غير قابل للإرجاع</option>
+              </select>
+              <div class="form-hint">عمود جديد return_allowed</div>
+            </div>
+            <div class="field-block">
+              <label for="warranty">الضمان</label>
+              <input type="text" id="warranty" placeholder="مثال: 12 شهر أو سنة" />
+              <div class="form-hint">عمود جديد warranty</div>
+            </div>
+          </div>
+
+          <div class="section-divider">
+            <span class="section-label"><i class="fa-solid fa-ruler-combined"></i> المقاسات والألوان</span>
+          </div>
+          <div class="editor-grid">
+            <div class="field-block span-2">
+              <div class="opt-panel">
+                <div class="opt-toggle-row">
+                  <label class="opt-toggle-label">
+                    <input type="checkbox" id="hasSizes" onchange="toggleSizesEditor()" />
+                    <i class="fa-solid fa-ruler-combined"></i> هل له مقاسات؟
+                  </label>
+                </div>
+                <div class="opt-editor" id="sizesEditor">
+                  <div class="opt-add-row">
+                    <input type="text" id="sizeInput" placeholder="أضف مقاساً ثم اضغط إضافة (مثال: L)" onkeydown="if(event.key==='Enter'){event.preventDefault();addSize();}" />
+                    <button type="button" class="btn btn-primary" onclick="addSize()" style="padding:8px 18px;font-size:0.82rem;"><i class="fa-solid fa-plus"></i> إضافة</button>
+                  </div>
+                  <div class="opt-list" id="sizesList"></div>
+                  <div class="opt-empty" id="sizesEmpty">لا توجد مقاسات بعد.</div>
+                </div>
+              </div>
+            </div>
+            <div class="field-block span-2">
+              <div class="opt-panel">
+                <div class="opt-toggle-row">
+                  <label class="opt-toggle-label">
+                    <input type="checkbox" id="hasColors" onchange="toggleColorsEditor()" />
+                    <i class="fa-solid fa-palette"></i> هل له ألوان؟
+                  </label>
+                </div>
+                <div class="opt-editor" id="colorsEditor">
+                  <div class="opt-add-row">
+                    <input type="color" id="colorValue" value="#ff6b1a" title="اختر اللون" />
+                    <input type="text" id="colorName" placeholder="اسم اللون (مثال: برتقالي)" onkeydown="if(event.key==='Enter'){event.preventDefault();addColor();}" />
+                    <button type="button" class="btn btn-primary" onclick="addColor()" style="padding:8px 18px;font-size:0.82rem;"><i class="fa-solid fa-plus"></i> إضافة</button>
+                  </div>
+                  <div class="opt-list" id="colorsList"></div>
+                  <div class="opt-empty" id="colorsEmpty">لا توجد ألوان بعد.</div>
+                </div>
+              </div>
+            </div>
+            <div class="field-block span-2">
+              <div class="form-hint" style="margin-top:0;">
+                <i class="fa-solid fa-circle-info"></i> المقاسات تُحفظ في مجلد taager_variant_groups، والألوان في عمود colors — كل منتج يختلف عن الآخر.
+              </div>
+            </div>
+          </div>
+
+          <div class="section-divider">
+            <span class="section-label"><i class="fa-solid fa-globe"></i> الدول المتاحة</span>
+          </div>
+          <div class="editor-grid">
+            <div class="field-block span-2">
+              <div class="country-chips" id="countryChips"></div>
+              <div class="form-hint" style="margin-top:8px;">يُحفظ في عمود available_countries — اضغط على الدولة لتحديدها/إلغاؤها</div>
+            </div>
+          </div>
+
           <div class="section-divider">
             <span class="section-label"><i class="fa-solid fa-images"></i> صور المنتج</span>
           </div>
@@ -164,9 +351,11 @@
             </button>
           </div>
         </section>
+
         <section class="card list-card">
           <div class="list-header">
             <h2>المنتجات المضافة</h2>
+            <span class="form-hint" style="margin-inline-start:auto;">من جدول taager_products</span>
           </div>
           <div class="products-grid" id="products"></div>
         </section>
@@ -198,6 +387,3 @@
     <script src="./admin.page.js"></script>
   </body>
 </html>
-
-
-
