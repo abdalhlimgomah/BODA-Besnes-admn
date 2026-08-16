@@ -60,15 +60,15 @@ const COUNTRIES = [
   { code: "SA", name: "السعودية" },
 ];
 
-/* ── حالة محررات المقاسات/الألوان (للإضافة الجديدة) ── */
+/* ── حالة محرر المقاسات/الألوان (للإضافة الجديدة) ── */
 let newSizes = [];
 let newColors = [];
-let sizesCardOpen = false;
-let colorsCardOpen = false;
+const newMatrixStock = {};
 
 /* ── حالة المحررات لكل منتج في وضع التعديل ── */
 const editSizes = {};
 const editColors = {};
+const editMatrixStock = {};
 
 /* ── التحميل التدريجي ── */
 let allProducts = [];
@@ -163,56 +163,188 @@ function removeVideo() {
   document.getElementById("videoFile").value = "";
 }
 
-/* ═══════════════ بطاقات المقاسات والألوان (قابلة للضغط) ═══════════════ */
-function toggleSizesCard() {
-  sizesCardOpen = !sizesCardOpen;
-  document.getElementById("sizesCard").classList.toggle("open", sizesCardOpen);
-  if (sizesCardOpen) {
-    renderSizesList();
-    document.getElementById("sizeInput").focus();
+/* ═══════════════ محرر مصفوفة المقاسات × الألوان ═══════════════ */
+function sizeLabel(s) {
+  return typeof s === "string" ? s : String((s && (s.name || s.size)) != null ? s.name || s.size : s || "");
+}
+
+function colorLabel(c) {
+  return typeof c === "string" ? c : String((c && (c.name || c.label || c.value)) != null ? c.name || c.label || c.value : c || "");
+}
+
+function normalizeSizeObjects(arr) {
+  return parseArray(arr)
+    .map(function (s) {
+      if (typeof s === "string") return { name: s, price: 0, stock: 0 };
+      return { name: String(s.name || s.size || ""), price: safeNumber(s.price), stock: safeNumber(s.stock) };
+    })
+    .filter(function (s) { return s.name; });
+}
+
+function normalizeColorObjects(arr) {
+  return parseColors(arr).map(function (c) {
+    return {
+      name: c.name,
+      value: c.value || "",
+      sizes: Array.isArray(c.sizes)
+        ? c.sizes.map(function (cs) {
+            return { size: String(cs.size || cs.name || ""), stock: safeNumber(cs.stock) };
+          })
+        : [],
+    };
+  });
+}
+
+function matrixKey(ci, si) { return ci + "_" + si; }
+
+function matrixStock(store, ci, si) {
+  const n = Number(store[matrixKey(ci, si)]);
+  return Number.isFinite(n) && n >= 0 ? n : 0;
+}
+
+function setMatrixCell(store, ci, si, value) {
+  store[matrixKey(ci, si)] = safeNumber(value);
+}
+
+function setSizePriceAt(sizes, si, value) {
+  if (sizes[si]) sizes[si].price = safeNumber(value);
+}
+
+function setSizeStockAt(sizes, si, value) {
+  if (sizes[si]) sizes[si].stock = safeNumber(value);
+}
+
+function colorTotal(sizes, colors, store, ci) {
+  return sizes.reduce((sum, s, si) => sum + matrixStock(store, ci, si), 0);
+}
+
+function sizeTotal(sizes, colors, store, si) {
+  return colors.reduce((sum, c, ci) => sum + matrixStock(store, ci, si), 0);
+}
+
+function grandTotal(sizes, colors, store) {
+  return colors.reduce((sum, c, ci) => sum + colorTotal(sizes, colors, store, ci), 0);
+}
+
+function matrixTableHtml(store, sizes, colors, cellHandler, priceHandler, qtyHandler, tableId) {
+  if (!sizes.length && !colors.length) return "";
+  const rows = [];
+  const qtyLocked = colors.length > 0;
+
+  const head = ['<th class="corner">اللون</th>'];
+  sizes.forEach((s, si) => {
+    const p = safeNumber(s.price) > 0 ? safeNumber(s.price).toFixed(2) : "";
+    const q = colors.length ? sizeTotal(sizes, colors, store, si) : Math.max(0, safeNumber(s.stock));
+    head.push(
+      '<th class="m-size-th"><div class="m-size-name">' + escapeHtml(sizeLabel(s)) + "</div>" +
+      '<div class="m-size-price-wrap"><span>السعر</span><input type="number" class="m-size-price" min="0" step="0.01" placeholder="—" value="' + p + '" oninput="' + priceHandler + '(' + si + ', this.value)" /></div>' +
+      '<div class="m-size-qty-wrap"><span>العدد</span><input type="number" class="m-size-qty" data-size-qty="' + si + '" min="0" value="' + q + '" oninput="' + qtyHandler + '(' + si + ', this.value)" ' + (qtyLocked ? 'readonly disabled style="width:52px;background:transparent;border:none;text-align:center;"' : 'style="width:52px;"') + ' /></div>' +
+      "</th>"
+    );
+  });
+  head.push('<th class="m-row-total-head">إجمالي اللون</th>');
+  rows.push("<tr>" + head.join("") + "</tr>");
+
+  colors.forEach((c, ci) => {
+    const tds = [
+      '<td class="m-color-name"><span class="swatch" style="background:' + escapeHtml(c.value || "#999") + ';"></span><span>' + escapeHtml(colorLabel(c)) + "</span></td>",
+    ];
+    sizes.forEach((s, si) => {
+      tds.push(
+        '<td><input type="number" class="m-cell" min="0" placeholder="0" title="كمية ' + escapeHtml(colorLabel(c)) + ' × ' + escapeHtml(sizeLabel(s)) + '" value="' + matrixStock(store, ci, si) + '" oninput="' + cellHandler + '(' + ci + ', ' + si + ', this.value)" /></td>'
+      );
+    });
+    tds.push('<td class="m-row-total">' + colorTotal(sizes, colors, store, ci) + "</td>");
+    rows.push("<tr>" + tds.join("") + "</tr>");
+  });
+
+  if (colors.length) {
+    const foot = ['<td class="m-foot-label">إجمالي المقاس</td>'];
+    sizes.forEach((s, si) => {
+      foot.push('<td class="m-foot-total">' + sizeTotal(sizes, colors, store, si) + "</td>");
+    });
+    foot.push('<td class="m-foot-grand">الإجمالي العام: <b>' + grandTotal(sizes, colors, store) + "</b></td>");
+    rows.push('<tr class="m-foot">' + foot.join("") + "</tr>");
+  }
+
+  return '<table class="variant-matrix"' + (tableId ? ' id="' + tableId + '"' : "") + ">" + rows.join("") + "</table>";
+}
+
+function refreshMatrixTotals(table, sizes, colors, store) {
+  if (!table) return;
+  const rows = table.querySelectorAll("tr");
+  colors.forEach((c, ci) => {
+    const row = rows[ci + 1];
+    const td = row && row.lastElementChild;
+    if (td) td.textContent = colorTotal(sizes, colors, store, ci);
+  });
+  const foot = rows[colors.length + 1];
+  if (foot) {
+    sizes.forEach((s, si) => {
+      const td = foot.children[si + 1];
+      if (td) td.textContent = sizeTotal(sizes, colors, store, si);
+    });
+    const grand = foot.lastElementChild;
+    if (grand) grand.textContent = grandTotal(sizes, colors, store);
   }
 }
 
-function toggleColorsCard() {
-  colorsCardOpen = !colorsCardOpen;
-  document.getElementById("colorsCard").classList.toggle("open", colorsCardOpen);
-  if (colorsCardOpen) renderColorsList();
+function renderVariantMatrix() {
+  const table = document.getElementById("variantMatrix");
+  if (!table) return;
+  const empty = document.getElementById("matrixEmpty");
+  const hasAny = newSizes.length > 0 || newColors.length > 0;
+  if (empty) empty.style.display = hasAny ? "none" : "";
+  table.innerHTML = matrixTableHtml(newMatrixStock, newSizes, newColors, "setCell", "setSizePrice", "setSizeStock");
 }
 
-function renderSizesState() {
-  const stateEl = document.getElementById("sizesState");
-  if (!stateEl) return;
-  if (newSizes.length) {
-    stateEl.className = "opt-state on";
-    stateEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> له مقاسات (${newSizes.length})`;
-  } else {
-    stateEl.className = "opt-state";
-    stateEl.innerHTML = `<i class="fa-regular fa-circle"></i> بدون مقاسات`;
-  }
+function setCell(ci, si, value) {
+  setMatrixCell(newMatrixStock, ci, si, value);
+  refreshMatrixTotals(document.getElementById("variantMatrix"), newSizes, newColors, newMatrixStock);
+  syncSizeStockInputs();
+  syncColorStockInputs();
 }
 
-function renderColorsState() {
-  const stateEl = document.getElementById("colorsState");
-  if (!stateEl) return;
-  if (newColors.length) {
-    stateEl.className = "opt-state on";
-    stateEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> له ألوان (${newColors.length})`;
-  } else {
-    stateEl.className = "opt-state";
-    stateEl.innerHTML = `<i class="fa-regular fa-circle"></i> بدون ألوان`;
-  }
+function setSizePrice(si, value) {
+  setSizePriceAt(newSizes, si, value);
+}
+
+function setSizeStock(si, value) {
+  setSizeStockAt(newSizes, si, value);
+}
+
+function sizeDisplayQty(sizes, colors, store, si) {
+  const s = sizes[si] || {};
+  return colors.length ? sizeTotal(sizes, colors, store, si) : Math.max(0, safeNumber(s.stock));
+}
+
+function syncSizeStockInputs() {
+  document.querySelectorAll("#sizesList .size-qty-input").forEach((input) => {
+    const idx = Number(input.getAttribute("data-size-qty"));
+    if (Number.isFinite(idx)) input.value = sizeDisplayQty(newSizes, newColors, newMatrixStock, idx);
+  });
+  document.querySelectorAll("#variantMatrix .m-size-qty").forEach((input) => {
+    const idx = Number(input.getAttribute("data-size-qty"));
+    if (Number.isFinite(idx)) input.value = sizeDisplayQty(newSizes, newColors, newMatrixStock, idx);
+  });
 }
 
 function renderSizesList() {
   const list = document.getElementById("sizesList");
-  const empty = document.getElementById("sizesEmpty");
+  if (!list) return;
   list.innerHTML = "";
-  empty.style.display = newSizes.length ? "none" : "";
+  const locked = newColors.length > 0;
   newSizes.forEach((size, idx) => {
+    const qty = sizeDisplayQty(newSizes, newColors, newMatrixStock, idx);
     const chip = document.createElement("span");
     chip.className = "opt-chip";
-    chip.innerHTML = `<span>${escapeHtml(size)}</span>
-      <span class="chip-actions">
+    chip.innerHTML =
+      `<span>${escapeHtml(sizeLabel(size))}</span>` +
+      `<span class="chip-qty" title="${locked ? "العدد المحسوب من مصفوفة الألوان × المقاسات" : "عدد القطع لهذا المقاس"}">` +
+      `<input type="number" class="size-qty-input" data-size-qty="${idx}" min="0" value="${qty}" oninput="setSizeStock(${idx}, this.value)" ${locked ? 'readonly disabled style="width:52px;background:transparent;border:none;text-align:center;"' : 'style="width:52px;"'} />` +
+      `</span>` +
+      (safeNumber(size.price) > 0 ? `<small title="السعر">ب${safeNumber(size.price).toFixed(2)}</small>` : "") +
+      `<span class="chip-actions">
         <button type="button" title="تحريك لأعلى" class="move" onclick="moveSize(${idx},-1)"><i class="fa-solid fa-arrow-up"></i></button>
         <button type="button" title="تحريك لأسفل" class="move" onclick="moveSize(${idx},1)"><i class="fa-solid fa-arrow-down"></i></button>
         <button type="button" title="حذف" onclick="removeSize(${idx})"><i class="fa-solid fa-xmark"></i></button>
@@ -223,16 +355,18 @@ function renderSizesList() {
 
 function addSize() {
   const input = document.getElementById("sizeInput");
+  const priceInput = document.getElementById("sizePriceInput");
   const value = input.value.trim();
   if (!value) { input.focus(); return; }
-  if (newSizes.some(s => s.toLowerCase() === value.toLowerCase())) {
+  if (newSizes.some((s) => sizeLabel(s).toLowerCase() === value.toLowerCase())) {
     showToast("هذا المقاس موجود بالفعل", "error");
     return;
   }
-  newSizes.push(value);
+  newSizes.push({ name: value, price: safeNumber(priceInput?.value), stock: 0 });
   input.value = "";
+  if (priceInput) priceInput.value = "";
   renderSizesList();
-  renderSizesState();
+  renderVariantMatrix();
 }
 
 function moveSize(idx, dir) {
@@ -242,32 +376,54 @@ function moveSize(idx, dir) {
   newSizes[idx] = newSizes[target];
   newSizes[target] = tmp;
   renderSizesList();
+  renderVariantMatrix();
 }
 
 function removeSize(idx) {
   newSizes.splice(idx, 1);
   renderSizesList();
-  renderSizesState();
+  renderVariantMatrix();
 }
 
 function renderColorsList() {
   const list = document.getElementById("colorsList");
-  const empty = document.getElementById("colorsEmpty");
+  if (!list) return;
   list.innerHTML = "";
-  empty.style.display = newColors.length ? "none" : "";
+  const locked = newSizes.length > 1;
+  const showQty = newSizes.length >= 1;
   newColors.forEach((color, idx) => {
-    const name = escapeHtml(color.name || color.value);
+    const name = escapeHtml(colorLabel(color));
+    const qty = showQty ? (newSizes.length === 1 ? matrixStock(newMatrixStock, idx, 0) : colorTotal(newSizes, newColors, newMatrixStock, idx)) : 0;
     const chip = document.createElement("span");
     chip.className = "opt-chip";
-    chip.innerHTML = `
-      ${color.value ? `<span class="swatch" style="background:${escapeHtml(color.value)};"></span>` : ""}
-      <span>${name}</span>
-      <span class="chip-actions">
+    chip.innerHTML =
+      (color.value ? `<span class="swatch" style="background:${escapeHtml(color.value)};"></span>` : "") +
+      `<span>${name}</span>` +
+      (showQty
+        ? `<span class="chip-qty" title="${locked ? "العدد المحسوب من مصفوفة الألوان × المقاسات" : "عدد القطع لهذا اللون"}">` +
+          `<input type="number" class="color-qty-input" data-color-qty="${idx}" min="0" value="${qty}" oninput="setColorStock(${idx}, this.value)" ${locked ? 'readonly disabled style="width:52px;background:transparent;border:none;text-align:center;"' : 'style="width:52px;"'} /></span>`
+        : "") +
+      `<span class="chip-actions">
         <button type="button" title="تحريك لأعلى" class="move" onclick="moveColor(${idx},-1)"><i class="fa-solid fa-arrow-up"></i></button>
         <button type="button" title="تحريك لأسفل" class="move" onclick="moveColor(${idx},1)"><i class="fa-solid fa-arrow-down"></i></button>
         <button type="button" title="حذف" onclick="removeColor(${idx})"><i class="fa-solid fa-xmark"></i></button>
       </span>`;
     list.appendChild(chip);
+  });
+}
+
+function setColorStock(ci, value) {
+  if (newSizes.length !== 1) return;
+  setMatrixCell(newMatrixStock, ci, 0, value);
+  refreshMatrixTotals(document.getElementById("variantMatrix"), newSizes, newColors, newMatrixStock);
+  syncSizeStockInputs();
+}
+
+function syncColorStockInputs() {
+  document.querySelectorAll("#colorsList .color-qty-input").forEach((input) => {
+    const ci = Number(input.getAttribute("data-color-qty"));
+    if (!Number.isFinite(ci) || newSizes.length < 1) return;
+    input.value = newSizes.length === 1 ? matrixStock(newMatrixStock, ci, 0) : colorTotal(newSizes, newColors, newMatrixStock, ci);
   });
 }
 
@@ -278,14 +434,14 @@ function addColor() {
   const value = valueInput.value.trim();
   if (!name && !value) { nameInput.focus(); return; }
   const label = (name || value).toLowerCase();
-  if (newColors.some(c => (c.name || c.value).toLowerCase() === label)) {
+  if (newColors.some((c) => (c.name || c.value).toLowerCase() === label)) {
     showToast("هذا اللون موجود بالفعل", "error");
     return;
   }
   newColors.push({ name, value });
   nameInput.value = "";
   renderColorsList();
-  renderColorsState();
+  renderVariantMatrix();
 }
 
 function moveColor(idx, dir) {
@@ -295,12 +451,41 @@ function moveColor(idx, dir) {
   newColors[idx] = newColors[target];
   newColors[target] = tmp;
   renderColorsList();
+  renderVariantMatrix();
 }
 
 function removeColor(idx) {
   newColors.splice(idx, 1);
   renderColorsList();
-  renderColorsState();
+  renderVariantMatrix();
+}
+
+/* ── إخراج المقاسات والألوان النهائيين (مع الكميات) ── */
+function finalizeSizes(sizes, colors, store, fallbackStock) {
+  const hasAnyCell = colors.some((c, ci) => sizes.some((s, si) => matrixStock(store, ci, si) > 0));
+  return sizes.map((s, si) => {
+    const typedStock = safeNumber(s.stock);
+    const baseStock = Math.max(0, typedStock || Number(fallbackStock) || 0);
+    return {
+      name: sizeLabel(s),
+      price: safeNumber(s.price) || 0,
+      stock: colors.length && hasAnyCell ? sizeTotal(sizes, colors, store, si) : baseStock,
+    };
+  });
+}
+
+function sizeBasedTotal(sizes, colors, store) {
+  if (!sizes.length) return 0;
+  if (colors.length) return grandTotal(sizes, colors, store);
+  return sizes.reduce((sum, s) => sum + Math.max(0, safeNumber(s.stock) || 0), 0);
+}
+
+function finalizeColors(sizes, colors, store) {
+  return colors.map((c, ci) => ({
+    name: colorLabel(c),
+    value: c.value || "",
+    sizes: sizes.map((s, si) => ({ size: sizeLabel(s), stock: matrixStock(store, ci, si) })),
+  }));
 }
 
 /* ═══════════════ المصدر اليدوي ═══════════════ */
@@ -383,7 +568,7 @@ function collectFormPayload() {
     price: price,
     original_price: originalPrice || null,
     description: description,
-    stock: stock,
+    stock: stock > 0 ? stock : sizeBasedTotal(newSizes, newColors, newMatrixStock),
     sales_count: salesCount,
     category: category,
     seller: seller || null,
@@ -397,8 +582,8 @@ function collectFormPayload() {
     available_countries: availableCountries,
     is_active: true,
     taager_product_id: taagerProductId || null,
-    colors: newColors.slice(),
-    sizes: newSizes.slice(),
+    colors: finalizeColors(newSizes, newColors, newMatrixStock),
+    sizes: finalizeSizes(newSizes, newColors, newMatrixStock, stock),
   };
 }
 
@@ -411,7 +596,8 @@ async function saveVariantGroup(rowId, parentId, sizes, name, thumbnail) {
   if (!sizes.length) return;
   const variants = sizes.map((size) => ({
     id: String(rowId),
-    size: size,
+    size: sizeLabel(size),
+    price: safeNumber(size.price) || 0,
     name: name,
     sku: "",
     thumbnail: thumbnail || "",
@@ -531,14 +717,17 @@ async function updateProduct(id) {
     ? Array.from(countriesWrap.querySelectorAll(".country-chip.on input")).map((el) => el.value)
     : undefined;
 
-  const sizes = editSizes[id] || [];
-  const colors = editColors[id] || [];
+  const editSizesArr = editSizes[id] || [];
+  const editColorsArr = editColors[id] || [];
+  const sizes = finalizeSizes(editSizesArr, editColorsArr, editMatrixStock[id] || {}, stock);
+  const colors = finalizeColors(editSizesArr, editColorsArr, editMatrixStock[id] || {});
+  const derivedStock = sizeBasedTotal(editSizesArr, editColorsArr, editMatrixStock[id] || {});
 
   const updatePayload = {
     name: name,
     price: price,
     description: description,
-    stock: stock,
+    stock: stock > 0 ? stock : derivedStock,
     category: category,
     seller: seller,
     vendor: vendor,
@@ -615,50 +804,125 @@ function countryChipsHtml(id, selected) {
 }
 
 function renderEditChips(id, sizes, colors) {
-  const sizesArr = editSizes[id] || parseArray(sizes);
-  const colorsArr = editColors[id] || parseColors(colors);
+  const sizesArr = editSizes[id] || normalizeSizeObjects(sizes);
+  const colorsArr = editColors[id] || normalizeColorObjects(colors);
   editSizes[id] = sizesArr;
   editColors[id] = colorsArr;
 
+  if (!editMatrixStock[id]) {
+    const seed = {};
+    colorsArr.forEach((c, ci) => {
+      (c.sizes || []).forEach((cs) => {
+        const si = sizesArr.findIndex((s) => sizeLabel(s).toLowerCase() === String(cs.size || "").toLowerCase());
+        if (si >= 0) seed[matrixKey(ci, si)] = safeNumber(cs.stock);
+      });
+    });
+    editMatrixStock[id] = seed;
+  }
+
   const sizesChips = `
     <div class="edit-opt-list" id="sizesChips_${id}">
-      ${sizesArr.length ? sizesArr.map((s, i) => `
-        <span class="edit-opt-chip">${escapeHtml(s)}
+      ${sizesArr.length ? sizesArr.map((s, i) => {
+        const editQty = colorsArr.length ? sizeTotal(sizesArr, colorsArr, editMatrixStock[id], i) : Math.max(0, safeNumber(s.stock));
+        return `<span class="edit-opt-chip">${escapeHtml(sizeLabel(s))}
+          <span class="chip-qty" title="${colorsArr.length ? "العدد المحسوب من مصفوفة الألوان × المقاسات" : "عدد القطع لهذا المقاس"}">
+            <input type="number" class="edit-size-qty-input" data-edit-size-qty="${i}" min="0" value="${editQty}" oninput="editSetSizeStock('${id}', ${i}, this.value)" ${colorsArr.length ? 'readonly disabled style="width:48px;background:transparent;border:none;text-align:center;"' : 'style="width:48px;"'} />
+          </span>
+          ${safeNumber(s.price) > 0 ? `<small title="السعر">ب${safeNumber(s.price).toFixed(2)}</small>` : ""}
           <button type="button" onclick="editMoveSize('${id}', ${i}, -1)" title="أعلى"><i class="fa-solid fa-arrow-up"></i></button>
           <button type="button" onclick="editMoveSize('${id}', ${i}, 1)" title="أسفل"><i class="fa-solid fa-arrow-down"></i></button>
           <button type="button" onclick="editRemoveSize('${id}', ${i})" title="حذف"><i class="fa-solid fa-xmark"></i></button>
-        </span>`).join("") : `<span class="opt-empty">لا توجد مقاسات.</span>`}
+        </span>`;
+      }).join("") : `<span class="opt-empty">لا توجد مقاسات.</span>`}
       <input type="text" id="sizeInput_${id}" placeholder="أضف مقاس..." style="width:110px;padding:5px 8px;border:1px solid var(--border,#d8dee9);border-radius:14px;font-size:0.72rem;font-family:inherit;background:var(--card-bg,#fff);color:var(--text,#1f2937);"
         onkeydown="if(event.key==='Enter'){event.preventDefault();editAddSize('${id}')}" />
+      <input type="number" id="sizePriceInput_${id}" placeholder="سعر المقاس" min="0" step="0.01" style="width:96px;padding:5px 8px;border:1px solid var(--border,#d8dee9);border-radius:14px;font-size:0.72rem;font-family:inherit;background:var(--card-bg,#fff);color:var(--text,#1f2937);" />
       <button type="button" class="btn btn-primary" onclick="editAddSize('${id}')" style="padding:4px 12px;font-size:0.72rem;"><i class="fa-solid fa-plus"></i></button>
     </div>`;
 
   const colorsChips = `
     <div class="edit-opt-list" id="colorsChips_${id}">
-      ${colorsArr.length ? colorsArr.map((c, i) => `
-        <span class="edit-opt-chip">${c.value ? `<span class="swatch" style="background:${escapeHtml(c.value)};"></span>` : ""}${escapeHtml(c.name || c.value)}
+      ${colorsArr.length ? colorsArr.map((c, i) => {
+        const editColorLocked = sizesArr.length > 1;
+        const editColorQty = sizesArr.length >= 1 ? (sizesArr.length === 1 ? matrixStock(editMatrixStock[id], i, 0) : colorTotal(sizesArr, colorsArr, editMatrixStock[id], i)) : 0;
+        return `<span class="edit-opt-chip">${c.value ? `<span class="swatch" style="background:${escapeHtml(c.value)};"></span>` : ""}${escapeHtml(colorLabel(c))}
+          ${sizesArr.length >= 1 ? `<span class="chip-qty" title="${editColorLocked ? "العدد المحسوب من مصفوفة الألوان × المقاسات" : "عدد القطع لهذا اللون"}">
+            <input type="number" class="edit-color-qty-input" data-edit-color-qty="${i}" min="0" value="${editColorQty}" oninput="editSetColorStock('${id}', ${i}, this.value)" ${editColorLocked ? 'readonly disabled style="width:48px;background:transparent;border:none;text-align:center;"' : 'style="width:48px;"'} />
+          </span>` : ""}
           <button type="button" onclick="editRemoveColor('${id}', ${i})" title="حذف"><i class="fa-solid fa-xmark"></i></button>
-        </span>`).join("") : `<span class="opt-empty">لا توجد ألوان.</span>`}
+        </span>`;
+      }).join("") : `<span class="opt-empty">لا توجد ألوان.</span>`}
       <input type="color" id="colorValue_${id}" value="#ff6b1a" style="width:34px;height:26px;border:1px solid var(--border,#d8dee9);border-radius:6px;padding:1px;cursor:pointer;" />
       <input type="text" id="colorName_${id}" placeholder="لون جديد..." style="width:110px;padding:5px 8px;border:1px solid var(--border,#d8dee9);border-radius:14px;font-size:0.72rem;font-family:inherit;background:var(--card-bg,#fff);color:var(--text,#1f2937);"
         onkeydown="if(event.key==='Enter'){event.preventDefault();editAddColor('${id}')}" />
       <button type="button" class="btn btn-primary" onclick="editAddColor('${id}')" style="padding:4px 12px;font-size:0.72rem;"><i class="fa-solid fa-plus"></i></button>
     </div>`;
 
-  return { sizesChips, colorsChips };
+  const matrixHtml = `
+    <div class="edit-matrix-wrap" id="editMatrixWrap_${id}" style="margin-top:6px;">
+      ${!sizesArr.length && !colorsArr.length ? '<div class="opt-empty">لا توجد مقاسات وألوان بعد.</div>' : matrixTableHtml(editMatrixStock[id], sizesArr, colorsArr, "editSetCell('" + id + "')", "editSetSizePrice('" + id + "')", "editSetSizeStock('" + id + "')", "editMatrix_" + id)}
+    </div>`;
+
+  return { sizesChips, colorsChips, matrixHtml };
+}
+
+function editSetCell(id, ci, si, value) {
+  setMatrixCell(editMatrixStock[id], ci, si, value);
+  refreshMatrixTotals(document.getElementById("editMatrix_" + id), editSizes[id] || [], editColors[id] || [], editMatrixStock[id]);
+  syncEditSizeStockInputs(id);
+  syncEditColorStockInputs(id);
+}
+
+function editSetSizePrice(id, si, value) {
+  setSizePriceAt(editSizes[id], si, value);
+}
+
+function editSetSizeStock(id, si, value) {
+  setSizeStockAt(editSizes[id], si, value);
+}
+
+function syncEditSizeStockInputs(id) {
+  document.querySelectorAll(`#sizesChips_${id} [data-edit-size-qty], #editMatrix_${id} .m-size-qty`).forEach((input) => {
+    const idx = Number(input.getAttribute("data-edit-size-qty") || input.getAttribute("data-size-qty"));
+    if (Number.isFinite(idx)) {
+      input.value = (editColors[id] || []).length
+        ? sizeTotal(editSizes[id] || [], editColors[id] || [], editMatrixStock[id], idx)
+        : Math.max(0, safeNumber((editSizes[id] || [])[idx]?.stock));
+    }
+  });
+}
+
+function editSetColorStock(id, ci, value) {
+  const sizesArr = editSizes[id] || [];
+  if (sizesArr.length !== 1) return;
+  setMatrixCell(editMatrixStock[id], ci, 0, value);
+  refreshMatrixTotals(document.getElementById("editMatrix_" + id), sizesArr, editColors[id] || [], editMatrixStock[id]);
+  syncEditSizeStockInputs(id);
+}
+
+function syncEditColorStockInputs(id) {
+  document.querySelectorAll(`[data-edit-color-qty]`).forEach((input) => {
+    if (!input.closest(`#colorsChips_${id}`)) return;
+    const ci = Number(input.getAttribute("data-edit-color-qty"));
+    const sizesArr = editSizes[id] || [];
+    if (!Number.isFinite(ci) || sizesArr.length < 1) return;
+    input.value = sizesArr.length === 1 ? matrixStock(editMatrixStock[id], ci, 0) : colorTotal(sizesArr, editColors[id] || [], editMatrixStock[id], ci);
+  });
 }
 
 function editAddSize(id) {
   const input = document.getElementById(`sizeInput_${id}`);
+  const priceInput = document.getElementById(`sizePriceInput_${id}`);
   const value = input.value.trim();
   if (!value) return;
   const arr = editSizes[id] || (editSizes[id] = []);
-  if (arr.some((s) => s.toLowerCase() === value.toLowerCase())) {
+  if (arr.some((s) => sizeLabel(s).toLowerCase() === value.toLowerCase())) {
     showToast("هذا المقاس موجود بالفعل", "error");
     return;
   }
-  arr.push(value);
+  arr.push({ name: value, price: safeNumber(priceInput?.value), stock: 0 });
   input.value = "";
+  if (priceInput) priceInput.value = "";
   renderEditChipsFor(id);
 }
 
@@ -690,7 +954,7 @@ function editAddColor(id) {
     showToast("هذا اللون موجود بالفعل", "error");
     return;
   }
-  arr.push({ name, value });
+  arr.push({ name, value, sizes: [] });
   nameInput.value = "";
   renderEditChipsFor(id);
 }
@@ -703,11 +967,13 @@ function editRemoveColor(id, idx) {
 
 function renderEditChipsFor(id) {
   const product = (allProducts || []).find((p) => String(p.id) === String(id));
-  const { sizesChips, colorsChips } = renderEditChips(id, product?.sizes, product?.colors);
+  const { sizesChips, colorsChips, matrixHtml } = renderEditChips(id, product?.sizes, product?.colors);
   const sizesContainer = document.getElementById(`sizesChips_${id}`);
   const colorsContainer = document.getElementById(`colorsChips_${id}`);
+  const matrixWrap = document.getElementById(`editMatrixWrap_${id}`);
   if (sizesContainer) sizesContainer.outerHTML = sizesChips;
   if (colorsContainer) colorsContainer.outerHTML = colorsChips;
+  if (matrixWrap) matrixWrap.outerHTML = matrixHtml;
 }
 
 /* ═══════════════ قائمة المنتجات ═══════════════ */
@@ -755,8 +1021,9 @@ function estimatedDiscount(price, originalPrice) {
 function buildCard(product) {
   const id = product.id;
   const discountValue = estimatedDiscount(Number(product.price), Number(product.original_price || 0));
-  const sizes = editSizes[id] || parseArray(product.sizes);
+  const sizes = editSizes[id] || normalizeSizeObjects(product.sizes);
   const colors = editColors[id] || parseColors(product.colors);
+  const editChips = renderEditChips(id, product.sizes, product.colors);
   const countries = parseArray(product.available_countries).join("، ") || "-";
   const returnOk = product.return_allowed !== false;
   const video = getProductVideo(product);
@@ -794,7 +1061,7 @@ function buildCard(product) {
         <span><i class="fa-solid fa-globe"></i> ${escapeHtml(countries)}</span>
         <span class="admin-status-pill ${returnOk ? "ok" : "no"}">${returnOk ? "قابل للإرجاع" : "غير قابل للإرجاع"}</span>
         ${product.warranty ? `<span><i class="fa-solid fa-shield-halved"></i> ضمان: ${escapeHtml(product.warranty)}</span>` : ""}
-        <span><i class="fa-solid fa-ruler-combined"></i> ${sizes.length ? sizes.join("، ") : "بدون مقاسات"}</span>
+        <span><i class="fa-solid fa-ruler-combined"></i> ${sizes.length ? sizes.map(sizeLabel).join("، ") : "بدون مقاسات"}</span>
         <span>${
           colors.length
             ? colors.map((c) => `<span class="swatch" style="width:12px;height:12px;border-radius:50%;display:inline-block;background:${escapeHtml(c.value || "#999")};border:1px solid rgba(0,0,0,0.15);" title="${escapeHtml(c.name || c.value)}"></span>`).join(" ")
@@ -882,12 +1149,16 @@ function buildCard(product) {
         <input type="text" id="description_${id}" value="${escapeHtml(product.description || "")}" />
       </div>
       <div class="edit-field span-2">
-        <label><i class="fa-solid fa-ruler-combined"></i> المقاسات (رتبها بالأسهم)</label>
-        ${renderEditChips(id, product.sizes, product.colors).sizesChips}
+        <label><i class="fa-solid fa-ruler-combined"></i> المقاسات (السعر والترتيب بالأسهم)</label>
+        ${editChips.sizesChips}
       </div>
       <div class="edit-field span-2">
         <label><i class="fa-solid fa-palette"></i> الألوان</label>
-        ${renderEditChips(id, product.sizes, product.colors).colorsChips}
+        ${editChips.colorsChips}
+      </div>
+      <div class="edit-field span-2">
+        <label><i class="fa-solid fa-table-cells-large"></i> الكميات (لون × مقاس) — إجمالي كل لون ومقاس يحسب تلقائياً</label>
+        ${editChips.matrixHtml}
       </div>
       <div class="edit-field span-2">
         <label>الدول المتاحة</label>
@@ -1025,17 +1296,13 @@ function clearForm() {
   if (videoUrlInput) videoUrlInput.value = "";
   newSizes = [];
   newColors = [];
-  sizesCardOpen = false;
-  colorsCardOpen = false;
-  document.getElementById("sizesCard").classList.remove("open");
-  document.getElementById("colorsCard").classList.remove("open");
-  renderSizesState();
-  renderColorsState();
+  Object.keys(newMatrixStock).forEach((key) => delete newMatrixStock[key]);
   setSelectedCountries([]);
   removeVideo();
   updatePricePreview();
   renderSizesList();
   renderColorsList();
+  renderVariantMatrix();
 }
 
 /* ═══════════════ روابط الصور (8 حقول) ═══════════════ */
@@ -1286,10 +1553,9 @@ function init() {
   populateCategorySelect();
   renderCountryChips();
   renderImageLinkInputs();
-  renderSizesState();
-  renderColorsState();
   renderSizesList();
   renderColorsList();
+  renderVariantMatrix();
   loadProducts();
 }
 
@@ -1310,18 +1576,24 @@ window.openGallery = openGallery;
 window.openGalleryById = openGalleryById;
 window.closeGallery = closeGallery;
 window.galleryNav = galleryNav;
-window.toggleSizesCard = toggleSizesCard;
-window.toggleColorsCard = toggleColorsCard;
 window.addSize = addSize;
 window.removeSize = removeSize;
 window.moveSize = moveSize;
 window.addColor = addColor;
 window.removeColor = removeColor;
 window.moveColor = moveColor;
+window.setCell = setCell;
+window.setSizePrice = setSizePrice;
+window.setSizeStock = setSizeStock;
+window.setColorStock = setColorStock;
 window.editAddSize = editAddSize;
 window.editRemoveSize = editRemoveSize;
 window.editMoveSize = editMoveSize;
 window.editAddColor = editAddColor;
 window.editRemoveColor = editRemoveColor;
+window.editSetCell = editSetCell;
+window.editSetSizePrice = editSetSizePrice;
+window.editSetSizeStock = editSetSizeStock;
+window.editSetColorStock = editSetColorStock;
 window.onSourceChange = onSourceChange;
 window.loadMoreProducts = loadMoreProducts;

@@ -271,13 +271,16 @@
     if (!deleteTarget) return;
     try {
       if (deleteType === 'category') {
-        await supabase.from('category_branches').delete().eq('category_id', deleteTarget);
-        var { error } = await supabase.from('categories').delete().eq('id', deleteTarget);
+        var { data: delBranches, error: delBranchesErr } = await supabase.from('category_branches').delete().eq('category_id', deleteTarget).select();
+        if (delBranchesErr) throw delBranchesErr;
+        var { data: delCats, error } = await supabase.from('categories').delete().eq('id', deleteTarget).select();
         if (error) throw error;
+        if (!delCats || !delCats.length) throw new Error('لم يتم حذف القسم. تأكد من وجود صلاحية الحذف في قاعدة البيانات');
         showToast('تم حذف القسم وجميع فروعه', 'success');
       } else {
-        var { error } = await supabase.from('category_branches').delete().eq('id', deleteTarget);
+        var { data: delRows, error } = await supabase.from('category_branches').delete().eq('id', deleteTarget).select();
         if (error) throw error;
+        if (!delRows || !delRows.length) throw new Error('لم يتم حذف الفرع. تأكد من وجود صلاحية الحذف في قاعدة البيانات');
         showToast('تم حذف الفرع', 'success');
         if (currentBranchCategoryId) {
           await loadBranches(currentBranchCategoryId);

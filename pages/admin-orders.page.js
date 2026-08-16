@@ -91,6 +91,129 @@ function toOrderId(value) {
   return String(value ?? "").trim();
 }
 
+function getOrderEmail(order) {
+  return String(order?.user_email || order?.email || order?.customer_email || "").trim().toLowerCase();
+}
+
+function getOrderPhone(order) {
+  return String(order?.phone || order?.customer_phone || "").trim();
+}
+
+function getOrderStatus(order) {
+  return String(order?.status || order?.order_status || "pending").trim();
+}
+
+function getOrderShipping(order) {
+  return Number(order?.shipping_cost ?? order?.shipping_fee ?? order?.shipping ?? 0) || 0;
+}
+
+function getOrderCodFee(order) {
+  return Number(order?.tax ?? order?.tax_amount ?? order?.cod_fee ?? order?.payment_fee ?? 0) || 0;
+}
+
+function getOrderTotal(order) {
+  return Number(order?.total_price ?? order?.total ?? order?.amount ?? 0) || 0;
+}
+
+const LEGACY_BATCH_WINDOW_MS = 3 * 60 * 1000;
+
+function parseOrderTime(order) {
+  const ts = new Date(order?.created_at ?? order?.updated_at);
+  return Number.isNaN(ts.getTime()) ? 0 : ts.getTime();
+}
+
+function sameLegacyBatch(a, b) {
+  if (a.order_batch_id || b.order_batch_id) return false;
+  const emailA = getOrderEmail(a);
+  const emailB = getOrderEmail(b);
+  if (!emailA || emailA !== emailB) return false;
+  if (getOrderPhone(a) !== getOrderPhone(b)) return false;
+  if (getOrderStatus(a) !== getOrderStatus(b)) return false;
+  const diff = Math.abs(parseOrderTime(a) - parseOrderTime(b));
+  return diff <= LEGACY_BATCH_WINDOW_MS;
+}
+
+// تقسّم الطلبات إلى مجموعات: كل مجموعة = طلبات صدرت من نفس السلة (نفس صفحة الدفع)
+function buildBatches(orders) {
+  const list = Array.isArray(orders) ? [...orders] : [];
+  const batches = [];
+  const used = new Set();
+
+  for (const order of list) {
+    const orderId = toOrderId(order?.id);
+    if (!orderId || used.has(orderId)) continue;
+
+    const groupOrders = [order];
+    used.add(orderId);
+    const batchId = String(order?.order_batch_id || "").trim();
+
+    for (const other of list) {
+      const otherId = toOrderId(other?.id);
+      if (!otherId || used.has(otherId)) continue;
+      if (batchId) {
+        if (String(other?.order_batch_id || "").trim() === batchId) {
+          groupOrders.push(other);
+          used.add(otherId);
+        }
+      } else if (sameLegacyBatch(order, other)) {
+        groupOrders.push(other);
+        used.add(otherId);
+      }
+    }
+
+    batches.push({
+      key: batchId || `legacy-${orderId}`,
+      batchId,
+      legacy: !batchId,
+      orders: groupOrders,
+    });
+  }
+
+  batches.sort((a, b) => parseOrderTime(b.orders[0]) - parseOrderTime(a.orders[0]));
+  return batches;
+}
+
+// إجماليات المجموعة: الشحن ورسوم الدفع تُحسب مرة واحدة فقط
+function computeBatchTotals(batch) {
+  const orders = batch?.orders || [];
+  let subtotal = 0;
+  let discount = 0;
+  let shipping = 0;
+  let cod = 0;
+  let couponCode = "";
+
+  orders.forEach((order) => {
+    for (const payload of [order.items_snapshot, order.items_json, order.items, order.order_items, order.type]) {
+      const entries = normalizeToArray(payload);
+      entries.forEach((item) => {
+        subtotal += (Number(item?.price) || 0) * (Number(item?.quantity) || 1);
+      });
+    }
+    discount += Number(order?.discount ?? order?.discount_amount ?? 0) || 0;
+    shipping = Math.max(shipping, getOrderShipping(order));
+    cod = Math.max(cod, getOrderCodFee(order));
+    if (!couponCode && order?.coupon_code) couponCode = String(order.coupon_code);
+  });
+
+  const total = Math.max(subtotal - discount + shipping + cod, 0);
+  return { subtotal, discount, shipping, cod, couponCode, total, ordersCount: orders.length };
+}
+
+function extractOrderItems(order) {
+  for (const payload of [order.items_snapshot, order.items_json, order.items, order.order_items, order.type]) {
+    const items = normalizeToArray(payload);
+    if (items.length) return items;
+  }
+  return [];
+}
+
+function totalItemsCount(batch) {
+  const orders = batch?.orders || [];
+  return orders.reduce((sum, order) => {
+    return sum + extractOrderItems(order).reduce((s, item) => s + (Number(item?.quantity) || 1), 0);
+  }, 0);
+}
+
 function normalizeImageSource(value) {
   const source = normalizeText(value);
   if (!source) return "";
@@ -406,7 +529,7 @@ function applyFilters() {
       const name = (order.user_name || "").toLowerCase();
       const phone = (order.phone || "").toLowerCase();
       const prod = (order.product_name || "").toLowerCase();
-      const email = (order.email || "").toLowerCase();
+      const email = getOrderEmail(order).toLowerCase();
       return name.includes(query) || phone.includes(query) || prod.includes(query) || email.includes(query);
     });
   }
@@ -428,9 +551,9 @@ function renderOrders(orders) {
 
   const grouped = {};
   orders.forEach(order => {
-    const email = (order.email || "غير معروف").trim().toLowerCase();
+    const email = getOrderEmail(order) || "غير معروف";
     if (!grouped[email]) {
-      grouped[email] = { email: order.email || "غير معروف", name: order.user_name || "", orders: [] };
+      grouped[email] = { email: order.user_email || order.email || order.customer_email || "غير معروف", name: order.user_name || "", orders: [] };
     }
     grouped[email].orders.push(order);
   });
@@ -445,7 +568,27 @@ function renderOrders(orders) {
     const latestOrder = entry.orders[0];
     const latestDate = formatDate(latestOrder?.created_at);
     var latestImage = normalizeImageSource(latestOrder?.product_image) || "";
-    var totalSpent = entry.orders.reduce(function (s, o) { return s + (Number(o.total_price) || 0); }, 0);
+
+    const batches = buildBatches(entry.orders);
+    const multiBatchCount = batches.filter((b) => b.orders.length > 1).length;
+    const ordersInMultiBatches = batches.reduce((s, b) => s + (b.orders.length > 1 ? b.orders.length : 0), 0);
+    var totalSpent = batches.reduce(function (s, b) { return s + computeBatchTotals(b).total; }, 0);
+    const multiBadge = multiBatchCount > 0
+      ? `<span class="multi-batch-badge"><i class="fa-solid fa-cart-plus"></i> ${ordersInMultiBatches} طلب من سلة مشتركة (${multiBatchCount} مجموعة)</span>`
+      : "";
+    // عدّ لعدد الطلبات في كل حالة (تم التسليم / جارٍ التجهيز / تم الشحن ...)
+    const statusCounts = {};
+    entry.orders.forEach((o) => {
+      const st = getOrderStatus(o);
+      statusCounts[st] = (statusCounts[st] || 0) + 1;
+    });
+    const statusOrder = ["review", "pending", "confirmed", "preparing", "shipped", "delivered", "onhold", "cancelled", "returned"];
+    const statusCountsHtml = statusOrder
+      .filter((s) => (statusCounts[s] || 0) > 0 || s === "review" || s === "preparing")
+      .map((s) =>
+        '<span class="status-count-pill ' + statusClass(s) + '"><i class="fa-solid fa-circle"></i> ' + (statusCounts[s] || 0) + ' ' + statusLabel(s) + '</span>'
+      )
+      .join("");
     return `
       <article class="user-card" onclick="goToUserOrders('${encodedEmail}')">
         <div class="user-count-badge">${count}</div>
@@ -456,6 +599,8 @@ function renderOrders(orders) {
             ${entry.name ? `<span class="user-name">${escapeAttr(entry.name)}</span>` : ''}
             <span class="user-latest">آخر طلب: ${latestDate}</span>
             <span class="user-total">الإجمالي: ${totalSpent}</span>
+            ${statusCountsHtml ? `<div class="user-status-counts">${statusCountsHtml}</div>` : ''}
+            ${multiBadge}
           </div>
         </div>
       </article>
@@ -486,16 +631,103 @@ async function fetchOrders(showErrorToast = false) {
   applyFilters();
 }
 
+/* ── خصم الكميات من مخزون المنتج عند تسليم الطلب ── */
+function parseTaagerVariantId(tid) {
+  const s = String(tid || "").trim();
+  const m = s.match(/^(.+?)_c_(.+?)(?:_s_(.*))?$/);
+  if (!m) return { base: s, color: "", size: "" };
+  return { base: m[1], color: m[2], size: m[3] || "" };
+}
+
+async function deductOrderItemsStock(order) {
+  const items = extractOrderItems(order);
+  if (!items.length) return;
+  const grouped = {};
+  items.forEach((it) => {
+    const rawId = String(it?.product_id || it?.id || "").trim();
+    if (!rawId) return;
+    const stripped = rawId.indexOf("taager_") === 0 ? rawId.slice(7) : rawId;
+    const parsed = parseTaagerVariantId(stripped);
+    let base = String(parsed.base || stripped || rawId);
+    if (base.indexOf("taager_") !== 0) base = "taager_" + base;
+    if (!grouped[base]) grouped[base] = [];
+    grouped[base].push({ color: parsed.color || "", size: parsed.size || "", qty: Math.max(1, Number(it?.quantity) || 1) });
+  });
+
+  for (const pid of Object.keys(grouped)) {
+    let row = null;
+    const { data: d1 } = await supabaseClient.from("taager_products").select("id,stock,colors,sizes").eq("id", pid).limit(1);
+    if (d1 && d1.length) row = d1[0];
+    else {
+      const { data: d2 } = await supabaseClient.from("taager_products").select("id,stock,colors,sizes").eq("taager_product_id", pid).limit(1);
+      if (d2 && d2.length) row = d2[0];
+    }
+    if (!row) continue;
+    await applyStockDeduction(row, grouped[pid]);
+    await applySoldCountIncrement(row, grouped[pid]);
+  }
+}
+
+async function applyStockDeduction(row, picks) {
+  const colors = Array.isArray(row.colors) ? JSON.parse(JSON.stringify(row.colors)) : [];
+  const sizes = Array.isArray(row.sizes) ? JSON.parse(JSON.stringify(row.sizes)) : [];
+  const totalQty = picks.reduce((sum, p) => sum + p.qty, 0);
+
+  picks.forEach((p) => {
+    if (!p.size) return;
+    const si = sizes.findIndex((s) => {
+      const label = typeof s === "string" ? s : (s && (s.name || s.size)) || "";
+      return String(label).trim().toLowerCase() === p.size.trim().toLowerCase();
+    });
+    if (si >= 0 && typeof sizes[si] === "object") {
+      sizes[si].stock = Math.max(0, (Number(sizes[si].stock) || 0) - p.qty);
+    }
+    const ci = colors.findIndex((c) => String((c && (c.name || c.value)) || "").trim().toLowerCase() === (p.color || "").trim().toLowerCase());
+    if (ci >= 0 && p.color) {
+      const sizesOfColor = Array.isArray(colors[ci].sizes) ? colors[ci].sizes : [];
+      const cell = sizesOfColor.find((cs) => String((cs && cs.size) || "").trim().toLowerCase() === p.size.trim().toLowerCase());
+      if (cell) cell.stock = Math.max(0, (Number(cell.stock) || 0) - p.qty);
+    }
+  });
+
+  const payload = { stock: Math.max(0, (Number(row.stock) || 0) - totalQty) };
+  if (sizes.length) payload.sizes = sizes;
+  if (colors.length) payload.colors = colors;
+  const { error } = await supabaseClient.from("taager_products").update(payload).eq("id", row.id);
+  if (error) console.warn("Stock deduction failed:", error.message);
+}
+
+async function applySoldCountIncrement(row, picks) {
+  const totalQty = picks.reduce((sum, p) => sum + p.qty, 0);
+  if (totalQty <= 0 || !row || !row.id) return;
+  try {
+    const { data: cur } = await supabaseClient.from("taager_products").select("sales_count").eq("id", row.id).limit(1);
+    if (!cur || !cur.length) return;
+    const newCount = Math.max(0, (Number(cur[0].sales_count) || 0) + totalQty);
+    const { error } = await supabaseClient.from("taager_products").update({ sales_count: newCount }).eq("id", row.id);
+    if (error) console.warn("Sold count increment failed:", error.message);
+  } catch (e) {
+    console.warn("Sold count increment failed:", e && e.message);
+  }
+}
+
 async function changeStatus(id) {
   const select = document.getElementById(`status_select_${id}`);
   if (!select) return;
 
   const newStatus = select.value;
+  const order = allOrders.find((o) => String(o.id) === String(id));
+  const wasDelivered = order ? getOrderStatus(order) === "delivered" : false;
+
   const { error } = await supabaseClient.from("orders").update({ status: newStatus }).eq("id", id);
   if (error) {
     console.error(error);
     showToast("حدث خطأ أثناء تحديث الحالة", "error");
     return;
+  }
+
+  if (newStatus === "delivered" && !wasDelivered && order) {
+    await deductOrderItemsStock(order);
   }
 
   showToast("تم تحديث حالة الطلب", "success");

@@ -40,6 +40,43 @@
       .opt-chip .chip-actions button:hover { color:var(--danger,#e03131); background:var(--surface-muted,#e2e8f0); }
       .opt-chip .chip-actions button.move:hover { color:var(--brand-teal,#00b8a9); }
       .opt-empty { font-size:0.78rem; color:var(--muted,#667085); padding:4px 2px; }
+      /* ── مصفوفة المقاسات × الألوان ── */
+      .matrix-toolbar { display:flex; flex-direction:column; gap:8px; margin-bottom:10px; }
+      .matrix-toolbar .opt-add-row { margin-bottom:0; }
+      .matrix-toolbar input[type="number"] { width:120px; padding:9px 12px; border:1px solid var(--border,#d8dee9); border-radius:9px; font-family:inherit; font-size:0.85rem; background:var(--card-bg,#fff); color:var(--text,#1f2937); }
+      .matrix-chips { display:flex; flex-direction:column; gap:8px; margin-bottom:10px; }
+      .variant-matrix-wrap { overflow-x:auto; border:1px solid var(--border,#d8dee9); border-radius:12px; }
+      .variant-matrix { width:100%; border-collapse:collapse; font-size:0.8rem; min-width:520px; }
+      .variant-matrix th, .variant-matrix td { border:1px solid var(--border,#d8dee9); padding:6px 8px; text-align:center; }
+      .variant-matrix th { background:var(--surface-muted,#f3f5f9); }
+      .variant-matrix .corner { color:var(--muted,#667085); font-weight:700; font-size:0.78rem; background:var(--surface-muted,#f3f5f9); }
+      .variant-matrix .m-size-th { min-width:110px; }
+      .variant-matrix .m-size-name { font-weight:800; font-size:0.85rem; color:var(--text,#1f2937); margin-bottom:4px; }
+      .variant-matrix .m-size-price-wrap { display:flex; align-items:center; gap:5px; justify-content:center; }
+      .variant-matrix .m-size-price-wrap span { font-size:0.66rem; font-weight:600; color:var(--muted,#667085); }
+      .variant-matrix .m-size-price { width:64px; }
+      .variant-matrix .m-size-qty-wrap { display:flex; align-items:center; gap:5px; justify-content:center; margin-top:4px; }
+      .variant-matrix .m-size-qty-wrap span { font-size:0.66rem; font-weight:600; color:var(--muted,#667085); }
+      .variant-matrix .m-size-qty { width:52px; }
+      .variant-matrix .m-size-name { font-weight:700; margin-bottom:3px; }
+      .variant-matrix .m-size-price { width:70px; }
+      .variant-matrix .m-color-name { display:flex; align-items:center; justify-content:flex-start; gap:6px; font-weight:600; text-align:right; min-width:90px; }
+      .variant-matrix input[type="number"] { width:64px; padding:5px 6px; border:1px solid var(--border,#d8dee9); border-radius:7px; font-family:inherit; font-size:0.78rem; text-align:center; background:var(--card-bg,#fff); color:var(--text,#1f2937); }
+      .variant-matrix .m-row-total { background:var(--surface-muted,#f7f9fc); font-weight:700; color:var(--brand-teal,#00b8a9); }
+      .variant-matrix .m-foot-total { font-weight:700; color:var(--brand-orange,#ff6b1a); background:var(--surface-muted,#f7f9fc); }
+      .variant-matrix .m-foot-label { font-weight:700; color:var(--muted,#667085); }
+      .variant-matrix .m-foot-grand { font-weight:700; color:var(--brand-teal,#00b8a9); background:var(--surface-muted,#f7f9fc); }
+      .variant-matrix .m-foot-grand b { font-size:0.9rem; }
+      .variant-matrix .m-color-name td { text-align:right; }
+      body.dark-mode .variant-matrix input[type="number"] { background:var(--card-bg,#1e293b); border-color:#334155; color:#e2e8f0; }
+      body.dark-mode .variant-matrix th { background:var(--surface-muted,#1e293b); }
+      /* ── عدد القطع لكل مقاس ── */
+      .chip-qty { display:inline-flex; align-items:center; gap:4px; }
+      .chip-qty input[type="number"] { width:52px; padding:3px 4px; border:1px solid var(--border,#d8dee9); border-radius:8px; font-family:inherit; font-size:0.75rem; text-align:center; background:var(--card-bg,#fff); color:var(--text,#1f2937); }
+      .chip-qty::before { content:"العدد:"; font-size:0.65rem; color:var(--muted,#667085); font-weight:600; }
+      .chip-qty small { font-size:0.68rem; color:var(--brand-teal,#00b8a9); }
+      .edit-opt-chip .chip-qty::before { content:"ع:"; }
+      body.dark-mode .chip-qty input[type="number"] { background:var(--card-bg,#1e293b); border-color:#334155; color:#e2e8f0; }
       /* ── حقول المصدر اليدوي ── */
       .custom-source-wrap { display:none; margin-top:8px; }
       .custom-source-wrap.show { display:block; }
@@ -255,50 +292,33 @@
           </div>
 
           <div class="section-divider">
-            <span class="section-label"><i class="fa-solid fa-ruler-combined"></i> المقاسات والألوان</span>
-            <span class="form-hint">اضغط على البطاقة لفتح المحرر — كل منتج يختلف عن الآخر</span>
+            <span class="section-label"><i class="fa-solid fa-table-cells-large"></i> المقاسات والألوان والكميات</span>
+            <span class="form-hint">صف لكل لون وعمود لكل مقاس — اكتب عدد القطع في كل خلية، وسعر المقاس في رأس العمود</span>
           </div>
           <div class="editor-grid">
             <div class="field-block span-2">
-              <div class="opt-card" id="sizesCard">
-                <div class="opt-card-head" onclick="toggleSizesCard()">
-                  <span class="opt-icon"><i class="fa-solid fa-ruler-combined"></i></span>
-                  <span class="opt-title">المقاسات</span>
-                  <span class="opt-state" id="sizesState"><i class="fa-regular fa-circle"></i> بدون مقاسات</span>
-                  <span class="opt-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+              <div class="matrix-toolbar">
+                <div class="opt-add-row">
+                  <input type="text" id="sizeInput" placeholder="أضف مقاساً (مثال: XL)" onkeydown="if(event.key==='Enter'){event.preventDefault();addSize();}" />
+                  <input type="number" id="sizePriceInput" placeholder="سعر المقاس" title="سعر هذا المقاس (إن اختلف عن سعر المنتج)" min="0" step="0.01" style="max-width:130px;" />
+                  <button type="button" class="btn btn-primary" onclick="addSize()" style="padding:9px 20px;font-size:0.82rem;"><i class="fa-solid fa-plus"></i> إضافة مقاس</button>
                 </div>
-                <div class="opt-card-content">
-                  <div class="opt-add-row">
-                    <input type="text" id="sizeInput" placeholder="أضف مقاساً بالترتيب الذي تريده (مثال: S ثم M ثم L)" onkeydown="if(event.key==='Enter'){event.preventDefault();addSize();}" />
-                    <button type="button" class="btn btn-primary" onclick="addSize()" style="padding:9px 20px;font-size:0.82rem;"><i class="fa-solid fa-plus"></i> إضافة</button>
-                  </div>
-                  <div class="opt-list" id="sizesList"></div>
-                  <div class="opt-empty" id="sizesEmpty">لا توجد مقاسات بعد — أضف المقاسات من هنا ويمكنك ترتيبها بالأسهم.</div>
+                <div class="opt-add-row">
+                  <input type="color" id="colorValue" value="#ff6b1a" title="اختر اللون" />
+                  <input type="text" id="colorName" placeholder="اسم اللون (مثال: أسود)" onkeydown="if(event.key==='Enter'){event.preventDefault();addColor();}" />
+                  <button type="button" class="btn btn-primary" onclick="addColor()" style="padding:9px 20px;font-size:0.82rem;"><i class="fa-solid fa-plus"></i> إضافة لون</button>
                 </div>
               </div>
-            </div>
-            <div class="field-block span-2">
-              <div class="opt-card" id="colorsCard">
-                <div class="opt-card-head" onclick="toggleColorsCard()">
-                  <span class="opt-icon"><i class="fa-solid fa-palette"></i></span>
-                  <span class="opt-title">الألوان</span>
-                  <span class="opt-state" id="colorsState"><i class="fa-regular fa-circle"></i> بدون ألوان</span>
-                  <span class="opt-arrow"><i class="fa-solid fa-chevron-down"></i></span>
-                </div>
-                <div class="opt-card-content">
-                  <div class="opt-add-row">
-                    <input type="color" id="colorValue" value="#ff6b1a" title="اختر اللون" />
-                    <input type="text" id="colorName" placeholder="اسم اللون (مثال: برتقالي)" onkeydown="if(event.key==='Enter'){event.preventDefault();addColor();}" />
-                    <button type="button" class="btn btn-primary" onclick="addColor()" style="padding:9px 20px;font-size:0.82rem;"><i class="fa-solid fa-plus"></i> إضافة</button>
-                  </div>
-                  <div class="opt-list" id="colorsList"></div>
-                  <div class="opt-empty" id="colorsEmpty">لا توجد ألوان بعد — اختر اللون واكتب اسمه ثم اضغط إضافة.</div>
-                </div>
+              <div class="matrix-chips">
+                <div class="opt-list" id="sizesList"></div>
+                <div class="opt-list" id="colorsList"></div>
               </div>
-            </div>
-            <div class="field-block span-2">
-              <div class="form-hint" style="margin-top:0;">
-                <i class="fa-solid fa-circle-info"></i> المقاسات تُحفظ في مجلد taager_variant_groups، والألوان في عمود colors — وتظهر مباشرة في صفحة المنتج.
+              <div class="variant-matrix-wrap">
+                <table class="variant-matrix" id="variantMatrix"></table>
+                <div class="opt-empty" id="matrixEmpty">لا توجد مقاسات وألوان بعد — أضف مقاساً أو لوناً من الأعلى ثم املأ الكميات في الخلايا.</div>
+              </div>
+              <div class="form-hint" style="margin-top:8px;">
+                <i class="fa-solid fa-circle-info"></i> الكميات تُحفظ لكل (لون × مقاس) وتظهر في صفحة المنتج — والمقاس الذي كمية صفّه صفر يظهر غير متوفر ويُخصم تلقائياً عند تسليم الطلب.
               </div>
             </div>
           </div>

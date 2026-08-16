@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>بيانات السلة</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/app-shell.css" />
+    <link rel="stylesheet" href="../css/admin-orders.css" />
+    <link rel="stylesheet" href="../css/admin-order-group.css" />
+    <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="./auth-guard.js"></script>
+  </head>
+  <body class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-badge">
+        <i class="fa-solid fa-bag-shopping"></i>
+        <div>
+          <strong>Buda Admin</strong>
+          <small>إدارة المتجر</small>
+        </div>
+      </div>
+      <nav class="side-nav">
+        <a class="side-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>لوحة التحكم</span></a>
+        <a class="side-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>رسائل الدعم</span></a>
+        <a class="side-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة المنتجات</span></a>
+        <a class="side-link active" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>الطلبات</span></a>
+        <a class="side-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>طلبات الشراكة</span></a>
+        <a class="side-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة المنتجات</span></a>
+        <a class="side-link" href="admin-ai-details.html"><i class="fa-solid fa-wand-magic-sparkles"></i><span>AI محتوى</span></a>
+        <a class="side-link" href="taager-products.html">
+          <i class="fa-solid fa-database"></i>
+          <span>منتجات Taager</span>
+        </a>
+        <a class="side-link" href="admin-taager-verify.html"><i class="fa-solid fa-check-double"></i><span>تدقيق تاجر</span></a>
+        <a class="side-link" href="admin-sellers.html">
+          <i class="fa-solid fa-store"></i>
+          <span>إدارة البائعين</span>
+        </a>
+        <a class="side-link" href="admin-coupons.html">
+          <i class="fa-solid fa-tags"></i>
+          <span>إدارة الكوبونات</span>
+        </a>
+        <a class="side-link" href="admin-fake-prices.html">
+          <i class="fa-solid fa-percent"></i>
+          <span>الأسعار الوهمية</span>
+        </a>
+        <a class="side-link" href="admin-taager-token.html">
+          <i class="fa-solid fa-key"></i>
+          <span>توكن تاجر</span>
+        </a>
+      </nav>
+    </aside>
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-title">
+          <div class="topbar-nav">
+            <a href="admin-user-orders.html?email=" id="backLink" class="back-link"><i class="fa-solid fa-arrow-right"></i> العودة للطلبات</a>
+          </div>
+          <h1 id="pageTitle">بيانات السلة</h1>
+          <p id="pageSummary">تحميل البيانات...</p>
+        </div>
+      </header>
+      <section class="content-wrap orders-page group-page">
+        <section class="card summary-row group-summary" id="groupSummary">
+          <div class="summary-item">
+            <p>عدد الأوامر في السلة</p>
+            <strong id="groupOrdersCount">0</strong>
+          </div>
+          <div class="summary-item">
+            <p>عدد المنتجات</p>
+            <strong id="groupProductsCount">0</strong>
+          </div>
+          <div class="summary-item">
+            <p>إجمالي السلة</p>
+            <strong id="groupTotalAmount">0</strong>
+          </div>
+        </section>
+
+        <section class="group-grid">
+          <div class="card info-card">
+            <h3 class="card-title"><i class="fa-solid fa-user"></i> البيانات الشخصية</h3>
+            <div class="info-rows" id="customerInfo"></div>
+          </div>
+          <div class="card info-card">
+            <h3 class="card-title"><i class="fa-solid fa-money-bill-wave"></i> الدفع والشحن</h3>
+            <div class="info-rows" id="paymentInfo"></div>
+          </div>
+        </section>
+
+        <section class="card products-card">
+          <h3 class="card-title"><i class="fa-solid fa-box-open"></i> المنتجات (<span id="productsCountLabel">0</span>)</h3>
+          <div class="products-table" id="productsTable"></div>
+        </section>
+
+        <section class="card suborders-card">
+          <h3 class="card-title"><i class="fa-solid fa-receipt"></i> الأوامر الفرعية</h3>
+          <div class="suborders-list" id="subOrdersList"></div>
+        </section>
+      </section>
+    </main>
+    <nav class="mobile-bottom-nav">
+      <a class="mobile-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>الرئيسية</span></a>
+      <a class="mobile-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة</span></a>
+      <a class="mobile-link active" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>طلبات</span></a>
+      <a class="mobile-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>شراكة</span></a>
+      <a class="mobile-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>الدعم</span></a>
+    </nav>
+    <script src="./admin-order-group.page.js"></script>
+  </body>
+</html>
