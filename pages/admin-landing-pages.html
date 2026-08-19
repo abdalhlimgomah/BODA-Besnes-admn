@@ -200,6 +200,40 @@
     .btn-save:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99,102,241,0.4); }
     .btn-cancel { background: var(--gray-100); color: var(--gray-600); }
     .btn-cancel:hover { background: var(--gray-200); }
+    .modal-desc {
+      margin: -10px 0 18px; padding: 10px 14px;
+      background: var(--primary-light); border: 1px solid #c7d2fe;
+      border-radius: var(--radius); color: var(--gray-600);
+      font-size: 0.8rem; line-height: 1.7;
+    }
+    .field-hint {
+      display: block; margin-top: 4px;
+      font-size: 0.72rem; font-weight: 400; color: var(--gray-400);
+      line-height: 1.5;
+    }
+    .field-hint .material-icons-outlined { font-size: 13px; vertical-align: middle; }
+    .color-dot {
+      display: inline-block; width: 14px; height: 14px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.3); margin-inline-start: 8px; vertical-align: middle;
+    }
+    .color-cell {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: Consolas, monospace; font-size: 12px; color: var(--gray-300);
+    }
+    .form-preview { margin-bottom: 16px; }
+    .fp-card {
+      border-radius: var(--radius-lg); padding: 16px 18px; min-height: 72px;
+      display: flex; flex-direction: column; justify-content: center; gap: 3px;
+      color: #fff; box-shadow: 0 4px 14px rgba(0,0,0,.18);
+    }
+    .fp-card b { font-size: 15px; text-shadow: 0 1px 2px rgba(0,0,0,.2); }
+    .fp-card span { font-size: 12px; opacity: .9; }
+    .field-warn {
+      display: flex; gap: 6px; align-items: flex-start; margin-top: 6px;
+      padding: 8px 10px; background: #fffbeb; border: 1px solid #fde68a;
+      border-radius: 8px; color: #92400e; font-size: 0.75rem; line-height: 1.6;
+    }
+    .field-warn .material-icons-outlined { font-size: 14px; color: #f59e0b; flex-shrink: 0; }
     .status-badge {
       display: inline-block; padding: 3px 10px; border-radius: 20px;
       font-size: 0.72rem; font-weight: 600;
@@ -313,6 +347,169 @@
       animation: spin 0.7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+    /* ===== استوديو التخطيط ===== */
+    .studio-toggle {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+      padding: 12px 20px; border: none; border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, #6d28d9, #7c3aed);
+      color: #fff; font-family: inherit; font-size: 0.92rem; font-weight: 700;
+      cursor: pointer; box-shadow: 0 4px 14px rgba(109,40,217,.3); transition: all .2s;
+    }
+    .studio-toggle:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(109,40,217,.4); }
+    .studio-hidden { display: none !important; }
+    .studio-list-header {
+      display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 16px;
+      padding: 16px; background: white; border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm); border: 1px solid var(--gray-100);
+    }
+    .studio-list-header .sf { display: flex; flex-direction: column; gap: 5px; font-size: .76rem; color: var(--gray-500); }
+    .studio-list-header input, .studio-list-header select {
+      padding: 9px 12px; border: 1px solid var(--gray-200); border-radius: var(--radius);
+      font-family: inherit; font-size: .85rem; min-width: 150px;
+    }
+    .studio-table { width: 100%; border-collapse: collapse; background: white; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
+    .studio-table th, .studio-table td { padding: 12px 14px; text-align: right; font-size: .85rem; border-bottom: 1px solid var(--gray-100); }
+    .studio-table th { background: var(--gray-50); color: var(--gray-500); font-size: .75rem; }
+    .studio-table tr:hover td { background: #fafaff; }
+    .st-block-btn { padding: 9px 16px; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: .8rem; font-weight: 600; background: var(--primary); color: #fff; }
+    .st-block-btn.ghost { background: var(--gray-100); color: var(--gray-600); }
+    .st-block-btn.danger { background: #fee2e2; color: #991b1b; }
+    .st-editor { display: grid; grid-template-columns: 470px 1fr; gap: 18px; align-items: start; }
+    .st-blocks-col {
+      background: white; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-100); padding: 14px;
+      display: flex; flex-direction: column; gap: 12px;
+      max-height: calc(100vh - 210px); overflow-y: auto;
+    }
+    .st-block { border: 1px solid var(--gray-200); border-radius: var(--radius); background: white; box-shadow: var(--shadow-sm); }
+    .st-block.dragging { opacity: .4; border-color: var(--primary); }
+    .st-block.drop-target { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,.25); }
+    .st-block-head {
+      display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+      background: var(--gray-50); border-bottom: 1px solid var(--gray-100);
+      border-radius: var(--radius) var(--radius) 0 0; cursor: grab;
+    }
+    .st-block-head:active { cursor: grabbing; }
+    .st-block-head .drag-handle { color: var(--gray-400); font-size: 17px; cursor: grab; }
+    .st-block-head .st-type { font-size: .82rem; font-weight: 700; color: var(--gray-800); display: flex; align-items: center; gap: 6px; flex: 1; }
+    .st-block-head .st-type .material-icons-outlined { font-size: 17px; color: var(--primary); }
+    .st-block-head button { border: none; background: transparent; cursor: pointer; color: var(--gray-400); font-size: 16px; padding: 2px 6px; border-radius: 6px; }
+    .st-block-head button:hover { background: var(--gray-200); color: var(--gray-700); }
+    .st-block-head button.st-del:hover { background: #fee2e2; color: #991b1b; }
+    .st-toggle-switch { position: relative; width: 34px; height: 18px; background: var(--gray-300); border-radius: 20px; cursor: pointer; transition: .2s; border: none; flex-shrink: 0; }
+    .st-toggle-switch.on { background: #22c55e; }
+    .st-toggle-switch::after { content: ''; position: absolute; top: 2px; width: 14px; height: 14px; background: white; border-radius: 50%; right: 2px; transition: .2s; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
+    .st-toggle-switch.on::after { right: 18px; }
+    .st-block-body { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .st-field { display: flex; flex-direction: column; gap: 4px; }
+    .st-field label { font-size: .75rem; font-weight: 600; color: var(--gray-600); }
+    .st-field input, .st-field textarea, .st-field select { padding: 8px 10px; border: 1px solid var(--gray-200); border-radius: 8px; font-family: inherit; font-size: .8rem; }
+    .st-field textarea { resize: vertical; min-height: 54px; }
+    .st-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .st-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: var(--primary-light); color: var(--primary-dark); border-radius: 20px; font-size: .72rem; font-weight: 600; }
+    .st-chip button { border: none; background: transparent; color: inherit; cursor: pointer; font-size: 13px; line-height: 1; padding: 0; }
+    .st-chip .st-brand-logo { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+    .st-chip .st-chip-btns { display: inline-flex; gap: 3px; margin-inline-start: 5px; }
+    .st-chip .st-chip-btns button { background: #eef2ff; color: var(--primary); border-radius: 5px; padding: 2px 6px; font-family: inherit; font-size: .66rem; font-weight: 700; }
+    .st-chip .st-chip-btns button:hover { background: var(--primary); color: #fff; }
+    .st-manual { border: 1px dashed var(--gray-300); border-radius: 8px; padding: 8px 10px; margin-top: 8px; background: var(--gray-50); }
+    .st-manual summary { cursor: pointer; font-size: .76rem; font-weight: 700; color: var(--primary); }
+    .st-manual-grid { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
+    .st-manual-grid input, .st-manual-grid select { width: 100%; padding: 8px 10px; border: 1px solid var(--gray-200); border-radius: 8px; font-family: inherit; font-size: .76rem; }
+    .st-add-row { display: flex; gap: 8px; align-items: center; }
+    .st-add-row input, .st-add-row select { flex: 1; }
+    .st-add-row .mini { padding: 8px 14px; border: none; border-radius: 8px; background: var(--primary); color: #fff; font-family: inherit; font-size: .76rem; font-weight: 600; cursor: pointer; flex-shrink: 0; }
+    .st-slide-box { border: 1px solid var(--gray-200); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px; background: var(--gray-50); }
+    .st-slide-box .st-del-slide { align-self: flex-end; border: none; background: #fee2e2; color: #991b1b; border-radius: 6px; padding: 3px 10px; cursor: pointer; font-family: inherit; font-size: .7rem; font-weight: 600; }
+    .st-add-menu { display: flex; flex-direction: column; gap: 8px; padding-bottom: 4px; }
+    .st-add-block-bar { margin-top: 16px; border: 2px dashed var(--primary); border-radius: 12px; padding: 12px; background: #f8f9ff; }
+    .st-add-title { display: flex; align-items: center; gap: 7px; font-weight: 800; font-size: .85rem; color: var(--gray-800); margin-bottom: 10px; }
+    .st-add-title .material-icons-outlined { color: var(--primary); font-size: 19px; }
+    .st-add-menu button { display: flex; align-items: center; gap: 10px; padding: 11px 13px; border: 1px solid var(--gray-200); background: white; border-radius: var(--radius); cursor: pointer; font-family: inherit; text-align: right; transition: .15s; }
+    .st-add-menu button:hover { border-color: var(--primary); background: #f5f6ff; }
+    .st-add-menu .ai { color: var(--primary); font-size: 20px; }
+    .st-add-menu .at b { font-size: .84rem; color: var(--gray-800); display: block; }
+    .st-add-menu .at small { font-size: .72rem; color: var(--gray-400); }
+    .st-preview-col { position: sticky; top: 0; }
+    .st-preview-frame {
+      max-width: 460px; margin: 0 auto; background: #fff; border-radius: var(--radius-lg);
+      overflow: hidden; box-shadow: 0 10px 30px rgba(15,23,42,.15); border: 1px solid var(--gray-100); min-height: 400px;
+    }
+    .sp-hero { position: relative; height: 190px; background-size: cover; background-position: center; display: flex; align-items: flex-end; }
+    .sp-hero .sp-hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.55), transparent); }
+    .sp-hero .sp-hero-content { position: relative; padding: 16px; color: #fff; width: 100%; }
+    .sp-hero h2 { font-size: 1.05rem; margin: 0 0 4px; text-shadow: 0 1px 3px rgba(0,0,0,.4); }
+    .sp-hero p { font-size: .72rem; margin: 0 0 8px; opacity: .9; }
+    .sp-btn { display: inline-block; padding: 7px 18px; border-radius: 20px; color: #fff; font-size: .75rem; font-weight: 700; text-decoration: none; }
+    .sp-title-block { text-align: center; padding: 18px 16px 6px; }
+    .sp-title-block h2 { font-size: 1.1rem; margin: 0 0 4px; }
+    .sp-title-block p { font-size: .78rem; margin: 0; opacity: .75; }
+    .sp-products-title { padding: 14px 16px 0; }
+    .sp-products-title h3 { font-size: .95rem; margin: 0 0 2px; }
+    .sp-products-title p { font-size: .72rem; margin: 0; opacity: .7; }
+    .sp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px 14px; }
+    .sp-card { border: 1px solid var(--gray-100); border-radius: 12px; overflow: hidden; background: #fff; text-decoration: none; color: inherit; box-shadow: var(--shadow-sm); }
+    .sp-card img { width: 100%; height: 110px; object-fit: cover; display: block; }
+    .sp-card .sp-card-body { padding: 8px 10px; }
+    .sp-card .sp-card-name { font-size: .7rem; color: var(--gray-600); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.1em; }
+    .sp-card .sp-card-price { font-size: .85rem; font-weight: 800; margin-top: 4px; }
+    .sp-card .sp-old-price { font-size: .7rem; font-weight: 600; color: var(--gray-400); text-decoration: line-through; margin-inline-end: 4px; }
+    .sp-card .sp-sale-badge { display: inline-block; background: #ef4444; color: #fff; font-size: .62rem; font-weight: 700; padding: 1px 6px; border-radius: 5px; margin-inline-start: 4px; vertical-align: middle; }
+    .sp-scroll-row { display: flex; gap: 10px; overflow-x: auto; padding: 12px 14px; }
+    .sp-scroll-row .sp-card { min-width: 130px; width: 130px; }
+    .sp-ad { position: relative; height: 150px; background-size: cover; background-position: center; margin: 12px 14px; border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    .sp-ad .sp-ad-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.45); }
+    .sp-ad .sp-ad-content { position: relative; text-align: center; color: #fff; padding: 12px; }
+    .sp-ad h3 { font-size: .95rem; margin: 0 0 3px; }
+    .sp-ad p { font-size: .72rem; margin: 0 0 8px; opacity: .9; }
+    .sp-brands { display: flex; gap: 10px; overflow-x: auto; padding: 12px 14px; }
+    .sp-smart-cats { display: flex; gap: 12px; overflow-x: auto; padding: 12px 14px; scroll-snap-type: x mandatory; }
+    .sp-smart-cats::-webkit-scrollbar { display: none; }
+    .sp-smart-cat-card { position: relative; flex-shrink: 0; scroll-snap-align: start; width: 150px; min-height: 185px; border-radius: 16px; overflow: hidden; text-decoration: none; color: #fff; display: flex; flex-direction: column; }
+    .sp-smart-cat-icon { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); font-size: 42px; opacity: .9; }
+    .sp-smart-cat-media { position: absolute; inset: 0; }
+    .sp-smart-cat-media img { width: 100%; height: 100%; object-fit: cover; }
+    .sp-smart-cat-content { position: relative; margin-top: auto; padding: 14px; }
+    .sp-smart-cat-content h3 { font-size: .85rem; margin: 0 0 3px; }
+    .sp-smart-cat-content p { font-size: .68rem; margin: 0 0 8px; opacity: .85; }
+    .sp-smart-cat-btn { font-size: .66rem; font-weight: 700; display: inline-flex; align-items: center; gap: 2px; background: rgba(255,255,255,.16); padding: 4px 8px; border-radius: 10px; }
+    .sp-showcase { position: relative; border-radius: 18px; margin: 12px 14px; overflow: hidden; min-height: 240px; background-size: cover; background-position: center; display: flex; align-items: flex-end; }
+    .sp-showcase-overlay { position: absolute; inset: 0; }
+    .sp-showcase-content { position: relative; padding: 18px; width: 100%; color: #fff; z-index: 2; display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .sp-showcase-title { font-size: 1.7rem; font-weight: 900; text-shadow: 0 2px 10px rgba(0,0,0,.5); line-height: 1.25; }
+    .sp-showcase-sub { font-size: .78rem; margin: 6px 0 0; opacity: .9; max-width: 90%; }
+    .sp-showcase-swatches { display: flex; margin-top: 12px; justify-content: center; }
+    .sp-swatch { width: 26px; height: 26px; border-radius: 8px; border: 2px solid rgba(255,255,255,.9); box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+    .sp-showcase-swatches .sp-swatch + .sp-swatch { margin-inline-start: -10px; }
+    .sp-showcase-btns { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; justify-content: center; }
+    .sp-showcase-products { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 220px)); justify-content: center; gap: 10px; width: 100%; margin: 14px 0 0; padding: 0 0 4px; }
+    .sp-showcase-products::-webkit-scrollbar { display: none; }
+    .sp-showcase-products .sp-card { min-width: 0; width: auto; }
+    @media (min-width: 768px) { .sp-showcase-products .sp-card img { height: 150px; } }
+    @media (max-width: 767px) {
+      .sp-showcase-products { display: flex; overflow-x: auto; justify-content: center; scroll-snap-type: x mandatory; }
+      .sp-showcase-products .sp-card { min-width: 132px; width: 132px; flex-shrink: 0; scroll-snap-align: start; }
+    }
+    .sp-showcase-products .sp-card img { height: 110px; }
+    .sp-showcase-products .sp-card-name { min-height: 1.9em; font-size: .68rem; }
+    .sp-brand-chip { flex-shrink: 0; padding: 9px 16px; border-radius: 20px; font-size: .75rem; font-weight: 700; }
+    .sp-empty { padding: 30px; text-align: center; color: var(--gray-400); font-size: .8rem; }
+    .st-status { font-size: .72rem; color: var(--gray-400); display: flex; align-items: center; gap: 4px; }
+    .st-status.saving { color: #d97706; }
+    .st-status.saved { color: #16a34a; }
+    .st-editor-head {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;
+      padding: 12px 16px; background: white; border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm); border: 1px solid var(--gray-100);
+    }
+    .st-editor-head input[type=text] { flex: 1; min-width: 150px; padding: 9px 12px; border: 1px solid var(--gray-200); border-radius: var(--radius); font-family: inherit; font-size: .85rem; font-weight: 700; }
+    .st-color-input { display: flex; align-items: center; gap: 6px; font-size: .72rem; color: var(--gray-500); }
+    .st-color-input input[type=color] { width: 30px; height: 30px; border: none; border-radius: 8px; cursor: pointer; padding: 0; background: transparent; }
+    .st-hint-bar {
+      margin-bottom: 12px; padding: 10px 14px; background: #eef2ff; border: 1px dashed #c7d2fe;
+      border-radius: var(--radius); color: var(--gray-600); font-size: .78rem;
+      display: flex; align-items: center; gap: 8px;
+    }
   </style>
 </head>
 <body>
@@ -344,6 +541,46 @@
     </span>
   </div>
 
+  <button class="studio-toggle" id="studioToggle" onclick="studioToggleView()"><span class="material-icons-outlined" style="font-size:19px">brush</span> استوديو تخطيط الصفحات (ارسم صفحتك)</button>
+
+  <div id="studioArea" class="studio-hidden">
+
+    <div id="studioList">
+      <div class="studio-list-header">
+        <div class="sf"><label>رابط الصفحة (slug)</label><input id="spNewSlug" placeholder="مثال: nike أو fashion" /></div>
+        <div class="sf"><label>نوع الصفحة</label>
+          <select id="spNewType"><option value="brand">ماركة / شراكة</option><option value="category">تصنيف / فئة</option></select></div>
+        <div class="sf" style="flex:1;min-width:190px"><label>اسم الصفحة (يظهر للزوار)</label><input id="spNewTitle" placeholder="مثال: صفحة نايك" /></div>
+        <button class="st-block-btn" onclick="studioCreatePage()">+ صفحة جديدة</button>
+        <button class="st-block-btn ghost" onclick="studioSeedSmartCategories()">⚡ جيب صفحات الشريط الذكي</button>
+      </div>
+      <table class="studio-table">
+        <thead><tr><th>الصفحة</th><th>النوع</th><th>المعرف</th><th>الدولة</th><th>الحالة</th><th>المكعبات</th><th></th></tr></thead>
+        <tbody id="studioListBody"></tbody>
+      </table>
+      <div id="studioListEmpty" class="st-empty studio-hidden">لا توجد صفحات بعد — أنشئ أول صفحة من فوق 👆</div>
+    </div>
+
+    <div id="studioEditor" class="studio-hidden">
+      <div class="st-editor-head">
+        <button class="st-block-btn ghost" onclick="studioShowList()"><span class="material-icons-outlined" style="font-size:15px;vertical-align:middle">arrow_forward</span> رجوع</button>
+        <input type="text" id="spTitle" oninput="studioPageTitle(this.value)" placeholder="اسم الصفحة" />
+        <div class="st-color-input">الخلفية <input type="color" id="spColorBg" oninput="studioColor('bg', this.value)" /></div>
+        <div class="st-color-input">الأزرار <input type="color" id="spColorPrimary" oninput="studioColor('primary', this.value)" /></div>
+        <div class="st-color-input">النصوص <input type="color" id="spColorText" oninput="studioColor('text', this.value)" /></div>
+        <span class="st-status" id="spSaveStatus">جاهز</span>
+      </div>
+      <div class="st-hint-bar"><span class="material-icons-outlined" style="font-size:16px;color:var(--primary)">auto_fix_high</span> اسحب المكعبات <b>⠿</b> لتغيير الترتيب — المعاينة على الشمال بتتحدث لحظياً، وكل تعديل بيتحفظ تلقائياً.</div>
+      <div class="st-editor">
+        <div class="st-blocks-col" id="stBlocksCol"></div>
+        <div class="st-preview-col">
+          <div class="st-preview-frame" id="spPreview"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
   <div class="tabs" id="tabs"></div>
 
   <div id="tabContents"></div>
@@ -352,6 +589,7 @@
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
   <div class="modal" id="modalContent">
     <h2 id="modalTitle"><span class="material-icons-outlined" style="color:var(--primary);">edit_note</span> إضافة</h2>
+    <p class="modal-desc" id="modalDesc"></p>
     <form id="modalForm" onsubmit="return false;"></form>
     <div class="btn-row">
       <button class="btn-cancel" onclick="closeModal()">إلغاء</button>
@@ -381,6 +619,82 @@ const TABLES = {
 };
 
 const TABLE_NAMES = Object.keys(TABLES);
+
+// عربي لكل حقل: تسمية + وصف إرشادي + مثال
+const FIELD_LABELS = {
+  title: { label: 'العنوان', hint: 'النص اللي بيظهر للزائر في الواجهة', placeholder: 'مثال: أحدث صيحات الصيف' },
+  subtitle: { label: 'العنوان الفرعي', hint: 'سطر صغير يظهر تحت العنوان', placeholder: 'مثال: عروض حصرية لمدة محدودة' },
+  image_url: { label: 'رابط الصورة', hint: 'رابط صورة كامل يبدأ بـ https:// (من الإنترنت أو من Supabase Storage)', placeholder: 'https://...' },
+  logo_url: { label: 'رابط الشعار (لوجو)', hint: 'صورة شعار الماركة — يفضل خلفية شفافة', placeholder: 'https://...' },
+  link_url: { label: 'رابط وجهة الضغط', hint: 'أين يفتح الزائر عند الضغط على هذا العنصر', placeholder: 'مثال: product-listing.html?category=fashion' },
+  button_text: { label: 'نص الزر', hint: 'الكلام اللي يظهر داخل الزر', placeholder: 'مثال: تسوق الآن' },
+  button_link: { label: 'رابط الزر', hint: 'أين يذهب الزائر عند الضغط على الزر', placeholder: 'مثال: product-listing.html?category=fashion' },
+  gradient_from: { label: 'لون التدرج (البداية)', hint: 'لون بتنسيق Hex مثل #6366f1 — أول لون للخلفية المتدرجة', placeholder: '#6366f1' },
+  gradient_to: { label: 'لون التدرج (النهاية)', hint: 'اللون الثاني للخلفية المتدرجة', placeholder: '#a855f7' },
+  bg_color: { label: 'لون الخلفية', hint: 'لون واحد بسيط للخلفية', placeholder: '#f3f4f6' },
+  sort_order: { label: 'الترتيب', hint: 'رقم صحيح — الرقم الأصغر يظهر أولاً', placeholder: '1' },
+  is_active: { label: 'تفعيل العنصر', hint: 'نشط = يظهر على الموقع، غير نشط = مخفي تماماً' },
+  category_id: { label: 'معرف التصنيف (id)', hint: 'انسخه من عمود id في تبويب "التصنيفات" — مهم: الـ id شكلها a6abcb66-9576-... مش رقم عادي زي 5 والرقم "5" ده ترتيب الصف مش الـ id', placeholder: 'مثال: a6abcb66-9576-47ef-b763-76d2586d9863' },
+  brand_id: { label: 'معرف الماركة (id)', hint: 'انسخه من عمود id في تبويب "الماركات" — الـ id شكلها a6abcb66-... مش رقم عادي', placeholder: 'مثال: a1b2c3d4-e5f6-7890-abcd-ef1234567890' },
+  brand_slug: { label: 'معرف الماركة (slug)', hint: 'المعرّف الإنجليزي المختصر للماركة — مثال: nike', placeholder: 'مثال: nike' },
+  slug: { label: 'المعرّف (slug)', hint: 'كلمة إنجليزية مختصرة تظهر في رابط الصفحة — حرف صغير بدون مسافات', placeholder: 'مثال: fashion' },
+  section_type: { label: 'نوع القسم', hint: 'كيف تُختار المنتجات داخل القسم — الأكثر استخداماً: featured', placeholder: 'featured' },
+  badge: { label: 'شارة صغيرة', hint: 'كلمة تظهر في زاوية القسم مثل: جديد / حصري (اتركها فارغة لو مش محتاج)', placeholder: 'مثال: جديد' },
+  display_count: { label: 'عدد المنتجات', hint: 'كم منتج يظهر في هذا القسم', placeholder: 'مثال: 8' },
+  selection_mode: { label: 'طريقة اختيار المنتجات', hint: 'manual = تختار المنتجات يدوياً في جدول المنتجات; أو top_rated/new_arrivals = اختيار تلقائي', placeholder: 'manual' },
+  section_id: { label: 'معرف القسم (id)', hint: 'انسخه من عمود id في تبويب الأقسام — الـ id شكلها a6abcb66-... مش رقم عادي — الأقسام تظهر لك في القائمة مباشرة', placeholder: 'مثال: a6abcb66-9576-47ef-b763-76d2586d9863' },
+  product_id: { label: 'معرف المنتج (id)', hint: 'رقم المنتج من كتالوج السوق — يظهر في رابط صفحة المنتج', placeholder: 'مثال: taager_5454' },
+  product_name: { label: 'اسم المنتج (نسخة للحفظ)', hint: 'احتياطي فقط — الموقع يقرأ الاسم الحقيقي من الكتالوج', placeholder: 'اختياري' },
+  product_image: { label: 'صورة المنتج (نسخة للحفظ)', hint: 'احتياطي فقط — الموقع يقرأ الصورة من الكتالوج', placeholder: 'اختياري' },
+  product_price: { label: 'سعر المنتج (نسخة للحفظ)', hint: 'احتياطي فقط — السعر الحقيقي من الكتالوج', placeholder: 'اختياري' },
+  product_old_price: { label: 'السعر القديم (نسخة للحفظ)', hint: 'احتياطي فقط', placeholder: 'اختياري' },
+  product_rating: { label: 'التقييم (نسخة للحفظ)', hint: 'احتياطي فقط', placeholder: 'اختياري' },
+  collection_slug: { label: 'معرف المجموعة (slug)', hint: 'المعرّف الإنجليزي للمجموعة المميزة', placeholder: 'مثال: summer-sale' },
+  name: { label: 'الاسم', hint: 'الاسم الظاهر للزوار', placeholder: 'مثال: نايك' },
+  name_en: { label: 'الاسم بالإنجليزي', hint: 'الاسم اللاتيني — يظهر في العناوين التقنية', placeholder: 'مثال: Nike' },
+  description: { label: 'الوصف', hint: 'جملة توضيحية عن العنصر', placeholder: 'اكتب وصفاً مختصراً...' },
+  website: { label: 'موقع الماركة الإلكتروني', hint: 'رابط الموقع الرسمي للماركة', placeholder: 'https://...' },
+  icon: { label: 'الأيقونة', hint: 'اسم أيقونة Material — مثل: category / store / headset', placeholder: 'مثال: category' },
+  brand_name: { label: 'اسم الماركة الطالبة', hint: 'اسم الماركة كما كتبها العميل في الطلب', placeholder: 'مثال: سعد للعطور' },
+  owner_name: { label: 'اسم صاحب الماركة', hint: 'اسم مقدم الطلب', placeholder: 'مثال: أحمد محمد' },
+  phone: { label: 'رقم الهاتف', hint: 'رقم للتواصل مع المقدم', placeholder: 'مثال: 01121068271' },
+  email: { label: 'البريد الإلكتروني', hint: 'بريد للتواصل', placeholder: 'name@example.com' },
+  instagram: { label: 'حساب الإنستجرام', hint: 'اسم الحساب بدون @', placeholder: 'مثال: mybrand' },
+  category: { label: 'التصنيف المقترح', hint: 'ما نوع/فئة الماركة حسب الطالب', placeholder: 'مثال: ملابس' },
+  message: { label: 'الرسالة', hint: 'نص الطلب الكامل من العميل', placeholder: 'رسالة العميل...' },
+  status: { label: 'الحالة', hint: 'pending = قيد المراجعة / approved = مقبول / rejected = مرفوض', placeholder: 'pending' },
+  country_code: { label: 'الدولة', hint: 'EG = مصر / SA = السعودية — تُملأ تلقائياً من التبويب العلوي' }
+};
+
+// شرح مبسط لكل جدول يظهر أعلى نموذج الإضافة
+const TABLE_DESCS = {
+  smart_category_showcase: 'شريط عرض ذكي يظهر في الصفحة الرئيسية. كل سطر = بنر/عنصر واحد بالعنوان والصورة والرابط.',
+  category_banners: 'بنر كبير يظهر أعلى صفحة التصنيف. category_id يربطه بالتصنيف الصحيح (مثال: fashion).',
+  promotional_banners: 'بنر ترويجي يظهر في صفحات الماركات — يربطه بـ brand_id أو brand_slug.',
+  category_sections: 'قسم داخلي في صفحة التصنيف (أفضل المنتجات/وصل حديثاً...). اختيار المنتجات يحدده selection_mode.',
+  category_section_products: 'احفظ منتجا في قسم معين يدوياً: section_id = معرف القسم، product_id = رقم المنتج من الكتالوج.',
+  brands: 'ماركة كاملة: اسمها وشعارها وموقعها. روابط brand-landing مرتبطة بجداول الماركات الأخرى.',
+  brand_banners: 'البنر الرئيسي داخل صفحة الماركة نفسها.',
+  brand_sections: 'أقسام داخل صفحة الماركة — مثل الأقسام في صفحة التصنيف لكن للماركة.',
+  brand_section_products: 'ربط منتجات بقسم ماركة محدد يدوياً.',
+  featured_collections: 'مجموعة مميزة (عنوان + صورة + رابط) تظهر ضمن صفحة التصنيف.',
+  collection_products: 'المنتجات اللي بتكوّن المجموعة المميزة.',
+  categories: 'التصنيفات الأساسية (الملابس/الإلكترونيات...). أي نص مصدره categories — وكل الجداول مرتبطة بـ id هنا.',
+  brand_submissions: 'طلبات الشراكة اللي واصلت من فورم "أضف ماركتك" — راجعها وحدّث status لكل طلب.'
+};
+// الحقول المرتبطة ببيانات أخرى: بتتحول لقوائم اختيار جاهزة
+const REL_FIELDS = {
+  category_id: { table: 'categories', labelField: 'name', valueField: 'id', sortField: 'sort_order' },
+  brand_id: { table: 'brands', labelField: 'name', valueField: 'id', sortField: 'sort_order' },
+  brand_slug: { table: 'brands', labelField: 'name', valueField: 'slug', sortField: 'sort_order' },
+  section_id: { multi: ['category_sections', 'brand_sections'], labelField: 'title', valueField: 'id', sortField: 'sort_order' },
+  collection_slug: { table: 'featured_collections', labelField: 'title', valueField: 'id', sortField: 'sort_order' },
+  product_id: { products: true },
+  status: { static: [['pending', 'قيد المراجعة'], ['approved', 'مقبول'], ['rejected', 'مرفوض']] },
+  section_type: { static: [['featured', 'مميز (featured)'], ['best_sellers', 'الأكثر مبيعاً'], ['new_arrivals', 'وصل حديثاً'], ['top_rated', 'الأعلى تقييماً'], ['manual', 'اختيار يدوي']] },
+  selection_mode: { static: [['manual', 'اختيار يدوي'], ['top_rated', 'الأعلى تقييماً'], ['new_arrivals', 'وصل حديثاً']] }
+};
+
 const COUNTRIES = [
   { code: 'EG', label: 'مصر', flag: '🇪🇬' },
   { code: 'SA', label: 'السعودية', flag: '🇸🇦' }
@@ -429,6 +743,7 @@ function switchCountry(code) {
     renderStats();
     switchTab(currentTable);
   }
+  if (STUDIO.open && STUDIO.view === 'list') studioShowList();
 }
 
 function updateRefLinks(code) {
@@ -612,6 +927,9 @@ function formatCell(field, val, row) {
     return img ? `<img src="${escapeHtml(img)}" class="img-thumb" onerror="this.style.display='none'" />` : '-';
   }
   if (field === 'is_active') return val ? '<span class="status-badge status-active">نشط</span>' : '<span class="status-badge status-inactive">غير نشط</span>';
+  if ((field === 'gradient_from' || field === 'gradient_to' || field === 'bg_color') && /^#[0-9a-fA-F]{6}$/.test(String(val || ''))) {
+    return `<span class="color-cell"><span class="color-dot" style="background:${val}"></span>${val}</span>`;
+  }
   if (field === 'sort_order') return val;
   if (typeof val === 'boolean') return val ? 'نعم' : 'لا';
   if (typeof val === 'object') return '<span style="color:#94a3b8;">[كائن]</span>';
@@ -628,10 +946,16 @@ function filterTable(table, query) {
   renderTable(table, filtered);
 }
 
+function setModalDesc(table) {
+  const d = document.getElementById('modalDesc');
+  if (d) d.textContent = TABLE_DESCS[table] || '';
+}
+
 async function openAdd(table) {
   editingId = null;
   document.getElementById('modalTitle').innerHTML = `<span class="material-icons-outlined" style="color:var(--success);">add_circle</span> إضافة - ${TABLES[table].label}`;
-  buildForm(table, {});
+  setModalDesc(table);
+  await buildForm(table, {});
   document.getElementById('modalOverlay').classList.add('show');
 }
 
@@ -640,23 +964,144 @@ async function openEdit(table, id) {
   const item = dataCache[table]?.find(r => String(r.id) === String(id));
   if (!item) { toast('العنصر غير موجود', 'error'); return; }
   document.getElementById('modalTitle').innerHTML = `<span class="material-icons-outlined" style="color:var(--warning);">edit</span> تعديل - ${TABLES[table].label}`;
-  buildForm(table, item);
+  setModalDesc(table);
+  await buildForm(table, item);
   document.getElementById('modalOverlay').classList.add('show');
 }
 
-function buildForm(table, data) {
+// يجيب الخيارات الجاهزة للحقول المرتبطة بجداول تانية
+async function fetchRelOptions(field, rel, table) {
+  try {
+    if (rel.products) {
+      const res = await supabaseFetch('/rest/v1/taager_products?select=id,name&limit=1000');
+      if (!res.ok) return [];
+      const rows = await res.json();
+      return (rows || []).map(r => ({ value: String(r.id), label: `${r.name} (${r.id})` }));
+    }
+    let tables = rel.multi || [rel.table];
+    if (rel.multi && table === 'brand_section_products') tables = ['brand_sections'];
+    if (rel.multi && table === 'category_section_products') tables = ['category_sections'];
+    let all = [];
+    for (const t of tables) {
+      const valueCol = rel.valueField || 'id';
+      const labelCol = rel.labelField || 'id';
+      let q = `/rest/v1/${t}?select=id,${valueCol},${labelCol}`;
+      if (rel.whereCountry !== false) q += `&country_code=eq.${currentCountry}`;
+      if (rel.sortField) q += `&order=${rel.sortField}.asc`;
+      const res = await supabaseFetch(q);
+      if (!res.ok) continue;
+      const rows = await res.json();
+      (rows || []).forEach(r => {
+        const label = String(r[labelCol] || r[valueCol] || r.id);
+        all.push({
+          value: String(r[valueCol]),
+          label: rel.multi ? `${label} [${TABLES[t].label}]` : label
+        });
+      });
+    }
+    return all;
+  } catch (e) {
+    return [];
+  }
+}
+
+function renderSelect(field, info, hintHtml, val, options, manual) {
+  const isManual = manual && String(val) && !options.some(o => String(o.value) === String(val));
+  const isManualEmpty = manual && !String(val);
+  const manualOpt = manual ? `<option value="__manual__"${isManual ? ' selected' : ''}>✏️ إدخال يدوي (ID مش موجود في القائمة)</option>` : '';
+  const manualInput = manual ? `<input type="text" name="${field}_manual" data-manual-for="${field}" value="${isManual ? escapeHtml(val) : ''}" placeholder="اكتب الـ ID يدوياً هنا..." style="display:${isManual ? 'block' : 'none'};margin-top:6px;border-color:var(--warning);" />` : '';
+  return `<div class="field"><label>${info.label}</label>${hintHtml}<select name="${field}"${manual ? ' data-manual="1"' : ''}><option value=""${isManualEmpty ? '' : ''}>— اختر من القائمة —</option>${options.map(o => `<option value="${escapeHtml(o.value)}"${String(o.value) === String(val) ? ' selected' : ''}>${escapeHtml(o.label)}</option>`).join('')}${manualOpt}</select>${manualInput}</div>`;
+}
+
+async function buildForm(table, data) {
   const fields = TABLES[table].fields.filter(f => f !== 'id' && f !== 'created_at' && f !== 'updated_at' && f !== 'country_code');
   const form = document.getElementById('modalForm');
-  form.innerHTML = (data.country_code ? `<input type="hidden" name="country_code" value="${data.country_code}" />` : `<input type="hidden" name="country_code" value="${currentCountry}" />`) + fields.map(f => {
+  const hidden = data.country_code ? data.country_code : currentCountry;
+  const parts = [];
+  const hasGrad = fields.includes('gradient_from') && fields.includes('gradient_to');
+  if (hasGrad) {
+    parts.push(`<div class="form-preview"><div class="fp-card" id="fpCard" style="background:linear-gradient(135deg,${data.gradient_from || '#1e2a3a'},${data.gradient_to || '#33404f'})"><b id="fpTitle">${escapeHtml(data.title || 'عنوان القطاع')}</b><span id="fpSub">${escapeHtml(data.subtitle || 'وصف قصير يظهر تحت العنوان')}</span></div></div>`);
+  }
+  for (const f of fields) {
     const val = data[f] ?? '';
+    const info = FIELD_LABELS[f] || { label: f, hint: '', placeholder: '' };
+    const hintHtml = info.hint ? `<small class="field-hint"><span class="material-icons-outlined">info</span> ${info.hint}</small>` : '';
     if (f === 'is_active') {
-      return `<div class="field"><label>${f}</label><select name="${f}"><option value="true"${val === true || val === 'true' ? ' selected' : ''}>نشط</option><option value="false"${val === false || val === 'false' ? ' selected' : ''}>غير نشط</option></select></div>`;
+      parts.push(`<div class="field"><label>${info.label}</label>${hintHtml}<select name="${f}"><option value="true"${val === true || val === 'true' ? ' selected' : ''}>نشط</option><option value="false"${val === false || val === 'false' ? ' selected' : ''}>غير نشط</option></select></div>`);
+      continue;
     }
     if (f === 'description' || f === 'message') {
-      return `<div class="field"><label>${f}</label><textarea name="${f}">${escapeHtml(val)}</textarea></div>`;
+      parts.push(`<div class="field"><label>${info.label}</label>${hintHtml}<textarea name="${f}" placeholder="${info.placeholder}">${escapeHtml(val)}</textarea></div>`);
+      continue;
     }
-    return `<div class="field"><label>${f}</label><input name="${f}" value="${escapeHtml(val)}" /></div>`;
-  }).join('');
+    const rel = REL_FIELDS[f];
+    if (rel) {
+      if (rel.static) {
+        parts.push(renderSelect(f, info, hintHtml, val, rel.static.map(([v, l]) => ({ value: v, label: l }))));
+        continue;
+      }
+      if (rel.products) {
+const opts = await fetchRelOptions(f, rel, table);
+        parts.push(`<div class="field"><label>${info.label}</label>${hintHtml}<input name="${f}" value="${escapeHtml(val)}" placeholder="${info.placeholder}" list="dl_products" /><datalist id="dl_products">${opts.map(o => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.label)}</option>`).join('')}</datalist></div>`);
+        continue;
+      }
+      const opts = await fetchRelOptions(f, rel, table);
+      if (opts.length) {
+        parts.push(renderSelect(f, info, hintHtml, val, opts, true));
+        continue;
+      }
+      const emptySrc = rel.multi ? TABLES[(table === 'brand_section_products' ? 'brand_sections' : 'category_sections')].label : null;
+      const warn = emptySrc
+        ? `القائمة فاضية لأن جدول <b>${emptySrc}</b> مافيهوش سجلات — أضف سجلاً الاول من تبويبه، وبعدين ارجع هنا`
+        : 'القائمة فاضية حالياً — اكتب الـ ID يدوياً لو متأكد إنه موجود';
+      parts.push(`<div class="field"><label>${info.label}</label>${hintHtml}<div class="field-warn"><span class="material-icons-outlined">warning</span> ${warn}</div><input name="${f}" value="${escapeHtml(val)}" placeholder="${info.placeholder}" /></div>`);
+      continue;
+    }
+    const specialTypes = { sort_order: 'number', display_count: 'number', email: 'email', phone: 'tel', product_price: 'number', product_old_price: 'number', product_rating: 'number' };
+    const isColorField = (f === 'gradient_from' || f === 'gradient_to' || f === 'bg_color');
+    const isHex = /^#[0-9a-f]{6}$/i.test(String(val || ''));
+    const type = isColorField ? (isHex || !String(val) ? 'color' : 'text') : (specialTypes[f] || 'text');
+    const colorShow = (isColorField && type === 'color') ? `<span class="color-dot" id="dot_${f}" style="background:${val || '#000000'}"></span><span class="color-cell" id="hex_${f}">${escapeHtml(val) || '#000000'}</span>` : '';
+    parts.push(`<div class="field"><label>${info.label}</label>${hintHtml}<input name="${f}" value="${escapeHtml(val)}" placeholder="${info.placeholder}" type="${type}" />${colorShow}</div>`);
+  }
+  form.innerHTML = `<input type="hidden" name="country_code" value="${escapeHtml(hidden)}" />` + parts.join('');
+  form.querySelectorAll('select[data-manual]').forEach(function (sel) {
+    const inp = form.querySelector('input[data-manual-for="' + sel.name + '"]');
+    if (!inp) return;
+    sel.addEventListener('change', function () {
+      inp.style.display = sel.value === '__manual__' ? 'block' : 'none';
+    });
+  });
+  const updatePreview = function () {
+    const card = document.getElementById('fpCard');
+    if (!card) return;
+    const gf = form.querySelector('input[name=gradient_from]');
+    const gt = form.querySelector('input[name=gradient_to]');
+    card.style.background = 'linear-gradient(135deg,' + (gf && gf.value ? gf.value : '#1e2a3a') + ',' + (gt && gt.value ? gt.value : '#33404f') + ')';
+    const t = document.getElementById('fpTitle');
+    const s = document.getElementById('fpSub');
+    const ti = form.querySelector('input[name=title]');
+    const si = form.querySelector('input[name=subtitle]');
+    if (t) t.textContent = (ti && ti.value) ? ti.value : 'عنوان القطاع';
+    if (s) s.textContent = (si && si.value) ? si.value : 'وصف قصير يظهر تحت العنوان';
+  };
+  ['gradient_from', 'gradient_to', 'bg_color'].forEach(function (n) {
+    const inp = form.querySelector('input[name="' + n + '"]');
+    if (!inp) return;
+    inp.addEventListener('input', function () {
+      const d = document.getElementById('dot_' + n);
+      const h = document.getElementById('hex_' + n);
+      if (d) d.style.background = inp.value;
+      if (h) h.textContent = inp.value;
+      updatePreview();
+    });
+  });
+  if (hasGrad) {
+    ['title', 'subtitle'].forEach(function (n) {
+      const inp = form.querySelector('input[name="' + n + '"]');
+      if (inp) inp.addEventListener('input', updatePreview);
+    });
+  }
 }
 
 function closeModal() {
@@ -669,13 +1114,45 @@ async function saveItem() {
   const inputs = form.querySelectorAll('input, textarea, select');
   const body = {};
   inputs.forEach(inp => {
+    if (inp.hasAttribute('data-manual-for')) return;
     let val = inp.value;
     if (inp.name === 'is_active') val = val === 'true';
     if (inp.name === 'sort_order') val = parseInt(val) || 0;
     body[inp.name] = val;
   });
+  form.querySelectorAll('input[data-manual-for]').forEach(inp => {
+    const f = inp.getAttribute('data-manual-for');
+    const sel = form.querySelector('select[name="' + f + '"]');
+    if (sel && sel.value === '__manual__' && inp.value.trim()) {
+      body[f] = inp.value.trim();
+    }
+  });
+
+  const UUID_FIELDS = ['category_id', 'brand_id', 'section_id', 'collection_slug'];
+  const badUuid = UUID_FIELDS.filter(f => {
+    const v = String(body[f] || '').trim();
+    return v && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+  });
+  if (badUuid.length) {
+    const fl = FIELD_LABELS[badUuid[0]];
+    toast(`خطأ: "${fl ? fl.label : badUuid[0]}" بقيمة مش ID صحيح — الـ id شكلها a6abcb66-9576-47ef-b763-76d2586d9863. اختار من القائمة أو انسخ من عمود id (الرقم زي "5" هو ترتيب الصف مش الـ id)`, 'error');
+    return;
+  }
 
   const table = currentTable;
+
+  if (!editingId && body.section_id && body.product_id) {
+    try {
+      const dupRes = await supabaseFetch(`/rest/v1/${table}?select=id&section_id=eq.${encodeURIComponent(body.section_id)}&product_id=eq.${encodeURIComponent(body.product_id)}&limit=1`);
+      if (dupRes.ok) {
+        const dupRows = await dupRes.json();
+        if (dupRows && dupRows.length) {
+          toast('هذا المنتج موجود من قبل في هذا القسم — اضغط تعديل على الصف الموجود لو عايز تغيّر ترتيبه', 'error');
+          return;
+        }
+      }
+    } catch (dupErr) { /* لا تمنع الإرسال لو فشل الفحص */ }
+  }
 
   try {
     let res;
@@ -698,7 +1175,19 @@ async function saveItem() {
     closeModal();
     loadTable(table);
   } catch (e) {
-    toast(`خطأ: ${e.message}`, 'error');
+    let msg = e.message || 'خطأ غير معروف';
+    const fk = e.message ? e.message.match(/Key is not present in table "([^"]+)"/) : null;
+    const dup = e.message ? e.message.match(/duplicate key value violates unique constraint/) : null;
+    const uuidErr = e.message ? e.message.match(/invalid input syntax for type uuid: "([^"]*)"/) : null;
+    if (dup) {
+      msg = 'هذا المنتج مضاف من قبل في هذا القسم (الربط مكرر) — اضغط تعديل على الصف الموجود لضبط ترتيبه';
+    } else if (uuidErr) {
+      msg = `القيمة "${uuidErr[1]}" مش ID صحيح — الـ id شكلها a6abcb66-9576-47ef-b763-76d2586d9863. اختار من القائمة أو انسخها من عمود id (الرقم اللي بتشوفه "5" مثلاص هو ترتيب الصف مش الـ id)`;
+    } else if (fk) {
+      const tLabel = TABLES[fk[1]] ? TABLES[fk[1]].label : fk[1];
+      msg = `الـ ID اللي كتبته مش موجود في "${tLabel}" — لازم تختار من القائمة أو تكتب ID موجود فعلاً`;
+    }
+    toast(`خطأ: ${msg}`, 'error');
   }
 }
 
@@ -715,6 +1204,967 @@ async function deleteItem(table, id) {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+// ================== استوديو تخطيط الصفحات ==================
+const BLOCK_DEFS = {
+  showcase: {
+    label: 'الجزء المميز (Showcase)',
+    icon: 'auto_awesome',
+    desc: 'جزء ضخم فخم: صورة + اسم بألوان متعددة + مربعات ألوان + أزرار + 4 منتجات + 3 إضافية',
+    defaults: {
+      image_url: '', gradient_from: '#1e2a3a', gradient_to: '#33404f',
+      title_segments: [{ text: '', color: '#ffffff' }],
+      subtitle: '',
+      swatches: [{ color: '#f43f5e' }, { color: '#0ea5e9' }, { color: '#22c55e' }, { color: '#eab308' }],
+      buttons: [{ text: 'تسوق الآن', link: '#', color: '' }],
+      products_mode: 'manual', product_ids: [], products_keywords: '', products_count: 4,
+      mini_mode: 'keywords', mini_ids: [], mini_keywords: '', mini_count: 3
+    }
+  },
+  hero_slider: { label: 'البنر العلوي المتحرك', icon: 'slideshow', desc: 'صور كبيرة بتتنقل فوق الصفحة', defaults: { slides: [{ image_url: '', title: '', subtitle: '', button_text: 'تسوق الآن', button_link: '#', show_button: 'show' }] } },
+  title_text: { label: 'عنوان وكلام', icon: 'title', desc: 'فاصل نصي كبير (عنوان + وصف)', defaults: { title: '', subtitle: '' } },
+  products: { label: 'عرض منتجات', icon: 'shopping_bag', desc: 'شبكة منتجات — يدوي أو بكلمات مفتاحية من السوق', defaults: { mode: 'keywords', keywords: '', ids: [], title: '', subtitle: '', count: 8, layout: 'grid' } },
+  ad_banner: { label: 'إعلان شركة', icon: 'campaign', desc: 'صورة إعلان ضخمة + زر يودّي لصفحة المنتجات', defaults: { image_url: '', title: '', subtitle: '', button_text: 'تسوق الآن', button_link: '#' } },
+  brands_row: { label: 'شريط ماركات', icon: 'storefront', desc: 'ماركات أفقية (لصفحات التصنيفات)', defaults: { title: '', brands: [] } },
+  smart_categories: { label: 'الشريط الذكي', icon: 'view_carousel', desc: 'شريط أفقي بتصنيفات أو أقسام (زي الرئيسية)', defaults: { title: 'تسوق حسب الفئة', source: 'auto', items: [] } }
+};
+
+const STUDIO = {
+  open: false, view: 'list', page: null, blocks: [],
+  dirty: new Set(), orderDirty: {}, saveTimer: null, previewTimer: null,
+  productsCache: [], brandsCache: [], dragId: null
+};
+
+function studioStatus(msg, cls) {
+  const el = document.getElementById('spSaveStatus');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'st-status' + (cls ? ' ' + cls : '');
+}
+
+function studioToggleView() {
+  STUDIO.open = !STUDIO.open;
+  document.getElementById('studioArea').classList.toggle('studio-hidden', !STUDIO.open);
+  document.getElementById('tabs').classList.toggle('studio-hidden', STUDIO.open);
+  document.getElementById('tabContents').classList.toggle('studio-hidden', STUDIO.open);
+  document.getElementById('studioToggle').classList.toggle('active', STUDIO.open);
+  if (STUDIO.open) {
+    if (STUDIO.view === 'editor' && STUDIO.page) {
+      document.getElementById('studioList').classList.add('studio-hidden');
+      document.getElementById('studioEditor').classList.remove('studio-hidden');
+      studioRenderBlocks();
+    } else {
+      studioShowList();
+    }
+  }
+}
+
+async function studioShowList() {
+  STUDIO.view = 'list';
+  document.getElementById('studioEditor').classList.add('studio-hidden');
+  document.getElementById('studioList').classList.remove('studio-hidden');
+  await studioLoadPages();
+}
+
+async function studioLoadPages() {
+  const tbody = document.getElementById('studioListBody');
+  tbody.innerHTML = '<tr><td colspan="7">جارٍ التحميل...</td></tr>';
+  try {
+    const allRes = await supabaseFetch('/rest/v1/smart_page_blocks?select=page_id&limit=1000');
+    const blockMap = {};
+    if (allRes.ok) {
+      const bs = await allRes.json();
+      (bs || []).forEach(x => { blockMap[x.page_id] = (blockMap[x.page_id] || 0) + 1; });
+    }
+    const res = await supabaseFetch(`/rest/v1/smart_pages?select=*&country_code=eq.${currentCountry}&order=title.asc`);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const rows = (await res.json()) || [];
+    document.getElementById('studioListEmpty').classList.toggle('studio-hidden', rows.length > 0);
+    tbody.innerHTML = rows.map(p => `<tr>
+      <td><b>${escapeHtml(p.title || p.slug)}</b></td>
+      <td>${p.page_type === 'category' ? 'تصنيف / فئة' : 'ماركة / شراكة'}</td>
+      <td><code style="font-size:.75rem">${escapeHtml(p.slug)}</code></td>
+      <td>${p.country_code}</td>
+      <td>${p.is_active !== false ? '<span class="status-badge status-active">نشط</span>' : '<span class="status-badge status-inactive">متوقف</span>'}</td>
+      <td>${blockMap[p.id] || 0}</td>
+      <td>
+        <button class="st-block-btn" onclick="studioOpenPage('${p.id}')">✏️ افتح وارسم</button>
+        <button class="st-block-btn ghost" onclick="studioTogglePage('${p.id}', ${p.is_active !== false})">${p.is_active !== false ? '⏸ إيقاف' : '▶️ تشغيل'}</button>
+        <button class="st-block-btn danger" onclick="studioDeletePage('${p.id}')">🗑 حذف</button>
+      </td>
+    </tr>`).join('');
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="7">تعذر التحميل (${escapeHtml(e.message)}) — هل نفّذت SQL إنشاء جداول الصفحات الذكية؟ انسخه من sql/setup_smart_pages.sql</td></tr>`;
+  }
+}
+
+async function studioSeedSmartCategories() {
+  try {
+    const res = await supabaseFetch(`/rest/v1/smart_category_showcase?select=*&is_active=eq.true&country_code=eq.${currentCountry}&order=sort_order.asc&limit=100`);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const rows = (await res.json()) || [];
+    if (!rows.length) { toast('مافيش تصنيفات في الشريط الذكي للبلد ده — جرّب بلد تاني', 'error'); return; }
+    const exRes = await supabaseFetch(`/rest/v1/smart_pages?select=slug&page_type=eq.category&country_code=eq.${currentCountry}&limit=1000`);
+    const existing = {};
+    if (exRes.ok) { const ex = await exRes.json(); (ex || []).forEach(p => { existing[p.slug] = 1; }); }
+    let created = 0, skipped = 0;
+    for (const c of rows) {
+      const slug = String(c.link_url || '').split('?slug=')[1] || c.slug || c.title;
+      if (!slug) continue;
+      if (existing[slug]) { skipped++; continue; }
+      const cr = await supabaseFetch('/rest/v1/smart_pages', {
+        method: 'POST',
+        body: JSON.stringify({ slug, title: c.title || slug, page_type: 'category', country_code: currentCountry, settings: {}, is_active: true })
+      });
+      if (cr.ok) created++;
+    }
+    toast('تم تجهيز ' + created + ' صفحة تصنيف جديدة للتخطيط' + (skipped ? ' (موجودة قبل كده: ' + skipped + ')' : ''));
+    studioShowList();
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+async function studioCreatePage() {
+  const slug = document.getElementById('spNewSlug').value.trim();
+  const type = document.getElementById('spNewType').value;
+  const title = document.getElementById('spNewTitle').value.trim();
+  if (!slug) { toast('اكتب رابط الصفحة (slug) الأول', 'error'); return; }
+  try {
+    const dupRes = await supabaseFetch(`/rest/v1/smart_pages?select=id&slug=eq.${encodeURIComponent(slug)}&country_code=eq.${currentCountry}&limit=1`);
+    if (dupRes.ok) {
+      const dup = await dupRes.json();
+      if (dup && dup.length) { toast('في صفحة بنفس الرابط والدولة — استخدم اسم مختلف', 'error'); return; }
+    }
+    const body = {
+      slug: slug.toLowerCase(),
+      page_type: type,
+      title: title || slug,
+      country_code: currentCountry,
+      settings: { colors: { bg: '#ffffff', primary: '#6d28d9', text: '#1e293b' } },
+      is_active: true
+    };
+    const res = await supabaseFetch('/rest/v1/smart_pages', { method: 'POST', body: JSON.stringify(body) });
+    if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()).slice(0, 150));
+    const rows = await res.json();
+    const p = Array.isArray(rows) ? rows[0] : rows;
+    document.getElementById('spNewSlug').value = '';
+    document.getElementById('spNewTitle').value = '';
+    toast('تم إنشاء الصفحة — ابدأ بإضافة المكعبات');
+    await studioOpenPage(p.id);
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+async function studioOpenPage(id) {
+  try {
+    const res = await supabaseFetch(`/rest/v1/smart_pages?id=eq.${id}&limit=1`);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const rows = await res.json();
+    STUDIO.page = rows[0];
+    STUDIO.dirty.clear();
+    STUDIO.orderDirty = {};
+    const bres = await supabaseFetch(`/rest/v1/smart_page_blocks?page_id=eq.${id}&order=block_order.asc`);
+    STUDIO.blocks = bres.ok ? ((await bres.json()) || []) : [];
+    STUDIO.view = 'editor';
+    document.getElementById('studioList').classList.add('studio-hidden');
+    document.getElementById('studioEditor').classList.remove('studio-hidden');
+    document.getElementById('spTitle').value = STUDIO.page.title || '';
+    const c = (STUDIO.page.settings && STUDIO.page.settings.colors) || { bg: '#ffffff', primary: '#6d28d9', text: '#1e293b' };
+    document.getElementById('spColorBg').value = c.bg || '#ffffff';
+    document.getElementById('spColorPrimary').value = c.primary || '#6d28d9';
+    document.getElementById('spColorText').value = c.text || '#1e293b';
+    studioEnsureCaches();
+    studioRenderBlocks();
+    studioPreviewRender();
+    studioStatus('جاهز');
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+function studioEnsureCaches() {
+  if (!STUDIO.productsCache.length) {
+    supabaseFetch('/rest/v1/taager_products?select=id,name&limit=400&order=name.asc')
+      .then(r => r.ok ? r.json() : []).then(d => { STUDIO.productsCache = d || []; })
+      .catch(() => {});
+  }
+  if (!STUDIO.brandsCache.length) {
+    supabaseFetch('/rest/v1/brands?select=id,name,slug,country_code&limit=200&order=sort_order.asc')
+      .then(r => r.ok ? r.json() : []).then(d => { STUDIO.brandsCache = d || []; })
+      .catch(() => {});
+  }
+}
+
+async function studioTogglePage(id, active) {
+  try {
+    const res = await supabaseFetch(`/rest/v1/smart_pages?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ is_active: !active }) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    toast('تم التحديث');
+    studioLoadPages();
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+async function studioDeletePage(id) {
+  if (!confirm('حذف الصفحة وكل مكعباتها نهائياً؟')) return;
+  try {
+    const res = await supabaseFetch(`/rest/v1/smart_pages?id=eq.${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    toast('تم الحذف');
+    studioLoadPages();
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+function studioPageTitle(v) {
+  if (!STUDIO.page) return;
+  STUDIO.page.title = v;
+  studioMarkDirty('__page__');
+}
+
+function studioColor(key, val) {
+  if (!STUDIO.page) return;
+  if (!STUDIO.page.settings.colors) STUDIO.page.settings.colors = {};
+  STUDIO.page.settings.colors[key] = val;
+  studioMarkDirty('__page__');
+  studioPreviewRender();
+}
+
+// ---------- الحفظ التلقائي ----------
+function studioMarkDirty(id) {
+  STUDIO.dirty.add(id || '__page__');
+  studioStatus('جارٍ الحفظ...', 'saving');
+  clearTimeout(STUDIO.saveTimer);
+  STUDIO.saveTimer = setTimeout(studioSaveNow, 800);
+}
+
+async function studioSaveNow() {
+  if (!STUDIO.page) { STUDIO.dirty.clear(); return; }
+  const jobs = [];
+  if (STUDIO.dirty.has('__page__')) {
+    jobs.push(supabaseFetch(`/rest/v1/smart_pages?id=eq.${STUDIO.page.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ title: STUDIO.page.title || '', settings: STUDIO.page.settings })
+    }).then(r => { if (!r.ok) throw new Error('الصفحة HTTP ' + r.status); }));
+  }
+  for (const id of Array.from(STUDIO.dirty)) {
+    if (id === '__page__') continue;
+    const b = STUDIO.blocks.find(x => x.id === id);
+    if (!b) continue;
+    const body = { settings: b.settings };
+    if (STUDIO.orderDirty[id]) body.block_order = b.block_order;
+    jobs.push(supabaseFetch(`/rest/v1/smart_page_blocks?id=eq.${id}`, {
+      method: 'PATCH', body: JSON.stringify(body)
+    }).then(r => { if (!r.ok) throw new Error('المكعب HTTP ' + r.status); }));
+  }
+  try {
+    await Promise.all(jobs);
+    STUDIO.dirty.clear();
+    STUDIO.orderDirty = {};
+    studioStatus('تم الحفظ ✓', 'saved');
+  } catch (e) {
+    studioStatus('فشل الحفظ ✗', '');
+    toast('خطأ في الحفظ: ' + e.message, 'error');
+  }
+}
+
+// ---------- المكعبات ----------
+function studioRenderBlocks() {
+  const col = document.getElementById('stBlocksCol');
+  if (!STUDIO.blocks.length) {
+    col.innerHTML = '<div class="st-empty">مافيش مكعبات بعد — أضف جزء جديد من تحت 👇</div>' + studioAddBarHtml();
+    return;
+  }
+  col.innerHTML = STUDIO.blocks.map(studioBlockCard).join('') + studioAddBarHtml();
+}
+
+function studioAddBarHtml() {
+  const menu = Object.keys(BLOCK_DEFS).map(t => {
+    const d = BLOCK_DEFS[t];
+    return `<button onclick="studioAddBlock('${t}')"><span class="material-icons-outlined ai">${d.icon}</span><span class="at"><b>${d.label}</b><small>${d.desc}</small></span></button>`;
+  }).join('');
+  return `<div class="st-add-block-bar">
+    <div class="st-add-title"><span class="material-icons-outlined">add_box</span> إضافة جزء جديد — اضغط على أي نوع لتحط تحت المكعبات</div>
+    <div class="st-add-menu">${menu}</div>
+  </div>`;
+}
+
+async function studioAddBlock(type) {
+  const def = BLOCK_DEFS[type];
+  const body = {
+    page_id: STUDIO.page.id,
+    block_type: type,
+    block_order: STUDIO.blocks.length + 1,
+    settings: JSON.parse(JSON.stringify(def.defaults)),
+    is_active: true
+  };
+  try {
+    const res = await supabaseFetch('/rest/v1/smart_page_blocks', { method: 'POST', body: JSON.stringify(body) });
+    if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()).slice(0, 120));
+    const rows = await res.json();
+    const b = Array.isArray(rows) ? rows[0] : rows;
+    STUDIO.blocks.push(b);
+    studioRenderBlocks();
+    studioPreviewRender();
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+function studioBlockCard(b) {
+  const def = BLOCK_DEFS[b.block_type] || { label: b.block_type, icon: 'widgets', desc: '' };
+  return `<div class="st-block" draggable="true" data-id="${b.id}">
+    <div class="st-block-head">
+      <span class="drag-handle">⠿</span>
+      <span class="st-type"><span class="material-icons-outlined">${def.icon}</span> ${def.label}</span>
+      <button class="st-toggle-switch ${b.is_active !== false ? 'on' : ''}" onclick="studioToggleBlock('${b.id}')" title="تشغيل/إيقاف المكعب"></button>
+      <button class="st-del" onclick="studioDeleteBlock('${b.id}')" title="حذف المكعب"><span class="material-icons-outlined" style="font-size:16px">delete</span></button>
+    </div>
+    <div class="st-block-body">${studioFieldsHtml(b)}</div>
+  </div>`;
+}
+
+function studioFieldsHtml(b) {
+  const s = b.settings || {};
+  if (b.block_type === 'hero_slider') {
+    const slides = s.slides || [];
+    const boxes = slides.map((sl, i) => `<div class="st-slide-box">
+      <button class="st-del-slide" onclick="studioDelSlide('${b.id}', ${i})">حذف السلايد</button>
+      <div class="st-field"><label>رابط صورة السلايد ${i + 1}</label><input data-k="image_url" data-i="${i}" value="${escapeHtml(sl.image_url)}" placeholder="https://..." /></div>
+      <div class="st-field"><label>العنوان</label><input data-k="title" data-i="${i}" value="${escapeHtml(sl.title)}" placeholder="عنوان يظهر فوق الصورة" /></div>
+      <div class="st-field"><label>الوصف</label><input data-k="subtitle" data-i="${i}" value="${escapeHtml(sl.subtitle)}" placeholder="وصف قصير" /></div>
+      <div class="st-add-row">
+        <div class="st-field" style="flex:1"><label>نص الزر</label><input data-k="button_text" data-i="${i}" value="${escapeHtml(sl.button_text)}" /></div>
+        <div class="st-field" style="flex:2"><label>رابط الزر</label><input data-k="button_link" data-i="${i}" value="${escapeHtml(sl.button_link)}" placeholder="# أو رابط صفحة" /></div>
+      </div>
+      <div class="st-add-row">
+        <div class="st-field" style="flex:1"><label>إظهار الزر؟</label><select data-k="show_button" data-i="${i}"><option value="show"${String(sl.show_button) !== 'hide' ? ' selected' : ''}>يظهر</option><option value="hide"${String(sl.show_button) === 'hide' ? ' selected' : ''}>لا يظهر</option></select></div>
+      </div>
+    </div>`).join('');
+    return boxes + `<button class="mini" style="align-self:flex-start;padding:8px 14px;border:none;border-radius:8px;background:var(--primary);color:#fff;font-family:inherit;font-size:.76rem;font-weight:600;cursor:pointer" onclick="studioAddSlide('${b.id}')">+ إضافة سلايد</button>`;
+  }
+  if (b.block_type === 'title_text') {
+    return `<div class="st-field"><label>العنوان الكبير</label><input data-k="title" value="${escapeHtml(s.title)}" placeholder="مثال: تشكيلة الصيف 2026" /></div>
+      <div class="st-field"><label>الوصف</label><input data-k="subtitle" value="${escapeHtml(s.subtitle)}" placeholder="وصف قصير تحت العنوان" /></div>`;
+  }
+  if (b.block_type === 'products') {
+    const ids = s.ids || [];
+    const chips = ids.map(id => `<span class="st-chip">${escapeHtml(id)} <button onclick="studioDelProduct('${b.id}','${escapeHtml(id)}')">×</button></span>`).join('');
+    const kwVisible = s.mode !== 'manual';
+    const idsVisible = s.mode === 'manual';
+    return `<div class="st-field"><label>طريقة جلب المنتجات</label>
+        <select data-k="mode" onchange="studioModeChange('${b.id}', this.value)">
+          <option value="keywords"${s.mode === 'keywords' ? ' selected' : ''}>تلقائي بكلمات مفتاحية</option>
+          <option value="manual"${s.mode === 'manual' ? ' selected' : ''}>اختيار يدوي (منتجات مميزة)</option>
+          <option value="top_rated"${s.mode === 'top_rated' ? ' selected' : ''}>تلقائي — الأكثر مبيعاً</option>
+        </select></div>
+      <div class="st-field" id="kw_${b.id}"${kwVisible ? '' : ' style="display:none"'}>
+        <label>كلمات مفتاحية (افصل بفاصلة)</label>
+        <textarea data-k="keywords" placeholder="مثال: سماعة, موبايل, شاحن">${escapeHtml(s.keywords || '')}</textarea>
+      </div>
+      <div id="idsrow_${b.id}"${idsVisible ? '' : ' style="display:none"'}>
+        <div class="st-field"><label>منتجات مميزة مختارة</label>
+          <div class="st-chips" id="chips_${b.id}">${chips || '<small style="color:var(--gray-400)">مافيش منتجات مختارة</small>'}</div>
+          <div class="st-add-row"><input id="ps_${b.id}" list="pdl_${b.id}" placeholder="اكتب اسم المنتج واختاره..." /><button class="mini" onclick="studioAddProduct('${b.id}')">إضافة</button></div>
+          <datalist id="pdl_${b.id}">${STUDIO.productsCache.slice(0, 300).map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}</option>`).join('')}</datalist>
+        </div>
+      </div>
+      <div class="st-add-row">
+        <div class="st-field" style="flex:2"><label>عنوان القسم</label><input data-k="title" value="${escapeHtml(s.title || '')}" placeholder="مثال: منتجات مميزة" /></div>
+        <div class="st-field" style="flex:2"><label>وصف صغير</label><input data-k="subtitle" value="${escapeHtml(s.subtitle || '')}" placeholder="اختياري" /></div>
+      </div>
+      <div class="st-add-row">
+        <div class="st-field" style="flex:1"><label>عدد المنتجات</label><input data-k="count" type="number" min="1" max="40" value="${escapeHtml(String(s.count || 8))}" /></div>
+        <div class="st-field" style="flex:1"><label>طريقة العرض</label>
+          <select data-k="layout"><option value="grid"${s.layout !== 'scroll' ? ' selected' : ''}>شبكة (2×2)</option><option value="scroll"${s.layout === 'scroll' ? ' selected' : ''}>شريط أفقي متحرك</option></select></div>
+      </div>`;
+  }
+  if (b.block_type === 'ad_banner') {
+    return `<div class="st-field"><label>رابط صورة الإعلان</label><input data-k="image_url" value="${escapeHtml(s.image_url)}" placeholder="https://... — صورة كبيرة عريضة" /></div>
+      <div class="st-field"><label>العنوان</label><input data-k="title" value="${escapeHtml(s.title)}" placeholder="مثال: عرض نايك 50%" /></div>
+      <div class="st-field"><label>الوصف</label><input data-k="subtitle" value="${escapeHtml(s.subtitle)}" placeholder="وصف قصير" /></div>
+      <div class="st-add-row">
+        <div class="st-field" style="flex:1"><label>نص الزر</label><input data-k="button_text" value="${escapeHtml(s.button_text)}" /></div>
+        <div class="st-field" style="flex:2"><label>رابط الزر (صفحة منتجات الشركة)</label><input data-k="button_link" value="${escapeHtml(s.button_link)}" placeholder="products.html?brand=nike" /></div>
+      </div>`;
+  }
+if (b.block_type === 'smart_categories') {
+    const items = s.items || [];
+    const boxes = items.map((it, i) => `<div class="st-slide-box">
+      <button class="st-del-slide" onclick="studioDelScCard('${b.id}', ${i})">حذف الكارت</button>
+      <div class="st-add-row">
+        <div class="st-field" style="flex:1"><label>عنوان الكارت ${i + 1}</label><input data-k="title" data-arr="items" data-i="${i}" value="${escapeHtml(it.title)}" placeholder="مثال: إلكترونيات" /></div>
+        <div class="st-field" style="flex:1"><label>وصف صغير</label><input data-k="subtitle" data-arr="items" data-i="${i}" value="${escapeHtml(it.subtitle)}" placeholder="اختياري" /></div>
+      </div>
+      <div class="st-add-row">
+        <div class="st-field" style="flex:2"><label>رابط الكارت</label><input data-k="link_url" data-arr="items" data-i="${i}" value="${escapeHtml(it.link_url)}" placeholder="category-landing.html?slug=..." /></div>
+        <div class="st-field" style="flex:1"><label>أيقونة</label><input data-k="icon" data-arr="items" data-i="${i}" value="${escapeHtml(it.icon)}" placeholder="spa / devices ..." /></div>
+      </div>
+      <div class="st-add-row">
+        <div class="st-field" style="flex:3"><label>صورة (بدل الأيقونة)</label><input data-k="image_url" data-arr="items" data-i="${i}" value="${escapeHtml(it.image_url)}" placeholder="https://..." /></div>
+        <div class="st-field" style="flex:1"><label>لون 1</label><input type="color" data-k="gradient_from" data-arr="items" data-i="${i}" value="${/^#[0-9a-f]{6}$/i.test(it.gradient_from || '') ? it.gradient_from : '#1e2a3a'}" /></div>
+        <div class="st-field" style="flex:1"><label>لون 2</label><input type="color" data-k="gradient_to" data-arr="items" data-i="${i}" value="${/^#[0-9a-f]{6}$/i.test(it.gradient_to || '') ? it.gradient_to : '#33404f'}" /></div>
+      </div>
+    </div>`).join('');
+    return `<div class="st-field"><label>عنوان الشريط</label><input data-k="title" value="${escapeHtml(s.title)}" placeholder="تسوق حسب الفئة" /></div>
+      <div class="st-field"><label>المصدر</label>
+        <select data-k="source" onchange="studioScSourceChange('${b.id}', this.value)">
+          <option value="auto"${s.source !== 'manual' ? ' selected' : ''}>تلقائي — نفس الشريط الذكي بتاع الرئيسية</option>
+          <option value="manual"${s.source === 'manual' ? ' selected' : ''}>يدوي — أنا اللي بعمل الكروت</option>
+        </select></div>
+      <div id="scItems_${b.id}"${s.source === 'manual' ? '' : ' style="display:none"'}>
+        ${boxes || '<small style="color:var(--gray-400)">مافيش كروت يدوية — ضيف من تحت 👇</small>'}
+        <button class="mini" style="margin-top:8px;padding:8px 14px;border:none;border-radius:8px;background:var(--primary);color:#fff;font-family:inherit;font-size:.76rem;font-weight:600;cursor:pointer" onclick="studioAddScCard('${b.id}')">+ إضافة كارت</button>
+      </div>`;
+  }
+if (b.block_type === 'showcase') {
+    const chipList = (arrKey, inputId) => {
+      const ids = b.settings[arrKey] || [];
+      return `<div class="st-chips" id="chips_${arrKey}_${b.id}">${ids.map((id, idx) => `<span class="st-chip">${escapeHtml(id)} <button onclick="studioDelListProduct('${b.id}','${arrKey}',${idx})">×</button></span>`).join('') || '<small style="color:var(--gray-400)">مافيش منتجات مختارة</small>'}</div>
+        <div class="st-add-row"><input id="ps_${inputId}_${b.id}" list="pdl_${inputId}_${b.id}" placeholder="اكتب اسم المنتج واختاره..." /><button class="mini" onclick="studioAddListProduct('${b.id}','${arrKey}','${inputId}')">إضافة</button></div>
+        <datalist id="pdl_${inputId}_${b.id}">${STUDIO.productsCache.slice(0, 300).map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name)}</option>`).join('')}</datalist>`;
+    };
+    const segs = (s.title_segments || []).map((sg, i) => `<div class="st-add-row">
+        <input data-k="text" data-arr="title_segments" data-i="${i}" value="${escapeHtml(sg.text)}" placeholder="كلمة أو حرف" style="flex:3" />
+        <input type="color" data-k="color" data-arr="title_segments" data-i="${i}" value="${/^#[0-9a-fA-F]{6}$/.test(sg.color || '') ? sg.color : '#ffffff'}" style="flex:1;height:36px;border:none;cursor:pointer" />
+        <button class="st-del-slide" onclick="studioDelListItem('${b.id}','title_segments',${i})">×</button></div>`).join('');
+    const sws = (s.swatches || []).map((sw, i) => `<div class="st-add-row">
+        <input type="color" data-k="color" data-arr="swatches" data-i="${i}" value="${/^#[0-9a-fA-F]{6}$/.test(sw.color || '') ? sw.color : '#f43f5e'}" style="flex:1;height:36px;border:none;cursor:pointer" />
+        <button class="st-del-slide" onclick="studioDelListItem('${b.id}','swatches',${i})">×</button></div>`).join('');
+    const bts = (s.buttons || []).map((bt, i) => `<div class="st-add-row">
+        <input data-k="text" data-arr="buttons" data-i="${i}" value="${escapeHtml(bt.text)}" placeholder="نص الزر" style="flex:2" />
+        <input data-k="link" data-arr="buttons" data-i="${i}" value="${escapeHtml(bt.link)}" placeholder="رابط" style="flex:3" />
+        <input type="color" data-k="color" data-arr="buttons" data-i="${i}" value="${/^#[0-9a-fA-F]{6}$/.test(bt.color || '') ? bt.color : '#6d28d9'}" style="flex:1;height:36px;border:none;cursor:pointer" />
+        <button class="st-del-slide" onclick="studioDelListItem('${b.id}','buttons',${i})">×</button></div>`).join('');
+    const prodSection = (which, arrKey, kwKey, modeKey, countKey, inputId, countVal) => `
+      <details class="st-manual" ${(s[modeKey] === 'manual' && !(s[arrKey] || []).length) ? '' : 'open'}>
+        <summary>${which === 'mini' ? '3 منتجات (اللي تحت)' : '4 منتجات (اللي تحت الاسم)'}</summary>
+        <div class="st-field"><label>طريقة الجلب</label>
+          <select data-k="${modeKey}" onchange="studioShowMode('${b.id}','${which}',this.value)">
+            <option value="manual"${s[modeKey] === 'manual' ? ' selected' : ''}>يدوي — أختار المنتجات بنفسي</option>
+            <option value="keywords"${s[modeKey] === 'keywords' ? ' selected' : ''}>تلقائي بكلمات مفتاحية</option>
+            <option value="top_rated"${s[modeKey] === 'top_rated' ? ' selected' : ''}>الأكثر مبيعاً</option>
+          </select></div>
+        <div class="st-field" id="kwp_${which}_${b.id}"${s[modeKey] === 'keywords' ? '' : ' style="display:none"'}>
+          <label>كلمات مفتاحية</label><textarea data-k="${kwKey}" placeholder="مثال: سماعة, موبايل">${escapeHtml(s[kwKey] || '')}</textarea></div>
+        <div class="st-field" id="idsp_${which}_${b.id}"${s[modeKey] === 'manual' ? '' : ' style="display:none"'}>
+          <label>منتجات مختارة</label>${chipList(arrKey, inputId)}</div>
+        <div class="st-field"><label>عدد المنتجات</label><input data-k="${countKey}" type="number" min="1" max="12" value="${escapeHtml(String(s[countKey] || countVal))}" /></div>
+      </details>`;
+    return `<details class="st-manual" open><summary>صورة الخلفية والألوان</summary>
+        <div class="st-field"><label>رابط الصورة الكبيرة</label><input data-k="image_url" value="${escapeHtml(s.image_url)}" placeholder="https://... — صورة عريضة" /></div>
+        <div class="st-add-row">
+          <div class="st-field" style="flex:1"><label>لون 1</label><input type="color" data-k="gradient_from" value="${/^#[0-9a-fA-F]{6}$/.test(s.gradient_from || '') ? s.gradient_from : '#1e2a3a'}" /></div>
+          <div class="st-field" style="flex:1"><label>لون 2</label><input type="color" data-k="gradient_to" value="${/^#[0-9a-fA-F]{6}$/.test(s.gradient_to || '') ? s.gradient_to : '#33404f'}" /></div>
+        </div></details>
+      <details class="st-manual" open><summary>الاسم المحترف — كل كلمة أو حرف بلون</summary>
+        ${segs || '<small style="color:var(--gray-400)">ضيف كلمات الاسم من تحت 👇</small>'}
+        <div class="st-add-row"><button class="mini" onclick="studioAddListItem('${b.id}','title_segments')">+ كلمة أو حرف</button></div>
+        <div class="st-field"><label>وصف صغير تحت الاسم</label><input data-k="subtitle" value="${escapeHtml(s.subtitle)}" placeholder="اختياري" /></div></details>
+      <details class="st-manual" open><summary>مربعات الألوان المتراكبة</summary>
+        ${sws || '<small style="color:var(--gray-400)">ضيف مربعات من تحت 👇</small>'}
+        <button class="mini" onclick="studioAddListItem('${b.id}','swatches')">+ مربع لون</button></details>
+      <details class="st-manual" open><summary>الأزرار</summary>
+        ${bts || '<small style="color:var(--gray-400)">ضيف زرار 👇</small>'}
+        <button class="mini" onclick="studioAddListItem('${b.id}','buttons')">+ زر</button></details>
+      ${prodSection('main', 'product_ids', 'products_keywords', 'products_mode', 'products_count', 'A', 4)}
+      ${prodSection('mini', 'mini_ids', 'mini_keywords', 'mini_mode', 'mini_count', 'B', 3)}`;
+  }
+  if (b.block_type === 'brands_row') {
+    const entries = s.brands || [];
+    const names = {};
+    STUDIO.brandsCache.forEach(x => { names[x.id] = x; });
+    const chips = entries.map((e, idx) => {
+      const isObj = e && typeof e === 'object';
+      const rec = isObj ? e : (names[e] || {});
+      const name = isObj ? (e.name || e.slug || 'ماركة') : (rec.name || e);
+      const country = isObj ? (e.country_code || '') : (rec.country_code || '');
+      const logo = isObj ? (e.logo_url || '') : (rec.logo_url || rec.logo || '');
+      return `<span class="st-chip">${logo ? `<img src="${escapeHtml(logo)}" class="st-brand-logo" onerror="this.style.display='none'" />` : ''}${escapeHtml(name)}${country ? ` <small style="opacity:.65">(${country})</small>` : ''}<span class="st-chip-btns"><button title="خطط صفحة هذه الماركة من الأول" onclick="studioPlanBrand('${b.id}', ${idx})">تَخْطِيط</button><button title="حذف الماركة" onclick="studioDelBrand('${b.id}', ${idx})">×</button></span></span>`;
+    }).join('');
+    const opts = STUDIO.brandsCache.map(x => `<option value="${x.id}">${escapeHtml(x.name)} (${x.country_code || ''})</option>`).join('');
+    return `<div class="st-field"><label>عنوان الشريط</label><input data-k="title" value="${escapeHtml(s.title)}" placeholder="مثال: ماركاتنا" /></div>
+      <div class="st-field"><label>الماركات في الشريط</label>
+        <div class="st-chips" id="chips_${b.id}">${chips || '<small style="color:var(--gray-400)">مافيش ماركات — أضف من الجدول أو يدوياً بالاسم من تحت 👇</small>'}</div>
+        ${opts ? `<div class="st-add-row" style="margin-top:8px"><select id="bs_${b.id}">${opts}</select><button class="mini" onclick="studioAddBrand('${b.id}')">إضافة ماركة من الجدول</button></div>` : ''}
+        <details class="st-manual"><summary>➕ إضافة ماركة يدوياً (باسمها) بالاسم والبلد واللوجو</summary>
+          <div class="st-manual-grid">
+            <input id="mbn_${b.id}" placeholder="اسم الماركة * — مثال: اديداس" />
+            <select id="mbc_${b.id}"><option value="">البلد: عام</option><option value="EG">🇪🇬 مصر</option><option value="SA">🇸🇦 السعودية</option></select>
+            <input id="mbs_${b.id}" placeholder="رابط الصفحة (slug) — مثال: adidas" />
+            <input id="mbl_${b.id}" placeholder="رابط اللوجو (صورة) — اختياري" />
+          </div>
+          <button class="mini" onclick="studioAddManualBrand('${b.id}')">💾 حفظ الماركة اليدوية</button>
+        </details>
+      </div>`;
+  }
+  return '<div class="st-empty">نوع غير معروف</div>';
+}
+
+function studioModeChange(blockId, mode) {
+  const b = STUDIO.blocks.find(x => x.id === blockId);
+  if (!b) return;
+  b.settings.mode = mode;
+  document.getElementById('kw_' + blockId).style.display = mode === 'manual' ? 'none' : '';
+  document.getElementById('idsrow_' + blockId).style.display = mode === 'manual' ? '' : 'none';
+  studioMarkDirty(blockId);
+  studioPreviewRender();
+}
+
+async function studioToggleBlock(id) {
+  const b = STUDIO.blocks.find(x => x.id === id);
+  if (!b) return;
+  b.is_active = b.is_active === false;
+  try {
+    const res = await supabaseFetch(`/rest/v1/smart_page_blocks?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ is_active: b.is_active }) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    studioRenderBlocks();
+    studioPreviewRender();
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); b.is_active = !b.is_active; }
+}
+
+async function studioDeleteBlock(id) {
+  if (!confirm('حذف هذا المكعب؟')) return;
+  try {
+    const res = await supabaseFetch(`/rest/v1/smart_page_blocks?id=eq.${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    STUDIO.blocks = STUDIO.blocks.filter(x => x.id !== id);
+    STUDIO.blocks.forEach((x, i) => { x.block_order = i + 1; STUDIO.orderDirty[x.id] = true; });
+    STUDIO.dirty.add('__order__');
+    STUDIO.blocks.forEach(x => STUDIO.dirty.add(x.id));
+    studioRenderBlocks();
+    studioPreviewRender();
+    studioScheduleSave();
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+function studioScheduleSave() {
+  studioStatus('جارٍ الحفظ...', 'saving');
+  clearTimeout(STUDIO.saveTimer);
+  STUDIO.saveTimer = setTimeout(studioSaveNow, 800);
+}
+
+function studioReorder(dragId, targetId) {
+  const from = STUDIO.blocks.findIndex(x => x.id === dragId);
+  const to = STUDIO.blocks.findIndex(x => x.id === targetId);
+  if (from < 0 || to < 0 || from === to) return;
+  const [moved] = STUDIO.blocks.splice(from, 1);
+  STUDIO.blocks.splice(to, 0, moved);
+  STUDIO.orderDirty = {};
+  STUDIO.blocks.forEach((b, i) => { b.block_order = i + 1; STUDIO.orderDirty[b.id] = true; });
+  STUDIO.blocks.forEach(x => STUDIO.dirty.add(x.id));
+  studioRenderBlocks();
+  studioPreviewRender();
+  studioScheduleSave();
+}
+
+function studioAddSlide(blockId) {
+  const b = STUDIO.blocks.find(x => x.id === blockId);
+  if (!b) return;
+  b.settings.slides = b.settings.slides || [];
+  b.settings.slides.push({ image_url: '', title: '', subtitle: '', button_text: 'تسوق الآن', button_link: '#' });
+  studioMarkDirty(blockId);
+  studioRenderBlocks();
+  studioPreviewRender();
+}
+
+function studioDelSlide(blockId, i) {
+  const b = STUDIO.blocks.find(x => x.id === blockId);
+  if (!b) return;
+  b.settings.slides.splice(i, 1);
+  studioMarkDirty(blockId);
+  studioRenderBlocks();
+  studioPreviewRender();
+}
+
+function studioAddProduct(blockId) {
+  const b = STUDIO.blocks.find(x => x.id === blockId);
+  if (!b) return;
+  const inp = document.getElementById('ps_' + blockId);
+  const val = inp.value.trim();
+  if (!val) return;
+  b.settings.ids = b.settings.ids || [];
+  if (!b.settings.ids.includes(val)) b.settings.ids.push(val);
+  inp.value = '';
+  studioMarkDirty(blockId);
+  studioRenderBlocks();
+  studioPreviewRender();
+}
+
+function studioDelProduct(blockId, pid) {
+  const b = STUDIO.blocks.find(x => x.id === blockId);
+  if (!b) return;
+  b.settings.ids = (b.settings.ids || []).filter(x => x !== pid);
+  studioMarkDirty(blockId);
+  studioRenderBlocks();
+  studioPreviewRender();
+}
+
+function studioAddBrand(blockId) {
+  const b = STUDIO.blocks.find(x => x.id === blockId);
+  if (!b) return;
+  const sel = document.getElementById('bs_' + blockId);
+  const val = sel.value;
+  if (!val) return;
+  b.settings.brands = b.settings.brands || [];
+  if (!b.settings.brands.includes(val)) b.settings.brands.push(val);
+  studioMarkDirty(blockId);
+  studioRenderBlocks();
+  studioPreviewRender();
+}
+
+function studioDelBrand(blockId, idx) {
+  const b = STUDIO.blocks.find(x => x.id === blockId);
+  if (!b) return;
+  b.settings.brands = (b.settings.brands || []).filter((_, i) => i !== idx);
+  studioMarkDirty(blockId);
+  studioRenderBlocks();
+  studioPreviewRender();
+}
+
+function studioAddManualBrand(blockId) {
+  const b = STUDIO.blocks.find(x => x.id === blockId);
+  if (!b) return;
+  const name = (document.getElementById('mbn_' + blockId)?.value || '').trim();
+  if (!name) { toast('اكتب اسم الماركة الأول', 'error'); return; }
+  const country = document.getElementById('mbc_' + blockId).value;
+  const slug = (document.getElementById('mbs_' + blockId)?.value || '').trim() || name;
+  const logo_url = (document.getElementById('mbl_' + blockId)?.value || '').trim();
+  b.settings.brands = b.settings.brands || [];
+  const entry = { name };
+  if (country) entry.country_code = country;
+  if (logo_url) entry.logo_url = logo_url;
+  entry.slug = slug;
+  b.settings.brands.push(entry);
+  studioMarkDirty(blockId);
+  studioRenderBlocks();
+  studioPreviewRender();
+  toast('تمت إضافة الماركة: ' + name);
+}
+
+async function studioPlanBrand(blockId, idx) {
+  const b = STUDIO.blocks.find(x => x.id === blockId);
+  if (!b) return;
+  const e = (b.settings.brands || [])[idx];
+  if (!e) return;
+  let name, slug, country;
+  if (e && typeof e === 'object') {
+    name = e.name || e.slug || ''; slug = e.slug || name; country = e.country_code || currentCountry;
+  } else {
+    const rec = STUDIO.brandsCache.find(x => x.id === e);
+    name = rec ? rec.name : e; slug = rec ? (rec.slug || rec.name) : e; country = rec ? (rec.country_code || currentCountry) : currentCountry;
+  }
+  if (!name) { toast('الماركة دي مالهاش اسم', 'error'); return; }
+  try {
+    const res = await supabaseFetch(`/rest/v1/smart_pages?select=id&slug=eq.${encodeURIComponent(slug)}&limit=1`);
+    let page = null;
+    if (res.ok) { const rows = await res.json(); page = (rows && rows[0]) || null; }
+    if (!page) {
+      const cr = await supabaseFetch('/rest/v1/smart_pages', {
+        method: 'POST',
+        body: JSON.stringify({ slug, title: name, page_type: 'brand', country_code: country, settings: {}, is_active: true })
+      });
+      if (!cr.ok) throw new Error('HTTP ' + cr.status + ' ' + (await cr.text()).slice(0, 120));
+      const rows = await cr.json();
+      page = Array.isArray(rows) ? rows[0] : rows;
+      toast('اتفتحت صفحة جديدة لـ' + name + ' — ارسمها من الأول 👇');
+    } else {
+      toast('اتفتح محرر صفحة ' + name + ' (موجودة قبل كده)');
+    }
+    await studioOpenPage(page.id);
+  } catch (err) { toast('خطأ: ' + err.message, 'error'); }
+}
+
+function studioOnInput(e) {
+  const inp = e.target;
+  const card = inp.closest('.st-block');
+  if (!card) return;
+  const b = STUDIO.blocks.find(x => x.id === card.dataset.id);
+  if (!b) return;
+  const k = inp.dataset.k;
+  if (!k) return;
+  const i = inp.dataset.i;
+  const arr = inp.dataset.arr || 'slides';
+  if (i != null) {
+    b.settings[arr] = b.settings[arr] || [];
+    b.settings[arr][i] = b.settings[arr][i] || {};
+    b.settings[arr][i][k] = inp.value;
+  } else {
+    b.settings[k] = inp.value;
+  }
+  studioMarkDirty(b.id);
+  studioPreviewRender();
+}
+
+async function studioFillSmart(blockId, s) {
+  const el = document.getElementById('spSmart_' + blockId);
+  if (!el) return;
+  let cards = [];
+  if (s.source === 'manual') {
+    cards = (s.items || []).filter(x => x && x.title);
+  } else {
+    try {
+      const r1 = await supabaseFetch(`/rest/v1/smart_category_showcase?select=*&is_active=eq.true&country_code=eq.${currentCountry}&order=sort_order.asc&limit=50`);
+      if (r1.ok) { const rows = await r1.json(); if (rows && rows.length) cards = rows; }
+      if (!cards.length) {
+        const r2 = await supabaseFetch('/rest/v1/smart_category_showcase?select=*&is_active=eq.true&country_code=eq.EG&order=sort_order.asc&limit=50');
+        if (r2.ok) { const rows = await r2.json(); if (rows && rows.length) cards = rows; }
+      }
+    } catch (e) {}
+  }
+  el.className = 'sp-smart-cats';
+  if (!cards.length) { el.innerHTML = '<div class="sp-empty">مافيش تصنيفات — أضف كروت يدوية أو حقن جدول الشريط الذكي</div>'; return; }
+  el.innerHTML = cards.map(c =>
+    `<a class="sp-smart-cat-card" href="${escapeHtml(c.link_url || '#')}" target="_blank" style="background:linear-gradient(135deg,${escapeHtml(c.gradient_from || '#1e2a3a')},${escapeHtml(c.gradient_to || '#33404f')})">
+      ${c.icon ? `<span class="material-icons-outlined sp-smart-cat-icon">${escapeHtml(c.icon)}</span>` : (c.image_url ? `<div class="sp-smart-cat-media"><img src="${escapeHtml(c.image_url)}" onerror="this.style.display='none'" /></div>` : '')}
+      <div class="sp-smart-cat-content"><h3>${escapeHtml(c.title)}</h3>${c.subtitle ? `<p>${escapeHtml(c.subtitle)}</p>` : ''}<span class="sp-smart-cat-btn">استكشف الآن <span class="material-icons-outlined" style="font-size:13px">arrow_back</span></span></div>
+    </a>`
+  ).join('');
+}
+
+async function studioFillShowcase(blockId, s) {
+  const sw = document.getElementById('shSwatches_' + blockId);
+  if (sw) sw.innerHTML = (s.swatches || []).map((x, i) => `<span class="sp-swatch" style="background:${escapeHtml(x.color || '#f43f5e')};z-index:${i + 1}"></span>`).join('');
+  const fill = async (elId, cfg) => {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    const products = await studioFetchProducts(cfg);
+    if (!products.length) { el.innerHTML = '<div class="sp-empty">مافيش منتجات — جرّب كلمات تانية</div>'; return; }
+    el.innerHTML = products.map(p => {
+      const op = Number(p.original_price) || 0; const pr = Number(p.price) || 0;
+      const off = op > pr && pr > 0 ? Math.round((1 - pr / op) * 100) : 0;
+      return `<a class="sp-card" href="product.html?id=${encodeURIComponent(p.id)}" target="_blank"><img src="${escapeHtml(p.image || '')}" onerror="this.style.display='none'"><div class="sp-card-body"><div class="sp-card-name">${escapeHtml(p.name)}</div><div class="sp-card-price">${off ? `<span class="sp-old-price">${op} ج.م</span> ` : ''}${pr} ج.م${off ? ` <span class="sp-sale-badge">-${off}%</span>` : ''}</div></div></a>`;
+    }).join('');
+  };
+  await fill('shMain_' + blockId, { mode: s.products_mode || 'manual', ids: s.product_ids || [], keywords: s.products_keywords || '', count: Number(s.products_count) || 4 });
+  await fill('shMini_' + blockId, { mode: s.mini_mode || 'keywords', ids: s.mini_ids || [], keywords: s.mini_keywords || '', count: Number(s.mini_count) || 3 });
+}
+
+// ---------- السحب والإفلات ----------
+function studioInitDnD() {
+  const col = document.getElementById('stBlocksCol');
+  col.addEventListener('input', studioOnInput);
+  col.addEventListener('dragstart', function (e) {
+    const card = e.target.closest('.st-block');
+    if (!card) return;
+    STUDIO.dragId = card.dataset.id;
+    card.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  });
+  col.addEventListener('dragend', function () {
+    STUDIO.dragId = null;
+    document.querySelectorAll('.st-block.dragging, .st-block.drop-target').forEach(c => c.classList.remove('dragging', 'drop-target'));
+  });
+  col.addEventListener('dragover', function (e) {
+    e.preventDefault();
+    const card = e.target.closest('.st-block');
+    if (!card || card.dataset.id === STUDIO.dragId) return;
+    document.querySelectorAll('.st-block.drop-target').forEach(c => c.classList.remove('drop-target'));
+    card.classList.add('drop-target');
+  });
+  col.addEventListener('drop', function (e) {
+    e.preventDefault();
+    const target = e.target.closest('.st-block');
+    if (!target || target.dataset.id === STUDIO.dragId || !STUDIO.dragId) return;
+    studioReorder(STUDIO.dragId, target.dataset.id);
+  });
+}
+
+function studioScSourceChange(blockId, v) {
+  const b = STUDIO.blocks.find(x => x.id === blockId);
+  if (!b) return;
+  b.settings.source = v;
+  const el = document.getElementById('scItems_' + blockId);
+  if (el) el.style.display = v === 'manual' ? '' : 'none';
+  studioMarkDirty(blockId);
+  studioPreviewRender();
+}
+
+function studioAddScCard(blockId) {
+  const b = STUDIO.blocks.find(x => x.id === blockId);
+  if (!b) return;
+  b.settings.items = b.settings.items || [];
+  b.settings.items.push({ title: '', subtitle: '', link_url: '#', icon: '', image_url: '', gradient_from: '#1e2a3a', gradient_to: '#33404f' });
+  studioMarkDirty(blockId);
+  studioRenderBlocks();
+  studioPreviewRender();
+}
+
+function studioDelScCard(blockId, i) {
+  const b = STUDIO.blocks.find(x => x.id === blockId);
+  if (!b) return;
+  b.settings.items.splice(i, 1);
+  studioMarkDirty(blockId);
+  studioRenderBlocks();
+  studioPreviewRender();
+}
+
+function studioShowMode(blockId, which, mode) {
+  const b = STUDIO.blocks.find(x => x.id === blockId);
+  if (!b) return;
+  const k = which === 'mini' ? 'mini_mode' : 'products_mode';
+  b.settings[k] = mode;
+  document.getElementById('kwp_' + which + '_' + blockId).style.display = mode === 'keywords' ? '' : 'none';
+  document.getElementById('idsp_' + which + '_' + blockId).style.display = mode === 'manual' ? '' : 'none';
+  studioMarkDirty(blockId);
+  studioPreviewRender();
+}
+
+function studioAddListItem(blockId, arrKey) {
+  const b = STUDIO.blocks.find(x => x.id === blockId);
+  if (!b) return;
+  b.settings[arrKey] = b.settings[arrKey] || [];
+  if (arrKey === 'title_segments') b.settings[arrKey].push({ text: '', color: '#ffffff' });
+  else if (arrKey === 'swatches') b.settings[arrKey].push({ color: '#f43f5e' });
+  else if (arrKey === 'buttons') b.settings[arrKey].push({ text: 'تسوق الآن', link: '#', color: '#6d28d9' });
+  studioMarkDirty(blockId);
+  studioRenderBlocks();
+  studioPreviewRender();
+}
+
+function studioDelListItem(blockId, arrKey, i) {
+  const b = STUDIO.blocks.find(x => x.id === blockId);
+  if (!b) return;
+  b.settings[arrKey].splice(i, 1);
+  studioMarkDirty(blockId);
+  studioRenderBlocks();
+  studioPreviewRender();
+}
+
+function studioAddListProduct(blockId, arrKey, inputId) {
+  const b = STUDIO.blocks.find(x => x.id === blockId);
+  if (!b) return;
+  const inp = document.getElementById('ps_' + inputId + '_' + blockId);
+  const val = (inp && inp.value.trim()) || '';
+  if (!val) return;
+  b.settings[arrKey] = b.settings[arrKey] || [];
+  if (!b.settings[arrKey].includes(val)) b.settings[arrKey].push(val);
+  if (inp) inp.value = '';
+  studioMarkDirty(blockId);
+  studioRenderBlocks();
+  studioPreviewRender();
+}
+
+function studioDelListProduct(blockId, arrKey, idx) {
+  const b = STUDIO.blocks.find(x => x.id === blockId);
+  if (!b) return;
+  b.settings[arrKey] = (b.settings[arrKey] || []).filter((_, i) => i !== idx);
+  studioMarkDirty(blockId);
+  studioRenderBlocks();
+  studioPreviewRender();
+}
+
+// ---------- المعاينة الحية ----------
+function studioPreviewRender() {
+  clearTimeout(STUDIO.previewTimer);
+  STUDIO.previewTimer = setTimeout(function () { studioPreviewBuild().catch(() => {}); }, 350);
+}
+
+async function studioPreviewBuild() {
+  const el = document.getElementById('spPreview');
+  const page = STUDIO.page;
+  if (!page) return;
+  const colors = (page.settings && page.settings.colors) || { bg: '#ffffff', primary: '#6d28d9', text: '#1e293b' };
+  const blocks = STUDIO.blocks.filter(b => b.is_active !== false);
+  let html = `<div class="sp-page" style="background:${colors.bg || '#ffffff'};color:${colors.text || '#1e293b'};min-height:400px">`;
+  if (!blocks.length) html += '<div class="sp-empty">المعاينة فاضية — أضف مكعبات من الشمال 👈</div>';
+  for (const b of blocks) {
+    const s = b.settings || {};
+    if (b.block_type === 'hero_slider') {
+      const slides = (s.slides || []).filter(x => x.image_url);
+      const first = slides[0] || {};
+      html += `<div class="sp-hero" style="background-image:url('${escapeHtml(first.image_url)}')"><div class="sp-hero-overlay"></div><div class="sp-hero-content"><h2>${escapeHtml(first.title)}</h2><p>${escapeHtml(first.subtitle)}</p>${String(first.show_button) === 'hide' ? '' : `<a class="sp-btn" style="background:${colors.primary || '#6d28d9'}" href="${escapeHtml(first.button_link || '#')}" target="_blank">${escapeHtml(first.button_text) || 'تسوق الآن'}</a>`}</div></div>`;
+    } else if (b.block_type === 'title_text') {
+      html += `<div class="sp-title-block"><h2>${escapeHtml(s.title)}</h2><p>${escapeHtml(s.subtitle)}</p></div>`;
+    } else if (b.block_type === 'products') {
+      html += `<div class="sp-products-title"><h3>${escapeHtml(s.title) || 'منتجات'}</h3>${s.subtitle ? '<p>' + escapeHtml(s.subtitle) + '</p>' : ''}</div><div class="sp-grid" id="spGrid_${b.id}"><div class="sp-empty">جارٍ جلب المنتجات...</div></div>`;
+    } else if (b.block_type === 'ad_banner') {
+      html += `<div class="sp-ad" style="background-image:url('${escapeHtml(s.image_url)}')"><div class="sp-ad-overlay"></div><div class="sp-ad-content"><h3>${escapeHtml(s.title)}</h3><p>${escapeHtml(s.subtitle)}</p><a class="sp-btn" style="background:${colors.primary || '#6d28d9'}" href="${escapeHtml(s.button_link || '#')}" target="_blank">${escapeHtml(s.button_text) || 'تسوق الآن'}</a></div></div>`;
+    } else if (b.block_type === 'brands_row') {
+      html += `<div class="sp-products-title"><h3>${escapeHtml(s.title) || 'ماركاتنا'}</h3></div><div class="sp-brands" id="spBrands_${b.id}"><div class="sp-empty">جارٍ جلب الماركات...</div></div>`;
+    } else if (b.block_type === 'smart_categories') {
+      html += `${s.title ? `<div class="sp-products-title"><h3>${escapeHtml(s.title)}</h3></div>` : ''}<div class="sp-smart-cats" id="spSmart_${b.id}"><div class="sp-empty">جارٍ جلب الشريط الذكي...</div></div>`;
+    } else if (b.block_type === 'showcase') {
+      const segs = (s.title_segments || []).filter(x => x && x.text);
+      html += `<div class="sp-showcase" style="background-image:url('${escapeHtml(s.image_url || '')}')">
+        <div class="sp-showcase-overlay" style="background:linear-gradient(180deg,${escapeHtml(s.gradient_from || '#1e2a3a')},${escapeHtml(s.gradient_to || '#33404f')})"></div>
+        <div class="sp-showcase-content">
+          <div class="sp-showcase-title" id="shTitle_${b.id}">${segs.map(x => `<span style="color:${escapeHtml(x.color || '#ffffff')}">${escapeHtml(x.text)}</span>`).join(' ')}</div>
+          ${s.subtitle ? `<p class="sp-showcase-sub">${escapeHtml(s.subtitle)}</p>` : ''}
+          <div class="sp-showcase-swatches" id="shSwatches_${b.id}"></div>
+          <div class="sp-showcase-btns" id="shBtns_${b.id}">${(s.buttons || []).filter(x => x.text).map(bt => `<a class="sp-btn" style="background:${escapeHtml(bt.color || colors.primary || '#6d28d9')}" href="${escapeHtml(bt.link || '#')}" target="_blank">${escapeHtml(bt.text)}</a>`).join('')}</div>
+          <div class="sp-showcase-products" id="shMain_${b.id}"><div class="sp-empty">جارٍ الجلب...</div></div>
+          <div class="sp-showcase-products" id="shMini_${b.id}"><div class="sp-empty">جارٍ الجلب...</div></div>
+        </div></div>`;
+    }
+  }
+  html += '</div>';
+  el.innerHTML = html;
+  for (const b of blocks) {
+    const s = b.settings || {};
+    if (b.block_type === 'products') studioFillProducts(b.id, s).catch(() => {});
+    if (b.block_type === 'brands_row') studioFillBrands(b.id, s).catch(() => {});
+    if (b.block_type === 'smart_categories') studioFillSmart(b.id, s).catch(() => {});
+    if (b.block_type === 'showcase') studioFillShowcase(b.id, s).catch(() => {});
+  }
+}
+
+async function studioFetchProducts(s) {
+  const count = Number(s.count) || 8;
+  try {
+    if (s.mode === 'manual') {
+      const ids = (s.ids || []).slice(0, 40);
+      if (!ids.length) return [];
+      const q = 'id=in.(' + ids.map(encodeURIComponent).join(',') + ')';
+      const res = await supabaseFetch(`/rest/v1/taager_products?select=id,name,price,original_price,image&${q}&limit=${ids.length}`);
+      if (!res.ok) return [];
+      return (await res.json()) || [];
+    }
+    if (s.mode === 'keywords') {
+      const kws = String(s.keywords || '').split(',').map(k => k.trim()).filter(Boolean).slice(0, 6);
+      const out = []; const seen = {};
+      for (const kw of kws) {
+        const res = await supabaseFetch(`/rest/v1/taager_products?select=id,name,price,original_price,image&name=ilike.*${encodeURIComponent(kw)}*&limit=${count}`);
+        if (!res.ok) continue;
+        const rows = (await res.json()) || [];
+        for (const r of rows) { if (!seen[r.id]) { seen[r.id] = 1; out.push(r); } }
+        if (out.length >= count) break;
+      }
+      return out.slice(0, count);
+    }
+    const res = await supabaseFetch(`/rest/v1/taager_products?select=id,name,price,original_price,image&limit=${Math.min(count * 2, 100)}`);
+    if (!res.ok) return [];
+    return ((await res.json()) || []).slice(0, count);
+  } catch (e) { return []; }
+}
+
+async function studioFillProducts(blockId, s) {
+  const el = document.getElementById('spGrid_' + blockId);
+  if (!el) return;
+  const products = await studioFetchProducts(s);
+  el.className = s.layout === 'scroll' ? 'sp-scroll-row' : 'sp-grid';
+  if (!products.length) {
+    el.innerHTML = '<div class="sp-empty">مافيش منتجات مطابقة — جرّب كلمات تانية أو اختار منتجات يدوياً</div>';
+    return;
+  }
+  el.innerHTML = products.map(p => {
+    const op = Number(p.original_price) || 0;
+    const pr = Number(p.price) || 0;
+    const off = op > pr && pr > 0 ? Math.round((1 - pr / op) * 100) : 0;
+    return `<a class="sp-card" href="product.html?id=${encodeURIComponent(p.id)}" target="_blank"><img src="${escapeHtml(p.image || '')}" onerror="this.style.display='none'"><div class="sp-card-body"><div class="sp-card-name">${escapeHtml(p.name)}</div><div class="sp-card-price">${off ? `<span class="sp-old-price">${op} ج.م</span> ` : ''}${pr} ج.م${off ? ` <span class="sp-sale-badge">-${off}%</span>` : ''}</div></div></a>`;
+  }).join('');
+}
+
+async function studioFillBrands(blockId, s) {
+  const el = document.getElementById('spBrands_' + blockId);
+  if (!el) return;
+  const entries = s.brands || [];
+  if (!entries.length) { el.innerHTML = '<div class="sp-empty">أضف ماركات من الشمال 👈</div>'; return; }
+  const ids = entries.filter(x => typeof x === 'string');
+  const manuals = entries.filter(x => x && typeof x === 'object');
+  const cacheMap = {};
+  STUDIO.brandsCache.forEach(x => { cacheMap[x.id] = x; });
+  const found = ids.map(i => cacheMap[i]).filter(Boolean);
+  const colors = (STUDIO.page.settings && STUDIO.page.settings.colors) || {};
+  const chip = (name, slug, logo) => `<a class="sp-brand-chip" style="background:${colors.primary || '#6d28d9'}" href="brand-landing.html?slug=${encodeURIComponent(slug || name)}" target="_blank">${logo ? `<img class="sp-brand-logo" src="${escapeHtml(logo)}" onerror="this.style.display='none'" />` : ''}${escapeHtml(name)}</a>`;
+  const rows = found.map(x => chip(x.name, x.slug || x.name, x.logo_url || x.logo || '')).concat(manuals.map(m => chip(m.name || m.slug || '', m.slug || m.name, m.logo_url || '')));
+  el.className = 'sp-brands-row';
+  el.innerHTML = rows.join('') || '<div class="sp-empty">ماركات مش موجودة في جدول الماركات</div>';
+}
+
+studioInitDnD();
 </script>
 </body>
 </html>
