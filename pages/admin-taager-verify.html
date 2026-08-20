@@ -127,6 +127,8 @@
           <button class="tv-btn secondary" id="fetch-qd" style="font-size:.78rem;padding:5px 12px"><i class="fa-solid fa-list"></i> تفاصيل سريعة</button>
           <button class="tv-btn secondary" id="fetch-ci" style="font-size:.78rem;padding:5px 12px"><i class="fa-solid fa-lightbulb"></i> أفكار محتوى</button>
           <button class="tv-btn secondary" id="fetch-htu" style="font-size:.78rem;padding:5px 12px"><i class="fa-solid fa-book-open"></i> طريقة استخدام</button>
+          <button class="tv-btn secondary" id="fetch-stock" style="font-size:.78rem;padding:5px 12px" title="تحديث الكميات من تاجر — النطاقات تتحول لأرقام، و not_available تتحول لنفد المخزون"><i class="fa-solid fa-boxes-stacked"></i> تحديث الكميات</button>
+          <button class="tv-btn secondary" id="fetch-new" style="font-size:.78rem;padding:5px 12px" title="جلب المنتجات الجديدة من تاجر وإضافتها للموجودين دون حذف"><i class="fa-solid fa-circle-plus"></i> جلب الجديد</button>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;padding:8px 14px;background:var(--card-bg,#fff);border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,0.04);align-items:center">
           <span style="font-size:.78rem;font-weight:700;color:var(--muted,#667085)">جلب الناقص:</span>
@@ -820,7 +822,312 @@
         }
         btn.disabled=false;btn.innerHTML=origHtml;
       }
+
+      // ===== Stock conversion: Taager bucket/range → number =====
+      // not_available → 0 (نفد المخزون) | less_than_10 → 9 | from_5_to_10 → 7 (منتصف) | above_30 → 30
+      function parseTaagerStock(ap) {
+        var raw = ap && (ap.stockAvailability || ap.availability || ap.stockInfo || null);
+        var bucket = '';
+        if (raw && typeof raw === 'object') bucket = raw.stockBucket || raw.detailedStockRange || raw.range || raw.bucket || '';
+        if (!bucket && typeof ap.total_stock === 'number') bucket = String(ap.total_stock);
+        if (!bucket && typeof ap.stock === 'number') bucket = String(ap.stock);
+        if (!bucket && typeof ap.quantity === 'number') bucket = String(ap.quantity);
+        if (typeof bucket !== 'string' || !bucket.trim()) return null;
+        bucket = bucket.trim();
+        if (bucket === 'not_available' || bucket === 'out_of_stock' || bucket === 'sold_out') return { stock: 0, status: 'out_of_stock' };
+        var m = bucket.match(/^from_(\d+)_to_(\d+)$/);
+        if (m) return { stock: Math.max(1, Math.round((parseInt(m[1],10) + parseInt(m[2],10)) / 2)), status: 'in_stock' };
+        var m2 = bucket.match(/^less_than_(\d+)$/);
+        if (m2) return { stock: Math.max(1, parseInt(m2[1],10) - 1), status: 'in_stock' };
+        var m3 = bucket.match(/^above_(\d+)$/);
+        if (m3) return { stock: parseInt(m3[1],10) || 1, status: 'in_stock' };
+        var m4 = bucket.match(/^below_(\d+)$/);
+        if (m4) return { stock: Math.max(1, Math.round(parseInt(m4[1],10) / 2)), status: 'in_stock' };
+        var m5 = bucket.match(/^(\d+)$/);
+        if (m5) { var n = parseInt(m5[1],10); return { stock: n, status: n > 0 ? 'in_stock' : 'out_of_stock' }; }
+        return null;
+      }
+
+      // Fetch all Taager products: Edge function first, direct API fallback
+      async function fetchAllApiProductsWithFallback() {
+        var apiProducts = [];
+        try {
+          setStatus('محاولة Edge Function (مصر+سعودية)...');
+          var edgeResult = await fetchAllTaagerProductsViaEdge('');
+          if (edgeResult && Array.isArray(edgeResult) && edgeResult.length) {
+            apiProducts = edgeResult;
+            setStatus('Edge Function: تم جلب ' + apiProducts.length + ' منتج');
+          } else {
+            setStatus('Edge Function: لم يرجع منتجات','error');
+          }
+        } catch(e) {
+          setStatus('Edge Function: ' + (e.message || e).substring(0,80),'error');
+        }
+        if (!apiProducts.length) {
+          setStatus('API المباشر...');
+          for (var ci = 0; ci < COUNTRIES.length; ci++) {
+            var cc = COUNTRIES[ci];
+            setStatus('API المباشر: جلب من ' + cc + '...');
+            var pg = 1;
+            while (true) {
+              try {
+                var json = await fetchTaagerAPIDirect(pg, cc);
+              } catch(apiErr) {
+                setStatus('API المباشر: ' + cc + ' صفحة ' + pg + ' فشلت: ' + (apiErr.message || apiErr).substring(0,60),'error');
+                break;
+              }
+              var items = Array.isArray(json) ? json : (json.data || json.products || json.items || json.result || []);
+              if (!items.length) { setStatus('API المباشر: ' + cc + ' الصفحة ' + pg + ' فاضية','error'); break; }
+              for (var t = 0; t < items.length; t++) items[t]._taager_country = cc;
+              apiProducts = apiProducts.concat(items);
+              setStatus('API المباشر: تم جلب ' + apiProducts.length + ' منتج حتى الآن');
+              if (items.length < 100) break;
+              pg++;
+            }
+          }
+          if (apiProducts.length) setStatus('API المباشر: تم جلب ' + apiProducts.length + ' منتج');
+          else setStatus('API المباشر: لم يتم جلب أي منتجات','error');
+        }
+        return apiProducts;
+      }
+
+      function buildApiLookup(apiProducts) {
+        var apiLookup = {};
+        apiProducts.forEach(function(ap) {
+          var ids = [ap.id, ap.productId, ap.product_id, ap.variantId, ap.variant_id, ap.sku, ap.code, ap.taager_product_id, ap._id, ap.itemId, ap.externalId];
+          ids.forEach(function(id) {
+            if (id != null && id !== undefined) apiLookup[String(id)] = ap;
+          });
+        });
+        return apiLookup;
+      }
+
+      function findApiMatch(p, apiLookup) {
+        var matchId = String(p.taager_product_id || p.id || '');
+        var apiItem = apiLookup[matchId];
+        if (!apiItem) {
+          var altIds = [p.id, p.product_id, p.productId, p.sku].filter(Boolean);
+          for (var a = 0; a < altIds.length; a++) {
+            if (apiLookup[String(altIds[a])]) { apiItem = apiLookup[String(altIds[a])]; break; }
+          }
+        }
+        return apiItem;
+      }
+
+      // ===== زر 1: تحديث الكميات — يحدّث stock + stock_status فقط لكل المنتجات =====
+      async function runStockUpdate() {
+        var btn = document.getElementById('fetch-stock');
+        var origHtml = btn.innerHTML;
+        btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري...';
+        var wrap = document.getElementById('tv-progress');
+        var bar = document.getElementById('tv-progress-bar');
+        wrap.style.display = 'block'; bar.style.width = '0%';
+        try {
+          var creds = await getTaagerCreds();
+          if (!creds.apiKey) throw new Error('Taager API key not found');
+          if (!allRows.length) await loadProducts();
+          if (!allRows.length) throw new Error('لا توجد منتجات في قاعدة البيانات');
+          setStatus('جاري جلب المنتجات من تاجر...');
+          var apiProducts = await fetchAllApiProductsWithFallback();
+          if (!apiProducts.length) throw new Error('لم يتم جلب أي منتجات من تاجر');
+          setStatus('بناء جدول المطابقة...');
+          var apiLookup = buildApiLookup(apiProducts);
+          var done = 0, skipped = 0, errors = 0, outOfStock = 0;
+          setStatus('بدأ تحديث الكميات لـ ' + allRows.length + ' منتج...');
+          for (var i = 0; i < allRows.length; i++) {
+            var p = allRows[i];
+            var apiItem = findApiMatch(p, apiLookup);
+            if (!apiItem) { skipped++; showProgress(Math.round((i+1) / allRows.length * 100), i+1, allRows.length); continue; }
+            try {
+              var parsed = parseTaagerStock(apiItem);
+              if (!parsed) { skipped++; showProgress(Math.round((i+1) / allRows.length * 100), i+1, allRows.length); continue; }
+              var upd = { stock: parsed.stock, stock_status: parsed.status, updated_at: new Date().toISOString() };
+              if (parsed.status === 'out_of_stock') outOfStock++;
+              var { error } = await _sb.from('taager_products').update(upd).eq('id', p.id);
+              if (error) { errors++; showProgress(Math.round((i+1) / allRows.length * 100), i+1, allRows.length); continue; }
+              done++;
+            } catch(e) { errors++; }
+            showProgress(Math.round((i+1) / allRows.length * 100), i+1, allRows.length);
+            if (i < allRows.length - 1) await new Promise(function(r){setTimeout(r,50);});
+          }
+          showProgress(0);
+          wrap.style.display = 'none';
+          var msg = 'تم تحديث الكميات لـ ' + done + ' منتج';
+          if (outOfStock) msg += ' (منهم ' + outOfStock + ' نفد المخزون)';
+          if (skipped) msg += ' (تخطي ' + skipped + ' بدون تطابق/كمية)';
+          if (errors) msg += ' (' + errors + ' خطأ)';
+          setStatus(msg, errors > 0);
+          notify(msg, errors ? 'error' : 'success');
+          await loadProducts();
+        } catch(e) {
+          wrap.style.display = 'none';
+          setStatus('خطأ: ' + (e.message || e).substring(0,100), true);
+          notify('خطأ: ' + (e.message || e), 'error');
+        }
+        btn.disabled = false; btn.innerHTML = origHtml;
+      }
+
+      // ===== زر 2: جلب المنتجات الجديدة — يضيف الجديد فقط دون حذف أو تعديل الموجود =====
+      async function runFetchNew() {
+        var btn = document.getElementById('fetch-new');
+        var origHtml = btn.innerHTML;
+        btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري...';
+        var wrap = document.getElementById('tv-progress');
+        var bar = document.getElementById('tv-progress-bar');
+        wrap.style.display = 'block'; bar.style.width = '0%';
+        try {
+          var creds = await getTaagerCreds();
+          if (!creds.apiKey) throw new Error('Taager API key not found');
+          setStatus('جاري تحميل المنتجات الموجودة...');
+          var existingIds = {};
+          var tpOff = 0, tpPg = 1000;
+          while (true) {
+            var { data, error } = await _sb.from('taager_products').select('taager_product_id').range(tpOff, tpOff + tpPg - 1);
+            if (error) throw error;
+            if (!data || !data.length) break;
+            data.forEach(function(r) { if (r.taager_product_id) existingIds[String(r.taager_product_id)] = 1; });
+            tpOff += tpPg;
+            if (data.length < tpPg) break;
+          }
+          setStatus('جاري جلب جميع المنتجات من تاجر...');
+          var allApi = await fetchAllApiProductsWithFallback();
+          if (!allApi.length) throw new Error('لم يتم جلب أي منتجات من تاجر');
+          setStatus('جاري جلب التفاصيل الكاملة لكل منتج...');
+          var prodMap = {};
+          for (var j = 0; j < allApi.length; j++) {
+            var pid0 = allApi[j].productId;
+            if (!prodMap[pid0]) prodMap[pid0] = [];
+            prodMap[pid0].push(allApi[j]);
+          }
+          var prodIds = Object.keys(prodMap);
+          var detailCache = {};
+          var BATCH_SIZE = 10;
+          for (var d = 0; d < prodIds.length; d += BATCH_SIZE) {
+            var batchIds = prodIds.slice(d, d + BATCH_SIZE);
+            var fetches = batchIds.map(function(pid) {
+              return (async function() {
+                try {
+                  var detailUrl = window.TAAGER_MERCHANT_API + '/products/' + pid;
+                  var detRes = await fetchWithTimeout(detailUrl, { headers: { 'Authorization': 'Bearer ' + creds.apiKey, 'taagerId': creds.taagerId, 'ui-session-key': creds.sessionKey } }, 30000);
+                  if (detRes.ok) detailCache[pid] = await detRes.json();
+                } catch(e) {}
+              })();
+            });
+            await Promise.all(fetches);
+            var pctDetail = Math.round(Math.min(d + BATCH_SIZE, prodIds.length) / prodIds.length * 100);
+            bar.style.width = Math.min(40, pctDetail / 2) + '%';
+          }
+          setStatus('جاري بناء المنتجات الجديدة...');
+          var rowsToInsert = [];
+          var already = 0;
+          for (var i = 0; i < allApi.length; i++) {
+            var ap = allApi[i];
+            var tpid = String(ap.variantId || ap.productId || ap.id || '');
+            if (existingIds[tpid]) { already++; continue; }
+            var detail = detailCache[ap.productId];
+            var detailVariant = null;
+            if (detail && detail.variants) {
+              detailVariant = detail.variants.find(function(v){return v.sku === ap.sku;}) || detail.variants[0] || null;
+            }
+            var rawImgs = [];
+            if (detailVariant && detailVariant.images && detailVariant.images.length) rawImgs = detailVariant.images.filter(Boolean);
+            else rawImgs = extractImages(ap);
+            var rawVids = [];
+            if (detailVariant && detailVariant.videos && detailVariant.videos.length) rawVids = detailVariant.videos.filter(Boolean);
+            var detDesc = '', detHow = '', detSpecs = '';
+            if (detailVariant) {
+              if (detailVariant.description && detailVariant.description.ar && detailVariant.description.ar.length > 2) detDesc = detailVariant.description.ar;
+              if (detailVariant.howToUse && detailVariant.howToUse.ar && detailVariant.howToUse.ar.length > 2) detHow = detailVariant.howToUse.ar;
+              if (detailVariant.specifications && detailVariant.specifications.ar && detailVariant.specifications.ar.length > 2) detSpecs = detailVariant.specifications.ar;
+            }
+            var st = parseTaagerStock(ap);
+            var row = {
+              id: tpid ? 'taager_' + tpid : 'taager_' + Date.now() + '_' + i,
+              taager_product_id: tpid,
+              name: ap.name || '',
+              description: detDesc || extractQuickDetails(ap) || '',
+              price: ap.financials ? (ap.financials.price || 0) : 0,
+              image: (rawImgs[0] || '') + '',
+              images: rawImgs,
+              image1: rawImgs[0] || '',
+              image2: rawImgs[1] || '',
+              image3: rawImgs[2] || '',
+              image4: rawImgs[3] || '',
+              image5: rawImgs[4] || '',
+              image6: rawImgs[5] || '',
+              image7: rawImgs[6] || '',
+              image8: rawImgs[7] || '',
+              videos: rawVids,
+              available_countries: [ap._taager_country || 'EG'],
+              stock: st ? st.stock : 999,
+              stock_status: st ? st.status : 'in_stock',
+              category: ap.type || 'product',
+              seller: 'تاجر',
+              source: 'taager',
+              is_active: true,
+              raw_data: ap,
+              quick_details: detDesc || extractQuickDetails(ap),
+              content_ideas: detSpecs || extractContentIdeas(ap),
+              how_to_use: detHow || extractHowToUse(ap),
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              last_synced_at: new Date().toISOString()
+            };
+            rowsToInsert.push(row);
+            var pct2 = Math.round((i+1) / allApi.length * 100);
+            if (i % 50 === 0) bar.style.width = Math.min(90, 40 + pct2 / 2) + '%';
+          }
+          if (!rowsToInsert.length) {
+            showProgress(0);
+            wrap.style.display = 'none';
+            var msg0 = 'لا توجد منتجات جديدة — كل المنتجات موجودة بالفعل (' + already + ')';
+            setStatus(msg0);
+            notify(msg0, 'info');
+            btn.disabled = false; btn.innerHTML = origHtml;
+            return;
+          }
+          setStatus('جاري إضافة ' + rowsToInsert.length + ' منتج جديد...');
+          var inserted = 0, errors = 0;
+          try {
+            var testRow = rowsToInsert[0];
+            var { error: testErr } = await _sb.from('taager_products').insert(testRow);
+            if (testErr) {
+              setStatus('خطأ: ' + JSON.stringify(testErr).substring(0, 300), true);
+              throw testErr;
+            }
+            inserted++;
+          } catch(e) {
+            wrap.style.display = 'none';
+            throw e;
+          }
+          for (var b = 1; b < rowsToInsert.length; b += 100) {
+            var batch = rowsToInsert.slice(b, b + 100);
+            try {
+              var { error: batchErr } = await _sb.from('taager_products').insert(batch);
+              if (batchErr) throw batchErr;
+              inserted += batch.length;
+            } catch(e) { errors += batch.length; }
+            var pct3 = Math.round(Math.min(b + 100, rowsToInsert.length) / rowsToInsert.length * 100);
+            bar.style.width = Math.min(100, 90 + pct3 / 10) + '%';
+          }
+          showProgress(0);
+          wrap.style.display = 'none';
+          var msg = 'تمت إضافة ' + inserted + ' منتج جديد';
+          if (already) msg += ' (' + already + ' موجود اتخطوا)';
+          if (errors) msg += ' (' + errors + ' خطأ)';
+          setStatus(msg, errors > 0);
+          notify(msg, errors ? 'error' : 'success');
+          await loadProducts();
+        } catch(e) {
+          wrap.style.display = 'none';
+          setStatus('خطأ: ' + (e.message || e).substring(0,100), true);
+          notify('خطأ: ' + (e.message || e), 'error');
+        }
+        btn.disabled = false; btn.innerHTML = origHtml;
+      }
       document.getElementById('fetch-all').addEventListener('click',function(){runTaagerFetch('all','all')});
+      document.getElementById('fetch-stock').addEventListener('click',runStockUpdate);
+      document.getElementById('fetch-new').addEventListener('click',runFetchNew);
       document.getElementById('fetch-images').addEventListener('click',function(){runTaagerFetch('images','all')});
       document.getElementById('fetch-qd').addEventListener('click',function(){runTaagerFetch('quick_details','all')});
       document.getElementById('fetch-ci').addEventListener('click',function(){runTaagerFetch('content_ideas','all')});
