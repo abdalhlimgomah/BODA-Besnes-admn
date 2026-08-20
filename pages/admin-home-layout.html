@@ -506,9 +506,22 @@
       <div class="section-block">
         <div class="section-block-header">
           <h2>📢 إعلانات مدفوعة <span class="badge-country" id="adBadge">EG</span></h2>
-          <button class="btn btn-primary btn-sm" onclick="openAdBannerModal()"><i class="fa-solid fa-plus"></i> إضافة إعلان</button>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <div class="device-seg" id="adDevFilter">
+              <button data-dev="all" class="active" onclick="setAdDevFilter('all')">الكل</button>
+              <button data-dev="mobile" onclick="setAdDevFilter('mobile')">📱 موبايل</button>
+              <button data-dev="desktop" onclick="setAdDevFilter('desktop')">💻 ديسكتوب</button>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="openAdBannerModal()"><i class="fa-solid fa-plus"></i> إضافة إعلان</button>
+          </div>
         </div>
         <div class="section-block-body">
+          <div class="dev-warn" id="adDevWarn" style="display:none;">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>تنبيه: خيار الديسكتوب غير مفعّل في قاعدة البيانات حتى الآن. نفّذ ملف
+            <strong>sql/012_add_device_column_ads.sql</strong> في محرر SQL الخاص بـ Supabase ثم حدّث الصفحة (F5) —
+            أي إعلان ديسكتوب يُحفظ الآن سيظهر في قائمة الموبايل.</span>
+          </div>
           <div class="items-grid" id="adBannerList"></div>
         </div>
       </div>
@@ -869,17 +882,24 @@
           <label>أو رابط الصورة</label>
           <input id="adUrlInput" type="url" placeholder="https://..." />
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>الرابط</label>
-            <input id="adLinkInput" type="text" placeholder="category.html?cat=..." />
+<div class="form-row">
+            <div class="form-group">
+              <label>الرابط</label>
+              <input id="adLinkInput" type="text" placeholder="category.html?cat=..." />
+            </div>
+            <div class="form-group">
+              <label>نص الوسم</label>
+              <input id="adBadgeInput" type="text" value="مدفوع" />
+            </div>
           </div>
-          <div class="form-group">
-            <label>نص الوسم</label>
-            <input id="adBadgeInput" type="text" value="مدفوع" />
+          <div class="form-group" style="margin-top:4px;">
+            <label>الجهاز الذي يظهر عليه الإعلان</label>
+            <div class="device-seg" id="adModalDeviceSeg" style="width:100%;justify-content:center;padding:5px;">
+              <button type="button" data-dev="mobile" class="active" onclick="setAdDevice('mobile')">📱 موبايل</button>
+              <button type="button" data-dev="desktop" onclick="setAdDevice('desktop')">💻 ديسكتوب</button>
+            </div>
           </div>
         </div>
-      </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline" onclick="closeModal('adBannerModal')">إلغاء</button>
         <button type="submit" class="btn btn-primary" id="adSubmitBtn"><i class="fa-solid fa-floppy-disk"></i> حفظ الإعلان</button>
@@ -1120,6 +1140,8 @@ function previewBannerUrl(url) {
 var _heroDev = 'all';      // 'all' | 'mobile' | 'desktop'
 var _slideDevice = 'mobile';
 var _bannerDevice = 'mobile';
+var _adDev = 'all';        // 'all' | 'mobile' | 'desktop'
+var _adDevice = 'mobile';
 
 function syncSeg(segId, dev) {
   var seg = document.getElementById(segId);
@@ -1150,6 +1172,17 @@ function setBannerDevice(d) {
   if (t && document.getElementById('bannerModal') && document.getElementById('bannerModal').classList.contains('open')) {
     t.textContent = d === 'desktop' ? 'إضافة/تعديل بانر الديسكتوب' : 'إضافة/تعديل بانر الموبايل';
   }
+}
+
+function setAdDevFilter(d) {
+  _adDev = d;
+  syncSeg('adDevFilter', d);
+  loadAdBanners();
+}
+
+function setAdDevice(d) {
+  _adDevice = d;
+  syncSeg('adModalDeviceSeg', d);
 }
 
 async function ensureDeviceCol(table) {
@@ -1856,6 +1889,9 @@ async function loadAdBanners() {
   if (!client) return;
   var sid = await getSectionId('ad_banners');
   if (!sid) return;
+  var devOk = await ensureDeviceCol('home_ad_banners');
+  var warnEl = document.getElementById('adDevWarn');
+  if (warnEl) warnEl.style.display = devOk ? 'none' : 'flex';
   var { data } = await client.from('home_ad_banners').select('*').eq('section_id', sid).order('sort_order');
   _adBannersData = data || [];
   var list = document.getElementById('adBannerList');
@@ -1863,11 +1899,17 @@ async function loadAdBanners() {
     list.innerHTML = '<div class="empty-state"><i class="fa-solid fa-bullhorn"></i> لا توجد إعلانات</div>';
     return;
   }
-  list.innerHTML = data.map(function(b, i) {
+  var rows = (_adDev === 'all') ? data : data.filter(function(b) { return (b.device || 'mobile') === _adDev; });
+  if (!rows.length) {
+    list.innerHTML = '<div class="empty-state"><i class="fa-solid fa-bullhorn"></i> لا توجد إعلانات لهذا الجهاز · أضف إعلاناً الآن</div>';
+    return;
+  }
+  list.innerHTML = rows.map(function(b, i) {
+    var dev = b.device || 'mobile';
     return '<div class="item-card" data-id="' + b.id + '">' +
       '<span class="order-num">' + (i+1) + '</span>' +
       '<div class="item-img-wrap"><img src="' + b.image_url + '" onerror="this.src=\'../assets/images/unnamed.png\'" /></div>' +
-      '<div class="item-info"><div class="item-title">إعلان ' + (i+1) + ' <span class="badge-type badge-icon" style="background:#fef3c7;color:#92400e;font-size:0.65rem;">' + (b.badge_text || 'مدفوع') + '</span></div>' +
+      '<div class="item-info"><div class="item-title">إعلان ' + (i+1) + ' <span class="device-badge device-' + dev + '">' + (dev === 'desktop' ? '💻 ديسكتوب' : '📱 موبايل') + '</span> <span class="badge-type badge-icon" style="background:#fef3c7;color:#92400e;font-size:0.65rem;">' + (b.badge_text || 'مدفوع') + '</span></div>' +
       '<div class="item-link"><i class="fa-solid fa-link"></i> ' + (b.link_url || '#') + '</div></div>' +
       '<div class="item-actions">' +
       '<button class="btn btn-outline btn-sm btn-icon" onclick="openAdBannerModal(\'' + b.id + '\')" title="تعديل"><i class="fa-solid fa-pen"></i></button>' +
@@ -1886,6 +1928,8 @@ function openAdBannerModal(id) {
   document.getElementById('adUrlInput').value = '';
   document.getElementById('adLinkInput').value = '';
   document.getElementById('adBadgeInput').value = 'مدفوع';
+  _adDevice = 'mobile';
+  syncSeg('adModalDeviceSeg', _adDevice);
   resetSimpleUpload('ad');
   document.getElementById('adSubmitBtn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> حفظ الإعلان';
   if (id) {
@@ -1899,6 +1943,8 @@ function openAdBannerModal(id) {
       document.getElementById('adUrlInput').value = b.image_url || '';
       document.getElementById('adLinkInput').value = b.link_url || '';
       document.getElementById('adBadgeInput').value = b.badge_text || 'مدفوع';
+      _adDevice = b.device || 'mobile';
+      syncSeg('adModalDeviceSeg', _adDevice);
       document.getElementById('adSubmitBtn').innerHTML = '<i class="fa-solid fa-check"></i> حفظ التعديل';
       if (b.image_url) {
         document.getElementById('adPreviewImg').src = b.image_url;
@@ -1919,6 +1965,11 @@ async function saveAdBanner(e) {
   if (!sid) { toast('خطأ في القسم', 'error'); return; }
   var img = document.getElementById('adUrlInput').value.trim();
   if (!img) { toast('يرجى إضافة صورة', 'error'); return; }
+  var devOk = await ensureDeviceCol('home_ad_banners');
+  if (!devOk && _adDevice === 'desktop') {
+    toast('⚠️ لم يتم الحفظ: نفّذ sql/012_add_device_column_ads.sql في محرر SQL الخاص بـ Supabase أولاً ثم حدّث الصفحة', 'error');
+    return;
+  }
   var payload = {
     section_id: sid,
     image_url: img,
@@ -1926,6 +1977,7 @@ async function saveAdBanner(e) {
     badge_text: document.getElementById('adBadgeInput').value.trim() || 'مدفوع',
     sort_order: 0
   };
+  if (devOk) payload.device = _adDevice;
   if (editAdBannerId) {
     await client.from('home_ad_banners').update(payload).eq('id', editAdBannerId);
   } else {
