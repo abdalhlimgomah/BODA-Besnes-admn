@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تقييمات وهمية للمنتجات</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/app-shell.css" />
+    <link rel="stylesheet" href="../css/admin.css" />
+    <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="./auth-guard.js"></script>
+    <style>
+      .fr-wrap { max-width:1400px; margin:0 auto; }
+      .fr-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; margin-bottom:18px; }
+      .fr-stat-card { background:var(--card-bg,#fff); border-radius:14px; padding:16px; text-align:center; box-shadow:0 2px 12px rgba(0,0,0,0.04); }
+      .fr-stat-card .num { font-size:1.5rem; font-weight:800; }
+      .fr-stat-card .label { font-size:0.78rem; color:var(--muted,#667085); margin-top:4px; }
+      .fr-stat-card.ok .num { color:#1f9d55; }
+      .fr-stat-card.warn .num { color:#e03131; }
+      .fr-stat-card.info .num { color:#2563eb; }
+      .fr-toolbar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px; padding:14px 18px; background:var(--card-bg,#fff); border-radius:14px; box-shadow:0 2px 12px rgba(0,0,0,0.04); }
+      .fr-toolbar h2 { font-size:1rem; margin:0; display:flex; align-items:center; gap:8px; }
+      .fr-toolbar h2 i { color:var(--brand-orange,#ff6b1a); }
+      .fr-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 18px; border:none; border-radius:10px; font-size:0.85rem; font-weight:700; font-family:inherit; cursor:pointer; transition:background 0.2s; }
+      .fr-btn:hover { opacity:0.9; }
+      .fr-btn:disabled { opacity:0.5; cursor:not-allowed; }
+      .fr-btn.primary { background:var(--brand-teal,#00b8a9); color:#fff; }
+      .fr-btn.secondary { background:var(--surface-muted,#eef2f7); color:var(--text,#1f2937); }
+      .fr-btn.danger { background:var(--danger,#e03131); color:#fff; }
+      .fr-seg { display:inline-flex; background:var(--surface-muted,#eef2f7); border-radius:10px; padding:3px; gap:2px; }
+      .fr-seg button { border:none; background:transparent; padding:6px 14px; border-radius:8px; font-size:0.8rem; font-weight:700; font-family:inherit; cursor:pointer; color:var(--muted,#667085); }
+      .fr-seg button.active { background:#fff; color:var(--brand-teal,#00b8a9); box-shadow:0 1px 4px rgba(0,0,0,0.1); }
+      .fr-table-wrap { overflow-x:auto; background:var(--card-bg,#fff); border-radius:14px; box-shadow:0 2px 12px rgba(0,0,0,0.04); }
+      .fr-table { width:100%; border-collapse:collapse; font-size:0.8rem; min-width:860px; }
+      .fr-table th { position:sticky; top:0; background:var(--surface-muted,#f8f9fc); text-align:center; padding:10px 8px; font-size:0.72rem; color:var(--muted,#667085); font-weight:700; }
+      .fr-table td { padding:9px 8px; border-bottom:1px solid var(--border,#f0f2f5); text-align:center; vertical-align:middle; }
+      .fr-table tr:hover td { background:var(--surface-muted,#f8f9fc); }
+      .fr-table .name-cell { text-align:right; max-width:230px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .fr-star-cell { font-size:0.72rem; color:var(--muted,#667085); white-space:nowrap; }
+      .fr-star-cell b { color:var(--text,#1f2937); }
+      .fr-avg { font-weight:800; color:var(--accent,#6c5ce7); }
+      .fr-badge { display:inline-block; padding:2px 10px; border-radius:20px; font-size:0.68rem; font-weight:700; }
+      .fr-badge.ok { background:#f0fdf4; color:#1f9d55; }
+      .fr-badge.miss { background:#fef2f2; color:#e03131; }
+      .fr-badge.src { background:#eff6ff; color:#2563eb; margin-right:4px; }
+      .fr-progress { height:4px; background:var(--border,#eef2f7); border-radius:4px; overflow:hidden; margin:8px 0; }
+      .fr-progress-bar { height:100%; background:var(--brand-teal,#00b8a9); border-radius:4px; transition:width 0.3s; width:0%; }
+      .fr-status { padding:10px 16px; border-radius:10px; font-size:0.82rem; font-weight:600; margin-bottom:14px; display:none; }
+      .fr-status.show { display:block; }
+      .fr-status.success { background:#f0fdf4; color:#1f9d55; border:1px solid #bbf7d0; }
+      .fr-status.error { background:#fef2f2; color:#e03131; border:1px solid #fecaca; }
+      .fr-status.info { background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; }
+      .fr-edit-modal { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:none; justify-content:center; align-items:center; z-index:999; }
+      .fr-edit-modal.open { display:flex; }
+      .fr-edit-panel { background:var(--card-bg,#fff); border-radius:16px; padding:24px; width:90%; max-width:520px; max-height:90vh; overflow-y:auto; }
+      .fr-edit-panel h3 { margin:0 0 14px; font-size:1rem; display:flex; align-items:center; gap:8px; }
+      .fr-star-row { display:flex; align-items:center; gap:10px; padding:10px 12px; margin-bottom:8px; background:var(--surface-muted,#f8f9fb); border-radius:10px; }
+      .fr-star-label { font-size:0.9rem; min-width:110px; color:#f59f00; letter-spacing:2px; }
+      .fr-star-count { flex:1; }
+      .fr-star-count input { width:100%; padding:6px 10px; border:1.5px solid var(--border,#d8dee9); border-radius:8px; font-family:inherit; font-size:0.9rem; text-align:center; outline:none; box-sizing:border-box; background:var(--card-bg,#fff); color:var(--text,#1f2937); }
+      .fr-step { width:34px; height:34px; border:none; border-radius:8px; font-size:1rem; font-weight:800; cursor:pointer; background:var(--border,#e2e8f0); color:var(--text,#1f2937); }
+      .fr-step:hover { background:var(--brand-teal,#00b8a9); color:#fff; }
+      .fr-edit-actions { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; justify-content:flex-end; }
+      .fr-edit-actions .spacer { flex:1; }
+      body.dark-mode .fr-stat-card, body.dark-mode .fr-toolbar, body.dark-mode .fr-table-wrap, body.dark-mode .fr-edit-panel { background:var(--card-bg,#1e293b); }
+      body.dark-mode .fr-star-row { background:var(--surface,#0f172a); }
+      body.dark-mode .fr-star-count input { background:var(--surface,#0f172a); color:#e2e8f0; }
+      body.dark-mode .fr-seg button.active { background:#334155; color:#e2e8f0; }
+      .fr-hint { font-size:0.72rem; color:var(--muted,#667085); margin-right:auto; }
+    </style>
+  </head>
+  <body class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-badge">
+        <i class="fa-solid fa-star"></i>
+        <div><strong>Buda Admin</strong><small>إدارة التقييمات</small></div>
+      </div>
+      <nav class="side-nav">
+        <a class="side-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>لوحة التحكم</span></a>
+        <a class="side-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>رسائل الدعم</span></a>
+        <a class="side-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة المنتجات</span></a>
+        <a class="side-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>الطلبات</span></a>
+        <a class="side-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>طلبات الشراكة</span></a>
+        <a class="side-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة المنتجات</span></a>
+        <a class="side-link" href="admin-ai-details.html"><i class="fa-solid fa-wand-magic-sparkles"></i><span>AI محتوى</span></a>
+        <a class="side-link" href="taager-products.html"><i class="fa-solid fa-database"></i><span>منتجات Taager</span></a>
+        <a class="side-link" href="admin-taager-verify.html"><i class="fa-solid fa-check-double"></i><span>تدقيق تاجر</span></a>
+        <a class="side-link" href="admin-sellers.html"><i class="fa-solid fa-store"></i><span>إدارة البائعين</span></a>
+        <a class="side-link" href="admin-coupons.html"><i class="fa-solid fa-tags"></i><span>إدارة الكوبونات</span></a>
+        <a class="side-link" href="admin-fake-prices.html"><i class="fa-solid fa-percent"></i><span>الأسعار الوهمية</span></a>
+        <a class="side-link" href="admin-buda-rewards.html"><i class="fa-solid fa-trophy"></i><span>مسابقة Buda Rewards</span></a>
+        <a class="side-link active" href="admin-fake-ratings.html"><i class="fa-solid fa-star"></i><span>تقييمات وهمية</span></a>
+      </nav>
+    </aside>
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-title">
+          <h1>تقييمات وهمية للمنتجات</h1>
+          <p>إضافة نجوم (تقييمات) للمنتجات بدون أسماء أو تعليقات — تظهر فوراً في المتجر</p>
+        </div>
+      </header>
+      <section class="content-wrap admin-page fr-wrap">
+        <div id="fr-status" class="fr-status"></div>
+        <div id="fr-stats" class="fr-stats"></div>
+        <div class="fr-toolbar">
+          <h2><i class="fa-solid fa-star-half-stroke"></i> التقييمات</h2>
+          <div class="fr-seg" id="frFilterSeg">
+            <button data-f="all" class="active" onclick="setFilter('all')">الكل</button>
+            <button data-f="added" onclick="setFilter('added')">✔ المضاف إليهم</button>
+            <button data-f="missing" onclick="setFilter('missing')">✖ الناقص</button>
+          </div>
+          <button id="btn-add-missing" class="fr-btn primary" onclick="runAdd('missing')"><i class="fa-solid fa-plus"></i> إضافة للناقص</button>
+          <button id="btn-add-all" class="fr-btn primary" onclick="runAdd('all')"><i class="fa-solid fa-wand-magic-sparkles"></i> إضافة للجميع</button>
+          <span style="display:flex;align-items:center;gap:6px;">
+            <input type="number" id="fr-custom-count" min="1" max="1000" value="50" title="أدخل عدداً محدداً" style="width:80px;padding:8px 10px;border:1.5px solid var(--border,#d8dee9);border-radius:10px;font-size:0.85rem;font-family:inherit;text-align:center;outline:none;background:var(--card-bg,#fff);color:var(--text,#1f2937);" />
+            <button class="fr-btn secondary" onclick="runAddCount()" title="يضيف هذا العدد بالضبط لكل منتج في الفلتر الحالي"><i class="fa-solid fa-plus"></i> أضف العدد</button>
+          </span>
+          <button class="fr-btn secondary" onclick="loadAll()"><i class="fa-solid fa-rotate"></i> تحديث</button>
+          <span class="fr-hint">لكل نجمه عدد عشوائي من 5–60 · لكل منتج توزيع مختلف ومواعيد عشوائية خلال 6 شهور</span>
+        </div>
+        <div id="fr-progress" class="fr-progress" style="display:none;"><div id="fr-progress-bar" class="fr-progress-bar"></div></div>
+        <div id="fr-progress-label" style="text-align:center;font-size:13px;color:var(--muted,#667085);display:none;margin-top:4px;"></div>
+        <div class="fr-table-wrap">
+          <table class="fr-table">
+            <thead><tr>
+              <th>#</th>
+              <th>المنتج</th>
+              <th>الحالة</th>
+              <th>المجموع</th>
+              <th>⭐1</th>
+              <th>⭐2</th>
+              <th>⭐3</th>
+              <th>⭐4</th>
+              <th>⭐5</th>
+              <th>المتوسط</th>
+              <th>تعديل</th>
+            </tr></thead>
+            <tbody id="fr-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <div id="fr-edit-modal" class="fr-edit-modal">
+      <div class="fr-edit-panel">
+        <h3><i class="fa-solid fa-pen"></i> تعديل تقييمات — <span id="fr-edit-name"></span></h3>
+        <div id="fr-star-rows"></div>
+        <div class="fr-edit-actions">
+          <button class="fr-btn danger" id="fr-clear"><i class="fa-solid fa-trash-can"></i> مسح تقييمات المنتج</button>
+          <span class="spacer"></span>
+          <button class="fr-btn secondary" onclick="closeEditModal()">إلغاء</button>
+          <button class="fr-btn primary" id="fr-save"><i class="fa-solid fa-floppy-disk"></i> حفظ التعديلات</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      var _sb;
+      try {
+        _sb = window._getSupabaseClient ? window._getSupabaseClient() : (window.__sb || window.supabase.createClient("https://msgqzgzoslearaprgiqq.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE"));
+      } catch(e) {
+        _sb = window.supabase.createClient("https://msgqzgzoslearaprgiqq.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE");
+      }
+
+      var FR = { products: [], ratings: {}, filter: 'all', editId: null };
+
+      function notify(msg, type) {
+        var el = document.getElementById("fr-status");
+        el.textContent = msg; el.className = "fr-status show " + type;
+        if (type !== "error") setTimeout(function() { el.classList.remove("show"); }, 6000);
+      }
+      function setStatus(msg, isError) {
+        var el = document.getElementById("fr-status");
+        if (!el) return;
+        if (!msg) { el.style.display = 'none'; return; }
+        el.style.display = 'block';
+        el.className = 'fr-status show ' + (isError ? 'error' : 'success');
+        el.textContent = msg;
+      }
+      function showProgress(pct, done, total) {
+        var el = document.getElementById("fr-progress");
+        var bar = document.getElementById("fr-progress-bar");
+        var label = document.getElementById("fr-progress-label");
+        if (pct <= 0) { el.style.display = "none"; if(label) label.style.display = "none"; return; }
+        el.style.display = "block"; bar.style.width = Math.min(pct, 100) + "%";
+        if (label && done !== undefined) { label.style.display = "block"; label.textContent = 'جارٍ ' + done + ' / ' + total + ' صف'; }
+      }
+      function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+      function randDate() { return new Date(Date.now() - Math.floor(Math.random() * 182 * 86400000)).toISOString(); }
+
+      async function fetchPaged(table, cols) {
+        var all = [], off = 0, pg = 1000;
+        while (true) {
+          var { data, error } = await _sb.from(table).select(cols).order("id", { ascending: false }).range(off, off + pg - 1);
+          if (error) throw error;
+          if (!data || !data.length) break;
+          all = all.concat(data);
+          off += pg;
+          if (data.length < pg) break;
+        }
+        return all;
+      }
+
+      function avgFor(id) {
+        var r = FR.ratings[String(id)];
+        if (!r || !r.total) return 0;
+        var sum = 0;
+        for (var s = 1; s <= 5; s++) sum += (r[s] || 0) * s;
+        return Math.round((sum / r.total) * 10) / 10;
+      }
+      function countsFor(id) {
+        var r = FR.ratings[String(id)];
+        return r || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, total: 0 };
+      }
+
+      function renderStats() {
+        var total = FR.products.length;
+        var added = 0;
+        FR.products.forEach(function(p) { if (FR.ratings[String(p.id)] && FR.ratings[String(p.id)].total > 0) added++; });
+        var missing = total - added;
+        var allRows = 0;
+        Object.keys(FR.ratings).forEach(function(k) { allRows += FR.ratings[k].total; });
+        var cont = document.getElementById("fr-stats");
+        cont.innerHTML =
+          '<div class="fr-stat-card info"><div class="num">' + total + '</div><div class="label">إجمالي المنتجات</div></div>' +
+          '<div class="fr-stat-card ok"><div class="num">' + added + '</div><div class="label">✔ عليه تقييمات</div></div>' +
+          '<div class="fr-stat-card' + (missing ? ' warn' : ' ok') + '"><div class="num">' + missing + '</div><div class="label">✖ ناقص تقييمات</div></div>' +
+          '<div class="fr-stat-card"><div class="num">' + allRows.toLocaleString("ar-EG") + '</div><div class="label">إجمالي التقييمات</div></div>';
+      }
+
+      function renderTable() {
+        var tbody = document.getElementById("fr-tbody");
+        var list = FR.products.filter(function(p) {
+          var has = FR.ratings[String(p.id)] && FR.ratings[String(p.id)].total > 0;
+          if (FR.filter === 'added' && !has) return false;
+          if (FR.filter === 'missing' && has) return false;
+          return true;
+        });
+        if (!list.length) {
+          tbody.innerHTML = '<tr><td colspan="11" style="padding:40px;color:var(--muted,#667085);">لا توجد منتجات مطابقة.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = list.map(function(p, i) {
+          var c = countsFor(p.id);
+          var has = c.total > 0;
+          var avg = avgFor(p.id);
+          var badge = has ? '<span class="fr-badge ok">مضاف ✔</span>' : '<span class="fr-badge miss">ناقص ✖</span>';
+          var src = p.src === 'taager' ? '<span class="fr-badge src">تاجر</span>' : '<span class="fr-badge src">متجر</span>';
+          return '<tr>' +
+            '<td>' + (i + 1) + '</td>' +
+            '<td class="name-cell"><span title="' + String(p.name || 'منتج').replace(/"/g, "&quot;") + '">' + (p.name || 'منتج') + '</span>' + src + '</td>' +
+            '<td>' + badge + '</td>' +
+            '<td>' + c.total + '</td>' +
+            '<td class="fr-star-cell">' + (c[1] || 0) + '</td>' +
+            '<td class="fr-star-cell">' + (c[2] || 0) + '</td>' +
+            '<td class="fr-star-cell">' + (c[3] || 0) + '</td>' +
+            '<td class="fr-star-cell">' + (c[4] || 0) + '</td>' +
+            '<td class="fr-star-cell">' + (c[5] || 0) + '</td>' +
+            '<td class="fr-avg">' + (has ? avg.toFixed(1) : '—') + '</td>' +
+            '<td><button class="fr-btn secondary" style="padding:4px 10px;font-size:0.75rem;" onclick="openEditModal(\'' + p.id + '\')" title="تعديل التقييمات"><i class="fa-solid fa-pen"></i> تعديل</button></td>' +
+            '</tr>';
+        }).join('');
+      }
+
+      function setFilter(f) {
+        FR.filter = f;
+        var seg = document.getElementById("frFilterSeg");
+        seg.querySelectorAll('button').forEach(function(b) {
+          b.classList.toggle('active', b.getAttribute('data-f') === f);
+        });
+        renderTable();
+      }
+
+      async function loadAll() {
+        setStatus('جاري تحميل المنتجات والتقييمات...');
+        try {
+          var shop = await fetchPaged('products', 'id,name');
+          var taager = await fetchPaged('taager_products', 'id,name');
+          FR.products = shop.map(function(p) { return { id: p.id, name: p.name, src: 'shop' }; })
+            .concat(taager.map(function(p) { return { id: p.id, name: p.name, src: 'taager' }; }));
+          FR.ratings = await loadRatingsMap();
+          renderStats();
+          renderTable();
+          setStatus('تم تحميل ' + FR.products.length + ' منتج و' + Object.keys(FR.ratings).length + ' منتج عليه تقييمات.');
+        } catch(e) {
+          setStatus('فشل التحميل: ' + (e.message || e), true);
+        }
+      }
+
+      async function loadRatingsMap() {
+        var map = {};
+        try {
+          var all = [], off = 0, pg = 1000;
+          while (true) {
+            var { data, error } = await _sb.from('ratings_summary').select('item_id,star1,star2,star3,star4,star5,total').range(off, off + pg - 1);
+            if (error) throw error;
+            if (!data || !data.length) break;
+            all = all.concat(data);
+            off += pg;
+            if (data.length < pg) break;
+          }
+          all.forEach(function(r) {
+            map[String(r.item_id)] = {
+              1: Math.round(Number(r.star1)) || 0,
+              2: Math.round(Number(r.star2)) || 0,
+              3: Math.round(Number(r.star3)) || 0,
+              4: Math.round(Number(r.star4)) || 0,
+              5: Math.round(Number(r.star5)) || 0,
+              total: Math.round(Number(r.total)) || 0
+            };
+          });
+          return map;
+        } catch(e) {
+          var off2 = 0, pg2 = 1000;
+          while (true) {
+            var { data, error } = await _sb.from('ratings').select('item_id,rating').order('id', { ascending: true }).range(off2, off2 + pg2 - 1);
+            if (error) throw error;
+            if (!data || !data.length) break;
+            data.forEach(function(r) {
+              var itemId = String(r.item_id);
+              var v = Math.round(Number(r.rating)) || 0;
+              if (v < 1 || v > 5) v = 0;
+              if (!map[itemId]) map[itemId] = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, total: 0 };
+              if (v) { map[itemId][v]++; map[itemId].total++; }
+            });
+            off2 += pg2;
+            if (data.length < pg2) break;
+          }
+          return map;
+        }
+      }
+
+      // ===== Distribution generation: stars only, random per product =====
+      function genDistribution() {
+        var counts = {};
+        for (var s = 1; s <= 5; s++) counts[s] = randInt(5, 60);
+        return counts;
+      }
+      function genDistributionExact(n) {
+        n = Math.max(1, Math.round(Number(n)) || 0);
+        var weights = [], sum = 0;
+        for (var s = 1; s <= 5; s++) { var w = Math.random() * 10 + 0.5; weights.push(w); sum += w; }
+        var counts = [0, 0, 0, 0, 0];
+        var assigned = 0;
+        for (var i = 0; i < 4; i++) { counts[i] = Math.max(0, Math.round((weights[i] / sum) * n)); assigned += counts[i]; }
+        counts[4] = Math.max(0, n - assigned);
+        var cur = counts[0] + counts[1] + counts[2] + counts[3] + counts[4];
+        var idx = 0;
+        while (cur < n) { counts[idx % 5]++; cur++; idx++; }
+        while (cur > n) { for (var k = 4; k >= 0; k--) { if (counts[k] > 0) { counts[k]--; cur--; break; } } }
+        return { 1: counts[0], 2: counts[1], 3: counts[2], 4: counts[3], 5: counts[4] };
+      }
+      function buildRows(itemId, counts) {
+        var rows = [];
+        for (var s = 1; s <= 5; s++) {
+          var n = Math.max(0, Math.round(Number(counts[s])) || 0);
+          for (var k = 0; k < n; k++) {
+            rows.push({ item_id: String(itemId), rating: s, created_at: randDate() });
+          }
+        }
+        return rows;
+      }
+      async function insertRows(rows, onBatch) {
+        var done = 0, errors = 0, B = 500;
+        for (var i = 0; i < rows.length; i += B) {
+          var batch = rows.slice(i, i + B);
+          try {
+            var { error } = await _sb.from('ratings').insert(batch);
+            if (error) { errors += batch.length; }
+            else done += batch.length;
+          } catch(e) { errors += batch.length; }
+          if (onBatch) onBatch(Math.min(i + B, rows.length), rows.length, errors);
+        }
+        return { done: done, errors: errors };
+      }
+
+      async function runAdd(mode) {
+        var btn = document.getElementById(mode === 'missing' ? 'btn-add-missing' : 'btn-add-all');
+        var origHtml = btn.innerHTML;
+        btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري...';
+        var targets = FR.products.filter(function(p) {
+          var has = FR.ratings[String(p.id)] && FR.ratings[String(p.id)].total > 0;
+          return mode === 'missing' ? !has : true;
+        });
+        if (!targets.length) {
+          setStatus('لا توجد منتجات مستهدفة — الكل مضاف إليه تقييمات.');
+          btn.disabled = false; btn.innerHTML = origHtml;
+          return;
+        }
+        if (!confirm('إضافة تقييمات وهمية لـ ' + targets.length + ' منتج؟\nالمنتجات اللي عليها تقييمات حالياً ستبقى كما هي ويُضاف فوقها الجديد.')) {
+          btn.disabled = false; btn.innerHTML = origHtml;
+          return;
+        }
+        var rows = [];
+        targets.forEach(function(p) { rows = rows.concat(buildRows(p.id, genDistribution())); });
+        try {
+          var result = await insertRows(rows, function(done, total) { showProgress(Math.round(done / total * 100), done, total); });
+          showProgress(0);
+          var msg = 'تمت إضافة ' + result.done.toLocaleString("ar-EG") + ' تقييم لـ ' + targets.length + ' منتج';
+          if (result.errors) msg += ' (' + result.errors.toLocaleString("ar-EG") + ' فشل)';
+          setStatus(msg, result.errors > 0);
+          await loadAll();
+        } catch(e) {
+          setStatus('خطأ: ' + (e.message || e), true);
+        }
+        btn.disabled = false; btn.innerHTML = origHtml;
+      }
+
+      async function runAddCount() {
+        var countEl = document.getElementById('fr-custom-count');
+        var n = Math.round(Number(countEl.value)) || 0;
+        if (n < 1 || n > 1000) {
+          setStatus('أدخل عدداً بين 1 و 1000', true);
+          return;
+        }
+        var mode = FR.filter || 'missing';
+        var targets = FR.products.filter(function(p) {
+          var has = FR.ratings[String(p.id)] && FR.ratings[String(p.id)].total > 0;
+          if (mode === 'missing') return !has;
+          if (mode === 'added') return has;
+          return true;
+        });
+        if (!targets.length) {
+          setStatus('لا توجد منتجات في الفلتر الحالي (' + modeLabel(mode) + ').', true);
+          return;
+        }
+        var totalAll = targets.length * n;
+        if (!confirm('إضافة ' + n.toLocaleString("ar-EG") + ' تقييم بالضبط لكل منتج من ' + targets.length + ' منتج (إجمالي ' + totalAll.toLocaleString("ar-EG") + ' تقييم)؟\nعدد النجوم كله عشوائي ومختلف لكل منتج.')) return;
+        var rows = [];
+        targets.forEach(function(p) { rows = rows.concat(buildRows(p.id, genDistributionExact(n))); });
+        try {
+          var result = await insertRows(rows, function(done, total) { showProgress(Math.round(done / total * 100), done, total); });
+          showProgress(0);
+          var msg = 'تمت إضافة ' + result.done.toLocaleString("ar-EG") + ' تقييم (' + n.toLocaleString("ar-EG") + ' لكل منتج) لـ ' + targets.length + ' منتج';
+          if (result.errors) msg += ' (' + result.errors.toLocaleString("ar-EG") + ' فشل)';
+          setStatus(msg, result.errors > 0);
+          await loadAll();
+        } catch(e) {
+          showProgress(0);
+          setStatus('خطأ: ' + (e.message || e), true);
+        }
+      }
+      function modeLabel(m) {
+        return { all: 'الكل', missing: 'الناقص', added: 'المضاف' }[m] || m;
+      }
+
+      // ===== Edit modal =====
+      function starLabel(s) { return '★'.repeat(s) + '☆'.repeat(5 - s); }
+      function openEditModal(id) {
+        FR.editId = id;
+        var p = null;
+        for (var i = 0; i < FR.products.length; i++) {
+          if (String(FR.products[i].id) === String(id)) { p = FR.products[i]; break; }
+        }
+        document.getElementById("fr-edit-name").textContent = p ? (p.name || 'منتج') : 'منتج';
+        var c = countsFor(id);
+        var rows = '';
+        for (var s = 5; s >= 1; s--) {
+          rows += '<div class="fr-star-row">' +
+            '<span class="fr-star-label">' + starLabel(s) + '</span>' +
+            '<button class="fr-step" onclick="stepCount(' + s + ',-1)">−</button>' +
+            '<span class="fr-star-count"><input type="number" min="0" max="999" id="fr-count-' + s + '" value="' + (c[s] || 0) + '" /></span>' +
+            '<button class="fr-step" onclick="stepCount(' + s + ',1)">+</button>' +
+            '</div>';
+        }
+        document.getElementById("fr-star-rows").innerHTML = rows;
+        document.getElementById("fr-edit-modal").classList.add("open");
+      }
+      function stepCount(s, delta) {
+        var inp = document.getElementById("fr-count-" + s);
+        var v = Math.max(0, (Math.round(Number(inp.value)) || 0) + delta);
+        inp.value = v;
+      }
+      function closeEditModal() {
+        document.getElementById("fr-edit-modal").classList.remove("open");
+        FR.editId = null;
+      }
+      function readCounts() {
+        var counts = {};
+        for (var s = 1; s <= 5; s++) {
+          var inp = document.getElementById("fr-count-" + s);
+          counts[s] = inp ? (Math.max(0, Math.round(Number(inp.value)) || 0)) : 0;
+        }
+        return counts;
+      }
+
+      document.getElementById("fr-save").addEventListener("click", async function() {
+        if (!FR.editId) return;
+        var counts = readCounts();
+        var total = counts[1] + counts[2] + counts[3] + counts[4] + counts[5];
+        if (!confirm('حفظ التعديلات؟\nسيتم مسح كل تقييمات هذا المنتج الحالية (' + countsFor(FR.editId).total + ') وتركيب ' + total + ' تقييم جديد.')) return;
+        var btn = document.getElementById("fr-save");
+        btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ...';
+        try {
+          await _sb.from('ratings').delete().eq('item_id', String(FR.editId));
+          var rows = buildRows(FR.editId, counts);
+          if (rows.length) await insertRows(rows, function(d, t) { showProgress(Math.round(d / t * 100), d, t); });
+          showProgress(0);
+          closeEditModal();
+          setStatus('تم حفظ ' + rows.length + ' تقييم للمنتج.');
+          await loadAll();
+        } catch(e) {
+          setStatus('خطأ: ' + (e.message || e), true);
+        }
+        btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> حفظ التعديلات';
+      });
+
+      document.getElementById("fr-clear").addEventListener("click", async function() {
+        if (!FR.editId) return;
+        if (!confirm('مسح كل تقييمات هذا المنتج (' + countsFor(FR.editId).total + ' تقييم)؟')) return;
+        var btn = document.getElementById("fr-clear");
+        btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري...';
+        try {
+          await _sb.from('ratings').delete().eq('item_id', String(FR.editId));
+          closeEditModal();
+          setStatus('تم مسح تقييمات المنتج.');
+          await loadAll();
+        } catch(e) {
+          setStatus('خطأ: ' + (e.message || e), true);
+        }
+        btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> مسح تقييمات المنتج';
+      });
+
+      loadAll();
+    </script>
+  </body>
+</html>
