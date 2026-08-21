@@ -118,6 +118,16 @@
       color: #555; text-decoration: none; font-size: 0.85rem; font-weight: 600; margin-bottom: 16px;
     }
     .back-link:hover { color: #1a1a2e; }
+    .country-tabs { display: flex; gap: 10px; margin-bottom: 16px; }
+    .country-tab {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 22px; border-radius: 12px; border: 2px solid #e5e7eb;
+      background: #fff; font-family: inherit; font-size: 0.9rem; font-weight: 800;
+      color: #666; cursor: pointer; transition: all 0.15s;
+    }
+    .country-tab:hover { border-color: #ffc107; color: #1a1a2e; }
+    .country-tab.on { background: #1a1a2e; border-color: #1a1a2e; color: #fff; }
+    .country-tab .flag { font-size: 1.1rem; }
   </style>
 </head>
 <body>
@@ -136,6 +146,14 @@
     <p class="subtitle">تحكم في شرائح حساب سعر البيع — سعر البيع = سعر المورد + قيمة الزيادة</p>
 
     <div class="card">
+      <div class="country-tabs">
+        <button type="button" class="country-tab on" data-country="EG" onclick="AdminPricing.setCountry('EG')">
+          <span class="flag">🇪🇬</span> مصر
+        </button>
+        <button type="button" class="country-tab" data-country="SA" onclick="AdminPricing.setCountry('SA')">
+          <span class="flag">🇸🇦</span> السعودية
+        </button>
+      </div>
       <div class="flex justify-between mb-2">
         <h2>الشرائح الحالية</h2>
         <button class="btn btn-primary" onclick="AdminPricing.openAddModal()">
@@ -153,7 +171,7 @@
       <p class="text-muted" style="margin-bottom:12px;">اختبر كيف سيتم حساب سعر البيع لأي سعر مورد</p>
       <div class="form-row">
         <div class="form-group">
-          <label>سعر المورد (جنيه)</label>
+          <label>سعر المورد (<span id="simulatorCurrency">جنيه</span>)</label>
           <input type="number" id="simulatorInput" placeholder="مثال: 420" oninput="AdminPricing.runSimulator()" />
         </div>
         <div class="form-group">
@@ -180,19 +198,26 @@
   <div class="modal-overlay" id="tierModal">
     <div class="modal">
       <h3 id="modalTitle">إضافة شريحة جديدة</h3>
+      <div class="form-group">
+        <label>الدولة</label>
+        <select id="inputCountry" onchange="AdminPricing.updateModalCurrency()">
+          <option value="EG">🇪🇬 مصر (جنيه)</option>
+          <option value="SA">🇸🇦 السعودية (ريال)</option>
+        </select>
+      </div>
       <div class="form-row">
         <div class="form-group">
-          <label>الحد الأدنى (جنيه)</label>
+          <label id="labelMin">الحد الأدنى (جنيه)</label>
           <input type="number" id="inputMin" min="0" step="0.01" />
         </div>
         <div class="form-group">
-          <label>الحد الأعلى (جنيه)</label>
+          <label id="labelMax">الحد الأعلى (جنيه)</label>
           <input type="number" id="inputMax" min="0" step="0.01" placeholder="فارغ = غير محدود" />
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label>قيمة الزيادة (جنيه)</label>
+          <label id="labelMarkup">قيمة الزيادة (جنيه)</label>
           <input type="number" id="inputMarkup" min="0" step="0.01" />
         </div>
         <div class="form-group">
@@ -222,7 +247,7 @@
   <script src="assets/js/supabase-client.js?v=20260630"></script>
   <script src="assets/js/auth.config.js?v=20260630"></script>
   <script src="assets/js/store.js?v=20260630d"></script>
-  <script src="assets/js/pricing-engine.js"></script>
-  <script src="admin-pricing.js"></script>
+  <script src="assets/js/pricing-engine.js?v=20260820"></script>
+  <script src="admin-pricing.js?v=20260820"></script>
 </body>
 </html>

@@ -7,6 +7,7 @@
 .app-sidebar {
   width: 280px;
   min-height: 100vh;
+  max-height: 100vh;
   position: fixed;
   top: 0;
   right: 0;
@@ -54,6 +55,7 @@
 .side-nav {
   display: grid;
   gap: 6px;
+  padding-bottom: 24px;
 }
 
 .side-link {

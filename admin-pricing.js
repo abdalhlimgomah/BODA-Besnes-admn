@@ -5,6 +5,31 @@
 var AdminPricing = {
   editingId: null,
   supabase: null,
+  currentCountry: "EG",
+
+  // Normalize tier country (legacy rows without country_code = EG)
+  tierCountry: function (t) {
+    var tc = t.country_code ? String(t.country_code).toUpperCase() : "EG";
+    return tc === "SA" ? "SA" : "EG";
+  },
+
+  // Currency label per country
+  currency: function () {
+    return this.currentCountry === "SA" ? "ريال" : "جنيه";
+  },
+
+  // Switch country tab (EG/SA)
+  setCountry: function (cc) {
+    this.currentCountry = cc === "SA" ? "SA" : "EG";
+    PricingEngine.activeCountry = this.currentCountry;
+    document.querySelectorAll(".country-tab").forEach(function (btn) {
+      btn.classList.toggle("on", btn.getAttribute("data-country") === AdminPricing.currentCountry);
+    });
+    var simCur = document.getElementById("simulatorCurrency");
+    if (simCur) simCur.textContent = this.currency();
+    this.renderTable();
+    this.runSimulator();
+  },
 
   init: async function () {
     this.supabase = window.supabaseClient;
@@ -13,16 +38,25 @@ var AdminPricing = {
       return;
     }
     await PricingEngine.loadTiers();
-    this.renderTable();
+    this.setCountry("EG");
   },
 
   // ========== RENDER TABLE ==========
   renderTable: function () {
     var wrap = document.getElementById("tierTableWrap");
-    var tiers = PricingEngine.tiers;
+    var cur = this.currency();
+    var allTiers = PricingEngine.tiers || [];
+    var tiers = allTiers.filter(function (t) {
+      return AdminPricing.tierCountry(t) === AdminPricing.currentCountry;
+    });
 
-    if (!tiers || !tiers.length) {
+    if (!allTiers.length) {
       wrap.innerHTML = '<div class="empty-state">لا توجد شرائح بعد. أضف الشريحة الأولى.</div>';
+      return;
+    }
+
+    if (!tiers.length) {
+      wrap.innerHTML = '<div class="empty-state">لا توجد شرائح لهذه الدولة بعد. أضف أول شريحة.</div>';
       return;
     }
 
@@ -38,17 +72,17 @@ var AdminPricing = {
 
     for (var i = 0; i < tiers.length; i++) {
       var t = tiers[i];
-      var maxStr = t.max_price === null || t.max_price === undefined ? "غير محدود" : Number(t.max_price).toFixed(0) + " جنيه";
+      var maxStr = t.max_price === null || t.max_price === undefined ? "غير محدود" : Number(t.max_price).toFixed(0) + " " + cur;
       var example = PricingEngine.calculate(1000);
       var isActive = t.is_active !== false;
       var inTier = (1000 >= t.min_price && (t.max_price === null || 1000 <= t.max_price));
 
       html += '<tr>' +
         '<td class="text-muted">' + (i + 1) + '</td>' +
-        '<td><strong>' + Number(t.min_price).toFixed(0) + '</strong> جنيه</td>' +
+        '<td><strong>' + Number(t.min_price).toFixed(0) + '</strong> ' + cur + '</td>' +
         '<td>' + maxStr + '</td>' +
-        '<td><strong style="color:#e67e22;">+' + Number(t.markup).toFixed(0) + '</strong> جنيه</td>' +
-        '<td>' + (inTier ? '<strong style="color:#28a745;">' + Number(example).toFixed(0) + ' جنيه</strong>' : '<span class="text-muted">—</span>') + '</td>' +
+        '<td><strong style="color:#e67e22;">+' + Number(t.markup).toFixed(0) + '</strong> ' + cur + '</td>' +
+        '<td>' + (inTier ? '<strong style="color:#28a745;">' + Number(example).toFixed(0) + ' ' + cur + '</strong>' : '<span class="text-muted">—</span>') + '</td>' +
         '<td>' +
         '<label class="toggle">' +
         '<input type="checkbox" ' + (isActive ? "checked" : "") + ' onchange="AdminPricing.toggleTier(' + t.id + ', this.checked)" />' +
@@ -71,13 +105,29 @@ var AdminPricing = {
   // ========== OPEN ADD MODAL ==========
   openAddModal: function () {
     this.editingId = null;
-    document.getElementById("modalTitle").textContent = "إضافة شريحة جديدة";
+    var cur = this.currency();
+    var sameCountryCount = (PricingEngine.tiers || []).filter(function (t) {
+      return AdminPricing.tierCountry(t) === AdminPricing.currentCountry;
+    }).length;
+    document.getElementById("modalTitle").textContent =
+      "إضافة شريحة جديدة — " + (this.currentCountry === "SA" ? "السعودية 🇸🇦" : "مصر 🇪🇬");
+    document.getElementById("inputCountry").value = this.currentCountry;
     document.getElementById("inputMin").value = "";
     document.getElementById("inputMax").value = "";
     document.getElementById("inputMarkup").value = "";
-    document.getElementById("inputSort").value = PricingEngine.tiers.length + 1;
+    document.getElementById("inputSort").value = sameCountryCount + 1;
     document.getElementById("inputActive").checked = true;
+    this.updateModalCurrency();
     document.getElementById("tierModal").classList.add("open");
+  },
+
+  // Update currency labels inside the modal
+  updateModalCurrency: function () {
+    var cc = document.getElementById("inputCountry").value;
+    var cur = cc === "SA" ? "ريال" : "جنيه";
+    document.getElementById("labelMin").textContent = "الحد الأدنى (" + cur + ")";
+    document.getElementById("labelMax").textContent = "الحد الأعلى (" + cur + ")";
+    document.getElementById("labelMarkup").textContent = "قيمة الزيادة (" + cur + ")";
   },
 
   // ========== OPEN EDIT MODAL ==========
@@ -90,11 +140,13 @@ var AdminPricing = {
 
     this.editingId = id;
     document.getElementById("modalTitle").textContent = "تعديل الشريحة";
+    document.getElementById("inputCountry").value = this.tierCountry(tier);
     document.getElementById("inputMin").value = tier.min_price;
     document.getElementById("inputMax").value = tier.max_price === null ? "" : tier.max_price;
     document.getElementById("inputMarkup").value = tier.markup;
     document.getElementById("inputSort").value = tier.sort_order;
     document.getElementById("inputActive").checked = tier.is_active !== false;
+    this.updateModalCurrency();
     document.getElementById("tierModal").classList.add("open");
   },
 
@@ -112,6 +164,7 @@ var AdminPricing = {
     var markup = parseFloat(document.getElementById("inputMarkup").value);
     var sort = parseInt(document.getElementById("inputSort").value, 10);
     var active = document.getElementById("inputActive").checked;
+    var country = document.getElementById("inputCountry").value === "SA" ? "SA" : "EG";
 
     // Validation
     if (isNaN(min) || min < 0) { this.showToast("الحد الأدنى يجب أن يكون 0 أو أكثر", "error"); return; }
@@ -119,8 +172,8 @@ var AdminPricing = {
     if (isNaN(sort) || sort < 1) { this.showToast("الترتيب يجب أن يكون 1 أو أكثر", "error"); return; }
     if (max !== null && max <= min) { this.showToast("الحد الأعلى يجب أن يكون أكبر من الحد الأدنى", "error"); return; }
 
-    // Check overlap
-    if (!this.checkNoOverlap(min, max, this.editingId)) return;
+    // Check overlap (within the same country only)
+    if (!this.checkNoOverlap(min, max, country, this.editingId)) return;
 
     var data = {
       min_price: min,
@@ -128,6 +181,7 @@ var AdminPricing = {
       markup: markup,
       sort_order: sort,
       is_active: active,
+      country_code: country,
     };
 
     try {
@@ -210,10 +264,11 @@ var AdminPricing = {
   },
 
   // ========== OVERLAP CHECK ==========
-  checkNoOverlap: function (min, max, excludeId) {
+  checkNoOverlap: function (min, max, country, excludeId) {
     var tiers = PricingEngine.tiers;
     for (var i = 0; i < tiers.length; i++) {
       var t = tiers[i];
+      if (this.tierCountry(t) !== country) continue;
       if (excludeId && t.id === excludeId) continue;
       var tMax = t.max_price === null ? Infinity : t.max_price;
       var newMax = max === null ? Infinity : max;
@@ -248,6 +303,7 @@ var AdminPricing = {
 
   // ========== SIMULATOR ==========
   runSimulator: function () {
+    var cur = this.currency();
     var val = parseFloat(document.getElementById("simulatorInput").value);
     if (isNaN(val) || val < 0) {
       document.getElementById("simulatorTier").value = "";
@@ -261,8 +317,8 @@ var AdminPricing = {
     document.getElementById("simulatorTier").value = tier
       ? Number(tier.min_price).toFixed(0) + " - " + (tier.max_price === null ? "غير محدود" : Number(tier.max_price).toFixed(0))
       : "لا توجد شريحة";
-    document.getElementById("simulatorMarkup").value = "+" + Number(markup).toFixed(0) + " جنيه";
-    document.getElementById("simulatorResult").value = Number(selling).toFixed(0) + " جنيه";
+    document.getElementById("simulatorMarkup").value = "+" + Number(markup).toFixed(0) + " " + cur;
+    document.getElementById("simulatorResult").value = Number(selling).toFixed(0) + " " + cur;
   },
 
   // ========== TOAST ==========

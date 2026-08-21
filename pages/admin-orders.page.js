@@ -631,83 +631,12 @@ async function fetchOrders(showErrorToast = false) {
   applyFilters();
 }
 
-/* ── خصم الكميات من مخزون المنتج عند تسليم الطلب ── */
-function parseTaagerVariantId(tid) {
-  const s = String(tid || "").trim();
-  const m = s.match(/^(.+?)_c_(.+?)(?:_s_(.*))?$/);
-  if (!m) return { base: s, color: "", size: "" };
-  return { base: m[1], color: m[2], size: m[3] || "" };
-}
-
+/* ── خصم الكميات من مخزون المنتج عند تسليم الطلب (وحدة موحدة مع سجل stock_change_log) ── */
 async function deductOrderItemsStock(order) {
-  const items = extractOrderItems(order);
-  if (!items.length) return;
-  const grouped = {};
-  items.forEach((it) => {
-    const rawId = String(it?.product_id || it?.id || "").trim();
-    if (!rawId) return;
-    const stripped = rawId.indexOf("taager_") === 0 ? rawId.slice(7) : rawId;
-    const parsed = parseTaagerVariantId(stripped);
-    let base = String(parsed.base || stripped || rawId);
-    if (base.indexOf("taager_") !== 0) base = "taager_" + base;
-    if (!grouped[base]) grouped[base] = [];
-    grouped[base].push({ color: parsed.color || "", size: parsed.size || "", qty: Math.max(1, Number(it?.quantity) || 1) });
-  });
-
-  for (const pid of Object.keys(grouped)) {
-    let row = null;
-    const { data: d1 } = await supabaseClient.from("taager_products").select("id,stock,colors,sizes").eq("id", pid).limit(1);
-    if (d1 && d1.length) row = d1[0];
-    else {
-      const { data: d2 } = await supabaseClient.from("taager_products").select("id,stock,colors,sizes").eq("taager_product_id", pid).limit(1);
-      if (d2 && d2.length) row = d2[0];
-    }
-    if (!row) continue;
-    await applyStockDeduction(row, grouped[pid]);
-    await applySoldCountIncrement(row, grouped[pid]);
-  }
-}
-
-async function applyStockDeduction(row, picks) {
-  const colors = Array.isArray(row.colors) ? JSON.parse(JSON.stringify(row.colors)) : [];
-  const sizes = Array.isArray(row.sizes) ? JSON.parse(JSON.stringify(row.sizes)) : [];
-  const totalQty = picks.reduce((sum, p) => sum + p.qty, 0);
-
-  picks.forEach((p) => {
-    if (!p.size) return;
-    const si = sizes.findIndex((s) => {
-      const label = typeof s === "string" ? s : (s && (s.name || s.size)) || "";
-      return String(label).trim().toLowerCase() === p.size.trim().toLowerCase();
-    });
-    if (si >= 0 && typeof sizes[si] === "object") {
-      sizes[si].stock = Math.max(0, (Number(sizes[si].stock) || 0) - p.qty);
-    }
-    const ci = colors.findIndex((c) => String((c && (c.name || c.value)) || "").trim().toLowerCase() === (p.color || "").trim().toLowerCase());
-    if (ci >= 0 && p.color) {
-      const sizesOfColor = Array.isArray(colors[ci].sizes) ? colors[ci].sizes : [];
-      const cell = sizesOfColor.find((cs) => String((cs && cs.size) || "").trim().toLowerCase() === p.size.trim().toLowerCase());
-      if (cell) cell.stock = Math.max(0, (Number(cell.stock) || 0) - p.qty);
-    }
-  });
-
-  const payload = { stock: Math.max(0, (Number(row.stock) || 0) - totalQty) };
-  if (sizes.length) payload.sizes = sizes;
-  if (colors.length) payload.colors = colors;
-  const { error } = await supabaseClient.from("taager_products").update(payload).eq("id", row.id);
-  if (error) console.warn("Stock deduction failed:", error.message);
-}
-
-async function applySoldCountIncrement(row, picks) {
-  const totalQty = picks.reduce((sum, p) => sum + p.qty, 0);
-  if (totalQty <= 0 || !row || !row.id) return;
   try {
-    const { data: cur } = await supabaseClient.from("taager_products").select("sales_count").eq("id", row.id).limit(1);
-    if (!cur || !cur.length) return;
-    const newCount = Math.max(0, (Number(cur[0].sales_count) || 0) + totalQty);
-    const { error } = await supabaseClient.from("taager_products").update({ sales_count: newCount }).eq("id", row.id);
-    if (error) console.warn("Sold count increment failed:", error.message);
+    await StockDeduction.deductForOrder(order, { sourcePage: "admin-orders" });
   } catch (e) {
-    console.warn("Sold count increment failed:", e && e.message);
+    console.warn("Stock deduction failed:", e && e.message);
   }
 }
 

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>حركات المخزون</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/app-shell.css" />
+    <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="./auth-guard.js"></script>
+    <style>
+      .stock-table-wrap {
+        overflow-x: auto;
+        background: var(--card-bg, #fff);
+        border-radius: 16px;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+      }
+      .stock-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 900px;
+        font-size: 0.9rem;
+      }
+      .stock-table th,
+      .stock-table td {
+        padding: 12px 14px;
+        text-align: right;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+        white-space: nowrap;
+      }
+      .stock-table th {
+        background: rgba(99, 102, 241, 0.07);
+        font-weight: 700;
+        color: #475569;
+        position: sticky;
+        top: 0;
+      }
+      .stock-table tbody tr:hover {
+        background: rgba(99, 102, 241, 0.04);
+      }
+      .stock-product-cell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        max-width: 260px;
+      }
+      .stock-product-cell img {
+        width: 38px;
+        height: 38px;
+        object-fit: cover;
+        border-radius: 9px;
+        flex-shrink: 0;
+        background: #f1f5f9;
+      }
+      .stock-product-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-weight: 600;
+      }
+      .badge-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+      }
+      .badge-success { background: #dcfce7; color: #15803d; }
+      .badge-partial { background: #ffedd5; color: #c2410c; }
+      .badge-error   { background: #fee2e2; color: #b91c1c; }
+      .stock-delta {
+        font-weight: 700;
+        color: #334155;
+        direction: ltr;
+        display: inline-block;
+      }
+      .stock-error-msg {
+        color: #b91c1c;
+        font-size: 0.78rem;
+        max-width: 220px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;
+      }
+      .empty-state {
+        padding: 48px 20px;
+        text-align: center;
+        color: #94a3b8;
+        font-size: 0.95rem;
+      }
+      .refresh-btn-spin i { animation: spinRefresh 0.9s linear infinite; }
+      @keyframes spinRefresh { to { transform: rotate(360deg); } }
+    </style>
+  </head>
+  <body class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-badge">
+        <i class="fa-solid fa-bag-shopping"></i>
+        <div>
+          <strong>Buda Admin</strong>
+          <small>إدارة المتجر</small>
+        </div>
+      </div>
+      <nav class="side-nav">
+        <a class="side-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>لوحة التحكم</span></a>
+        <a class="side-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>رسائل الدعم</span></a>
+        <a class="side-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة المنتجات</span></a>
+        <a class="side-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>الطلبات</span></a>
+        <a class="side-link active" href="admin-stock-changes.html"><i class="fa-solid fa-warehouse"></i><span>حركات المخزون</span></a>
+        <a class="side-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>طلبات الشراكة</span></a>
+        <a class="side-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة المنتجات</span></a>
+        <a class="side-link" href="admin-ai-details.html"><i class="fa-solid fa-wand-magic-sparkles"></i><span>AI محتوى</span></a>
+        <a class="side-link" href="taager-products.html">
+          <i class="fa-solid fa-database"></i>
+          <span>منتجات Taager</span>
+        </a>
+        <a class="side-link" href="admin-taager-verify.html"><i class="fa-solid fa-check-double"></i><span>تدقيق تاجر</span></a>
+        <a class="side-link" href="admin-sellers.html">
+          <i class="fa-solid fa-store"></i>
+          <span>إدارة البائعين</span>
+        </a>
+        <a class="side-link" href="admin-coupons.html">
+          <i class="fa-solid fa-tags"></i>
+          <span>إدارة الكوبونات</span>
+        </a>
+        <a class="side-link" href="admin-fake-prices.html">
+          <i class="fa-solid fa-percent"></i>
+          <span>الأسعار الوهمية</span>
+        </a>
+        <a class="side-link" href="admin-taager-token.html">
+          <i class="fa-solid fa-key"></i>
+          <span>توكن تاجر</span>
+        </a>
+      </nav>
+    </aside>
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-title">
+          <h1>حركات المخزون</h1>
+          <p>سجل خصم الكميات تلقائياً عند تسليم الطلبات — نجاحاً أو خطأً</p>
+        </div>
+      </header>
+      <section class="content-wrap orders-page">
+        <section class="card summary-row">
+          <div class="summary-item">
+            <p>حركات اليوم</p>
+            <strong id="todayCount">0</strong>
+          </div>
+          <div class="summary-item">
+            <p>وحدات مخصومة اليوم</p>
+            <strong id="todayQty">0</strong>
+          </div>
+          <div class="summary-item">
+            <p>إجمالي الحركات</p>
+            <strong id="totalCount">0</strong>
+          </div>
+          <div class="summary-item">
+            <p>أخطاء</p>
+            <strong id="errorCount">0</strong>
+          </div>
+        </section>
+        <section class="card filters">
+          <div class="filter-item grow">
+            <label for="searchInput">ابحث عن منتج أو طلب أو عميل</label>
+            <div class="search-group">
+              <input type="text" id="searchInput" placeholder="بحث بالاسم أو رقم الطلب..." />
+              <button id="searchBtn" class="btn btn-primary">بحث</button>
+            </div>
+          </div>
+          <div class="filter-item">
+            <label for="statusFilter">الحالة</label>
+            <select id="statusFilter">
+              <option value="all">الكل</option>
+              <option value="success">ناجحة</option>
+              <option value="partial">جزئية</option>
+              <option value="error">أخطاء فقط</option>
+            </select>
+          </div>
+          <div class="filter-item">
+            <label for="periodFilter">الفترة</label>
+            <select id="periodFilter">
+              <option value="today">اليوم</option>
+              <option value="7">آخر 7 أيام</option>
+              <option value="30">آخر 30 يوم</option>
+              <option value="all">الكل</option>
+            </select>
+          </div>
+          <div class="filter-item">
+            <label>&nbsp;</label>
+            <button id="refreshBtn" class="btn btn-primary refresh-btn" title="تحديث"><i class="fa-solid fa-rotate-right"></i> تحديث</button>
+          </div>
+        </section>
+        <section class="stock-table-wrap">
+          <table class="stock-table">
+            <thead>
+              <tr>
+                <th>الوقت</th>
+                <th>المنتج</th>
+                <th>الكمية</th>
+                <th>المخزون قبل ← بعد</th>
+                <th>رقم الطلب</th>
+                <th>العميل</th>
+                <th>الجدول</th>
+                <th>الحالة</th>
+                <th>المصدر</th>
+              </tr>
+            </thead>
+            <tbody id="logBody"></tbody>
+          </table>
+          <div class="empty-state" id="emptyState" hidden>لا توجد حركات مخزون مطابقة</div>
+        </section>
+      </section>
+    </main>
+    <nav class="mobile-bottom-nav">
+      <a class="mobile-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>الرئيسية</span></a>
+      <a class="mobile-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة</span></a>
+      <a class="mobile-link active" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>طلبات</span></a>
+      <a class="mobile-link" href="admin-stock-changes.html"><i class="fa-solid fa-warehouse"></i><span>مخزون</span></a>
+      <a class="mobile-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>الدعم</span></a>
+    </nav>
+    <script src="./stock-deduction.common.js?v=20260820"></script>
+    <script src="./admin-stock-changes.page.js?v=20260820"></script>
+  </body>
+</html>
