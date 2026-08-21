@@ -6,6 +6,13 @@ var PricingEngine = {
   tiers: [],
   tiersLoaded: false,
   loadPromise: null,
+  activeCountry: null, // when set (EG/SA), findTier only matches that country's tiers
+
+  // Normalize tier country (legacy rows without country_code = EG)
+  tierCountry: function (t) {
+    var tc = t.country_code ? String(t.country_code).toUpperCase() : "EG";
+    return tc === "SA" ? "SA" : "EG";
+  },
 
   // Load price tiers from Supabase only
   loadTiers: async function () {
@@ -19,9 +26,16 @@ var PricingEngine = {
           return;
         }
         var result = await client.from("price_tiers")
-          .select("id,min_price,max_price,markup,sort_order,is_active")
+          .select("id,min_price,max_price,markup,sort_order,is_active,country_code")
           .eq("is_active", true)
           .order("sort_order", { ascending: true });
+        if (result.error) {
+          // Fallback: country_code column not added yet (pre-migration DB)
+          result = await client.from("price_tiers")
+            .select("id,min_price,max_price,markup,sort_order,is_active")
+            .eq("is_active", true)
+            .order("sort_order", { ascending: true });
+        }
         if (result.error) throw result.error;
         if (result.data && result.data.length) {
           PricingEngine.tiers = result.data;
@@ -46,6 +60,7 @@ var PricingEngine = {
     var price = Number(supplierPrice) || 0;
     for (var i = 0; i < this.tiers.length; i++) {
       var t = this.tiers[i];
+      if (this.activeCountry && this.tierCountry(t) !== this.activeCountry) continue;
       if (price >= t.min_price && (t.max_price === null || price <= t.max_price)) {
         return t;
       }
