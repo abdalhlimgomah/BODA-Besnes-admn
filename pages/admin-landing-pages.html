@@ -376,11 +376,15 @@
     .st-block-btn.danger { background: #fee2e2; color: #991b1b; }
     .st-editor { display: grid; grid-template-columns: 470px 1fr; gap: 18px; align-items: start; }
     .st-blocks-col {
+      position: sticky; top: 12px;
       background: white; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
       border: 1px solid var(--gray-100); padding: 14px;
       display: flex; flex-direction: column; gap: 12px;
-      max-height: calc(100vh - 210px); overflow-y: auto;
+      max-height: calc(100vh - 36px); overflow-y: auto;
     }
+    .st-blocks-col::-webkit-scrollbar { width: 8px; }
+    .st-blocks-col::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 8px; }
+    .st-blocks-col::-webkit-scrollbar-thumb:hover { background: var(--gray-300); }
     .st-block { border: 1px solid var(--gray-200); border-radius: var(--radius); background: white; box-shadow: var(--shadow-sm); }
     .st-block.dragging { opacity: .4; border-color: var(--primary); }
     .st-block.drop-target { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,.25); }
@@ -435,7 +439,33 @@
       max-width: 460px; margin: 0 auto; background: #fff; border-radius: var(--radius-lg);
       overflow: hidden; box-shadow: 0 10px 30px rgba(15,23,42,.15); border: 1px solid var(--gray-100); min-height: 400px;
     }
-    .sp-hero { position: relative; height: 190px; background-size: cover; background-position: center; display: flex; align-items: flex-end; }
+    .sp-hero { position: relative; height: 190px; overflow: hidden; background: var(--gray-100); }
+    .sp-hero-track { display: flex; height: 100%; transition: transform .45s ease; }
+    #spPreview .sp-hero-bg { position: absolute; inset: 0; background-size: cover; background-position: center; }
+    #spPreview .sp-hero-bg-m { display: none; }
+    @media (max-width: 767px) {
+      #spPreview .sp-hero-bg-m { display: block; }
+      #spPreview .sp-hero-bg-d { display: none; }
+    }
+    .sp-hero-slide {
+      flex: 0 0 100%; min-width: 100%; height: 100%;
+      background-size: cover; background-position: center;
+      display: flex; align-items: flex-end; position: relative;
+    }
+    .sp-hero-arrow {
+      position: absolute; top: 50%; transform: translateY(-50%); z-index: 3;
+      width: 30px; height: 30px; border-radius: 50%; border: none; cursor: pointer;
+      background: rgba(255,255,255,.85); color: #1e293b; font-size: 17px; line-height: 1;
+      box-shadow: 0 2px 8px rgba(0,0,0,.25); opacity: 0; transition: opacity .2s, background .2s;
+      font-family: inherit;
+    }
+    .sp-hero:hover .sp-hero-arrow { opacity: 1; }
+    .sp-hero-arrow:hover { background: #fff; }
+    .sp-hero-arrow.prev { right: 8px; }
+    .sp-hero-arrow.next { left: 8px; }
+    .sp-hero-dots { position: absolute; bottom: 7px; left: 0; right: 0; display: flex; justify-content: center; gap: 5px; z-index: 3; }
+    .sp-hero-dots span { width: 7px; height: 7px; border-radius: 5px; background: rgba(255,255,255,.55); cursor: pointer; transition: .2s; box-shadow: 0 1px 3px rgba(0,0,0,.35); }
+    .sp-hero-dots span.on { background: #fff; width: 16px; }
     .sp-hero .sp-hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.55), transparent); }
     .sp-hero .sp-hero-content { position: relative; padding: 16px; color: #fff; width: 100%; }
     .sp-hero h2 { font-size: 1.05rem; margin: 0 0 4px; text-shadow: 0 1px 3px rgba(0,0,0,.4); }
@@ -457,12 +487,34 @@
     .sp-card .sp-sale-badge { display: inline-block; background: #ef4444; color: #fff; font-size: .62rem; font-weight: 700; padding: 1px 6px; border-radius: 5px; margin-inline-start: 4px; vertical-align: middle; }
     .sp-scroll-row { display: flex; gap: 10px; overflow-x: auto; padding: 12px 14px; }
     .sp-scroll-row .sp-card { min-width: 130px; width: 130px; }
+    /* معاينة كروت المنتجات بنفس شكل الهوم */
+    #spPreview .noon-product-card { position: relative; background: #fff; border: 1px solid #e8edf4; border-radius: 14px; overflow: hidden; box-shadow: 0 8px 18px rgba(2,12,27,.06); display: flex; flex-direction: column; }
+    #spPreview .noon-product-media-wrap { position: relative; }
+    #spPreview .buda-badge { position: absolute; top: 8px; right: 8px; z-index: 2; background: #ef4444; color: #fff; font-size: .62rem; font-weight: 800; padding: 2px 7px; border-radius: 6px; }
+    #spPreview .noon-wishlist-btn { position: absolute; top: 8px; left: 8px; z-index: 2; width: 28px; height: 28px; border-radius: 50%; border: none; background: rgba(255,255,255,.92); box-shadow: 0 2px 8px rgba(2,12,27,.14); display: flex; align-items: center; justify-content: center; cursor: pointer; color: #334155; }
+    #spPreview .noon-wishlist-btn.is-active { color: #e11d48; }
+    #spPreview .noon-product-media { aspect-ratio: 1/1; background: var(--gray-50); }
+    #spPreview .noon-product-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    #spPreview .noon-add-square { position: absolute; bottom: 8px; left: 8px; z-index: 2; width: 30px; height: 30px; border: none; border-radius: 9px; background: var(--primary); color: #fff; font-size: 19px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(2,12,27,.22); }
+    #spPreview .noon-product-body { padding: 9px 11px 11px; }
+    #spPreview .noon-title { margin: 0 0 5px; font-size: .74rem; font-weight: 600; color: #1e293b; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.2em; }
+    #spPreview .noon-price-line { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    #spPreview .noon-price { margin: 0; font-size: .86rem; font-weight: 800; color: #0f172a; }
+    #spPreview .noon-price-compare { display: inline-flex; align-items: center; gap: 4px; }
+    #spPreview .noon-old-price { margin: 0; font-size: .68rem; color: #94a3b8; text-decoration: line-through; }
+    #spPreview .noon-discount-pill { background: #fee2e2; color: #dc2626; font-size: .6rem; font-weight: 800; padding: 1px 6px; border-radius: 5px; }
+    #spPreview .noon-installment { margin-top: 5px; display: flex; align-items: center; gap: 3px; font-size: .64rem; font-weight: 700; color: #7c3aed; background: #f5f3ff; border-radius: 7px; padding: 3px 7px; width: max-content; }
+    #spPreview .noon-installment .material-icons-outlined { font-size: 12px; }
+    .sp-scroll-row .noon-product-card,
+    .sp-showcase-products .noon-product-card { min-width: 150px; width: 150px; flex-shrink: 0; }
     .sp-ad { position: relative; height: 150px; background-size: cover; background-position: center; margin: 12px 14px; border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
     .sp-ad .sp-ad-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.45); }
     .sp-ad .sp-ad-content { position: relative; text-align: center; color: #fff; padding: 12px; }
     .sp-ad h3 { font-size: .95rem; margin: 0 0 3px; }
     .sp-ad p { font-size: .72rem; margin: 0 0 8px; opacity: .9; }
     .sp-brands { display: flex; gap: 10px; overflow-x: auto; padding: 12px 14px; }
+    .sp-brands-row { display: flex; gap: 14px; overflow-x: auto; padding: 12px 14px; scroll-snap-type: x mandatory; }
+    .sp-brands-row::-webkit-scrollbar { display: none; }
     .sp-smart-cats { display: flex; gap: 12px; overflow-x: auto; padding: 12px 14px; scroll-snap-type: x mandatory; }
     .sp-smart-cats::-webkit-scrollbar { display: none; }
     .sp-smart-cat-card { position: relative; flex-shrink: 0; scroll-snap-align: start; width: 150px; min-height: 185px; border-radius: 16px; overflow: hidden; text-decoration: none; color: #fff; display: flex; flex-direction: column; }
@@ -473,6 +525,24 @@
     .sp-smart-cat-content h3 { font-size: .85rem; margin: 0 0 3px; }
     .sp-smart-cat-content p { font-size: .68rem; margin: 0 0 8px; opacity: .85; }
     .sp-smart-cat-btn { font-size: .66rem; font-weight: 700; display: inline-flex; align-items: center; gap: 2px; background: rgba(255,255,255,.16); padding: 4px 8px; border-radius: 10px; }
+    #spPreview .sp-smart-cat-card { min-height: var(--sp-cat-h, 185px); border-radius: var(--sp-cat-radius, 16px); }
+    #spPreview .sp-cats-grid {
+      display: grid; overflow-x: visible; scroll-snap-type: none;
+      grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr));
+      gap: var(--sp-cat-gap, 12px);
+    }
+    #spPreview .sp-cats-grid .sp-smart-cat-card { width: auto; }
+    #spPreview .sp-cat-shadow .sp-smart-cat-card { box-shadow: 0 10px 26px rgba(15, 23, 42, .16); }
+    #spPreview .sp-smart-cat-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15,23,42,.2), rgba(15,23,42,.65)); pointer-events: none; }
+    #spPreview .sp-pos-top .sp-smart-cat-content { margin-top: 0; margin-bottom: auto; }
+    #spPreview .sp-pos-center .sp-smart-cat-content { margin-top: auto; margin-bottom: auto; }
+    #spPreview .sp-cat-zoom .sp-smart-cat-media img { transition: transform .5s ease; }
+    @media (hover: hover) { #spPreview .sp-cat-zoom .sp-smart-cat-card:hover .sp-smart-cat-media img { transform: scale(1.08); } }
+    #spPreview .sp-products-sub { font-size: .72rem; color: #64748b; margin: 4px 16px 0; }
+    #spPreview .sp-cust-grid { grid-template-columns: repeat(var(--mcols, 2), 1fr); gap: var(--cust-gap, 12px); }
+    @media (min-width: 768px) { #spPreview .sp-cust-grid { grid-template-columns: repeat(var(--cols, 3), 1fr); } }
+    #spPreview .sp-cust-body h4 { font-size: var(--cust-name, .9rem); }
+    #spPreview .sp-cust-grid.no-zoom .sp-cust-media img { transform: none !important; }
     .sp-showcase { position: relative; border-radius: 18px; margin: 12px 14px; overflow: hidden; min-height: 240px; background-size: cover; background-position: center; display: flex; align-items: flex-end; }
     .sp-showcase-overlay { position: absolute; inset: 0; }
     .sp-showcase-content { position: relative; padding: 18px; width: 100%; color: #fff; z-index: 2; display: flex; flex-direction: column; align-items: center; text-align: center; }
@@ -492,7 +562,63 @@
     }
     .sp-showcase-products .sp-card img { height: 110px; }
     .sp-showcase-products .sp-card-name { min-height: 1.9em; font-size: .68rem; }
-    .sp-brand-chip { flex-shrink: 0; padding: 9px 16px; border-radius: 20px; font-size: .75rem; font-weight: 700; }
+    .sp-brand-card {
+      position: relative;
+      flex-shrink: 0; width: 116px; height: 116px;
+      background: #fff; border: 1px solid rgba(15,23,42,.08); border-radius: 18px;
+      box-shadow: 0 2px 10px rgba(15,23,42,.07);
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px; text-decoration: none;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .sp-brand-card:hover { transform: translateY(-3px); box-shadow: 0 8px 18px rgba(15,23,42,.13); }
+    .sp-brand-card .sp-brand-fallback {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.4rem; font-weight: 800;
+      color: var(--primary); opacity: .3;
+    }
+    .sp-brand-card img {
+      position: relative; z-index: 1;
+      max-width: 100%; max-height: 100%;
+      width: auto; height: auto; object-fit: contain;
+    }
+    .sp-cust-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 12px 14px 16px; }
+    @media (min-width: 768px) { .sp-cust-grid { grid-template-columns: repeat(var(--cols, 3), 1fr); } }
+    @media (min-width: 1024px) {
+      .sp-cust-grid { grid-template-columns: repeat(var(--cols, 3), minmax(0, 360px)); justify-content: center; gap: 18px; padding: 18px; }
+    }
+    .sp-cust-banner { position: relative; overflow: hidden; border-radius: 14px; background: var(--gray-100); }
+    .sp-cust-banner.h-thin { height: 110px; }
+    .sp-cust-banner.h-normal { height: 150px; }
+    .sp-cust-banner.h-big { height: 200px; }
+    @media (min-width: 768px) {
+      .sp-cust-banner.h-thin { height: 260px; }
+      .sp-cust-banner.h-normal { height: 340px; }
+      .sp-cust-banner.h-big { height: 430px; }
+    }
+    @media (max-width: 767px) {
+      .sp-cust-banner.h-thin { height: 72px; }
+      .sp-cust-banner.h-normal { height: 98px; }
+      .sp-cust-banner.h-big { height: 132px; }
+    }
+    .sp-cust-bn-slide { flex: 0 0 100%; min-width: 100%; background-size: contain; background-position: center; background-repeat: no-repeat; }
+    .sp-cust-box { margin-top: 12px; overflow: hidden; box-shadow: 0 10px 26px rgba(15,23,42,.16); }
+    .sp-cust-box .sp-cust-grid { padding: 14px; }
+    .sp-cust-card {
+      display: block; text-decoration: none; color: inherit;
+      background: #fff; border: 1px solid rgba(15,23,42,.07);
+      box-shadow: 0 2px 10px rgba(15,23,42,.08); overflow: hidden;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .sp-cust-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(15,23,42,.16); }
+    .sp-cust-media { position: relative; width: 100%; overflow: hidden; background-size: cover; }
+    .sp-cust-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease; }
+    .sp-cust-card:hover .sp-cust-media img { transform: scale(1.07); }
+    .sp-cust-body { padding: 10px 12px 12px; text-align: center; }
+    .sp-cust-body h4 { margin: 0 0 4px; font-size: .85rem; color: var(--gray-800); }
+    .sp-cust-hint { font-size: .66rem; color: var(--primary); font-weight: 700; display: inline-flex; align-items: center; gap: 3px; }
+    .sp-cust-hint .material-icons-outlined { font-size: 12px; }
     .sp-empty { padding: 30px; text-align: center; color: var(--gray-400); font-size: .8rem; }
     .st-status { font-size: .72rem; color: var(--gray-400); display: flex; align-items: center; gap: 4px; }
     .st-status.saving { color: #d97706; }
@@ -1221,18 +1347,31 @@ const BLOCK_DEFS = {
       mini_mode: 'keywords', mini_ids: [], mini_keywords: '', mini_count: 3
     }
   },
-  hero_slider: { label: 'البنر العلوي المتحرك', icon: 'slideshow', desc: 'صور كبيرة بتتنقل فوق الصفحة', defaults: { slides: [{ image_url: '', title: '', subtitle: '', button_text: 'تسوق الآن', button_link: '#', show_button: 'show' }] } },
+  hero_slider: { label: 'البنر العلوي المتحرك', icon: 'slideshow', desc: 'صور كبيرة بتتنقل فوق الصفحة (مقاس كمبيوتر + مقاس موبايل)', defaults: { slides: [{ image_url: '', mobile_image_url: '', title: '', subtitle: '', button_text: 'تسوق الآن', button_link: '#', show_button: 'show' }] } },
   title_text: { label: 'عنوان وكلام', icon: 'title', desc: 'فاصل نصي كبير (عنوان + وصف)', defaults: { title: '', subtitle: '' } },
   products: { label: 'عرض منتجات', icon: 'shopping_bag', desc: 'شبكة منتجات — يدوي أو بكلمات مفتاحية من السوق', defaults: { mode: 'keywords', keywords: '', ids: [], title: '', subtitle: '', count: 8, layout: 'grid' } },
   ad_banner: { label: 'إعلان شركة', icon: 'campaign', desc: 'صورة إعلان ضخمة + زر يودّي لصفحة المنتجات', defaults: { image_url: '', title: '', subtitle: '', button_text: 'تسوق الآن', button_link: '#' } },
   brands_row: { label: 'شريط ماركات', icon: 'storefront', desc: 'ماركات أفقية (لصفحات التصنيفات)', defaults: { title: '', brands: [] } },
-  smart_categories: { label: 'الشريط الذكي', icon: 'view_carousel', desc: 'شريط أفقي بتصنيفات أو أقسام (زي الرئيسية)', defaults: { title: 'تسوق حسب الفئة', source: 'auto', items: [] } }
+  smart_categories: { label: 'الشريط الذكي', icon: 'view_carousel', desc: 'شريط أفقي بتصنيفات أو أقسام (زي الرئيسية)', defaults: { title: 'تسوق حسب الفئة', subtitle: '', source: 'auto', items: [], layout: 'scroll', cols: '2', size: 'medium', height: '', radius: '', gap: '', overlay: '', text_pos: 'bottom', zoom: 'on', shadow: 'off', show_btn: 'show', btn_text: 'استكشف الآن', bg: '', title_color: '' } },
+  custom_cards: {
+    label: 'كروت الأقسام المصوّرة',
+    icon: 'grid_view',
+    desc: 'بنر سلايدر رفيع بعرض الصفحة + تحته صندوق ملون فيه كروت (صورة + اسم + بحث أو رابط)',
+    defaults: {
+      title: '', subtitle: '', columns: '3', ratio: '1/1', radius: '18',
+      gradient_from: '#0ea5e9', gradient_to: '#6d28d9', gradient_angle: '180',
+      mobile_cols: '', gap: '', name_size: '', zoom: 'on',
+      show_hint: 'show', hint_text: '', card_bg: '', title_color: '',
+      banner_height: 'thin', banners: [{ image_url: '' }],
+      items: [{ image_url: '', title: '', keywords: '', link: '' }]
+    }
+  }
 };
 
 const STUDIO = {
   open: false, view: 'list', page: null, blocks: [],
   dirty: new Set(), orderDirty: {}, saveTimer: null, previewTimer: null,
-  productsCache: [], brandsCache: [], dragId: null
+  productsCache: [], brandsCache: [], dragId: null, heroIdx: {}
 };
 
 function studioStatus(msg, cls) {
@@ -1290,6 +1429,7 @@ async function studioLoadPages() {
       <td>
         <button class="st-block-btn" onclick="studioOpenPage('${p.id}')">✏️ افتح وارسم</button>
         <button class="st-block-btn ghost" onclick="studioTogglePage('${p.id}', ${p.is_active !== false})">${p.is_active !== false ? '⏸ إيقاف' : '▶️ تشغيل'}</button>
+        <button class="st-block-btn ghost" onclick="studioCopyPageToCountry('${p.id}')" title="نسخ الصفحة بكل أجزائها للدولة التانية">${p.country_code === 'SA' ? '📄 نسخ 🇪🇬' : '📄 نسخ 🇸🇦'}</button>
         <button class="st-block-btn danger" onclick="studioDeletePage('${p.id}')">🗑 حذف</button>
       </td>
     </tr>`).join('');
@@ -1410,6 +1550,42 @@ async function studioDeletePage(id) {
   } catch (e) { toast('خطأ: ' + e.message, 'error'); }
 }
 
+async function studioCopyPageToCountry(id) {
+  try {
+    const res = await supabaseFetch(`/rest/v1/smart_pages?id=eq.${id}&limit=1`);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const rows = await res.json();
+    const src = Array.isArray(rows) ? rows[0] : rows;
+    if (!src) { toast('الصفحة مش موجودة', 'error'); return; }
+    const target = src.country_code === 'SA' ? 'EG' : 'SA';
+    const targetName = target === 'SA' ? '🇸🇦 السعودية' : '🇪🇬 مصر';
+    if (!confirm('هنسخ صفحة «' + (src.title || src.slug) + '» بكل أجزائها ورسوماتها وألوانها إلى ' + targetName + ' — وكأنك رسمتها هناك من الأول.\n\nتكمل النسخة؟')) return;
+    const dupRes = await supabaseFetch(`/rest/v1/smart_pages?select=id&slug=eq.${encodeURIComponent(src.slug)}&page_type=eq.${src.page_type}&country_code=eq.${target}&limit=1`);
+    if (dupRes.ok) {
+      const dup = await dupRes.json();
+      if (dup && dup.length && !confirm('⚠️ ملاحظة: في صفحة بنفس الرابط («' + src.slug + '») في ' + targetName + ' بالفعل.\n\nهتتعمل نسخة تانية جنبها — تكمل؟')) return;
+    }
+    const pc = await supabaseFetch('/rest/v1/smart_pages', {
+      method: 'POST',
+      body: JSON.stringify({ slug: src.slug, title: src.title || src.slug, page_type: src.page_type, country_code: target, settings: src.settings || {}, is_active: src.is_active !== false })
+    });
+    if (!pc.ok) throw new Error('تعذر إنشاء الصفحة الجديدة (HTTP ' + pc.status + ')');
+    const prows = await pc.json();
+    const newPage = Array.isArray(prows) ? prows[0] : prows;
+    const bRes = await supabaseFetch(`/rest/v1/smart_page_blocks?select=block_type,settings,block_order,is_active&page_id=eq.${id}&order=block_order.asc`);
+    const blocks = bRes.ok ? ((await bRes.json()) || []) : [];
+    let copied = 0;
+    if (blocks.length) {
+      const payload = blocks.map(b => ({ page_id: newPage.id, block_type: b.block_type, settings: b.settings || {}, block_order: b.block_order, is_active: b.is_active !== false }));
+      const bi = await supabaseFetch('/rest/v1/smart_page_blocks', { method: 'POST', body: JSON.stringify(payload) });
+      if (!bi.ok) throw new Error('الصفحة اتعملت بس تعذر نسخ الأجزاء (HTTP ' + bi.status + ') — انسخهم يدوي أو احذف الصفحة وجرّب تاني');
+      copied = blocks.length;
+    }
+    toast('✅ اتنسخت لـ ' + targetName + ' بـ ' + copied + ' جزء — بدّل الدولة من الفوق عشان تشوفها وتعدل عليها');
+    studioLoadPages();
+  } catch (e) { toast('خطأ في النسخ: ' + e.message, 'error'); }
+}
+
 function studioPageTitle(v) {
   if (!STUDIO.page) return;
   STUDIO.page.title = v;
@@ -1522,7 +1698,8 @@ function studioFieldsHtml(b) {
     const slides = s.slides || [];
     const boxes = slides.map((sl, i) => `<div class="st-slide-box">
       <button class="st-del-slide" onclick="studioDelSlide('${b.id}', ${i})">حذف السلايد</button>
-      <div class="st-field"><label>رابط صورة السلايد ${i + 1}</label><input data-k="image_url" data-i="${i}" value="${escapeHtml(sl.image_url)}" placeholder="https://..." /></div>
+      <div class="st-field"><label>🖥️ رابط صورة الكمبيوتر — سلايد ${i + 1}</label><input data-k="image_url" data-i="${i}" value="${escapeHtml(sl.image_url)}" placeholder="https://... صورة عريضة" /></div>
+      <div class="st-field"><label>📱 رابط صورة الموبايل (اختياري — لو فاضية هتستخدم صورة الكمبيوتر)</label><input data-k="mobile_image_url" data-i="${i}" value="${escapeHtml(sl.mobile_image_url || '')}" placeholder="https://... صورة طولية/مربعة مناسبة للموبايل" /></div>
       <div class="st-field"><label>العنوان</label><input data-k="title" data-i="${i}" value="${escapeHtml(sl.title)}" placeholder="عنوان يظهر فوق الصورة" /></div>
       <div class="st-field"><label>الوصف</label><input data-k="subtitle" data-i="${i}" value="${escapeHtml(sl.subtitle)}" placeholder="وصف قصير" /></div>
       <div class="st-add-row">
@@ -1604,6 +1781,60 @@ if (b.block_type === 'smart_categories') {
           <option value="auto"${s.source !== 'manual' ? ' selected' : ''}>تلقائي — نفس الشريط الذكي بتاع الرئيسية</option>
           <option value="manual"${s.source === 'manual' ? ' selected' : ''}>يدوي — أنا اللي بعمل الكروت</option>
         </select></div>
+      <div class="st-add-row" style="margin-top:10px"><div class="st-field" style="flex:1"><label>⚙️ شكل القسم — التخطيط</label>
+        <select data-k="layout">
+          <option value="scroll"${s.layout !== 'grid' ? ' selected' : ''}>شريط بيلف باللمس</option>
+          <option value="grid"${s.layout === 'grid' ? ' selected' : ''}>شبكة ثابتة — الكروت جنب بعض زي الشركات الكبيرة</option>
+        </select></div>
+        <div class="st-field" style="flex:1"><label>عدد الأعمدة (للشبكة)</label>
+          <select data-k="cols">${['2', '3', '4'].map(n => `<option value="${n}"${String(Number(s.cols) || 2) === n ? ' selected' : ''}>${n} كروت جنب بعض</option>`).join('')}</select></div>
+      </div>
+      <div class="st-add-row">
+        <div class="st-field" style="flex:1"><label>حجم الكارت</label>
+          <select data-k="size">
+            <option value="small"${s.size === 'small' ? ' selected' : ''}>صغير (150px)</option>
+            <option value="medium"${s.size !== 'custom' && s.size !== 'large' && s.size !== 'small' ? ' selected' : ''}>متوسط (190px)</option>
+            <option value="large"${s.size === 'large' ? ' selected' : ''}>كبير (280px)</option>
+            <option value="custom"${s.size === 'custom' ? ' selected' : ''}>مخصص ↓</option>
+          </select></div>
+        <div class="st-field" style="flex:1"><label>ارتفاع مخصص px (لو اخترت مخصص)</label><input type="number" min="80" max="800" data-k="height" value="${escapeHtml(s.height == null ? '' : s.height)}" placeholder="مثال: 320" /></div>
+      </div>
+      <div class="st-add-row">
+        <div class="st-field" style="flex:1"><label>استدارة الحواف px (فاضي = 16)</label><input type="number" min="0" max="60" data-k="radius" value="${escapeHtml(s.radius == null ? '' : s.radius)}" placeholder="16" /></div>
+        <div class="st-field" style="flex:1"><label>المسافة بين الكروت px (فاضي = 12)</label><input type="number" min="0" max="60" data-k="gap" value="${escapeHtml(s.gap == null ? '' : s.gap)}" placeholder="12" /></div>
+        <div class="st-field" style="flex:1"><label>تعتيم الصورة % (يسهّل قراءة النص)</label><input type="number" min="0" max="90" data-k="overlay" value="${escapeHtml(s.overlay == null ? '' : s.overlay)}" placeholder="0 - 90" /></div>
+      </div>
+      <div class="st-add-row">
+        <div class="st-field" style="flex:1"><label>مكان النص في الكارت</label>
+          <select data-k="text_pos">
+            <option value="bottom"${s.text_pos !== 'center' && s.text_pos !== 'top' ? ' selected' : ''}>تحت</option>
+            <option value="center"${s.text_pos === 'center' ? ' selected' : ''}>في النص</option>
+            <option value="top"${s.text_pos === 'top' ? ' selected' : ''}>فوق</option>
+          </select></div>
+        <div class="st-field" style="flex:1"><label>تكبير الصورة عند الماوس/اللمس</label>
+          <select data-k="zoom">
+            <option value="on"${String(s.zoom) !== 'off' ? ' selected' : ''}>مفعّل ✨</option>
+            <option value="off"${String(s.zoom) === 'off' ? ' selected' : ''}>إيقاف</option>
+          </select></div>
+        <div class="st-field" style="flex:1"><label>ظل تحت الكروت</label>
+          <select data-k="shadow">
+            <option value="off"${s.shadow !== 'on' ? ' selected' : ''}>بدون</option>
+            <option value="on"${s.shadow === 'on' ? ' selected' : ''}>بظل ناعم</option>
+          </select></div>
+      </div>
+      <div class="st-add-row">
+        <div class="st-field" style="flex:1"><label>زر «استكشف الآن»</label>
+          <select data-k="show_btn">
+            <option value="show"${String(s.show_btn) !== 'hide' ? ' selected' : ''}>يظهر</option>
+            <option value="hide"${String(s.show_btn) === 'hide' ? ' selected' : ''}>مخفي</option>
+          </select></div>
+        <div class="st-field" style="flex:2"><label>نص الزر</label><input data-k="btn_text" value="${escapeHtml(s.btn_text || 'استكشف الآن')}" placeholder="استكشف الآن" /></div>
+      </div>
+      <div class="st-add-row">
+        <div class="st-field" style="flex:2"><label>وصف تحت العنوان (اختياري)</label><input data-k="subtitle" value="${escapeHtml(s.subtitle || '')}" placeholder="سطر صغير تحت عنوان القسم" /></div>
+        <div class="st-field" style="flex:1"><label>خلفية القسم</label><input type="color" data-k="bg" value="${/^#[0-9a-f]{6}$/i.test(s.bg || '') ? s.bg : '#ffffff'}" style="height:36px;border:none;cursor:pointer" /></div>
+        <div class="st-field" style="flex:1"><label>لون العنوان</label><input type="color" data-k="title_color" value="${/^#[0-9a-f]{6}$/i.test(s.title_color || '') ? s.title_color : '#0f172a'}" style="height:36px;border:none;cursor:pointer" /></div>
+      </div>
       <div id="scItems_${b.id}"${s.source === 'manual' ? '' : ' style="display:none"'}>
         ${boxes || '<small style="color:var(--gray-400)">مافيش كروت يدوية — ضيف من تحت 👇</small>'}
         <button class="mini" style="margin-top:8px;padding:8px 14px;border:none;border-radius:8px;background:var(--primary);color:#fff;font-family:inherit;font-size:.76rem;font-weight:600;cursor:pointer" onclick="studioAddScCard('${b.id}')">+ إضافة كارت</button>
@@ -1661,6 +1892,71 @@ if (b.block_type === 'showcase') {
         <button class="mini" onclick="studioAddListItem('${b.id}','buttons')">+ زر</button></details>
       ${prodSection('main', 'product_ids', 'products_keywords', 'products_mode', 'products_count', 'A', 4)}
       ${prodSection('mini', 'mini_ids', 'mini_keywords', 'mini_mode', 'mini_count', 'B', 3)}`;
+  }
+  if (b.block_type === 'custom_cards') {
+    const banners = s.banners || [];
+    const items = s.items || [];
+    const bnBoxes = banners.map((bn, i) => `<div class="st-slide-box">
+      <button class="st-del-slide" onclick="studioDelCustBanner('${b.id}',${i})">حذف البنر</button>
+      <div class="st-field"><label>رابط صورة البنر ${i + 1} — بتاخد عرض الصفحة كله</label><input data-k="image_url" data-i="${i}" data-arr="banners" value="${escapeHtml(bn.image_url)}" placeholder="https://... صورة عريضة" /></div>
+    </div>`).join('');
+    const cardBoxes = items.map((it, i) => `<div class="st-slide-box">
+      <button class="st-del-slide" onclick="studioDelCustItem('${b.id}',${i})">حذف الكارت</button>
+      <div class="st-field"><label>صورة الكارت ${i + 1}</label><input data-k="image_url" data-i="${i}" data-arr="items" value="${escapeHtml(it.image_url)}" placeholder="https://... رابط الصورة" /></div>
+      <div class="st-add-row">
+        <div class="st-field" style="flex:1"><label>اسم القسم (يظهر تحت الصورة)</label><input data-k="title" data-i="${i}" data-arr="items" value="${escapeHtml(it.title)}" placeholder="مثال: سماعات" /></div>
+      </div>
+      <div class="st-add-row">
+        <div class="st-field" style="flex:1"><label>كلمات البحث — عند الضغط يدوّر عليها في الموقع</label><input data-k="keywords" data-i="${i}" data-arr="items" value="${escapeHtml(it.keywords)}" placeholder="سماعة, بلوتوث" /></div>
+      </div>
+      <div class="st-field"><label>رابط مخصص (اختياري — لو حطيته بيتجاهل كلمات البحث)</label><input data-k="link" data-i="${i}" data-arr="items" value="${escapeHtml(it.link)}" placeholder="https://... أو صفحة داخلية زي product.html?id=.." /></div>
+    </div>`).join('');
+    const sel = (k, opts, cur) => `<select data-k="${k}">${opts.map(([v, l]) => `<option value="${v}"${String(cur) === v ? ' selected' : ''}>${l}</option>`).join('')}</select>`;
+    return `
+      <details class="st-manual" open><summary>🖼️ البنر العلوي — سلايدر رفيع بعرض الصفحة (صور بس)</summary>
+        ${bnBoxes || '<small style="color:var(--gray-400)">مافيش بنرات — ضيف صورة عريضة 👇</small>'}
+        <button class="mini" style="align-self:flex-start;padding:8px 14px;border:none;border-radius:8px;background:var(--primary);color:#fff;font-family:inherit;font-size:.76rem;font-weight:600;cursor:pointer" onclick="studioAddCustBanner('${b.id}')">+ إضافة صورة بنر</button>
+        <div class="st-add-row" style="margin-top:10px">
+          <div class="st-field" style="flex:1"><label>سُمك البنر</label>${sel('banner_height', [['thin', 'رفيع'], ['normal', 'عادي'], ['big', 'كبير']], s.banner_height || 'thin')}</div>
+        </div>
+      </details>
+      <details class="st-manual" open><summary>🃏 الكروت — دي اللي ليها روابط وكلمات مفتاحية</summary>
+        ${cardBoxes || '<small style="color:var(--gray-400)">مافيش كروت — ضيف كارت 👇</small>'}
+        <button class="mini" style="align-self:flex-start;padding:8px 14px;border:none;border-radius:8px;background:var(--primary);color:#fff;font-family:inherit;font-size:.76rem;font-weight:600;cursor:pointer;margin-top:6px" onclick="studioAddCustItem('${b.id}')">+ إضافة كارت</button>
+      </details>
+      <details class="st-manual"><summary>🎨 الشكل والألوان المتقدمة</summary>
+        <div class="st-add-row" style="margin-top:10px">
+          <div class="st-field" style="flex:1"><label>عدد الكروت بالصف (كمبيوتر)</label>${sel('columns', [['2', '2'], ['3', '3'], ['4', '4']], s.columns || '3')}</div>
+          <div class="st-field" style="flex:1"><label>شكل الكارت</label>${sel('ratio', [['1/1', 'مربع'], ['4/5', 'طولي'], ['16/9', 'عريض']], s.ratio || '1/1')}</div>
+        </div>
+        <div class="st-add-row" style="margin-top:8px">
+          <div class="st-field" style="flex:1"><label>استدارة الحواف</label>${sel('radius', [['0', 'حاد'], ['12', 'ناعم'], ['18', 'أكتر'], ['26', 'دائري']], s.radius || '18')}</div>
+          <div class="st-field" style="flex:1"><label>اتجاه التدرج (خلفية صندوق الكروت)</label>${sel('gradient_angle', [['180', 'نازل ⬇'], ['0', 'طالع ⬆'], ['135', 'قطري ↘'], ['45', 'قطري ↗'], ['90', 'يمين →'], ['270', 'شمال ←']], s.gradient_angle || '180')}</div>
+        </div>
+        <div class="st-add-row" style="margin-top:8px">
+          <div class="st-color-input">من لون <input type="color" data-k="gradient_from" value="${escapeHtml(s.gradient_from || '#0ea5e9')}" /></div>
+          <div class="st-color-input">إلى لون <input type="color" data-k="gradient_to" value="${escapeHtml(s.gradient_to || '#6d28d9')}" /></div>
+        </div>
+        <small style="color:var(--gray-400)">💡 التدرج بيظهر كخلفية صندوق الكروت اللي تحت، وبيبان ورا أي كارت صورته ناقصة</small>
+        <div class="st-add-row" style="margin-top:12px">
+          <div class="st-field" style="flex:1"><label>📱 كام كارت بالصف في الموبايل؟</label>${sel('mobile_cols', [['', 'تلقائي (2)'], ['1', 'كارت واحد'], ['2', '2 كروت'], ['3', '3 كروت']], s.mobile_cols == null ? '' : s.mobile_cols)}</div>
+          <div class="st-field" style="flex:1"><label>المسافة بين الكروت px</label><input type="number" min="0" max="60" data-k="gap" value="${escapeHtml(s.gap == null ? '' : s.gap)}" placeholder="12 موبايل / 16 كمبيوتر" /></div>
+          <div class="st-field" style="flex:1"><label>حجم خط اسم القسم px</label><input type="number" min="10" max="30" data-k="name_size" value="${escapeHtml(s.name_size == null ? '' : s.name_size)}" placeholder="افتراضي 14" /></div>
+        </div>
+        <div class="st-add-row" style="margin-top:8px">
+          <div class="st-field" style="flex:1"><label>تكبير صورة الكارت عند الماوس</label>${sel('zoom', [['on', 'مفعّل ✨'], ['off', 'إيقاف']], s.zoom || 'on')}</div>
+          <div class="st-field" style="flex:1"><label>شارة «شوف المنتجات»</label>${sel('show_hint', [['show', 'تظهر'], ['hide', 'مخفية']], s.show_hint || 'show')}</div>
+          <div class="st-field" style="flex:2"><label>نص الشارة (اختياري)</label><input data-k="hint_text" value="${escapeHtml(s.hint_text || '')}" placeholder="زي: اكتشف القسم" /></div>
+        </div>
+        <div class="st-add-row" style="margin-top:8px">
+          <div class="st-field" style="flex:1"><label>خلفية الكارت نفسه</label>${sel('card_bg', [['', 'شفاف — التدرج يبان تحته'], ['#ffffff', 'أبيض ناصع']], s.card_bg || '')}</div>
+          <div class="st-field" style="flex:1"><label>لون عنوان الجزء</label><input type="color" data-k="title_color" value="${/^#[0-9a-f]{6}$/i.test(s.title_color || '') ? s.title_color : '#0f172a'}" style="height:36px;border:none;cursor:pointer" /></div>
+          <div class="st-field" style="flex:2"><label>وصف تحت عنوان الجزء (اختياري)</label><input data-k="subtitle" value="${escapeHtml(s.subtitle || '')}" placeholder="سطر صغير تحت العنوان" /></div>
+        </div>
+      </details>
+      <div class="st-add-row">
+        <div class="st-field" style="flex:2"><label>عنوان الجزء فوق الكروت (اختياري)</label><input data-k="title" value="${escapeHtml(s.title)}" placeholder="مثال: تسوق حسب القسم" /></div>
+      </div>`;
   }
   if (b.block_type === 'brands_row') {
     const entries = s.brands || [];
@@ -1750,11 +2046,49 @@ function studioReorder(dragId, targetId) {
   studioScheduleSave();
 }
 
+function studioAddCustBanner(blockId) {
+  const b = STUDIO.blocks.find(x => x.id === blockId);
+  if (!b) return;
+  b.settings.banners = b.settings.banners || [];
+  b.settings.banners.push({ image_url: '' });
+  studioMarkDirty(blockId);
+  studioRenderBlocks();
+  studioPreviewRender();
+}
+
+function studioDelCustBanner(blockId, i) {
+  const b = STUDIO.blocks.find(x => x.id === blockId);
+  if (!b) return;
+  (b.settings.banners || []).splice(i, 1);
+  studioMarkDirty(blockId);
+  studioRenderBlocks();
+  studioPreviewRender();
+}
+
+function studioAddCustItem(blockId) {
+  const b = STUDIO.blocks.find(x => x.id === blockId);
+  if (!b) return;
+  b.settings.items = b.settings.items || [];
+  b.settings.items.push({ image_url: '', title: '', keywords: '', link: '' });
+  studioMarkDirty(blockId);
+  studioRenderBlocks();
+  studioPreviewRender();
+}
+
+function studioDelCustItem(blockId, i) {
+  const b = STUDIO.blocks.find(x => x.id === blockId);
+  if (!b) return;
+  (b.settings.items || []).splice(i, 1);
+  studioMarkDirty(blockId);
+  studioRenderBlocks();
+  studioPreviewRender();
+}
+
 function studioAddSlide(blockId) {
   const b = STUDIO.blocks.find(x => x.id === blockId);
   if (!b) return;
   b.settings.slides = b.settings.slides || [];
-  b.settings.slides.push({ image_url: '', title: '', subtitle: '', button_text: 'تسوق الآن', button_link: '#' });
+  b.settings.slides.push({ image_url: '', mobile_image_url: '', title: '', subtitle: '', button_text: 'تسوق الآن', button_link: '#' });
   studioMarkDirty(blockId);
   studioRenderBlocks();
   studioPreviewRender();
@@ -1888,6 +2222,45 @@ function studioOnInput(e) {
   studioPreviewRender();
 }
 
+function ccWrapAttrs(s) {
+  const mcols = ['1', '2', '3'].indexOf(String(s.mobile_cols)) > -1 ? String(s.mobile_cols) : '';
+  const gapv = s.gap != null && s.gap !== '' ? Number(s.gap) : '';
+  const nameSize = s.name_size != null && s.name_size !== '' ? Number(s.name_size) : '';
+  const style = `--cols:${Number(s.columns) || 3};` +
+    (mcols ? `--mcols:${mcols};` : '') +
+    (gapv !== '' ? `--cust-gap:${gapv}px;` : '') +
+    (nameSize !== '' ? `--cust-name:${nameSize}px;` : '');
+  return {
+    cls: 'sp-cust-grid' + (s.zoom === 'off' ? ' no-zoom' : ''),
+    style,
+    showHint: String(s.show_hint) !== 'hide',
+    hintText: s.hint_text || '',
+    cardBg: /^#[0-9a-f]{3,8}$/i.test(s.card_bg || '') ? `background:${s.card_bg};` : ''
+  };
+}
+
+function scWrapAttrs(s) {
+  const heights = { small: 150, medium: 190, large: 280 };
+  const H = s.size === 'custom' && s.height != null && s.height !== '' ? (Number(s.height) || 190) : (heights[s.size] || 190);
+  const radius = s.radius != null && s.radius !== '' ? Number(s.radius) : 16;
+  const gap = s.gap != null && s.gap !== '' ? Number(s.gap) : 12;
+  const cols = [2, 3, 4].indexOf(Number(s.cols)) > -1 ? Number(s.cols) : 2;
+  const isGrid = s.layout === 'grid';
+  const cls = 'sp-smart-cats' + (isGrid ? ' sp-cats-grid' : '') +
+    (String(s.zoom) !== 'off' ? ' sp-cat-zoom' : '') +
+    (s.shadow === 'on' ? ' sp-cat-shadow' : '');
+  const style = `--sp-cat-h:${H}px;--sp-cat-radius:${radius}px;--sp-cat-gap:${gap}px;` +
+    (isGrid ? `--cols:${cols};` : '') +
+    (/^#[0-9a-f]{3,8}$/i.test(s.bg || '') ? `background:${s.bg};` : '');
+  const pos = s.text_pos === 'center' ? ' sp-pos-center' : (s.text_pos === 'top' ? ' sp-pos-top' : '');
+  const ov = Math.min(Math.max(Number(s.overlay) || 0, 0), 90);
+  return {
+    cls, style, pos,
+    overlayHtml: ov > 0 ? `<div class="sp-smart-cat-overlay" style="opacity:${ov / 100}"></div>` : '',
+    showBtn: String(s.show_btn) !== 'hide'
+  };
+}
+
 async function studioFillSmart(blockId, s) {
   const el = document.getElementById('spSmart_' + blockId);
   if (!el) return;
@@ -1904,14 +2277,37 @@ async function studioFillSmart(blockId, s) {
       }
     } catch (e) {}
   }
-  el.className = 'sp-smart-cats';
+  const sc = scWrapAttrs(s);
+  el.className = sc.cls;
+  el.setAttribute('style', sc.style);
   if (!cards.length) { el.innerHTML = '<div class="sp-empty">مافيش تصنيفات — أضف كروت يدوية أو حقن جدول الشريط الذكي</div>'; return; }
   el.innerHTML = cards.map(c =>
-    `<a class="sp-smart-cat-card" href="${escapeHtml(c.link_url || '#')}" target="_blank" style="background:linear-gradient(135deg,${escapeHtml(c.gradient_from || '#1e2a3a')},${escapeHtml(c.gradient_to || '#33404f')})">
+    `<a class="sp-smart-cat-card${sc.pos}" href="${escapeHtml(c.link_url || '#')}" target="_blank" style="background:linear-gradient(135deg,${escapeHtml(c.gradient_from || '#1e2a3a')},${escapeHtml(c.gradient_to || '#33404f')})">
       ${c.icon ? `<span class="material-icons-outlined sp-smart-cat-icon">${escapeHtml(c.icon)}</span>` : (c.image_url ? `<div class="sp-smart-cat-media"><img src="${escapeHtml(c.image_url)}" onerror="this.style.display='none'" /></div>` : '')}
-      <div class="sp-smart-cat-content"><h3>${escapeHtml(c.title)}</h3>${c.subtitle ? `<p>${escapeHtml(c.subtitle)}</p>` : ''}<span class="sp-smart-cat-btn">استكشف الآن <span class="material-icons-outlined" style="font-size:13px">arrow_back</span></span></div>
+      ${sc.overlayHtml}
+      <div class="sp-smart-cat-content"><h3>${escapeHtml(c.title)}</h3>${c.subtitle ? `<p>${escapeHtml(c.subtitle)}</p>` : ''}${sc.showBtn ? `<span class="sp-smart-cat-btn">${escapeHtml(s.btn_text || 'استكشف الآن')} <span class="material-icons-outlined" style="font-size:13px">arrow_back</span></span>` : ''}</div>
     </a>`
   ).join('');
+}
+
+function studioNoonCard(p) {
+  const pr = Number(p.price) || 0;
+  const op = Number(p.original_price) || 0;
+  const off = op > pr && pr > 0 ? Math.round((1 - pr / op) * 100) : 0;
+  const fmt = v => (Math.round(v) === v ? String(v) : v.toFixed(2)) + ' ج.م';
+  return `<article class="noon-product-card" data-view-product="${escapeHtml(String(p.id))}">
+    <div class="noon-product-media-wrap">
+      ${off > 10 ? `<span class="buda-badge">-${off}%</span>` : ''}
+      <button type="button" class="icon-btn noon-wishlist-btn" tabindex="-1"><span class="material-icons-outlined" style="font-size:18px;">favorite_border</span></button>
+      <div class="noon-product-media">${p.image ? `<img src="${escapeHtml(p.image)}" loading="lazy" onerror="this.style.display='none'" />` : ''}</div>
+      <button type="button" class="noon-add-square" tabindex="-1">+</button>
+    </div>
+    <div class="noon-product-body">
+      <h4 class="noon-title">${escapeHtml(p.name || 'منتج')}</h4>
+      <div class="noon-price-line"><span class="noon-price">${fmt(pr)}</span>${off ? `<span class="noon-price-compare"><span class="noon-old-price">${fmt(op)}</span><span class="noon-discount-pill">${off}%</span></span>` : ''}</div>
+      <div class="noon-installment"><span class="material-icons-outlined">bolt</span><span class="noon-install-text">${fmt(pr / 12)} / شهر</span></div>
+    </div>
+  </article>`;
 }
 
 async function studioFillShowcase(blockId, s) {
@@ -1922,11 +2318,7 @@ async function studioFillShowcase(blockId, s) {
     if (!el) return;
     const products = await studioFetchProducts(cfg);
     if (!products.length) { el.innerHTML = '<div class="sp-empty">مافيش منتجات — جرّب كلمات تانية</div>'; return; }
-    el.innerHTML = products.map(p => {
-      const op = Number(p.original_price) || 0; const pr = Number(p.price) || 0;
-      const off = op > pr && pr > 0 ? Math.round((1 - pr / op) * 100) : 0;
-      return `<a class="sp-card" href="product.html?id=${encodeURIComponent(p.id)}" target="_blank"><img src="${escapeHtml(p.image || '')}" onerror="this.style.display='none'"><div class="sp-card-body"><div class="sp-card-name">${escapeHtml(p.name)}</div><div class="sp-card-price">${off ? `<span class="sp-old-price">${op} ج.م</span> ` : ''}${pr} ج.م${off ? ` <span class="sp-sale-badge">-${off}%</span>` : ''}</div></div></a>`;
-    }).join('');
+    el.innerHTML = products.map(p => studioNoonCard(p)).join('');
   };
   await fill('shMain_' + blockId, { mode: s.products_mode || 'manual', ids: s.product_ids || [], keywords: s.products_keywords || '', count: Number(s.products_count) || 4 });
   await fill('shMini_' + blockId, { mode: s.mini_mode || 'keywords', ids: s.mini_ids || [], keywords: s.mini_keywords || '', count: Number(s.mini_count) || 3 });
@@ -2064,18 +2456,53 @@ async function studioPreviewBuild() {
     const s = b.settings || {};
     if (b.block_type === 'hero_slider') {
       const slides = (s.slides || []).filter(x => x.image_url);
-      const first = slides[0] || {};
-      html += `<div class="sp-hero" style="background-image:url('${escapeHtml(first.image_url)}')"><div class="sp-hero-overlay"></div><div class="sp-hero-content"><h2>${escapeHtml(first.title)}</h2><p>${escapeHtml(first.subtitle)}</p>${String(first.show_button) === 'hide' ? '' : `<a class="sp-btn" style="background:${colors.primary || '#6d28d9'}" href="${escapeHtml(first.button_link || '#')}" target="_blank">${escapeHtml(first.button_text) || 'تسوق الآن'}</a>`}</div></div>`;
+      if (!slides.length) {
+        html += '<div class="sp-hero"><div class="sp-empty">مافيش صور — أضف رابط صورة للسلايد الأول 👈</div></div>';
+      } else {
+        STUDIO.heroIdx[b.id] = Math.min(STUDIO.heroIdx[b.id] || 0, slides.length - 1);
+        const cur = STUDIO.heroIdx[b.id];
+        const track = slides.map(sl => {
+          const mobBg = sl.mobile_image_url ? `<div class="sp-hero-bg sp-hero-bg-m" style="background-image:url('${escapeHtml(sl.mobile_image_url)}')"></div>` : '';
+          return `<div class="sp-hero-slide"><div class="sp-hero-bg sp-hero-bg-d" style="background-image:url('${escapeHtml(sl.image_url)}')"></div>${mobBg}<div class="sp-hero-overlay"></div><div class="sp-hero-content"><h2>${escapeHtml(sl.title)}</h2><p>${escapeHtml(sl.subtitle)}</p>${String(sl.show_button) === 'hide' ? '' : `<a class="sp-btn" style="background:${colors.primary || '#6d28d9'}" href="${escapeHtml(sl.button_link || '#')}" target="_blank">${escapeHtml(sl.button_text) || 'تسوق الآن'}</a>`}</div></div>`;
+        }).join('');
+        const nav = slides.length > 1 ? `<button type="button" class="sp-hero-arrow prev" onclick="studioHeroGo('${b.id}',-1)">›</button><button type="button" class="sp-hero-arrow next" onclick="studioHeroGo('${b.id}',1)">‹</button><div class="sp-hero-dots">${slides.map((_, di) => `<span class="${di === cur ? 'on' : ''}" onclick="studioHeroSet('${b.id}',${di})"></span>`).join('')}</div>` : '';
+        html += `<div class="sp-hero" id="spHero_${b.id}" data-count="${slides.length}"><div class="sp-hero-track">${track}</div>${nav}</div>`;
+      }
     } else if (b.block_type === 'title_text') {
       html += `<div class="sp-title-block"><h2>${escapeHtml(s.title)}</h2><p>${escapeHtml(s.subtitle)}</p></div>`;
     } else if (b.block_type === 'products') {
       html += `<div class="sp-products-title"><h3>${escapeHtml(s.title) || 'منتجات'}</h3>${s.subtitle ? '<p>' + escapeHtml(s.subtitle) + '</p>' : ''}</div><div class="sp-grid" id="spGrid_${b.id}"><div class="sp-empty">جارٍ جلب المنتجات...</div></div>`;
     } else if (b.block_type === 'ad_banner') {
       html += `<div class="sp-ad" style="background-image:url('${escapeHtml(s.image_url)}')"><div class="sp-ad-overlay"></div><div class="sp-ad-content"><h3>${escapeHtml(s.title)}</h3><p>${escapeHtml(s.subtitle)}</p><a class="sp-btn" style="background:${colors.primary || '#6d28d9'}" href="${escapeHtml(s.button_link || '#')}" target="_blank">${escapeHtml(s.button_text) || 'تسوق الآن'}</a></div></div>`;
+    } else if (b.block_type === 'custom_cards') {
+      const banners = (s.banners || []).filter(x => x && x.image_url);
+      let bannerHtml = '';
+      if (banners.length) {
+        STUDIO.heroIdx[b.id + '__bn'] = Math.min(STUDIO.heroIdx[b.id + '__bn'] || 0, banners.length - 1);
+        const bnCur = STUDIO.heroIdx[b.id + '__bn'];
+        const bnTrack = banners.map(bn => `<div class="sp-cust-bn-slide" style="background-image:url('${escapeHtml(bn.image_url)}')"></div>`).join('');
+        const bnNav = banners.length > 1 ? `<button type="button" class="sp-hero-arrow prev" onclick="studioHeroGo('${b.id}__bn',-1)">›</button><button type="button" class="sp-hero-arrow next" onclick="studioHeroGo('${b.id}__bn',1)">‹</button><div class="sp-hero-dots">${banners.map((_, di) => `<span class="${di === bnCur ? 'on' : ''}" onclick="studioHeroSet('${b.id}__bn',${di})"></span>`).join('')}</div>` : '';
+        bannerHtml = `<div class="sp-cust-banner h-${s.banner_height || 'thin'}" id="spHero_${b.id}__bn" data-count="${banners.length}"><div class="sp-hero-track">${bnTrack}</div>${bnNav}</div>`;
+      }
+      const items = (s.items || []).filter(x => x && (x.image_url || x.title));
+      const grad = `linear-gradient(${Number(s.gradient_angle) || 180}deg, ${escapeHtml(s.gradient_from || '#0ea5e9')}, ${escapeHtml(s.gradient_to || '#6d28d9')})`;
+      const cc = ccWrapAttrs(s);
+      const cards = items.map(it => {
+        const href = it.link ? escapeHtml(it.link) : ('search.html?q=' + encodeURIComponent(it.keywords || ''));
+        const hint = cc.hintText || (it.link ? 'زيارة الصفحة' : 'شوف المنتجات');
+        return `<a class="sp-cust-card" style="border-radius:${Number(s.radius) || 18}px;${cc.cardBg}" href="${href}" target="_blank" title="${escapeHtml(it.title)}">
+          <div class="sp-cust-media" style="aspect-ratio:${s.ratio || '1/1'};background:${grad}">${it.image_url ? `<img src="${escapeHtml(it.image_url)}" loading="lazy" onerror="this.remove()" />` : ''}</div>
+          ${it.title ? `<div class="sp-cust-body"><h4>${escapeHtml(it.title)}</h4>${cc.showHint ? `<span class="sp-cust-hint">${escapeHtml(hint)} <span class="material-icons-outlined">arrow_back</span></span>` : ''}</div>` : ''}
+        </a>`;
+      }).join('');
+      const ccTitle = s.title ? `<div class="sp-products-title"><h3${/^#[0-9a-f]{3,8}$/i.test(s.title_color || '') ? ` style="color:${escapeHtml(s.title_color)}"` : ''}>${escapeHtml(s.title)}</h3>${s.subtitle ? `<p class="sp-products-sub">${escapeHtml(s.subtitle)}</p>` : ''}</div>` : '';
+      html += `<div class="sp-products">${bannerHtml}${ccTitle}<div class="sp-cust-box" style="background:${grad};border-radius:${Number(s.radius) + 8}px"><div class="${cc.cls}" style="${cc.style}">${cards || '<div class="sp-empty">ضيف كارت من الشمال 👈</div>'}</div></div></div>`;
     } else if (b.block_type === 'brands_row') {
       html += `<div class="sp-products-title"><h3>${escapeHtml(s.title) || 'ماركاتنا'}</h3></div><div class="sp-brands" id="spBrands_${b.id}"><div class="sp-empty">جارٍ جلب الماركات...</div></div>`;
     } else if (b.block_type === 'smart_categories') {
-      html += `${s.title ? `<div class="sp-products-title"><h3>${escapeHtml(s.title)}</h3></div>` : ''}<div class="sp-smart-cats" id="spSmart_${b.id}"><div class="sp-empty">جارٍ جلب الشريط الذكي...</div></div>`;
+      const sc = scWrapAttrs(s);
+      const scTitle = s.title ? `<div class="sp-products-title"><h3${/^#[0-9a-f]{3,8}$/i.test(s.title_color || '') ? ` style="color:${escapeHtml(s.title_color)}"` : ''}>${escapeHtml(s.title)}</h3>${s.subtitle ? `<p class="sp-products-sub">${escapeHtml(s.subtitle)}</p>` : ''}</div>` : '';
+      html += `${scTitle}<div class="${sc.cls}" id="spSmart_${b.id}" style="${sc.style}"><div class="sp-empty">جارٍ جلب الشريط الذكي...</div></div>`;
     } else if (b.block_type === 'showcase') {
       const segs = (s.title_segments || []).filter(x => x && x.text);
       html += `<div class="sp-showcase" style="background-image:url('${escapeHtml(s.image_url || '')}')">
@@ -2099,6 +2526,30 @@ async function studioPreviewBuild() {
     if (b.block_type === 'smart_categories') studioFillSmart(b.id, s).catch(() => {});
     if (b.block_type === 'showcase') studioFillShowcase(b.id, s).catch(() => {});
   }
+}
+
+function studioHeroGo(id, dir) {
+  const el = document.getElementById('spHero_' + id);
+  if (!el) return;
+  const count = Number(el.dataset.count) || 1;
+  if (count < 2) return;
+  STUDIO.heroIdx[id] = ((STUDIO.heroIdx[id] || 0) + dir + count) % count;
+  studioHeroApply(id);
+}
+
+function studioHeroSet(id, idx) {
+  STUDIO.heroIdx[id] = idx;
+  studioHeroApply(id);
+}
+
+function studioHeroApply(id) {
+  const el = document.getElementById('spHero_' + id);
+  if (!el) return;
+  const count = Number(el.dataset.count) || 1;
+  const idx = Math.min(STUDIO.heroIdx[id] || 0, count - 1);
+  const track = el.querySelector('.sp-hero-track');
+  if (track) track.style.transform = 'translateX(' + (idx * 100) + '%)';
+  el.querySelectorAll('.sp-hero-dots span').forEach((d, i) => d.classList.toggle('on', i === idx));
 }
 
 async function studioFetchProducts(s) {
@@ -2139,12 +2590,7 @@ async function studioFillProducts(blockId, s) {
     el.innerHTML = '<div class="sp-empty">مافيش منتجات مطابقة — جرّب كلمات تانية أو اختار منتجات يدوياً</div>';
     return;
   }
-  el.innerHTML = products.map(p => {
-    const op = Number(p.original_price) || 0;
-    const pr = Number(p.price) || 0;
-    const off = op > pr && pr > 0 ? Math.round((1 - pr / op) * 100) : 0;
-    return `<a class="sp-card" href="product.html?id=${encodeURIComponent(p.id)}" target="_blank"><img src="${escapeHtml(p.image || '')}" onerror="this.style.display='none'"><div class="sp-card-body"><div class="sp-card-name">${escapeHtml(p.name)}</div><div class="sp-card-price">${off ? `<span class="sp-old-price">${op} ج.م</span> ` : ''}${pr} ج.م${off ? ` <span class="sp-sale-badge">-${off}%</span>` : ''}</div></div></a>`;
-  }).join('');
+  el.innerHTML = products.map(p => studioNoonCard(p)).join('');
 }
 
 async function studioFillBrands(blockId, s) {
@@ -2158,7 +2604,7 @@ async function studioFillBrands(blockId, s) {
   STUDIO.brandsCache.forEach(x => { cacheMap[x.id] = x; });
   const found = ids.map(i => cacheMap[i]).filter(Boolean);
   const colors = (STUDIO.page.settings && STUDIO.page.settings.colors) || {};
-  const chip = (name, slug, logo) => `<a class="sp-brand-chip" style="background:${colors.primary || '#6d28d9'}" href="brand-landing.html?slug=${encodeURIComponent(slug || name)}" target="_blank">${logo ? `<img class="sp-brand-logo" src="${escapeHtml(logo)}" onerror="this.style.display='none'" />` : ''}${escapeHtml(name)}</a>`;
+  const chip = (name, slug, logo) => `<a class="sp-brand-card" href="brand-landing.html?slug=${encodeURIComponent(slug || name)}" target="_blank" title="${escapeHtml(name)}">${logo ? `<img src="${escapeHtml(logo)}" alt="" loading="lazy" onerror="this.remove()" onload="var f=this.nextElementSibling; if(f&&f.classList.contains('sp-brand-fallback')) f.remove();" />` : ''}<span class="sp-brand-fallback">${escapeHtml((name || '?').trim().charAt(0))}</span></a>`;
   const rows = found.map(x => chip(x.name, x.slug || x.name, x.logo_url || x.logo || '')).concat(manuals.map(m => chip(m.name || m.slug || '', m.slug || m.name, m.logo_url || '')));
   el.className = 'sp-brands-row';
   el.innerHTML = rows.join('') || '<div class="sp-empty">ماركات مش موجودة في جدول الماركات</div>';

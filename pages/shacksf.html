@@ -78,7 +78,7 @@
 
         <a class="side-link" href="admin-fake-prices.html">
           <i class="fa-solid fa-percent"></i>
-          <span>الأسعار الوهمية</span>
+          <span>الأسعار </span>
         </a>
         
         <a class="side-link" href="taager-products.html">
@@ -121,7 +121,7 @@
         </a>
         <a class="side-link" href="admin-fake-ratings.html">
           <i class="fa-solid fa-star"></i>
-          <span>تقييمات وهمية</span>
+          <span>تقييمات </span>
         </a>       </nav>
     </aside>
     <main class="app-main">
@@ -158,34 +158,6 @@
         <section id="dashboard" class="section active">
           <h3 class="section-title">إحصائيات سريعة</h3>
           <div class="stats-grid">
-            <article class="stat-card card">
-              <div class="stat-icon products-icon"><i class="fa-solid fa-box"></i></div>
-              <div>
-                <p class="stat-label">المنتجات</p>
-                <p id="productCount" class="stat-value">0</p>
-              </div>
-            </article>
-            <article class="stat-card card">
-              <div class="stat-icon orders-icon"><i class="fa-solid fa-cart-shopping"></i></div>
-              <div>
-                <p class="stat-label">الطلبات</p>
-                <p id="orderCount" class="stat-value">0</p>
-              </div>
-            </article>
-            <article class="stat-card card">
-              <div class="stat-icon sales-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
-              <div>
-                <p class="stat-label">المبيعات</p>
-                <p id="salesAmount" class="stat-value">0 ج.م</p>
-              </div>
-            </article>
-            <article class="stat-card card">
-              <div class="stat-icon revenue-icon"><i class="fa-solid fa-chart-pie"></i></div>
-              <div>
-                <p class="stat-label">الإيرادات</p>
-                <p id="revenueAmount" class="stat-value">0 ج.م</p>
-              </div>
-            </article>
             <article class="stat-card card" onclick="window.location.href='taager-products.html'" style="cursor:pointer">
               <div class="stat-icon products-icon"><i class="fa-solid fa-database"></i></div>
               <div>
@@ -193,17 +165,68 @@
                 <p class="stat-value" id="taagerCount">0</p>
               </div>
             </article>
+            <article class="stat-card card" onclick="window.location.href='admin-orders.html'" style="cursor:pointer">
+              <div class="stat-icon orders-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+              <div>
+                <p class="stat-label">الطلبات</p>
+                <p id="orderCount" class="stat-value">0</p>
+              </div>
+            </article>
+                        <article class="stat-card card" onclick="window.location.href='admin-stock-changes.html'" style="cursor:pointer">
+              <div class="stat-icon" style="background:#e3f2fd;color:#1565c0"><i class="fa-solid fa-warehouse"></i></div>
+              <div>
+                <p class="stat-label">حركات المخزون</p>
+                <p class="stat-value" id="stockChangesCount">0</p>
+              </div>
+            </article>
+                                                    <article class="stat-card card" onclick="window.location.href='admin-support.html'" style="cursor:pointer">
+              <div class="stat-icon" style="background:#e8f5e9;color:#2e7d32"><i class="fa-solid fa-headset"></i></div>
+              <div>
+                <p class="stat-label">دعم المستخدمين</p>
+              </div>
+            </article>
+                                    <article class="stat-card card" onclick="window.location.href='admin-partner-accounts.html'" style="cursor:pointer">
+              <div class="stat-icon" style="background:#fef3c7;color:#92400e"><i class="fa-solid fa-users"></i></div>
+              <div>
+                <p class="stat-label">حسابات الشركاء</p>
+              </div>
+            </article>
+                                             <article class="stat-card card" onclick="window.location.href='admin-transfer-requests.html'" style="cursor:pointer">
+              <div class="stat-icon" style="background:#fef3c7;color:#92400e"><i class="fa-solid fa-file-invoice"></i></div>
+              <div>
+                <p class="stat-label">طلبات التحويل</p>
+              </div>
+            </article> 
+                        <article class="stat-card card" onclick="window.location.href='view-products.html'" style="cursor:pointer">
+              <div class="stat-icon" style="background:#fef3c7;color:#92400e"><i class="fa-solid fa-box-open"></i></div>
+              <div>
+                <p class="stat-label">عرض المنتجات الشراكه</p>
+              </div>
+            </article> 
+                         <article class="stat-card card" onclick="window.location.href='admin-taager-sizes.html'" style="cursor:pointer">
+              <div class="stat-icon" style="background:#e8f5e9;color:#2e7d32"><i class="fa-solid fa-ruler-combined"></i></div>
+              <div>
+                <p class="stat-label">المقاسات</p>
+                <p class="stat-value" id="variantGroupsCount">0</p>
+              </div>
+            </article>
+                        <article class="stat-card card" onclick="window.location.href='admin-buda-rewards.html'" style="cursor:pointer">
+              <div class="stat-icon" style="background:#fef3c7;color:#92400e"><i class="fa-solid fa-trophy"></i></div>
+              <div>
+                <p class="stat-label">مسابقة Buda Rewards</p>
+              </div>
+            </article>
+                                    <article class="stat-card card" onclick="window.location.href='admin-sellers.html'" style="cursor:pointer">
+              <div class="stat-icon" style="background:#e8f5e9;color:#2e7d32"><i class="fa-solid fa-store"></i></div>
+              <div>
+                <p class="stat-label">البائعون</p>
+                <p class="stat-value" id="sellersCountDashboard">0</p>
+              </div>
+            </article>
                           <article class="stat-card card" onclick="window.location.href='admin-sections.html'" style="cursor:pointer">
               <div class="stat-icon" style="background:#e8f5e9;color:#2e7d32"><i class="fa-solid fa-cog"></i></div>
               <div>
                 <p class="stat-label">تحكم صفحه المتجر </p>
-              </div>
-            </article>
-                                        <article class="stat-card card" onclick="window.location.href='admin-support.html'" style="cursor:pointer">
-              <div class="stat-icon" style="background:#e8f5e9;color:#2e7d32"><i class="fa-solid fa-headset"></i></div>
-              <div>
-                <p class="stat-label">دعم المستخدمين</p>
-                <p class="stat-value" id="supportCount">0</p>
               </div>
             </article>
                             <article class="stat-card card" onclick="window.location.href='admin-complaints.html'" style="cursor:pointer">
@@ -217,37 +240,21 @@
               <div class="stat-icon" style="background:#fce4ec;color:#c62828"><i class="fa-solid fa-percent"></i></div>
               <div>
                 <p class="stat-label">الأسعار</p>
-                <p class="stat-value" id="fakePricesCount">0</p>
               </div>
             </article>
-                        <article class="stat-card card" onclick="window.location.href='admin-sellers.html'" style="cursor:pointer">
-              <div class="stat-icon" style="background:#e8f5e9;color:#2e7d32"><i class="fa-solid fa-store"></i></div>
+                                        <article class="stat-card card" onclick="window.location.href='admin-coupons.html'" style="cursor:pointer">
+              <div class="stat-icon" style="background:#e8f5e9;color:#2e7d32"><i class="fa-solid fa-percent"></i></div>
               <div>
-                <p class="stat-label">البائعون</p>
-                <p class="stat-value" id="sellersCountDashboard">0</p>
+                <p class="stat-label">اداره الكوبونات</p>
               </div>
             </article>
             <article class="stat-card card" onclick="window.location.href='../admin-pricing.html'" style="cursor:pointer">
               <div class="stat-icon" style="background:#fff3cd;color:#856404"><i class="fa-solid fa-coins"></i></div>
               <div>
                 <p class="stat-label">شرائح الأسعار</p>
-                <p class="stat-value" id="pricingCount">0</p>
-              </div>
-            </article>
-            <article class="stat-card card" onclick="window.location.href='admin-stock-changes.html'" style="cursor:pointer">
-              <div class="stat-icon" style="background:#e3f2fd;color:#1565c0"><i class="fa-solid fa-warehouse"></i></div>
-              <div>
-                <p class="stat-label">حركات المخزون</p>
-                <p class="stat-value" id="stockChangesCount">0</p>
               </div>
             </article>
 
-                            <article class="stat-card card" onclick="window.location.href='admin-coupons.html'" style="cursor:pointer">
-              <div class="stat-icon" style="background:#e8f5e9;color:#2e7d32"><i class="fa-solid fa-percent"></i></div>
-              <div>
-                <p class="stat-label">اداره الكوبونات</p>
-              </div>
-            </article>
 
                 <article class="stat-card card" onclick="window.location.href='admin-ai-details.html'" style="cursor:pointer">
               <div class="stat-icon" style="background:#e8f5e9;color:#2e7d32"><i class="fa-solid fa-robot"></i></div>
@@ -256,13 +263,6 @@
               </div>
             </article>
 
-              <article class="stat-card card" onclick="window.location.href='admin-taager-sizes.html'" style="cursor:pointer">
-              <div class="stat-icon" style="background:#e8f5e9;color:#2e7d32"><i class="fa-solid fa-ruler-combined"></i></div>
-              <div>
-                <p class="stat-label">المقاسات</p>
-                <p class="stat-value" id="variantGroupsCount">0</p>
-              </div>
-            </article>
               <article class="stat-card card" onclick="window.location.href='admin-taager-token.html'" style="cursor:pointer">
               <div class="stat-icon" style="background:#e8f5e9;color:#2e7d32"><i class="fa-solid fa-key"></i></div>
               <div>
@@ -280,41 +280,17 @@
               <div>
                 <p class="stat-label">صفحات الفئات الذكية</p>
               </div>
-            </article>
-                        <article class="stat-card card" onclick="window.location.href='admin-partner-accounts.html'" style="cursor:pointer">
-              <div class="stat-icon" style="background:#fef3c7;color:#92400e"><i class="fa-solid fa-users"></i></div>
-              <div>
-                <p class="stat-label">حسابات الشركاء</p>
-              </div>
-            </article>
-                                 <article class="stat-card card" onclick="window.location.href='admin-transfer-requests.html'" style="cursor:pointer">
-              <div class="stat-icon" style="background:#fef3c7;color:#92400e"><i class="fa-solid fa-file-invoice"></i></div>
-              <div>
-                <p class="stat-label">طلبات التحويل</p>
-              </div>
-            </article>   
+            </article>  
                                       <article class="stat-card card" onclick="window.location.href='admin-categories.html'" style="cursor:pointer">
               <div class="stat-icon" style="background:#EDE5FF;color:#6D28D9"><i class="fa-solid fa-layer-group"></i></div>
               <div>
                 <p class="stat-label">إدارة الأقسام</p>
               </div>
-            </article>   
-            <article class="stat-card card" onclick="window.location.href='view-products.html'" style="cursor:pointer">
-              <div class="stat-icon" style="background:#fef3c7;color:#92400e"><i class="fa-solid fa-box-open"></i></div>
-              <div>
-                <p class="stat-label">عرض المنتجات الشراكه</p>
-              </div>
-            </article>    
-            <article class="stat-card card" onclick="window.location.href='admin-buda-rewards.html'" style="cursor:pointer">
-              <div class="stat-icon" style="background:#fef3c7;color:#92400e"><i class="fa-solid fa-trophy"></i></div>
-              <div>
-                <p class="stat-label">مسابقة Buda Rewards</p>
-              </div>
-            </article>
+            </article>      
             <article class="stat-card card" onclick="window.location.href='admin-fake-ratings.html'" style="cursor:pointer">
               <div class="stat-icon" style="background:#EDE5FF;color:#6D28D9"><i class="fa-solid fa-star"></i></div>
               <div>
-                <p class="stat-label">تقييمات وهمية</p>
+                <p class="stat-label">تقييمات</p>
               </div>
             </article>
           </div>
