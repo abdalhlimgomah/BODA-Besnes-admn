@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>طلبات اليوم | Buda Admin</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/app-shell.css" />
+    <link rel="stylesheet" href="../css/admin-orders.css" />
+    <link rel="stylesheet" href="../css/admin-today-orders.css" />
+    <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
+    <script src="../assets/vendor/supabase/supabase-js@2.js"></script>
+    <script src="../assets/vendor/sheetjs/xlsx.full.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="./auth-guard.js"></script>
+  </head>
+  <body class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-badge">
+        <i class="fa-solid fa-bag-shopping"></i>
+        <div>
+          <strong>Buda Admin</strong>
+          <small>إدارة المتجر</small>
+        </div>
+      </div>
+      <nav class="side-nav">
+        <a class="side-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>لوحة التحكم</span></a>
+        <a class="side-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>رسائل الدعم</span></a>
+        <a class="side-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة المنتجات</span></a>
+        <a class="side-link active" href="admin-today-orders.html"><i class="fa-solid fa-calendar-day"></i><span>طلبات اليوم</span></a>
+        <a class="side-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>كل الطلبات</span></a>
+        <a class="side-link" href="admin-stock-changes.html"><i class="fa-solid fa-warehouse"></i><span>حركات المخزون</span></a>
+        <a class="side-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>طلبات الشراكة</span></a>
+        <a class="side-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة المنتجات</span></a>
+        <a class="side-link" href="admin-ai-details.html"><i class="fa-solid fa-wand-magic-sparkles"></i><span>AI محتوى</span></a>
+        <a class="side-link" href="taager-products.html">
+          <i class="fa-solid fa-database"></i>
+          <span>منتجات Taager</span>
+        </a>
+        <a class="side-link" href="admin-taager-verify.html"><i class="fa-solid fa-check-double"></i><span>تدقيق تاجر</span></a>
+        <a class="side-link" href="admin-sellers.html">
+          <i class="fa-solid fa-store"></i>
+          <span>إدارة البائعين</span>
+        </a>
+        <a class="side-link" href="admin-coupons.html">
+          <i class="fa-solid fa-tags"></i>
+          <span>إدارة الكوبونات</span>
+        </a>
+        <a class="side-link" href="admin-fake-prices.html">
+          <i class="fa-solid fa-percent"></i>
+          <span>الأسعار الوهمية</span>
+        </a>
+        <a class="side-link" href="admin-taager-token.html">
+          <i class="fa-solid fa-key"></i>
+          <span>توكن تاجر</span>
+        </a>
+      </nav>
+    </aside>
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-title">
+          <h1>طلبات اليوم</h1>
+          <p>عرض طلبات يوم محدد وتصديرها بقالب العربية (تاجر)</p>
+        </div>
+      </header>
+      <section class="content-wrap orders-page">
+
+        <section class="card date-controls">
+          <div class="date-nav">
+            <button id="prevDayBtn" class="btn btn-ghost date-btn" title="اليوم السابق"><i class="fa-solid fa-chevron-right"></i></button>
+            <label class="date-label">
+              <i class="fa-solid fa-calendar-days"></i>
+              <input type="date" id="dateInput" />
+            </label>
+            <button id="nextDayBtn" class="btn btn-ghost date-btn" title="اليوم التالي"><i class="fa-solid fa-chevron-left"></i></button>
+            <button id="todayBtn" class="btn btn-soft date-today-btn"><i class="fa-solid fa-house"></i> اليوم</button>
+          </div>
+
+          <div class="filter-item country-filter">
+            <label for="countryFilter">الفلتر بالبلد</label>
+            <select id="countryFilter">
+              <option value="all">كل البلدان</option>
+              <option value="SA">السعودية</option>
+              <option value="EG">مصر</option>
+            </select>
+          </div>
+
+          <div class="filter-item company-filter">
+            <label for="companyFilter">الفلتر بالشركة</label>
+            <select id="companyFilter">
+              <option value="all">كل الشركات</option>
+            </select>
+          </div>
+
+          <div class="filter-item status-filter">
+            <label for="statusFilterSelect">الفلتر بالحالة</label>
+            <select id="statusFilterSelect">
+              <option value="all">كل الحالات</option>
+            </select>
+            <button id="clearStatusFilterBtn" class="btn btn-ghost clear-filter-btn" title="إزالة فلتر الحالة" style="display:none"><i class="fa-solid fa-xmark"></i> </button>
+          </div>
+
+          <div class="export-actions">
+            <button id="prepareAllBtn" class="btn btn-secondary prepare-btn"><i class="fa-solid fa-boxes-packing"></i> تجهيز الكل (جارٍ التجهيز)</button>
+            <button id="exportBtn" class="btn btn-primary export-btn"><i class="fa-solid fa-file-excel"></i> تصدير Excel</button>
+          </div>
+        </section>
+
+        <section class="card summary-row day-summary">
+          <div class="summary-item">
+            <p>طلبات اليوم المعروضة</p>
+            <strong id="summaryOrders">0 طلب</strong>
+          </div>
+          <div class="summary-item">
+            <p>المنتجات (الأسطر)</p>
+            <strong id="summaryItems">0</strong>
+          </div>
+          <div class="summary-item">
+            <p>إجمالي المبيعات</p>
+            <strong id="summaryTotal">0</strong>
+          </div>
+          <div class="summary-item">
+            <p>تم تجهيزهم</p>
+            <strong id="summaryPrepared">0</strong>
+          </div>
+        </section>
+
+        <section class="card status-summary" id="statusSummary"></section>
+
+        <section class="card week-strip-card">
+          <div class="status-summary-title">آخر 7 أيام</div>
+          <div class="week-strip" id="weekStrip"></div>
+        </section>
+
+        <section class="card unregistered-section">
+          <div class="status-summary-title"><i class="fa-solid fa-triangle-exclamation"></i> منتجات غير مسجلة أو غير معروفة الشركة (تحتاج تسجيل)</div>
+          <div class="unregistered-list" id="unregisteredList"></div>
+        </section>
+
+        <section class="card companies-overview" id="companiesOverview">
+          <div class="companies-head">
+            <div class="status-summary-title"><i class="fa-solid fa-building"></i> الطلبات حسب الشركة</div>
+            <button id="exportByCompanyBtn" class="btn btn-secondary company-export-all-btn"><i class="fa-solid fa-file-export"></i> تصدير ملف لكل شركة</button>
+          </div>
+          <div class="companies-grid" id="companiesGrid"></div>
+        </section>
+
+        <section class="card bulk-status-card">
+          <div class="bulk-head">
+            <div class="status-summary-title"><i class="fa-solid fa-bolt"></i> تغيير حالة جماعي (الطلبات المعروضة)</div>
+            <button id="applyBulkStatusBtn" class="btn btn-primary bulk-apply-btn"><i class="fa-solid fa-circle-check"></i> نفّذ</button>
+          </div>
+          <div class="bulk-row">
+            <select id="bulkStatusSelect"></select>
+            <span class="bulk-count" id="bulkCount"></span>
+          </div>
+          <p class="bulk-note">تُطبَّق الحالة على كل الطلبات المطابقة للفلاتر الحالية (البلد / الشركة / الحالة) دون إعادة تحميل.</p>
+        </section>
+
+        <section class="card shortcuts-hint" id="shortcutsHint">
+          <div class="status-summary-title"><i class="fa-solid fa-keyboard"></i> اختصارات سريعة</div>
+          <div class="shortcuts-kbd">
+            <span><kbd>Shift</kbd> + <kbd>→</kbd>/<kbd>←</kbd> يوم التالي/السابق</span>
+            <span><kbd>T</kbd> اليوم</span>
+            <span><kbd>E</kbd> تصدير</span>
+            <span><kbd>P</kbd> تجهيز الكل</span>
+            <span><kbd>1</kbd>/<kbd>2</kbd>/<kbd>3</kbd> حالة جماعية: تجهيز/شحن/تسليم</span>
+          </div>
+        </section>
+
+        <section class="orders-grid" id="ordersGrid"></section>
+      </section>
+    </main>
+    <nav class="mobile-bottom-nav">
+      <a class="mobile-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>الرئيسية</span></a>
+      <a class="mobile-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة</span></a>
+      <a class="mobile-link active" href="admin-today-orders.html"><i class="fa-solid fa-calendar-day"></i><span>طلبات اليوم</span></a>
+      <a class="mobile-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>شراكة</span></a>
+      <a class="mobile-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>الدعم</span></a>
+    </nav>
+
+    <div class="preview-modal" id="exportPreviewModal">
+      <div class="preview-modal-box">
+        <div class="preview-modal-head">
+          <div class="preview-head-title">
+            <h3><i class="fa-solid fa-file-excel"></i> <span id="previewTitle">معاينة التصدير</span></h3>
+            <p class="preview-sub">كل سطر هنا سينزل في الملف — عدّل ثم نزّل.</p>
+          </div>
+          <button class="btn btn-ghost preview-close-btn" onclick="closeExportPreview()" title="إغلاق"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="preview-stats">
+          <span class="pv-stat" id="previewRowCount">0 سطر</span>
+          <span class="pv-stat pv-total" id="previewTotal"></span>
+          <span class="pv-stat pv-file" id="previewFileName"></span>
+        </div>
+        <div class="preview-table-wrap" id="previewTableWrap"></div>
+        <div class="preview-modal-foot">
+          <button class="btn btn-soft preview-add-row-btn" id="previewAddRowBtn" onclick="previewAddRow()"><i class="fa-solid fa-plus"></i> أضف سطر</button>
+          <div class="preview-foot-spacer"></div>
+          <button class="btn btn-ghost" onclick="closeExportPreview()">إلغاء</button>
+          <button class="btn btn-primary" onclick="downloadPreviewFile()"><i class="fa-solid fa-download"></i> تنزيل الملف</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="./stock-deduction.common.js?v=20260911"></script>
+    <script src="./admin-today-orders.page.js"></script>
+  </body>
+</html>

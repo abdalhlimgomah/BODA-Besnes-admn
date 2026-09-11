@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>منتجات Vendoor</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/app-shell.css" />
+    <link rel="stylesheet" href="../css/admin.css" />
+    <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="./auth-guard.js"></script>
+    <style>
+      body { background:var(--surface,#f5f7fa); }
+      .vp-wrap { max-width:1500px; margin:0 auto; }
+      .vp-kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-bottom:14px; }
+      .vp-kpi { background:var(--card-bg,#fff); border-radius:12px; padding:12px 14px; box-shadow:0 2px 10px rgba(0,0,0,0.04); }
+      .vp-kpi .n { font-size:1.25rem; font-weight:800; }
+      .vp-kpi .t { font-size:0.72rem; color:var(--muted,#667085); margin-top:2px; }
+      .vp-kpi.c1 .n { color:var(--brand-teal,#00b8a9); }
+      .vp-kpi.c2 .n { color:#6366f1; }
+      .vp-kpi.c3 .n { color:#e03131; }
+      .vp-kpi.c4 .n { color:#1f9d55; }
+      .vp-kpi.c5 .n { color:#e67700; }
+      .vp-toolbar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:12px; padding:14px 18px; background:var(--card-bg,#fff); border-radius:14px; box-shadow:0 2px 12px rgba(0,0,0,0.04); }
+      .vp-search { position:relative; flex:1; min-width:180px; }
+      .vp-search i { position:absolute; right:12px; top:50%; transform:translateY(-50%); color:var(--muted,#94a3b8); font-size:0.85rem; }
+      .vp-search input { width:100%; padding:8px 34px 8px 12px; border:1.5px solid var(--border,#d8dee9); border-radius:10px; font-family:inherit; font-size:0.85rem; outline:none; background:var(--card-bg,#fff); color:var(--text,#1f2937); }
+      .vp-search input:focus { border-color:var(--brand-teal,#00b8a9); }
+      .vp-select { padding:8px 12px; border:1.5px solid var(--border,#d8dee9); border-radius:10px; font-family:inherit; font-size:0.85rem; background:var(--card-bg,#fff); color:var(--text,#1f2937); outline:none; }
+      .vp-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border:none; border-radius:10px; font-size:0.84rem; font-weight:700; font-family:inherit; cursor:pointer; transition:background 0.2s; }
+      .vp-btn:disabled { opacity:0.5; cursor:not-allowed; }
+      .vp-btn.primary { background:var(--brand-teal,#00b8a9); color:#fff; }
+      .vp-btn.primary:hover:not(:disabled) { background:var(--brand-teal-deep,#02998d); }
+      .vp-btn.secondary { background:var(--surface-muted,#eef2f7); color:var(--text,#1f2937); }
+      .vp-btn.secondary:hover:not(:disabled) { background:var(--border,#d8dee9); }
+      .vp-btn.danger { background:var(--danger,#e03131); color:#fff; }
+      .vp-btn.danger:hover:not(:disabled) { background:#c92a2a; }
+      .vp-status { padding:10px 16px; border-radius:10px; font-size:0.82rem; font-weight:600; margin-bottom:12px; display:none; }
+      .vp-status.show { display:block; }
+      .vp-status.success { background:#f0fdf4; color:#1f9d55; border:1px solid #bbf7d0; }
+      .vp-status.error { background:#fef2f2; color:#e03131; border:1px solid #fecaca; }
+      .vp-status.info { background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; }
+      .vp-box { background:var(--card-bg,#fff); border-radius:14px; box-shadow:0 2px 12px rgba(0,0,0,0.04); overflow:hidden; }
+      .vp-table { width:100%; border-collapse:collapse; font-size:0.84rem; }
+      .vp-table th { text-align:right; padding:10px 12px; color:var(--muted,#667085); font-size:0.72rem; background:var(--surface-muted,#f8f9fb); border-bottom:1px solid var(--border,#d8dee9); white-space:nowrap; }
+      .vp-table td { padding:9px 12px; border-bottom:1px solid var(--border,#d8dee9); vertical-align:middle; }
+      .vp-table tbody tr:hover { background:var(--surface-muted,#f8f9fb); }
+      .vp-prod { display:flex; align-items:center; gap:10px; min-width:220px; }
+      .vp-prod img { width:46px; height:46px; object-fit:cover; border-radius:9px; background:#eef2f7; flex-shrink:0; }
+      .vp-prod .nm { font-weight:700; max-width:280px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .vp-prod .id { font-size:0.72rem; color:var(--muted,#94a3b8); direction:ltr; text-align:left; }
+      .vp-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 10px; border-radius:20px; font-size:0.72rem; font-weight:700; }
+      .vp-badge.ok { background:#f0fdf4; color:#1f9d55; }
+      .vp-badge.no { background:#fef2f2; color:#e03131; }
+      .vp-badge.off { background:var(--surface-muted,#eef2f7); color:var(--muted,#667085); }
+      .vp-badge.warn { background:#fff9db; color:#e67700; }
+      .vp-icon-btn { background:none; border:1px solid var(--border,#d8dee9); border-radius:8px; width:30px; height:30px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; color:var(--muted,#667085); transition:all 0.15s; font-size:0.8rem; }
+      .vp-icon-btn:hover { background:var(--brand-teal,#00b8a9); color:#fff; border-color:var(--brand-teal); }
+      .vp-icon-btn.danger:hover { background:#e03131; color:#fff; border-color:#e03131; }
+      .vp-footer { display:flex; align-items:center; gap:12px; padding:12px 16px; border-top:1px solid var(--border,#d8dee9); flex-wrap:wrap; }
+      .vp-bulkbar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:12px; padding:12px 16px; background:var(--card-bg,#fff); border-radius:14px; box-shadow:0 2px 12px rgba(0,0,0,0.04); }
+      .vp-bulkbar .blk-lbl { display:inline-flex; align-items:center; gap:6px; font-size:0.78rem; font-weight:800; color:var(--muted,#667085); margin-inline-end:4px; }
+      .vp-bulkbar .vp-btn { padding:7px 12px; font-size:0.78rem; }
+      .vp-footer .info { font-size:0.8rem; color:var(--muted,#667085); margin-left:auto; }
+      .vp-loading { text-align:center; padding:60px; }
+      .vp-loading .spinner { display:inline-block; width:36px; height:36px; border:3px solid var(--border,#d8dee9); border-top-color:var(--brand-teal,#00b8a9); border-radius:50%; animation:vpspin .6s linear infinite; }
+      @keyframes vpspin { to { transform:rotate(360deg); } }
+      .vp-empty { text-align:center; padding:70px 20px; color:var(--muted,#667085); }
+      .vp-modal { display:none; position:fixed; inset:0; background:rgba(15,23,42,0.5); z-index:1000; align-items:flex-start; justify-content:center; padding:30px 14px; overflow-y:auto; }
+      .vp-modal.open { display:flex; }
+      .vp-modal-card { background:var(--card-bg,#fff); border-radius:16px; max-width:720px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.2); animation:vpop .18s ease; }
+      @keyframes vpop { from { opacity:0; transform:translateY(8px); } }
+      .vp-modal-head { display:flex; align-items:center; gap:10px; padding:14px 18px; border-bottom:1px solid var(--border,#d8dee9); }
+      .vp-modal-head h3 { font-size:1rem; margin:0; flex:1; }
+      .vp-modal-head .close { background:none; border:none; font-size:1.3rem; cursor:pointer; color:var(--muted,#667085); }
+      .vp-modal-body { padding:16px 18px; }
+      .vp-gallery { display:flex; gap:8px; flex-wrap:wrap; }
+      .vp-gallery img { width:76px; height:76px; object-fit:cover; border-radius:10px; border:1.5px solid var(--border,#d8dee9); cursor:pointer; }
+      .vp-desc { background:var(--surface-muted,#f8f9fb); padding:10px 14px; border-radius:10px; font-size:0.85rem; line-height:1.7; white-space:pre-wrap; max-height:180px; overflow-y:auto; color:var(--text,#1f2937); }
+      .vp-variant-table { width:100%; border-collapse:collapse; font-size:0.8rem; }
+      .vp-variant-table th, .vp-variant-table td { border-bottom:1px solid var(--border,#d8dee9); padding:6px 10px; text-align:right; }
+      .vp-link { color:var(--brand-teal,#00b8a9); text-decoration:none; font-weight:700; font-size:0.84rem; }
+      .vp-media-item { display:flex; align-items:center; gap:8px; padding:8px 10px; background:var(--surface-muted,#f8f9fb); border-radius:8px; margin-bottom:6px; font-size:0.8rem; word-break:break-all; }
+      .vp-field { margin-bottom:12px; }
+      .vp-field label { display:block; font-size:0.76rem; font-weight:700; color:var(--muted,#667085); margin-bottom:4px; }
+      .vp-progress { margin-top:10px; display:none; }
+      .vp-progress.show { display:block; }
+      .vp-progress .bar { height:8px; background:var(--surface-muted,#eef2f7); border-radius:20px; overflow:hidden; margin-top:6px; }
+      .vp-progress .fill { height:100%; width:0; background:var(--brand-teal,#00b8a9); border-radius:20px; transition:width .3s; }
+      .vp-note { font-size:0.75rem; color:var(--muted,#667085); margin-top:6px; }
+      .vp-field input, .vp-field textarea, .vp-field select { width:100%; padding:8px 12px; border:1.5px solid var(--border,#d8dee9); border-radius:9px; font-family:inherit; font-size:0.86rem; outline:none; background:var(--card-bg,#fff); color:var(--text,#1f2937); box-sizing:border-box; }
+      .vp-field input:focus, .vp-field textarea:focus { border-color:var(--brand-teal,#00b8a9); }
+      .vp-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+      .vp-check { display:inline-flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:600; cursor:pointer; }
+      body.dark-mode .vp-kpi, body.dark-mode .vp-toolbar, body.dark-mode .vp-box, body.dark-mode .vp-modal-card { background:var(--card-bg,#1e293b); }
+      body.dark-mode .vp-table th { background:var(--surface,#0f172a); }
+      body.dark-mode .vp-table td { border-color:var(--border,#334155); }
+      body.dark-mode .vp-desc, body.dark-mode .vp-media-item { background:var(--surface,#0f172a); }
+    </style>
+  </head>
+  <body class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-badge">
+        <i class="fa-solid fa-handshake"></i>
+        <div><strong>Buda Admin</strong><small>إدارة المتجر</small></div>
+      </div>
+      <nav class="side-nav">
+        <a class="side-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>لوحة التحكم</span></a>
+        <a class="side-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>رسائل الدعم</span></a>
+        <a class="side-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة المنتجات</span></a>
+        <a class="side-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>الطلبات</span></a>
+        <a class="side-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>طلبات الشراكة</span></a>
+        <a class="side-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة المنتجات</span></a>
+        <a class="side-link" href="admin-ai-details.html"><i class="fa-solid fa-wand-magic-sparkles"></i><span>AI محتوى</span></a>
+        <a class="side-link" href="taager-products.html"><i class="fa-solid fa-database"></i><span>منتجات Taager</span></a>
+        <a class="side-link active" href="admin-vendor-products.html"><i class="fa-solid fa-handshake"></i><span>منتجات Vendoor</span></a>
+        <a class="side-link" href="admin-vendor-token.html"><i class="fa-solid fa-key"></i><span>جلسة Vendoor</span></a>
+        <a class="side-link" href="../admin-pricing.html"><i class="fa-solid fa-coins"></i><span>شرائح الأسعار</span></a>
+        <a class="side-link" href="admin-sellers.html"><i class="fa-solid fa-store"></i><span>إدارة البائعين</span></a>
+        <a class="side-link" href="admin-coupons.html"><i class="fa-solid fa-tags"></i><span>إدارة الكوبونات</span></a>
+        <a class="side-link" href="admin-fake-prices.html"><i class="fa-solid fa-percent"></i><span>الأسعار الوهمية</span></a>
+        <a class="side-link" href="admin-taager-token.html"><i class="fa-solid fa-key"></i><span>توكن تاجر</span></a>
+      </nav>
+    </aside>
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-title">
+          <h1>منتجات Vendoor</h1>
+          <p>إدارة منتجات منصة الفيندور المستوردة — في نفس سلة منتجات تاجر <strong id="vp-total-top">0</strong></p>
+        </div>
+      </header>
+      <section class="content-wrap admin-page vp-wrap">
+        <div id="vp-status" class="vp-status"></div>
+
+        <div class="vp-kpis">
+          <div class="vp-kpi c1"><div class="n" id="k-total">0</div><div class="t">إجمالي المنتجات</div></div>
+          <div class="vp-kpi c2"><div class="n" id="k-active">0</div><div class="t">نشط</div></div>
+          <div class="vp-kpi c3"><div class="n" id="k-out">0</div><div class="t">خارج المخزون</div></div>
+          <div class="vp-kpi c4"><div class="n" id="k-done">0</div><div class="t">أكملت التفاصيل</div></div>
+          <div class="vp-kpi c5"><div class="n" id="k-pending">0</div><div class="t">بانتظار التفاصيل</div></div>
+        </div>
+
+        <div class="vp-toolbar">
+          <div class="vp-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="vp-search" placeholder="بحث باسم المنتج أو معرفه..." />
+          </div>
+          <select class="vp-select" id="vp-status-filter">
+            <option value="active">نشط فقط</option>
+            <option value="all">الكل</option>
+            <option value="inactive">معطّل</option>
+          </select>
+          <select class="vp-select" id="vp-details-filter">
+            <option value="all">كل التفاصيل</option>
+            <option value="ready">أكملت التفاصيل</option>
+            <option value="pending">بانتظار التفاصيل</option>
+          </select>
+          <select class="vp-select" id="vp-seller-filter">
+            <option value="">كل البائعين</option>
+          </select>
+          <select class="vp-select" id="vp-sort">
+            <option value="updated_desc">الأحدث تحديثاً</option>
+            <option value="created_desc">الأحدث إضافة</option>
+            <option value="name_asc">الاسم أ→ي</option>
+            <option value="price_asc">السعر تصاعدي</option>
+            <option value="price_desc">السعر تنازلي</option>
+            <option value="stock_asc">الأقل مخزناً</option>
+          </select>
+          <select class="vp-select" id="vp-per-page">
+            <option value="25">25 / صفحة</option>
+            <option value="50" selected>50 / صفحة</option>
+            <option value="100">100 / صفحة</option>
+          </select>
+          <button id="btn-refresh" class="vp-btn secondary"><i class="fa-solid fa-rotate"></i> تحديث</button>
+          <button id="btn-sync" class="vp-btn primary"><i class="fa-solid fa-cloud-arrow-down"></i> جلب من Vendoor</button>
+        </div>
+
+        <div class="vp-bulkbar">
+          <span class="blk-lbl"><i class="fa-solid fa-sliders"></i> عمليات جماعية:</span>
+          <button id="btn-bulk-end" class="vp-btn primary" title="يكمل الترحيل صفحة-صفحة حتى آخر كتالوج فيندور: يضيف الجديد ويحدّث الموجود حتى اكتمال المرور الكامل"><i class="fa-solid fa-angles-down"></i> سحب حتى آخر صفحة</button>
+          <button id="btn-bulk-sync" class="vp-btn primary" title="جلب كل كتالوج فيندور وتحديث المنتجات الموجودة وإضافة الجديد وتعطيل المحذوف"><i class="fa-solid fa-cloud-arrow-down"></i> سحب المنتجات كلها</button>
+          <button id="btn-bulk-new" class="vp-btn primary" title="يسحب الكتالوج ويضيف المنتجات الجديدة فقط دون لمس الموجود"><i class="fa-solid fa-cloud-plus"></i> سحب الجديد فقط</button>
+          <button id="btn-bulk-stock" class="vp-btn secondary" title="يجلب الكتالوج ويحدّث المخزون فقط لجميع المنتجات"><i class="fa-solid fa-boxes-stacked"></i> تحديث المخزون الكل</button>
+          <button id="btn-bulk-sizes" class="vp-btn secondary" title="يجلب صفحات المقاسات ويحدّث المقاسات فقط"><i class="fa-solid fa-ruler-combined"></i> تحديث المقاسات</button>
+          <button id="btn-bulk-price" class="vp-btn secondary" title="يجلب الكتالوج ويحدّث الأسعار فقط"><i class="fa-solid fa-money-bill-wave"></i> تحديث الأسعار</button>
+        </div>
+
+        <div class="vp-box">
+          <div id="vp-loading" class="vp-loading" style="display:none;"><div class="spinner"></div><div style="margin-top:8px;color:var(--muted,#667085);">جاري التحميل...</div></div>
+          <div id="vp-table-wrap" style="overflow-x:auto;"></div>
+          <div class="vp-footer">
+            <button id="btn-prev" class="vp-btn secondary"><i class="fa-solid fa-chevron-right"></i> السابق</button>
+            <button id="btn-next" class="vp-btn secondary">التالي <i class="fa-solid fa-chevron-left"></i></button>
+            <span class="info" id="vp-page-info">--</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Detail Modal -->
+    <div class="vp-modal" id="modal-detail">
+      <div class="vp-modal-card">
+        <div class="vp-modal-head">
+          <h3><i class="fa-solid fa-box-open"></i> تفاصيل المنتج</h3>
+          <button class="close" onclick="closeModal('modal-detail')">&times;</button>
+        </div>
+        <div class="vp-modal-body" id="modal-detail-body"></div>
+      </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="vp-modal" id="modal-edit">
+      <div class="vp-modal-card">
+        <div class="vp-modal-head">
+          <h3><i class="fa-solid fa-pen-to-square"></i> تعديل المنتج</h3>
+          <button class="close" onclick="closeModal('modal-edit')">&times;</button>
+        </div>
+        <div class="vp-modal-body">
+          <input type="hidden" id="e-id" />
+          <div class="vp-field"><label>اسم المنتج</label><input type="text" id="e-name" /></div>
+          <div class="vp-grid2">
+            <div class="vp-field"><label>السعر (ج.م)</label><input type="number" id="e-price" step="0.01" /></div>
+            <div class="vp-field"><label>المخزون</label><input type="number" id="e-stock" step="1" /></div>
+          </div>
+          <div class="vp-grid2">
+            <div class="vp-field"><label>البائع</label><input type="text" id="e-seller" /></div>
+            <div class="vp-field"><label>حالة المخزون</label>
+              <select id="e-stock-status">
+                <option value="in_stock">متوفر</option>
+                <option value="out_of_stock">نفد</option>
+                <option value="preorder">حجز مسبق</option>
+              </select>
+            </div>
+          </div>
+          <div class="vp-field"><label>الوصف</label><textarea id="e-description" rows="4"></textarea></div>
+          <div class="vp-field"><label class="vp-check"><input type="checkbox" id="e-active" checked /> المنتج نشط وظاهر</label></div>
+          <div style="display:flex;gap:10px;margin-top:6px;">
+            <button id="btn-save-edit" class="vp-btn primary"><i class="fa-solid fa-floppy-disk"></i> حفظ</button>
+            <button class="vp-btn secondary" onclick="closeModal('modal-edit')">إلغاء</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sync Modal -->
+    <div class="vp-modal" id="modal-sync">
+      <div class="vp-modal-card">
+        <div class="vp-modal-head">
+          <h3><i class="fa-solid fa-cloud-arrow-down"></i> <span id="s-title">جلب من Vendoor</span></h3>
+          <button class="close" onclick="closeModal('modal-sync')">&times;</button>
+        </div>
+        <div class="vp-modal-body">
+          <div id="s-desc" style="background:var(--surface-muted,#f8f9fb);padding:10px 14px;border-radius:10px;font-size:0.8rem;color:var(--muted,#667085);margin-bottom:12px;"></div>
+          <div class="vp-grid2">
+            <div class="vp-field"><label>عدد الصفحات (max_pages)</label><input type="number" id="s-max-pages" value="60" min="1" max="200" /></div>
+            <div class="vp-field"><label>عدد التفاصيل هذه الجولة</label><input type="number" id="s-details-limit" value="200" min="0" max="1000" /></div>
+          </div>
+          <div class="vp-field"><label>Sync Secret (إن كان مضبوطاً)</label><input type="password" id="s-secret" placeholder="اختياري" /></div>
+          <div class="vp-field"><label class="vp-check"><input type="checkbox" id="s-fetch-details" checked /> جلب التفاصيل (وصف + مقاسات + ميديا)</label></div>
+          <div class="vp-field"><label class="vp-check"><input type="checkbox" id="s-auto" checked /> واصل تلقائيًا بجولات قصيرة حتى اكتمال الكتالوج (ينفّذ fetch الكبير في دفعات صغيرة لتجنّب حد الموارد)</label></div>
+          <input type="hidden" id="s-fields" value="full" />
+          <input type="hidden" id="s-new-only" value="0" />
+          <div id="s-progress" class="vp-progress"><div style="font-size:0.78rem;color:var(--muted,#667085);" id="s-progress-text">جولة 1/... </div><div class="bar"><div class="fill" id="s-progress-fill"></div></div></div>
+          <div class="vp-note">ملاحظة: حد موارد Supabase المجاني يقبل ~2 ثانية CPU لكل جولة، لذا الجولة الواحدة تُكبّر على الأكثر 20 صفحة. الخيار التلقائي يدير كل الجولات حتى تظهر "اكتمل الكتالوج ✓".</div>
+          <div id="s-result"></div>
+          <div style="display:flex;gap:10px;margin-top:8px;">
+            <button id="btn-run-sync" class="vp-btn primary"><i class="fa-solid fa-play"></i> بدء الجلب</button>
+            <button class="vp-btn secondary" onclick="closeModal('modal-sync')">إغلاق</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      var _sb;
+      try { _sb = window._getSupabaseClient ? window._getSupabaseClient() : (window.__sb || window.supabase.createClient("https://msgqzgzoslearaprgiqq.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE")); } catch(e) { _sb = window.supabase.createClient("https://msgqzgzoslearaprgiqq.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE"); }
+      var EDGE_URL = "https://msgqzgzoslearaprgiqq.supabase.co/functions/v1/vendor-proxy";
+
+      var page = 1;
+      var totalRows = 0;
+      var sellersCache = [];
+
+      function $(id) { return document.getElementById(id); }
+      function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+      function raw(p) { return (p && p.raw_data && typeof p.raw_data === "object") ? p.raw_data : {}; }
+      function number(v, fb) { var n = Number(v); return Number.isFinite(n) ? n : (fb != null ? fb : 0); }
+      function money(v) { return number(v, 0).toLocaleString("ar-EG", { maximumFractionDigits: 0 }) + " ج.م"; }
+      function hasDetails(p) {
+        var r = raw(p);
+        return !!(esc(r.description) || (Array.isArray(r.variants) && r.variants.length));
+      }
+
+      function notify(msg, type) {
+        var el = $("vp-status");
+        el.textContent = msg;
+        el.className = "vp-status show " + type;
+        if (type !== "error") setTimeout(function() { el.classList.remove("show"); }, 6000);
+      }
+
+      function openModal(id) { $(id).classList.add("open"); }
+      function closeModal(id) { $(id).classList.remove("open"); }
+      document.querySelectorAll(".vp-modal").forEach(function(m) {
+        m.addEventListener("click", function(e) { if (e.target === m) closeModal(m.id); });
+      });
+
+      var BASE_IMG_FALLBACK = "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23eef2f7%22 width=%22100%22 height=%22100%22/><text x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%2394a3b8%22 font-size=%2210%22>بدون صورة</text></svg>";
+
+      function productImages(p) {
+        var out = [];
+        var seen = {};
+        var push = function(u) { if (u && !seen[u] && !seen[u.toUpperCase()]) { seen[u.toUpperCase()] = 1; out.push(u); } };
+        var r = raw(p);
+        (Array.isArray(r.images) ? r.images : []).forEach(push);
+        [p.image1, p.image2, p.image3, p.image4, p.image5, p.image6, p.image7, p.image8].forEach(push);
+        (Array.isArray(p.images) ? p.images : []).forEach(push);
+        push(p.image);
+        if (!out.length) out.push("");
+        return out;
+      }
+
+      function buildQuery() {
+        var q = _sb.from("taager_products").select("*").eq("source", "vendor");
+
+        var s = $("vp-search").value.trim();
+        if (s) {
+          var num = s.match(/^\d+$/);
+          q = num ? q.eq("id", "vendor_" + s) : q.ilike("name", "%" + s + "%");
+        }
+
+        var st = $("vp-status-filter").value;
+        if (st === "active") q = q.eq("is_active", true);
+        if (st === "inactive") q = q.eq("is_active", false);
+
+        var seller = $("vp-seller-filter").value;
+        if (seller) q = q.eq("seller", seller);
+
+        var sort = $("vp-sort").value;
+        var order = { updated_desc: ["updated_at", "desc"], created_desc: ["created_at", "desc"], name_asc: ["name", "asc"], price_asc: ["price", "asc"], price_desc: ["price", "desc"], stock_asc: ["stock", "asc"] };
+        var o = order[sort] || order.updated_desc;
+        q = q.order(o[0], { ascending: o[1] === "asc" });
+
+        var per = number($("vp-per-page").value, 50);
+        var from = (page - 1) * per;
+        q = q.range(from, from + per - 1);
+        return q;
+      }
+
+      async function loadProducts(keepPage) {
+        if (!keepPage) page = 1;
+        $("vp-loading").style.display = "block";
+        var tableWrap = $("vp-table-wrap");
+        var btn = $("btn-refresh");
+        btn.disabled = true;
+        try {
+          var per = number($("vp-per-page").value, 50);
+
+          var q = buildQuery();
+          var { data, error } = await q;
+          if (error) throw error;
+
+          var { count } = await _sb.from("taager_products").select("id", { count: "exact", head: true }).eq("source", "vendor");
+          totalRows = count || 0;
+          var list = data || [];
+          renderTable(list);
+          $("vp-total-top").textContent = totalRows;
+
+          var pages = Math.max(1, Math.ceil(totalRows / per));
+          $("vp-page-info").textContent = "صفحة " + page + " من " + pages + " — إجمالي " + totalRows + " منتج";
+          $("btn-prev").disabled = page <= 1;
+          $("btn-next").disabled = page >= pages;
+          if (list.length === 0) $("btn-next").disabled = true;
+
+          loadStats();
+        } catch(e) {
+          notify("فشل التحميل: " + (e.message || e), "error");
+        }
+        $("vp-loading").style.display = "none";
+        btn.disabled = false;
+      }
+
+      async function loadStats() {
+        var base = _sb.from("taager_products").select("*", { count: "exact", head: true }).eq("source", "vendor");
+        var total = await base.count ? null : null;
+        var t = await _sb.from("taager_products").select("id", { count: "exact", head: true }).eq("source", "vendor");
+        var a = await _sb.from("taager_products").select("id", { count: "exact", head: true }).eq("source", "vendor").eq("is_active", true);
+        var o = await _sb.from("taager_products").select("id", { count: "exact", head: true }).eq("source", "vendor").eq("stock_status", "out_of_stock");
+        $("k-total").textContent = t.count || 0;
+        $("k-active").textContent = a.count || 0;
+        $("k-out").textContent = o.count || 0;
+
+        var noDesc = await _sb.from("taager_products").select("id", { count: "exact", head: true }).eq("source", "vendor").is("description", null);
+        var noDesc2 = await _sb.from("taager_products").select("id", { count: "exact", head: true }).eq("source", "vendor").eq("description", "");
+        var pending = (noDesc.count || 0) + (noDesc2.count || 0);
+        $("k-pending").textContent = pending;
+        $("k-done").textContent = Math.max(0, (t.count || 0) - pending);
+      }
+
+      async function loadSellers() {
+        var all = [];
+        var off = 0;
+        while (true) {
+          var { data, error } = await _sb.from("taager_products").select("seller").eq("source", "vendor").range(off, off + 999);
+          if (error) break;
+          if (!data || !data.length) break;
+          all = all.concat(data);
+          off += 1000;
+          if (data.length < 999) break;
+        }
+        var seen = {};
+        all.forEach(function(r) { if (r.seller) seen[r.seller] = 1; });
+        sellersCache = Object.keys(seen).sort();
+        var sel = $("vp-seller-filter");
+        sel.innerHTML = '<option value="">كل البائعين</option>' + sellersCache.map(function(x) { return '<option value="' + esc(x) + '">' + esc(x) + '</option>'; }).join("");
+        sel.value = "";
+      }
+
+      function statusBadge(p) {
+        var r = raw(p);
+        var done = hasDetails(p);
+        var detBadge = done ? '<span class="vp-badge ok">تفاصيل</span>' : '<span class="vp-badge warn">بدون تفاصيل</span>';
+        if (!p.is_active) return '<span class="vp-badge off">معطّل</span> ' + detBadge;
+        if (p.stock_status === "out_of_stock" || (number(p.stock, 1) <= 0)) return '<span class="vp-badge no">نفد</span> ' + detBadge;
+        return '<span class="vp-badge ok">نشط</span> ' + detBadge;
+      }
+
+      function renderTable(list) {
+        var wrap = $("vp-table-wrap");
+        if (!list.length) {
+          wrap.innerHTML = '<div class="vp-empty"><i class="fa-solid fa-box-open" style="font-size:3rem;display:block;margin-bottom:12px;opacity:0.25;"></i>لا توجد منتجات مطابقة.<br>شغّل "جلب من Vendoor" لاستيراد المنتجات.</div>';
+          return;
+        }
+        var rows = list.map(function(p) {
+          var r = raw(p);
+          var imgs = productImages(p);
+          var img = imgs[0] ? '<img src="' + esc(imgs[0]) + '" alt="" loading="lazy" onerror="this.src=window.BASE_IMG_FALLBACK" />' : '<div style="width:46px;height:46px;border-radius:9px;background:var(--surface-muted,#eef2f7);display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-image" style="color:var(--muted,#94a3b8)"></i></div>';
+          var pid = String(p.id || "").replace(/^vendor_/, "");
+          var zip = r.zip_url || "";
+          var zipBtn = zip ? '<button class="vp-icon-btn" title="نسخ رابط ZIP" onclick="window.copyZip(\'' + esc(zip).replace(/'/g, "\\'") + '\')"><i class="fa-solid fa-file-zipper"></i></button>' : '<button class="vp-icon-btn" disabled title="لا يوجد ZIP"><i class="fa-solid fa-file-zipper"></i></button>';
+          var variantsN = Array.isArray(r.variants) ? r.variants.length : 0;
+          var driveN = Array.isArray(r.drive_links) ? r.drive_links.length : (Array.isArray(r.media && r.media.drives) ? r.media.drives.length : 0);
+
+          return '<tr data-id="' + esc(p.id) + '" data-pid="' + pid + '">' +
+            '<td><div class="vp-prod">' + img +
+              '<div><div class="nm" title="' + esc(p.name) + '">' + esc(p.name) + '</div><div class="id">vendor_' + pid + '</div></div>' +
+            '</div></td>' +
+            '<td style="white-space:nowrap;">' + money(p.price) +
+              (r.price_min != null ? '<div style="font-size:0.72rem;color:var(--muted,#667085);">أدنى ' + number(r.price_min).toLocaleString("ar-EG") + ' — أقصى ' + number(r.price_max).toLocaleString("ar-EG") + '</div>' : '') +
+            '</td>' +
+            '<td>' + (number(p.stock, 0) || "—") + '</td>' +
+            '<td>' + esc(p.seller || "—") + '</td>' +
+            '<td style="text-align:center;">' + variantsN + ' مقاس</td>' +
+            '<td>' + zipBtn + ' <a class="vp-icon-btn" title="صفحة المنتج في Vendoor" href="https://aff.ven-door.com/product/' + pid + '" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i></a></td>' +
+            '<td style="white-space:nowrap;font-size:0.75rem;color:var(--muted,#667085);">' + (p.updated_at ? p.updated_at.replace("T", " ").split(".")[0].slice(0, 16) : "—") + '</td>' +
+            '<td>' + statusBadge(p) + '</td>' +
+            '<td style="white-space:nowrap;">' +
+              '<button class="vp-icon-btn" title="تفاصيل" onclick="showDetail(\'' + pid + '\')"><i class="fa-solid fa-eye"></i></button> ' +
+              '<button class="vp-icon-btn" title="تحديث تفاصيل من Vendoor" onclick="refreshOne(\'' + pid + '\')"><i class="fa-solid fa-rotate"></i></button> ' +
+              '<button class="vp-icon-btn" title="تعديل" onclick="openEdit(\'' + pid + '\')"><i class="fa-solid fa-pen"></i></button> ' +
+              '<button class="vp-icon-btn" title="تعطيل/تفعيل" onclick="toggleActive(\'' + pid + '\')"><i class="fa-solid fa-power-off"></i></button> ' +
+              '<button class="vp-icon-btn danger" title="حذف" onclick="removeOne(\'' + pid + '\')"><i class="fa-solid fa-trash"></i></button>' +
+            '</td></tr>';
+        }).join("");
+        wrap.innerHTML = '<table class="vp-table"><thead><tr>' +
+          '<th>المنتج</th><th>السعر</th><th>المخزون</th><th>البائع</th><th>المقاسات</th><th>الميديا</th><th>آخر تحديث</th><th>الحالة</th><th>إجراءات</th>' +
+          '</tr></thead><tbody>' + rows + '</tbody></table>';
+      }
+
+      window.BASE_IMG_FALLBACK = BASE_IMG_FALLBACK;
+      window.copyZip = function(url) { (function(u){ if (navigator.clipboard) navigator.clipboard.writeText(u).then(function(){ notify("تم نسخ رابط ZIP.", "info"); }); else alert(u); })(decodeURIComponent(url)); };
+
+      function showDetail(pid) {
+        var rows = document.querySelectorAll("#vp-table-wrap tbody tr[data-pid='" + pid + "']");
+        (function(p) {
+          if (!p) { notify("المنتج غير موجود في الصفحة الحالية.", "error"); return; }
+          renderDetail(p);
+          openModal("modal-detail");
+        })(null);
+        // Fetch full object fresh for complete raw_data
+        fetchRow(pid).then(function(p) {
+          if (p) { renderDetail(p); openModal("modal-detail"); }
+        });
+      }
+
+      async function fetchRow(pid) {
+        var { data, error } = await _sb.from("taager_products").select("*").eq("id", "vendor_" + pid).maybeSingle();
+        if (error) { notify("فشل التحميل: " + error.message, "error"); return null; }
+        return data;
+      }
+
+      function renderDetail(p) {
+        var r = raw(p);
+        var imgs = productImages(p);
+        var gallery = imgs.map(function(u) {
+          return u ? '<img src="' + esc(u) + '" onclick="window.open(\'' + esc(u).replace(/'/g, "\\'") + '\')" onerror="this.style.display=\'none\'" />' : '';
+        }).filter(Boolean).join("");
+
+        var vars = Array.isArray(r.variants) && r.variants.length ? r.variants : null;
+        var varTable = vars ? '<table class="vp-variant-table"><thead><tr><th>اللون</th><th>المقاس</th><th>المخزون</th></tr></thead><tbody>' + vars.map(function(v) {
+          return '<tr><td>' + esc(v.color || "—") + '</td><td>' + esc(v.size || v.sizeCombined || "—") + '</td><td>' + esc(v.stock == null ? "—" : v.stock) + '</td></tr>';
+        }).join("") + '</tbody></table>' : '<span style="color:var(--muted,#667085);">لا توجد بيانات مقاسات</span>';
+
+        var desc = r.description || p.description || "";
+        if (desc) desc = desc.replace(/^<p>/gi, "").replace(/<\/p>$/gi, "");
+        var descHtml = desc ? '<div style="margin:10px 0;"><div style="font-size:0.76rem;font-weight:700;color:var(--muted,#667085);margin-bottom:4px;">الوصف</div><div class="vp-desc">' + esc(desc) + '</div></div>' : "";
+
+        var drives = r.drive_links || (r.media && r.media.drives) || [];
+        var mediaHtml = '<div style="margin:10px 0;"><div style="font-size:0.76rem;font-weight:700;color:var(--muted,#667085);margin-bottom:4px;">الوسائط</div>';
+        if (r.zip_url) mediaHtml += '<div class="vp-media-item"><i class="fa-solid fa-file-zipper" style="color:var(--brand-teal);"></i> <a class="vp-link" href="' + esc(r.zip_url) + '" target="_blank" rel="noopener">تحميل ZIP</a></div>';
+        if (drives.length) drives.forEach(function(d) { mediaHtml += '<div class="vp-media-item"><i class="fa-brands fa-google-drive" style="color:#1da462;"></i> <a class="vp-link" href="' + esc(d) + '" target="_blank" rel="noopener">' + esc(d) + '</a></div>'; });
+        if (!r.zip_url && !drives.length) mediaHtml += '<span style="color:var(--muted,#667085);">لا يوجد ميديا</span>';
+        mediaHtml += '</div>';
+
+        var meta = [
+          ["المعرف", "vendor_" + pid(p)],
+          ["متجر/قسم", r.store_id || "—"],
+          ["البائع (ID)", (p.seller || "—") + (r.vendor_id ? " (vendor_id: " + r.vendor_id + ")" : "")],
+          ["السعر", money(p.price)],
+          ["أدنى/أقصى", r.price_min != null ? number(r.price_min).toLocaleString("ar-EG") + " / " + number(r.price_max).toLocaleString("ar-EG") + " ج.م" : "—"],
+          ["العملة", "ج.م"],
+          ["المخزون", number(p.stock, 0) + " (" + esc(p.stock_status || "in_stock") + ")"],
+          ["التفاصيل أكتملت", hasDetails(p) ? "نعم" : "لا"],
+          ["آخر تحديث", (p.updated_at || "").replace("T", " ").split(".")[0].slice(0, 16)],
+        ];
+        var metaHtml = '<div class="vp-grid2" style="margin:10px 0;">' + meta.map(function(m) {
+          return '<div style="padding:8px 10px;background:var(--surface-muted,#f8f9fb);border-radius:8px;"><div style="font-size:0.7rem;color:var(--muted,#667085);">' + m[0] + '</div><div style="font-weight:700;font-size:0.85rem;">' + m[1] + '</div></div>';
+        }).join("") + '</div>';
+
+        var body = $("modal-detail-body");
+        body.innerHTML =
+          '<h3 style="margin:0 0 4px;">' + esc(p.name) + '</h3>' +
+          '<div style="font-size:0.78rem;color:var(--muted,#667085);margin-bottom:12px;">' + metaHtml + '</div>' +
+          (gallery ? '<div class="vp-gallery" style="margin-bottom:12px;">' + gallery + '</div>' : '<div style="color:var(--muted,#667085);font-size:0.85rem;padding:10px 0;">لا توجد صور</div>') +
+          descHtml +
+          '<div style="margin:10px 0;"><div style="font-size:0.76rem;font-weight:700;color:var(--muted,#667085);margin-bottom:4px;">المقاسات والألوان (' + (vars ? vars.length : 0) + ')' + '</div>' + varTable + '</div>' +
+          mediaHtml;
+      }
+
+      function pid(p) { return String(p.id || "").replace(/^vendor_/, ""); }
+
+      function openEdit(pid) {
+        fetchRow(pid).then(function(p) {
+          if (!p) return;
+          $("e-id").value = p.id;
+          $("e-name").value = p.name || "";
+          $("e-price").value = number(p.price, 0);
+          $("e-stock").value = number(p.stock, 0);
+          $("e-seller").value = p.seller || "";
+          $("e-stock-status").value = p.stock_status || "in_stock";
+          $("e-description").value = p.description || "";
+          $("e-active").checked = !!p.is_active;
+          openModal("modal-edit");
+        });
+      }
+
+      $("btn-save-edit").addEventListener("click", async function() {
+        var id = $("e-id").value;
+        if (!id) return;
+        var btn = this;
+        btn.disabled = true;
+        try {
+          var r = raw({});
+          var patch = {
+            name: $("e-name").value.trim(),
+            price: number($("e-price").value, 0),
+            stock: number($("e-stock").value, 0),
+            stock_status: $("e-stock-status").value,
+            seller: $("e-seller").value.trim(),
+            description: $("e-description").value.trim(),
+            is_active: $("e-active").checked,
+            updated_at: new Date().toISOString(),
+          };
+          var { error } = await _sb.from("taager_products").update(patch).eq("id", id);
+          if (error) throw error;
+          notify("تم حفظ التعديلات.", "success");
+          closeModal("modal-edit");
+          loadProducts(true);
+        } catch(e) {
+          notify("فشل الحفظ: " + (e.message || e), "error");
+        }
+        btn.disabled = false;
+      });
+
+      async function toggleActive(pid) {
+        var p = await fetchRow(pid);
+        if (!p) return;
+        var next = !p.is_active;
+        if (!confirm(next ? "تفعيل المنتج؟" : "تعطيل المنتج من الظهور؟")) return;
+        var { error } = await _sb.from("taager_products").update({ is_active: next, updated_at: new Date().toISOString() }).eq("id", p.id);
+        if (error) { notify("فشل: " + error.message, "error"); return; }
+        notify(next ? "تم التفعيل." : "تم التعطيل.", "success");
+        loadProducts(true);
+        loadStats();
+      }
+
+      async function removeOne(pid) {
+        if (!confirm("حذف المنتج vendor_" + pid + " نهائياً؟")) return;
+        var { error } = await _sb.from("taager_products").delete().eq("id", "vendor_" + pid);
+        if (error) { notify("فشل الحذف: " + error.message, "error"); return; }
+        notify("تم الحذف.", "success");
+        loadProducts(true);
+        loadStats();
+      }
+
+      async function refreshOne(pid) {
+        if (!confirm("إعادة جلب تفاصيل هذا المنتج من Vendoor؟")) return;
+        try {
+          var res = await fetch(EDGE_URL + "?action=detail&id=" + pid);
+          var data = await res.json();
+          if (!res.ok || !data.ok) { notify((data.error || "فشل") + (data.hint || ""), "error"); return; }
+          notify("تم تحديث تفاصيل المنتج.", "success");
+          loadProducts(true);
+        } catch(e) { notify("فشل: " + (e.message || e), "error"); }
+      }
+
+      $("btn-run-sync").addEventListener("click", async function() {
+        var btn = this;
+        var out = $("s-result");
+        var auto = $("s-auto").checked;
+
+        var params = {
+          details_limit: number($("s-details-limit").value, 200),
+          fetch_details: $("s-fetch-details").checked,
+          fields: $("s-fields").value || "full",
+          new_only: $("s-new-only").value === "1",
+          secret: $("s-secret").value.trim(),
+        };
+
+        var sum = { synced: 0, added: 0, updated: 0, pages: 0, details: 0, runs: 0 };
+        var notes = [];
+        var done = false;
+
+        function mark(j, total, text) {
+          $("s-progress").classList.add("show");
+          $("s-progress-text").textContent = text;
+          $("s-progress-fill").style.width = Math.min(100, Math.round((j / Math.max(1, total)) * 100)) + "%";
+        }
+
+        async function oneRun(runNo) {
+          var callPages = auto ? 15 : number($("s-max-pages").value, 60);
+          var callDetails = auto ? Math.max(1, Math.min(params.details_limit, 8)) : params.details_limit;
+          var url = EDGE_URL + "?action=sync" +
+            "&max_pages=" + encodeURIComponent(callPages) +
+            "&details_limit=" + encodeURIComponent(callDetails) +
+            "&fetch_details=" + (params.fetch_details ? "1" : "0") +
+            "&fields=" + encodeURIComponent(params.fields) +
+            "&new_only=" + (params.new_only ? "1" : "0");
+          var headers = { "Content-Type": "application/json" };
+          if (params.secret) headers["x-sync-secret"] = params.secret;
+          var res = await fetch(url, { headers: headers });
+          var data = await res.json();
+          return { ok: res.ok, data: data };
+        }
+
+        function item(lbl, v) { return '<div style="padding:8px 10px;background:var(--surface-muted,#f8f9fb);border-radius:8px;"><div style="font-size:0.7rem;color:var(--muted,#667085);">' + lbl + '</div><div style="font-weight:700;">' + v + '</div></div>'; }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التنفيذ...';
+        out.innerHTML = "";
+        try {
+          var runNo = 0;
+          var maxRuns = auto ? 600 : 1;
+          while (!done) {
+            runNo++;
+            if (runNo > maxRuns) { notes.push("وصلت أقصى عدد جولات (" + maxRuns + ") — اضغط الزر مجددًا للمتابعة"); break; }
+            mark(runNo, maxRuns, "جولة " + runNo + (auto ? " من سلسلة متواصلة — " : " ") + "يا اختارك...");
+            var r;
+            try { r = await oneRun(runNo); }
+            catch (e) {
+              notes.push("جولة " + runNo + " فشلت (شبكة): " + (e.message || e));
+              if (!auto) break;
+              await new Promise(function(res) { setTimeout(res, 1200); });
+              continue;
+            }
+            var d = r.data || {};
+            if (!r.ok) {
+              notes.push("جولة " + runNo + " رجعت خطأ: " + (d.error || r.status));
+              if (d.loop_stopped) { notes.push(params.new_only ? "لا يوجد منتجات جديدة — كل كتالوج فيندور موجود بالفعل." : "اكتمل المرور على كل صفحات فيندور."); done = true; }
+              if (!auto) break;
+              await new Promise(function(res) { setTimeout(res, 1200); });
+              continue;
+            }
+            if (!d.ok) {
+              notes.push("جولة " + runNo + " رجعت: " + (d.error || "فشل"));
+              if (d.loop_stopped || d.catalog_complete) done = true;
+              if (!auto) break;
+              await new Promise(function(res) { setTimeout(res, 1200); });
+              continue;
+            }
+            sum.synced += d.synced_count || 0;
+            sum.added += d.added_count || 0;
+            sum.updated += d.updated_count || 0;
+            sum.pages += d.pages_scanned || 0;
+            sum.details += d.details_fetched || 0;
+            sum.runs = runNo;
+            if (!auto && !done) done = true;
+            if (d.catalog_complete) { done = true; }
+            if (d.loop_stopped) { notes.push(params.new_only ? "تم إيقاف اللوب — لا يوجد منتجات جديدة." : "وصلت لأول صفحة تمت قراءتها — اكتمل المرور."); done = true; }
+            mark(runNo, maxRuns, "جولة " + runNo + " تمت — إجمالي " + sum.pages + " صفحة، أُضيف " + sum.added + "، حُدّث " + sum.updated);
+          }
+
+          var modeLabel = params.new_only ? "جديد فقط" : (params.fields !== "full" ? "تحديث (" + params.fields + ")" : "كامل/جميع");
+          var rowsGrid = '<div class="vp-grid2" style="margin:10px 0;">' +
+            item("الوضع", modeLabel) +
+            item("الجولات", sum.runs) +
+            item("منتجات الجولة", sum.synced) +
+            item("جديد أُضيف", sum.added) +
+            item("موجود حُدّث", sum.updated) +
+            item("صفحات", sum.pages);
+          if (params.fetch_details) rowsGrid += item("تفاصيل", sum.details);
+          rowsGrid += '</div>';
+          var notesHtml = notes.length ? '<div style="margin-top:8px;font-size:0.78rem;color:var(--muted,#667085);">' + notes.map(function(n) { return "• " + esc(n); }).join("<br>") + '</div>' : "";
+          out.innerHTML = rowsGrid + notesHtml;
+          notify("تم: " + sum.synced + " منتج (" + (sum.added ? "جديد " + sum.added : "لا جديد") + ").", sum.added ? "success" : "info");
+          loadProducts(false);
+        } catch(e) {
+          out.innerHTML = '<div class="vp-status error show">' + esc(e.message || e) + '</div>';
+        }
+        $("s-progress").classList.remove("show");
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-play"></i> بدء الجلب';
+      });
+
+      var BULK_PRESETS = {
+        "btn-bulk-end": {
+          title: "سحب حتى آخر صفحة",
+          desc: "يكمل الترحيل صفحة-صفحة حتى آخر كتالوج فيندور: يضيف المنتجات الجديدة، يحدّث الأسعار والمخزون للموجود، ويستمر تلقائيًا بالجولات القصيرة حتى المرور الكامل على كل الصفحات.",
+          maxPages: 30, detailsLimit: 24, fetchDetails: true, fields: "full", newOnly: 0, auto: true,
+        },
+        "btn-bulk-sync": {
+          title: "سحب المنتجات كلها",
+          desc: "يجلب كتالوج فيندور كاملاً: يضيف الجديد، يحدّث الموجود، ويعطّل المنتجات المحذوفة من فيندور (عند اكتمال الكتالوج).",
+          maxPages: 60, detailsLimit: 0, fetchDetails: true, fields: "full", newOnly: 0, auto: true,
+        },
+        "btn-bulk-new": {
+          title: "سحب الجديد فقط",
+          desc: "يجلب الكتالوج ويضيف المنتجات غير الموجودة في قاعدة البيانات فقط — بدون تعديل أو تعطيل أي منتج موجود.",
+          maxPages: 60, detailsLimit: 0, fetchDetails: false, fields: "full", newOnly: 1,
+        },
+        "btn-bulk-stock": {
+          title: "تحديث المخزون الكل",
+          desc: "يجلب الكتالوج ويحدّث حقول المخزون وحالة التوافر فقط لكل المنتجات الموجودة (ولا يضيف جديداً مطبوعاً، يتجاهل غير الموجود).",
+          maxPages: 60, detailsLimit: 0, fetchDetails: false, fields: "stock", newOnly: 0,
+        },
+        "btn-bulk-sizes": {
+          title: "تحديث المقاسات",
+          desc: "يجلب صفحات المقاسات لجميع المنتجات ويحدّث المقاسات والألوان والمخزون المرتبط بها فقط — يتطلب جلب التفاصيل.",
+          maxPages: 60, detailsLimit: 200, fetchDetails: true, fields: "sizes", newOnly: 0,
+        },
+        "btn-bulk-price": {
+          title: "تحديث الأسعار",
+          desc: "يجلب الكتالوج ويحدّث أسعار كل المنتجات فقط (السعر/الأدنى/الأقصى).",
+          maxPages: 60, detailsLimit: 0, fetchDetails: false, fields: "price", newOnly: 0,
+        },
+      };
+
+      function openBulk(id) {
+        var p = BULK_PRESETS[id];
+        if (!p) return;
+        $("s-title").textContent = p.title;
+        $("s-desc").textContent = p.desc;
+        $("s-max-pages").value = p.maxPages;
+        $("s-details-limit").value = p.detailsLimit;
+        $("s-fetch-details").checked = p.fetchDetails;
+        $("s-fields").value = p.fields;
+        $("s-new-only").value = String(p.newOnly);
+        $("s-auto").checked = p.auto !== false;
+        $("s-result").innerHTML = "";
+        openModal("modal-sync");
+      }
+
+      Object.keys(BULK_PRESETS).forEach(function(id) {
+        $(id).addEventListener("click", function() { openBulk(id); });
+      });
+
+      $("btn-sync").addEventListener("click", function() {
+        $("s-result").innerHTML = "";
+        openModal("modal-sync");
+      });
+
+      $("btn-refresh").addEventListener("click", function() { loadProducts(false); });
+      $("btn-prev").addEventListener("click", function() { if (page > 1) { page--; loadProducts(true); } });
+      $("btn-next").addEventListener("click", function() { page++; loadProducts(true); });
+
+      ["vp-search", "vp-status-filter", "vp-details-filter", "vp-sort", "vp-per-page"].forEach(function(id) {
+        $(id).addEventListener(id === "vp-search" ? "input" : "change", function() { loadProducts(false); });
+      });
+      $("vp-seller-filter").addEventListener("change", function() { loadProducts(false); });
+
+      var doSearch = (function() { var t; return function() { clearTimeout(t); t = setTimeout(function(){ loadProducts(false); }, 350); }; })();
+      $("vp-search").removeEventListener("input", null); // guarded; re-bind below
+      $("vp-search").oninput = doSearch;
+
+      async function prefillSecret() {
+        try {
+          var { data } = await _sb.from("app_settings").select("value").eq("key", "vendor_sync_secret").single();
+          if (data && data.value) $("s-secret").value = data.value;
+        } catch(e) {}
+      }
+
+      loadSellers();
+      loadStats();
+      loadProducts(false);
+      prefillSecret();
+    </script>
+  </body>
+</html>

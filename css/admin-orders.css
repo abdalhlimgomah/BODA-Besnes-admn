@@ -326,6 +326,29 @@
   margin-bottom: 6px;
 }
 
+.today-shortcut-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0d9488, #0f766e);
+  color: #fff;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 0.85rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.today-shortcut-btn:hover {
+  box-shadow: 0 4px 16px rgba(13, 148, 136, 0.35);
+  transform: translateY(-1px);
+}
+
 .back-link {
   display: inline-flex;
   align-items: center;

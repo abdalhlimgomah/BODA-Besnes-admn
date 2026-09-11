@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>إدارة جلسة Vendoor</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/app-shell.css" />
+    <link rel="stylesheet" href="../css/admin.css" />
+    <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="./auth-guard.js"></script>
+    <style>
+      .tk-wrap { max-width:820px; margin:0 auto; }
+      .tk-card { background:var(--card-bg,#fff); border-radius:16px; padding:24px; box-shadow:0 2px 12px rgba(0,0,0,0.04); margin-bottom:20px; }
+      .tk-card h2 { font-size:1.1rem; margin:0 0 16px; display:flex; align-items:center; gap:8px; }
+      .tk-card h2 i { color:var(--brand-orange,#ff6b1a); }
+      .tk-field { margin-bottom:16px; }
+      .tk-field label { display:block; font-size:0.82rem; font-weight:700; color:var(--muted,#667085); margin-bottom:4px; }
+      .tk-field input, .tk-field textarea { width:100%; padding:10px 14px; border:1.5px solid var(--border,#d8dee9); border-radius:10px; font-size:0.9rem; font-family:inherit; outline:none; transition:border-color 0.2s; background:var(--card-bg,#fff); color:var(--text,#1f2937); box-sizing:border-box; }
+      .tk-field input:focus, .tk-field textarea:focus { border-color:var(--brand-teal,#00b8a9); }
+      .tk-field textarea { min-height:60px; resize:vertical; font-family:monospace; direction:ltr; text-align:left; }
+      .tk-field .hint { font-size:0.75rem; color:var(--muted,#667085); margin-top:4px; }
+      .tk-btn { display:inline-flex; align-items:center; gap:8px; padding:10px 22px; border:none; border-radius:10px; font-size:0.9rem; font-weight:700; font-family:inherit; cursor:pointer; transition:background 0.2s,transform 0.1s; }
+      .tk-btn:active { transform:scale(0.97); }
+      .tk-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+      .tk-btn.primary { background:var(--brand-teal,#00b8a9); color:#fff; }
+      .tk-btn.primary:hover:not(:disabled) { background:var(--brand-teal-deep,#02998d); }
+      .tk-btn.secondary { background:var(--surface-muted,#eef2f7); color:var(--text,#1f2937); }
+      .tk-btn.secondary:hover:not(:disabled) { background:var(--border,#d8dee9); }
+      .tk-btn.danger { background:var(--danger,#e03131); color:#fff; }
+      .tk-btn.danger:hover:not(:disabled) { background:#c92a2a; }
+      .tk-btn.outline { background:transparent; color:var(--brand-teal,#00b8a9); border:1.5px solid var(--brand-teal,#00b8a9); }
+      .tk-btn.outline:hover { background:var(--brand-teal,#00b8a9); color:#fff; }
+      .tk-status { padding:12px 16px; border-radius:10px; font-size:0.85rem; font-weight:600; margin-bottom:16px; display:none; }
+      .tk-status.show { display:block; }
+      .tk-status.success { background:#f0fdf4; color:#1f9d55; border:1px solid #bbf7d0; }
+      .tk-status.error { background:#fef2f2; color:#e03131; border:1px solid #fecaca; }
+      .tk-status.info { background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; }
+      .tk-badge { display:inline-block; padding:3px 12px; border-radius:20px; font-size:0.75rem; font-weight:700; }
+      .tk-badge.ok { background:#f0fdf4; color:#1f9d55; }
+      .tk-badge.empty { background:#fef2f2; color:#e03131; }
+      .tk-badge.warn { background:#fff9db; color:#e67700; }
+      .tk-info-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+      .tk-info-item { padding:12px; background:var(--surface-muted,#f8f9fb); border-radius:10px; }
+      .tk-info-item .lbl { font-size:0.72rem; color:var(--muted,#667085); margin-bottom:2px; }
+      .tk-info-item .val { font-size:0.9rem; font-weight:700; word-break:break-all; }
+      .tk-flex { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+      .tk-opt { display:flex; gap:12px; flex-wrap:wrap; }
+      .tk-opt .tk-field { flex:1; min-width:160px; }
+      .tk-num { display:flex; gap:8px; align-items:center; }
+      .tk-num input { width:90px; text-align:center; }
+      .tk-sync-res { display:none; margin-top:14px; }
+      .tk-sync-res.show { display:grid; }
+      .tk-check { display:inline-flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:600; color:var(--text,#1f2937); cursor:pointer; }
+      .tk-token-preview { max-height:120px; overflow-y:auto; background:var(--surface-muted,#f8f9fb); padding:10px 14px; border-radius:8px; font-size:0.78rem; font-family:monospace; word-break:break-all; white-space:pre-wrap; direction:ltr; text-align:left; }
+      .tk-pr { display:grid; grid-template-columns:1fr auto; gap:4px 12px; padding:10px 14px; background:var(--surface-muted,#f8f9fb); border-radius:10px; align-items:center; margin-bottom:8px; }
+      .tk-pr-lbl { grid-column:1; font-size:0.75rem; font-weight:700; color:var(--muted,#667085); }
+      .tk-pr-val { grid-column:1; font-size:0.88rem; font-weight:600; word-break:break-all; direction:ltr; text-align:left; }
+      .tk-pr-act { grid-column:2; grid-row:1/3; display:flex; align-items:center; }
+      .tk-inline-copy { background:none; border:1px solid var(--border,#d8dee9); border-radius:6px; padding:4px 8px; cursor:pointer; color:var(--muted,#667085); font-size:0.82rem; transition:all 0.15s; }
+      .tk-inline-copy:hover { background:var(--brand-teal,#00b8a9); color:#fff; border-color:var(--brand-teal); }
+      .tk-table { width:100%; border-collapse:collapse; font-size:0.82rem; }
+      .tk-table th, .tk-table td { padding:8px 10px; border-bottom:1px solid var(--border,#d8dee9); text-align:right; vertical-align:middle; }
+      .tk-table th { color:var(--muted,#667085); font-size:0.74rem; }
+      .tk-table img { width:44px; height:44px; object-fit:cover; border-radius:8px; }
+      .tk-empty { text-align:center; color:var(--muted,#667085); padding:24px; font-size:0.85rem; }
+      body.dark-mode .tk-card { background:var(--card-bg,#1e293b); }
+      body.dark-mode .tk-info-item, body.dark-mode .tk-token-preview, body.dark-mode .tk-pr { background:var(--surface,#0f172a); }
+      body.dark-mode .tk-table td, body.dark-mode .tk-table th { border-color:var(--border,#334155); }
+      ol.guide { margin:8px 0 0; padding-right:20px; font-size:0.85rem; color:var(--text,#1f2937); line-height:1.8; }
+      ol.guide code { background:var(--surface-muted,#f0f0f0); padding:1px 6px; border-radius:4px; font-size:0.78rem; direction:ltr; display:inline-block; }
+    </style>
+  </head>
+  <body class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-badge">
+        <i class="fa-solid fa-handshake"></i>
+        <div><strong>Buda Admin</strong><small>إدارة المتجر</small></div>
+      </div>
+      <nav class="side-nav">
+        <a class="side-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>لوحة التحكم</span></a>
+        <a class="side-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>رسائل الدعم</span></a>
+        <a class="side-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة المنتجات</span></a>
+        <a class="side-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>الطلبات</span></a>
+        <a class="side-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>طلبات الشراكة</span></a>
+        <a class="side-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة المنتجات</span></a>
+        <a class="side-link" href="admin-ai-details.html"><i class="fa-solid fa-wand-magic-sparkles"></i><span>AI محتوى</span></a>
+        <a class="side-link" href="taager-products.html"><i class="fa-solid fa-database"></i><span>منتجات Taager</span></a>
+        <a class="side-link" href="../admin-pricing.html"><i class="fa-solid fa-coins"></i><span>شرائح الأسعار</span></a>
+        <a class="side-link" href="admin-sellers.html"><i class="fa-solid fa-store"></i><span>إدارة البائعين</span></a>
+        <a class="side-link" href="admin-coupons.html"><i class="fa-solid fa-tags"></i><span>إدارة الكوبونات</span></a>
+        <a class="side-link" href="admin-fake-prices.html"><i class="fa-solid fa-percent"></i><span>الأسعار الوهمية</span></a>
+        <a class="side-link" href="admin-taager-token.html"><i class="fa-solid fa-key"></i><span>توكن تاجر</span></a>
+        <a class="side-link" href="admin-vendor-products.html"><i class="fa-solid fa-box-open"></i><span>منتجات Vendoor</span></a>
+        <a class="side-link active" href="admin-vendor-token.html"><i class="fa-solid fa-handshake"></i><span>جلسة Vendoor</span></a>
+      </nav>
+    </aside>
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-title">
+          <h1>إدارة جلسة Vendoor</h1>
+          <p>ربط متجر Vendoor (aff.ven-door.com) — يتم سحب المنتجات إلى نفس جدول منتجات Taager</p>
+        </div>
+      </header>
+      <section class="content-wrap admin-page tk-wrap">
+        <div id="tk-status" class="tk-status"></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+          <div style="display:flex;align-items:center;gap:12px;padding:16px 20px;background:var(--card-bg,#fff);border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.04);">
+            <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#00b8a9,#02a093);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-shop" style="color:#fff;font-size:1.2rem;"></i></div>
+            <div><div style="font-weight:700;font-size:0.9rem;">Vendoor</div><div style="font-size:0.75rem;color:var(--muted,#667085);margin-top:2px;">منصة الفيندور — تعمل بنفس جدول منتجات تاجر</div></div>
+          </div>
+          <a href="admin-vendor-products.html" style="display:flex;align-items:center;gap:12px;padding:16px 20px;background:var(--card-bg,#fff);border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.04);text-decoration:none;color:var(--text,#1f2937);transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow=''">
+            <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#6366f1,#4f46e5);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-box-open" style="color:#fff;font-size:1.2rem;"></i></div>
+            <div><div style="font-weight:700;font-size:0.9rem;">منتجات Vendoor</div><div style="font-size:0.75rem;color:var(--muted,#667085);margin-top:2px;">لوحة إدارة منتجات Vendoor كاملة</div></div>
+          </a>
+        </div>
+
+        <div class="tk-card">
+          <h2><i class="fa-solid fa-circle-info"></i> حالة الإعدادات</h2>
+          <div class="tk-info-grid" id="tk-info-grid">
+            <div class="tk-info-item"><div class="lbl">Cookie Session (laravel_session)</div><div class="val" id="info-session">--</div></div>
+            <div class="tk-info-item"><div class="lbl">XSRF Token</div><div class="val" id="info-xsrf">--</div></div>
+            <div class="tk-info-item"><div class="lbl">حالة الجلسة في موقع Vendoor</div><div class="val" id="info-session-status"><span class="tk-badge empty">غير محددة</span></div></div>
+            <div class="tk-info-item"><div class="lbl">JWT (آمن</div><div class="val" id="info-jwt">--</div></div>
+            <div class="tk-info-item" style="grid-column:1/-1;"><div class="lbl">عدد منتجات Vendoor في الجدول</div><div class="val" id="info-count">--</div></div>
+          </div>
+          <div style="margin-top:14px;">
+            <button id="btn-probe" class="tk-btn outline"><i class="fa-solid fa-heart-pulse"></i> فحص الجلسة الآن</button>
+          </div>
+        </div>
+
+        <div class="tk-card">
+          <h2><i class="fa-solid fa-pen-to-square"></i> تحديث بيانات الجلسة</h2>
+          <div class="tk-field">
+            <label for="tk-session">Cookie Session (laravel_session)</label>
+            <input type="text" id="tk-session" placeholder="مثال: eyJpdiI6IlIvbk... (القيمة فقط بدون الخصائص)" />
+            <div class="hint">القيمة من كوكيز المتصفح بعد تسجيل الدخول في aff.ven-door.com — تأخذها من تبويب Application &gt; Cookies</div>
+          </div>
+          <div class="tk-field">
+            <label for="tk-xsrf">XSRF Token</label>
+            <input type="text" id="tk-xsrf" placeholder="مثال: eyJpdiI6Ik... (القيمة فقط بدون الخصائص)" />
+            <div class="hint">كوكيز XSRF-TOKEN من نفس تبويب Application &gt; Cookies</div>
+          </div>
+          <div class="tk-field">
+            <label for="tk-jwt">JWT Token (اختياري)</label>
+            <textarea id="tk-jwt" rows="2" placeholder="eyJraWQiOiJwcm9kLWtleS0xIi..."></textarea>
+            <div class="hint">توكن الحساب من auth.thunderbit.com — يُحفظ كمرجع فقط ولا يُستخدم في السحب</div>
+          </div>
+          <div class="tk-flex">
+            <button id="btn-save" class="tk-btn primary"><i class="fa-solid fa-floppy-disk"></i> حفظ البيانات</button>
+            <button id="btn-clear" class="tk-btn danger"><i class="fa-solid fa-trash-can"></i> مسح البيانات</button>
+          </div>
+        </div>
+
+        <div class="tk-card" id="tk-parser-card">
+          <h2><i class="fa-solid fa-microchip"></i> استخراج بيانات الجلسة من متصفحك</h2>
+          <p style="font-size:0.85rem;color:var(--muted,#667085);margin:0 0 12px;">
+            الصق هنا طلب الـ Network الكامل (tab Network → الطلب <code>load_data</code> أو أي طلب للصفحة الرئيسية → Copy as cURL​) أو نص الكوكيز — سيتم استخراج القيم تلقائياً.
+          </p>
+          <div class="tk-field">
+            <label for="tk-parser-input">نص الطلب أو الكوكيز</label>
+            <textarea id="tk-parser-input" rows="6" placeholder="laravel_session=eyJpdiI6...; XSRF-TOKEN=eyJpdiI6..."></textarea>
+          </div>
+          <div class="tk-flex">
+            <button id="btn-parse" class="tk-btn primary"><i class="fa-solid fa-search"></i> استخراج البيانات</button>
+            <button id="btn-clear-parse" class="tk-btn secondary"><i class="fa-solid fa-eraser"></i> مسح</button>
+          </div>
+          <div id="tk-parse-results" style="display:none;margin-top:16px;">
+            <hr style="border:none;border-top:1px solid var(--border,#d8dee9);margin:0 0 14px;">
+            <div class="tk-info-grid" id="tk-parse-grid"></div>
+          </div>
+        </div>
+
+        <div class="tk-card">
+          <h2><i class="fa-solid fa-rotate"></i> جلب منتجات Vendoor</h2>
+          <p style="font-size:0.85rem;color:var(--muted,#667085);margin:0 0 14px;">يُسحب الكتالوج (كروت المنتجات كاملة) ثم يُضيف التفاصيل والجلسة المسبقة للمقايس في نفس جدول taager_products بتعريف vendor_ — لا تلمس منتجات تاجر.</p>
+          <div class="tk-opt">
+            <div class="tk-field">
+              <label for="tk-max-pages">عدد الصفحات (max_pages)</label>
+              <input type="number" id="tk-max-pages" value="0" min="0" max="2000" />
+              <div class="hint">0 = جلب الكتالوج كاملاً حتى آخر صفحة تلقائيًا (مُوصى به) — ضع رقمًا لتحديد عدد صفحات محدد ومقترح</div>
+            </div>
+            <div class="tk-field">
+              <label for="tk-details-limit">عدد التفاصيل في هذه الجولة</label>
+              <input type="number" id="tk-details-limit" value="200" min="0" max="2000" />
+              <div class="hint">0 = بدون تفاصيل (سريع) — التفاصيل تُملأ بالتتابع: كل جولة تكمّل المنتجات الناقصة دون إعادة ما تم جلبُه</div>
+            </div>
+            <div class="tk-field">
+              <label for="tk-sync-secret">Sync Secret (اختياري)</label>
+              <input type="password" id="tk-sync-secret" placeholder="إن كان مضبوطاً في Edge Function" />
+              <div class="hint">يُحفظ مع بقية البيانات تلقائياً — مطلوب فقط إذا عيّنت VENDOR_SYNC_SECRET على الخادم</div>
+            </div>
+          </div>
+          <div class="tk-flex" style="margin-bottom:8px;">
+            <button id="btn-sync" class="tk-btn primary"><i class="fa-solid fa-cloud-arrow-down"></i> جلب الآن</button>
+            <label class="tk-check"><input type="checkbox" id="tk-fetch-details" checked /> جلب التفاصيل (وصف + المقاسات + الميديا)</label>
+          </div>
+          <div class="tk-sync-res" id="tk-sync-res"></div>
+        </div>
+
+        <div class="tk-card">
+          <h2><i class="fa-solid fa-rotate"></i> مزامنة مع Supabase Secrets</h2>
+          <p style="font-size:0.85rem;color:var(--muted,#667085);margin:0 0 12px;">تحديث بيانات جلسة Vendoor في Supabase Secrets (مطلوبة لـ Edge Function) — يولد ملف .bat ينفّذ الأمر تلقائياً.</p>
+          <button id="btn-sync-secrets" class="tk-btn secondary"><i class="fa-solid fa-cloud-upload-alt"></i> تحميل ملف تحديث Secrets</button>
+          <div style="margin-top:12px;font-size:0.78rem;color:var(--muted,#667085);">
+            <i class="fa-solid fa-terminal"></i> الأمر اليدوي: <code style="background:var(--surface-muted,#f0f0f0);padding:2px 8px;border-radius:4px;">supabase secrets set VENDOR_COOKIE_SESSION="..." VENDOR_COOKIE_XSRF="..."</code>
+          </div>
+        </div>
+
+        <div class="tk-card" id="tk-products-card">
+          <h2><i class="fa-solid fa-box-open"></i> آخر منتجات Vendoor المستوردة</h2>
+          <div id="tk-products-list"></div>
+          <button id="btn-refresh-products" class="tk-btn secondary" style="margin-top:10px;"><i class="fa-solid fa-rotate"></i> تحديث القائمة</button>
+        </div>
+
+        <div class="tk-card">
+          <h2><i class="fa-solid fa-question-circle"></i> كيفية الحصول على بيانات الجلسة</h2>
+          <ol class="guide">
+            <li>سجّل الدخول في <code>aff.ven-door.com</code> من متصفحك.</li>
+            <li>افتح DevTools (F12) → تبويب <code>Application</code> → <code>Cookies</code> → موقع <code>aff.ven-door.com</code>.</li>
+            <li>انسخ <b>قيمة</b> الكوكية <code>laravel_session</code> وضعها في حقل Cookie Session، وقيمة <code>XSRF-TOKEN</code> في حقل XSRF Token.</li>
+            <li>أو: تبويب <code>Network</code> → اعمل Refresh → اضغط على أي طلب → <code>Copy as cURL</code> والصق النص كاملاً في صندوق "استخراج".</li>
+            <li>اضغط "فحص الجلسة" للتأكد، ثم "جلب الآن".</li>
+            <li>ملاحظة: الجلسة تنتهي بعد نحو ساعتين — يُعاد استخراجها عند الحاجة.</li>
+          </ol>
+        </div>
+      </section>
+    </main>
+    <script>
+      var _sb;
+      try {
+        _sb = window._getSupabaseClient ? window._getSupabaseClient() : (window.__sb || window.supabase.createClient("https://msgqzgzoslearaprgiqq.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE"));
+      } catch(e) {
+        _sb = window.supabase.createClient("https://msgqzgzoslearaprgiqq.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE");
+      }
+
+      var EDGE_URL = "https://msgqzgzoslearaprgiqq.supabase.co/functions/v1/vendor-proxy";
+
+      function notify(msg, type) {
+        var el = document.getElementById("tk-status");
+        el.textContent = msg;
+        el.className = "tk-status show " + type;
+        if (type !== "error") setTimeout(function() { el.classList.remove("show"); }, 6000);
+      }
+
+      function getVal(key) {
+        return document.getElementById("tk-" + key).value.trim();
+      }
+
+      function setVal(key, val) {
+        document.getElementById("tk-" + key).value = val || "";
+      }
+
+      function truncate(str, n) {
+        str = String(str || "");
+        return str.length > n ? str.substring(0, n) + "..." : str;
+      }
+
+      async function loadSettings() {
+        var { data, error } = await _sb.from("app_settings").select("key, value");
+        if (error) { notify("فشل تحميل الإعدادات: " + error.message, "error"); return; }
+        if (!Array.isArray(data)) return;
+        var map = {};
+        data.forEach(function(r) { if (r && r.key) map[r.key] = r.value; });
+        setVal("session", map.vendor_cookie_session || "");
+        setVal("xsrf", map.vendor_cookie_xsrf || "");
+        setVal("jwt", map.vendor_jwt_token || "");
+        setVal("sync-secret", map.vendor_sync_secret || "");
+        document.getElementById("info-session").textContent = map.vendor_cookie_session ? truncate(map.vendor_cookie_session, 60) : "--";
+        document.getElementById("info-xsrf").textContent = map.vendor_cookie_xsrf ? truncate(map.vendor_cookie_xsrf, 40) : "--";
+        document.getElementById("info-jwt").textContent = map.vendor_jwt_token ? truncate(map.vendor_jwt_token, 40) : "--";
+        if (map.vendor_cookie_session && map.vendor_cookie_xsrf) {
+          document.getElementById("info-session-status").innerHTML = '<span class="tk-badge warn">محفوظة — تحتاج فحص</span>';
+        } else {
+          document.getElementById("info-session-status").innerHTML = '<span class="tk-badge empty">غير محفوظة</span>';
+        }
+        loadVendorCount();
+      }
+
+      async function loadVendorCount() {
+        try {
+          var total = await _sb.from("taager_products").select("*", { count: "exact", head: true }).eq("source", "vendor");
+          var active = await _sb.from("taager_products").select("*", { count: "exact", head: true }).eq("source", "vendor").eq("is_active", true);
+          var tt = total.count != null ? total.count : 0;
+          var ac = active.count != null ? active.count : 0;
+          document.getElementById("info-count").innerHTML = tt + " منتج (منها <b style=\"color:var(--brand-teal,#00b8a9);\">" + ac + " نشط</b>)";
+        } catch(e) {}
+      }
+
+      async function probeSession() {
+        var el = document.getElementById("info-session-status");
+        el.innerHTML = '<span class="tk-badge warn">جارٍ الفحص...</span>';
+        var btn = document.getElementById("btn-probe");
+        btn.disabled = true;
+        try {
+          var res = await fetch(EDGE_URL + "?action=probe");
+          var data = await res.json();
+          if (data.ok) {
+            el.innerHTML = '<span class="tk-badge ok">الجلسة سارية — جاهزة للجلب</span>';
+            notify("الجلسة في Vendoor سليمة.", "success");
+          } else {
+            el.innerHTML = '<span class="tk-badge empty">الجلسة غير صالحة — حدّث الكوكيز</span>';
+            notify(data.error || "الجلسة غير صالحة. حدّث الكوكيز من المتصفح.", "error");
+          }
+        } catch(e) {
+          el.innerHTML = '<span class="tk-badge empty">تعذر الوصول للـ Edge Function</span>';
+          notify("فشل الفحص: " + (e.message || e) + " — تأكد من نشر الدالة vendor-proxy", "error");
+        }
+        btn.disabled = false;
+      }
+
+      document.getElementById("btn-probe").addEventListener("click", probeSession);
+
+      document.getElementById("btn-save").addEventListener("click", async function() {
+        var session = getVal("session");
+        var xsrf = getVal("xsrf");
+        var jwt = getVal("jwt");
+        var sec = getVal("sync-secret");
+        if (!session && !xsrf && !jwt && !sec) { notify("أدخل بيانات على الأقل.", "error"); return; }
+        var btn = this;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جارٍ الحفظ...';
+        try {
+          var entries = [
+            { key: "vendor_cookie_session", value: session },
+            { key: "vendor_cookie_xsrf", value: xsrf },
+            { key: "vendor_jwt_token", value: jwt },
+            { key: "vendor_sync_secret", value: sec },
+          ];
+          for (var i = 0; i < entries.length; i++) {
+            var { error } = await _sb.from("app_settings").upsert(entries[i], { onConflict: "key" });
+            if (error) throw error;
+          }
+          await loadSettings();
+          notify("تم حفظ بيانات الجلسة. اضغط فحص الجلسة للتأكد.", "success");
+        } catch (e) {
+          notify("فشل الحفظ: " + (e.message || e), "error");
+        }
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> حفظ البيانات';
+      });
+
+      document.getElementById("btn-clear").addEventListener("click", async function() {
+        if (!confirm("مسح جميع بيانات جلسة Vendoor؟")) return;
+        var btn = this;
+        btn.disabled = true;
+        try {
+          await _sb.from("app_settings").delete().in("key", ["vendor_cookie_session", "vendor_cookie_xsrf", "vendor_jwt_token", "vendor_sync_secret"]);
+          await loadSettings();
+          notify("تم مسح البيانات.", "info");
+        } catch (e) {
+          notify("فشل المسح: " + (e.message || e), "error");
+        }
+        btn.disabled = false;
+      });
+
+      function extractCookies(text) {
+        var result = { session: "", xsrf: "", token: "" };
+        var s = text.match(/laravel_session=([A-Za-z0-9%_.\-~]+)/);
+        if (s) result.session = s[1];
+        var x = text.match(/XSRF-TOKEN=([A-Za-z0-9%_.\-~]+)/i);
+        if (x) result.xsrf = x[1];
+        var t = text.match(/_token=([A-Za-z0-9]{20,})/);
+        if (t) result.token = t[1];
+        return result;
+      }
+
+      function parseInput() {
+        var input = document.getElementById("tk-parser-input").value;
+        if (!input) { notify("الصق البيانات أولاً.", "error"); return; }
+        var cookies = extractCookies(input);
+        setVal("session", cookies.session);
+        setVal("xsrf", cookies.xsrf);
+        if (cookies.token) notify("تم استخراج البيانات. (ملاحظة: CSRF _token يعود للجلسة الحالية)", "info");
+
+        var grid = document.getElementById("tk-parse-grid");
+        var items = [];
+        items.push({ label: "laravel_session", value: cookies.session, ok: !!cookies.session });
+        items.push({ label: "XSRF-TOKEN", value: cookies.xsrf, ok: !!cookies.xsrf });
+        items.push({ label: "CSRF _token (معلومات فقط)", value: cookies.token, ok: !!cookies.token });
+        grid.innerHTML = items.map(function(item) {
+          var badge = item.ok ? '<span class="tk-badge ok" style="font-size:0.7rem;">تم العثور</span>' : '<span class="tk-badge empty" style="font-size:0.7rem;">غير موجود</span>';
+          var copyBtn = item.value ? '<button class="tk-inline-copy" data-val="' + item.value.replace(/"/g, "&quot;") + '" title="نسخ"><i class="fa-solid fa-copy"></i></button>' : '';
+          return '<div class="tk-pr"><div class="tk-pr-lbl">' + item.label + ' ' + badge + '</div><div class="tk-pr-val">' + (item.value ? truncate(item.value, 90) : "—") + '</div><div class="tk-pr-act">' + copyBtn + '</div></div>';
+        }).join("");
+        document.getElementById("tk-parse-results").style.display = "block";
+        if (!cookies.session && !cookies.xsrf) notify("لم نعثر على الكوكيز — تأكد من صيغة النص", "error");
+      }
+
+      document.getElementById("btn-parse").addEventListener("click", parseInput);
+      document.getElementById("btn-clear-parse").addEventListener("click", function() {
+        document.getElementById("tk-parser-input").value = "";
+        document.getElementById("tk-parse-results").style.display = "none";
+      });
+
+      document.getElementById("tk-parse-grid").addEventListener("click", function(e) {
+        var btn = e.target.closest(".tk-inline-copy");
+        if (!btn) return;
+        var val = btn.getAttribute("data-val");
+        if (!val) return;
+        try { navigator.clipboard.writeText(val); notify("تم النسخ!", "info"); } catch(_e) {}
+      });
+
+      async function runSync() {
+        var btn = document.getElementById("btn-sync");
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جارٍ الجلب...';
+        try {
+          var url = EDGE_URL + "?action=sync" +
+            "&max_pages=" + encodeURIComponent(getVal("max-pages") || "0") +
+            "&details_limit=" + encodeURIComponent(getVal("details-limit") || "200") +
+            "&fetch_details=" + (document.getElementById("tk-fetch-details").checked ? "1" : "0");
+          var headers = { "Content-Type": "application/json" };
+          var secret = getVal("sync-secret");
+          if (secret) headers["x-sync-secret"] = secret;
+          var res = await fetch(url, { headers: headers });
+          var data = await res.json();
+          var box = document.getElementById("tk-sync-res");
+          box.className = "tk-sync-res show tk-info-grid";
+          function val(lbl, v) { return '<div class="tk-info-item"><div class="lbl">' + lbl + '</div><div class="val">' + v + '</div></div>'; }
+          if (res.ok && data.ok) {
+            box.innerHTML =
+              val("منتجات مزامنة", data.synced_count) +
+              val("صفحات", data.pages_scanned) +
+              val("اكتمل الكتالوج", data.catalog_complete ? '<span class="tk-badge ok">نعم — كل المنتجات</span>' : '<span class="tk-badge warn">جزئي — زد max_pages</span>') +
+              val("تفاصيل مضافة هذه الجولة", data.details_fetched) +
+              val("تفاصيل موجودة مسبقًا", data.details_skipped) +
+              val("بانتظار التفاصيل", data.details_pending) +
+              val("الحالة", '<span class="tk-badge ok">اكتملت</span>');
+            notify("تم الجلب بنجاح — " + data.synced_count + " منتج.", "success");
+            loadVendorCount();
+            loadVendorProducts();
+          } else {
+            box.innerHTML = val("خطأ", (data.error || "فشل") + (data.hint ? " — " + data.hint : ""));
+            notify(data.error || "فشل الجلب", "error");
+          }
+        } catch(e) {
+          notify("فشل الجلب: " + (e.message || e), "error");
+        }
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i> جلب الآن';
+      }
+
+      document.getElementById("btn-sync").addEventListener("click", runSync);
+
+      function downloadFile(filename, content) {
+        try {
+          var blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement("a");
+          a.href = url; a.download = filename;
+          document.body.appendChild(a); a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          return true;
+        } catch(e) { return false; }
+      }
+
+      document.getElementById("btn-sync-secrets").addEventListener("click", function() {
+        var session = getVal("session");
+        var xsrf = getVal("xsrf");
+        var jwt = getVal("jwt");
+        if (!session || !xsrf) { notify("أدخل Cookie Session و XSRF أولاً.", "error"); return; }
+        var PROJECT_REF = "msgqzgzoslearaprgiqq";
+        var cmd = 'supabase secrets set --project-ref ' + PROJECT_REF +
+          ' VENDOR_COOKIE_SESSION="' + session + '" VENDOR_COOKIE_XSRF="' + xsrf + '"' +
+          (jwt ? ' VENDOR_JWT_TOKEN="' + jwt + '"' : "");
+        var deployCmd = "supabase functions deploy vendor-proxy --project-ref " + PROJECT_REF + " --no-verify-jwt";
+        var batContent = "@echo off\r\nchcp 65001 >nul 2>nul\r\necho ====================================\r\necho  Buda - تحديث Supabase Secrets لـ Vendoor\r\necho ====================================\r\necho.\r\nwhere supabase >nul 2>nul\r\nif %errorlevel% neq 0 (\r\n  echo [خطأ] لم يتم العثور على أمر supabase.\r\n  echo تأكد من تثبيت Supabase CLI أو شغّل الأمر يدوياً:\r\n  echo.\r\n  echo   " + cmd + "\r\n  echo.\r\n  echo ثم:\r\n  echo   " + deployCmd + "\r\n  pause\r\n  exit /b 1\r\n)\r\necho [1/2] جاري تحديث Supabase Secrets...\r\necho.\r\n" + cmd + "\r\nif %errorlevel% neq 0 (\r\n  echo.\r\n  echo [خطأ] فشل تحديث الـ Secrets.\r\n  pause\r\n  exit /b 1\r\n)\r\necho.\r\necho [تم] تم تحديث الـ Secrets بنجاح!\r\necho.\r\necho [2/2] جاري إعادة نشر الـ Edge Function...\r\n" + deployCmd + "\r\nif %errorlevel% neq 0 (\r\n  echo.\r\n  echo [تحذير] فشل نشر الـ Edge Function. حاول يدوياً:\r\n  echo   " + deployCmd + "\r\n  pause\r\n  exit /b 1\r\n)\r\necho.\r\necho ====================================\r\necho  تم كل شيء بنجاح!\r\necho ====================================\r\necho.\r\npause\r\n";
+        if (downloadFile("update-vendor-secrets.bat", batContent)) {
+          notify("تم تحميل update-vendor-secrets.bat — افتحه لتشغيل التحديث تلقائياً.", "success");
+        } else {
+          var msg = "انسخ الأمر التالي وشغّله في terminal:\n\n" + cmd + "\n\nبعد التشغيل، أعد نشر الدالة:\n" + deployCmd;
+          alert(msg);
+          try { navigator.clipboard.writeText(cmd); notify("تم نسخ الأمر للحافظة.", "info"); } catch(_e) {}
+        }
+      });
+
+      async function loadVendorProducts() {
+        var list = document.getElementById("tk-products-list");
+        try {
+          var res = await fetch(EDGE_URL + "?action=stored-products&source=vendor&limit=30&page=1");
+          var data = await res.json();
+          if (!Array.isArray(data) || !data.length) {
+            list.innerHTML = '<div class="tk-empty">لا توجد منتجات بعد — شغّل الجلب أولاً</div>';
+            return;
+          }
+          var rows = data.map(function(p) {
+            var img = p.image1 || p.image || "";
+            var imgHtml = img ? '<img src="' + img + '" alt="" loading="lazy" onerror="this.style.display=\'none\'" />' : '<div style="width:44px;height:44px;border-radius:8px;background:var(--surface-muted,#eef2f7);display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-image" style="color:var(--muted)"></i></div>';
+            return '<tr>' +
+              '<td>' + imgHtml + '</td>' +
+              '<td style="max-width:260px;">' + (p.name || "--") + '</td>' +
+              '<td>' + (p.price ? p.price + " ج.م" : "--") + '</td>' +
+              '<td>' + (p.stock != null ? p.stock : "--") + '</td>' +
+              '<td>' + (p.seller || "--") + '</td>' +
+              '</tr>';
+          }).join("");
+          list.innerHTML = '<div style="max-height:340px;overflow:auto;"><table class="tk-table"><thead><tr><th></th><th>المنتج</th><th>السعر</th><th>الكمية</th><th>البائع</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+        } catch(e) {
+          list.innerHTML = '<div class="tk-empty">تعذر تحميل المنتجات: ' + (e.message || e) + '</div>';
+        }
+      }
+
+      document.getElementById("btn-refresh-products").addEventListener("click", function() {
+        loadVendorProducts();
+        loadVendorCount();
+      });
+
+      loadSettings();
+      loadVendorProducts();
+    </script>
+  </body>
+</html>

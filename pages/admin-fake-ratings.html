@@ -292,25 +292,31 @@
       async function loadRatingsMap() {
         var map = {};
         try {
-          var all = [], off = 0, pg = 1000;
+          var ids = [], off = 0, pg = 1000;
           while (true) {
-            var { data, error } = await _sb.from('ratings_summary').select('item_id,star1,star2,star3,star4,star5,total').range(off, off + pg - 1);
+            var { data, error } = await _sb.from('ratings').select('item_id').order('id', { ascending: true }).range(off, off + pg - 1);
             if (error) throw error;
             if (!data || !data.length) break;
-            all = all.concat(data);
+            data.forEach(function(r) { if (r.item_id) ids.push(String(r.item_id)); });
             off += pg;
             if (data.length < pg) break;
           }
-          all.forEach(function(r) {
-            map[String(r.item_id)] = {
-              1: Math.round(Number(r.star1)) || 0,
-              2: Math.round(Number(r.star2)) || 0,
-              3: Math.round(Number(r.star3)) || 0,
-              4: Math.round(Number(r.star4)) || 0,
-              5: Math.round(Number(r.star5)) || 0,
-              total: Math.round(Number(r.total)) || 0
-            };
-          });
+          ids = Array.from(new Set(ids));
+          for (var i = 0; i < ids.length; i += 100) {
+            var chunk = ids.slice(i, i + 100);
+            var { data: rpcData, error } = await _sb.rpc('get_ratings_summary', { product_ids: chunk });
+            if (error) throw error;
+            (rpcData || []).forEach(function(r) {
+              map[String(r.item_id)] = {
+                1: Math.round(Number(r.star1)) || 0,
+                2: Math.round(Number(r.star2)) || 0,
+                3: Math.round(Number(r.star3)) || 0,
+                4: Math.round(Number(r.star4)) || 0,
+                5: Math.round(Number(r.star5)) || 0,
+                total: Math.round(Number(r.total)) || 0
+              };
+            });
+          }
           return map;
         } catch(e) {
           var off2 = 0, pg2 = 1000;

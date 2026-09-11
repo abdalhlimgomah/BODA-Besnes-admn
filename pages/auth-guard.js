@@ -19,6 +19,7 @@
     "shacksf.html",
     "admin.html",
     "admin-orders.html",
+    "admin-today-orders.html",
     "admin-partners.html",
     "view-products.html",
     "taager-products.html",
