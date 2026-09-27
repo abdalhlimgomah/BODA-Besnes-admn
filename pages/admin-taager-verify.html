@@ -132,6 +132,11 @@
           <button class="tv-btn secondary" id="fetch-codes" style="font-size:.78rem;padding:5px 12px" title="تعبئة أكواد تاجر الحقيقية (sku) لكل المنتجات الموجودة في عمود taager_code"><i class="fa-solid fa-barcode"></i> أكواد تاجر</button>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;padding:8px 14px;background:var(--card-bg,#fff);border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,0.04);align-items:center">
+          <span style="font-size:.78rem;font-weight:700;color:var(--muted,#667085)">خصم الكميات:</span>
+          <button class="tv-btn primary" id="fetch-qty-discounts" style="font-size:.78rem;padding:5px 12px;background:#00a877" title="يجلب خصومات الكميات من تاجر (financials.tieredPricing) ويحفظها في جدول taager_quantity_discounts"><i class="fa-solid fa-percent"></i> جلب وحفظ خصومات الكميات</button>
+          <span id="td-stats" style="font-size:.78rem;color:var(--muted,#667085)"></span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;padding:8px 14px;background:var(--card-bg,#fff);border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,0.04);align-items:center">
           <span style="font-size:.78rem;font-weight:700;color:var(--muted,#667085)">جلب الناقص:</span>
           <button class="tv-btn secondary" id="fetch-images-missing" style="font-size:.78rem;padding:5px 12px"><i class="fa-solid fa-images"></i> صور</button>
           <button class="tv-btn secondary" id="fetch-videos-missing" style="font-size:.78rem;padding:5px 12px"><i class="fa-solid fa-video"></i> فيديو</button>
@@ -206,6 +211,8 @@
       function money(v) { return safeVal(v).toLocaleString("ar-EG", { minimumFractionDigits: 2 }) + " ج.م"; }
 
       function getStockLabel(p) {
+        var st = Number(p.stock);
+        if (p.stock != null && p.stock !== '' && p.stock !== 999 && Number.isFinite(st)) return st + ' قطعة';
         try {
           var raw = typeof p.raw_data === 'string' ? JSON.parse(p.raw_data) : p.raw_data;
           if (raw && raw.stockAvailability) {
@@ -215,7 +222,6 @@
             if (range) return formatStockBucket(range);
           }
         } catch(e) {}
-        if (p.stock != null && p.stock !== 999) return p.stock + ' قطعة';
         return '—';
       }
       function formatStockBucket(s) {
@@ -825,27 +831,34 @@
       }
 
       // ===== Stock conversion: Taager bucket/range → number =====
-      // not_available → 0 (نفد المخزون) | less_than_10 → 9 | from_5_to_10 → 7 (منتصف) | above_30 → 30
+      // not_available → 0 (نفد المخزون) | less_than_10/under_10 → 9 | from_5_to_10 → 7 (منتصف) | above_30 → 30 | below_30 → منتصف
       function parseTaagerStock(ap) {
-        var raw = ap && (ap.stockAvailability || ap.availability || ap.stockInfo || null);
+        if (!ap) return null;
         var bucket = '';
-        if (raw && typeof raw === 'object') bucket = raw.stockBucket || raw.detailedStockRange || raw.range || raw.bucket || '';
-        if (!bucket && typeof ap.total_stock === 'number') bucket = String(ap.total_stock);
-        if (!bucket && typeof ap.stock === 'number') bucket = String(ap.stock);
-        if (!bucket && typeof ap.quantity === 'number') bucket = String(ap.quantity);
+        var raw = null;
+        if (ap.stockAvailability && typeof ap.stockAvailability === 'object') raw = ap.stockAvailability;
+        else if (ap.availability && typeof ap.availability === 'object') raw = ap.availability;
+        else if (ap.stockInfo && typeof ap.stockInfo === 'object') raw = ap.stockInfo;
+        if (raw) bucket = raw.stockBucket || raw.detailedStockRange || raw.range || raw.bucket || raw.availability || raw.stock || raw.quantity || raw.count || '';
+        if (!bucket && typeof ap.stockAvailability === 'string') bucket = ap.stockAvailability;
+        if (!bucket && typeof ap.availability === 'string') bucket = ap.availability;
+        var nu = ['total_stock', 'stock', 'quantity', 'stock_count', 'available_quantity', 'availableStock'];
+        for (var n = 0; !bucket && n < nu.length; n++) if (typeof ap[nu[n]] === 'number') bucket = String(ap[nu[n]]);
+        if (typeof bucket === 'number') bucket = String(bucket);
         if (typeof bucket !== 'string' || !bucket.trim()) return null;
-        bucket = bucket.trim();
-        if (bucket === 'not_available' || bucket === 'out_of_stock' || bucket === 'sold_out') return { stock: 0, status: 'out_of_stock' };
+        bucket = bucket.trim().toLowerCase();
+        if (bucket === 'not_available' || bucket === 'out_of_stock' || bucket === 'sold_out' || bucket === 'unavailable' || bucket === 'none' || bucket === 'no_stock') return { stock: 0, status: 'out_of_stock' };
+        if (bucket === 'in_stock' || bucket === 'available' || bucket === 'available_now') return { stock: 999, status: 'in_stock' };
         var m = bucket.match(/^from_(\d+)_to_(\d+)$/);
         if (m) return { stock: Math.max(1, Math.round((parseInt(m[1],10) + parseInt(m[2],10)) / 2)), status: 'in_stock' };
-        var m2 = bucket.match(/^less_than_(\d+)$/);
+        var m2 = bucket.match(/^(?:less_than|under|lt)_(\d+)$/);
         if (m2) return { stock: Math.max(1, parseInt(m2[1],10) - 1), status: 'in_stock' };
         var m3 = bucket.match(/^above_(\d+)$/);
         if (m3) return { stock: parseInt(m3[1],10) || 1, status: 'in_stock' };
         var m4 = bucket.match(/^below_(\d+)$/);
         if (m4) return { stock: Math.max(1, Math.round(parseInt(m4[1],10) / 2)), status: 'in_stock' };
         var m5 = bucket.match(/^(\d+)$/);
-        if (m5) { var n = parseInt(m5[1],10); return { stock: n, status: n > 0 ? 'in_stock' : 'out_of_stock' }; }
+        if (m5) { var n5 = parseInt(m5[1],10); return { stock: n5, status: n5 > 0 ? 'in_stock' : 'out_of_stock' }; }
         return null;
       }
 
@@ -894,28 +907,42 @@
 
       function buildApiLookup(apiProducts) {
         var apiLookup = {};
-        apiProducts.forEach(function(ap) {
+        (apiProducts || []).forEach(function(ap) {
           var ids = [ap.id, ap.productId, ap.product_id, ap.variantId, ap.variant_id, ap.sku, ap.code, ap.taager_product_id, ap._id, ap.itemId, ap.externalId];
           ids.forEach(function(id) {
-            if (id != null && id !== undefined) apiLookup[String(id)] = ap;
+            if (id != null && id !== undefined && String(id) !== '') apiLookup[String(id).trim().toLowerCase()] = ap;
           });
         });
         return apiLookup;
       }
 
       function findApiMatch(p, apiLookup) {
-        var matchId = String(p.taager_product_id || p.id || '');
-        var apiItem = apiLookup[matchId];
-        if (!apiItem) {
-          var altIds = [p.id, p.product_id, p.productId, p.sku].filter(Boolean);
-          for (var a = 0; a < altIds.length; a++) {
-            if (apiLookup[String(altIds[a])]) { apiItem = apiLookup[String(altIds[a])]; break; }
-          }
+        if (!p) return null;
+        var ids = [];
+        if (p.taager_product_id != null) ids.push(p.taager_product_id);
+        if (p.id != null) {
+          ids.push(p.id);
+          if (String(p.id).indexOf('taager_') === 0) ids.push(String(p.id).substring(7));
         }
-        return apiItem;
+        if (p.product_id != null) ids.push(p.product_id);
+        if (p.productId != null) ids.push(p.productId);
+        if (p.sku != null) ids.push(p.sku);
+        if (p.taager_code != null) ids.push(p.taager_code);
+        var rd = p.raw_data;
+        if (typeof rd === 'string') { try { rd = JSON.parse(rd); } catch(e) { rd = null; } }
+        if (rd && typeof rd === 'object') {
+          ids.push(rd.variantId, rd.productId, rd.product_id, rd.variant_id, rd._id, rd.itemId, rd.externalId, rd.id, rd.sku, rd.code);
+        }
+        for (var i = 0; i < ids.length; i++) {
+          if (ids[i] == null || ids[i] === '') continue;
+          var k = String(ids[i]).trim().toLowerCase();
+          if (apiLookup[k]) return apiLookup[k];
+        }
+        return null;
       }
 
-      // ===== زر 1: تحديث الكميات — يحدّث stock + stock_status فقط لكل المنتجات =====
+      // ===== زر 1: تحديث الكميات — يحدّث stock + stock_status لكل المنتجات =====
+      // المنتج اللي مش موجود في استجابة تاجر (اختفى من القائمة) يُعتبر نفد المخزون → stock = 0
       async function runStockUpdate() {
         var btn = document.getElementById('fetch-stock');
         var origHtml = btn.innerHTML;
@@ -930,34 +957,60 @@
           if (!allRows.length) throw new Error('لا توجد منتجات في قاعدة البيانات');
           setStatus('جاري جلب المنتجات من تاجر...');
           var apiProducts = await fetchAllApiProductsWithFallback();
-          if (!apiProducts.length) throw new Error('لم يتم جلب أي منتجات من تاجر');
+          if (!apiProducts.length) throw new Error('لم يتم جلب أي منتجات من تاجر — لم يتم تغيير أي كمية');
           setStatus('بناء جدول المطابقة...');
           var apiLookup = buildApiLookup(apiProducts);
-          var done = 0, skipped = 0, errors = 0, outOfStock = 0;
+          var done = 0, skipped = 0, zeroed = 0, errors = 0, outOfStock = 0;
           setStatus('بدأ تحديث الكميات لـ ' + allRows.length + ' منتج...');
           for (var i = 0; i < allRows.length; i++) {
             var p = allRows[i];
             var apiItem = findApiMatch(p, apiLookup);
-            if (!apiItem) { skipped++; showProgress(Math.round((i+1) / allRows.length * 100), i+1, allRows.length); continue; }
+            if (!apiItem) {
+              // مش موجود في تاجر = نفد المخزون
+              zeroed++;
+              try {
+                var { error: zerr } = await _sb.from('taager_products').update({ stock: 0, stock_status: 'out_of_stock', updated_at: new Date().toISOString() }).eq('id', p.id);
+                if (zerr) { errors++; zeroed--; }
+                else outOfStock++;
+              } catch(e) { errors++; zeroed--; }
+              showProgress(Math.round((i+1) / allRows.length * 100), i+1, allRows.length);
+              if (i < allRows.length - 1) await new Promise(function(r){setTimeout(r,10);});
+              continue;
+            }
             try {
               var parsed = parseTaagerStock(apiItem);
               if (!parsed) { skipped++; showProgress(Math.round((i+1) / allRows.length * 100), i+1, allRows.length); continue; }
               var upd = { stock: parsed.stock, stock_status: parsed.status, updated_at: new Date().toISOString() };
               var realCode = String(apiItem.sku || apiItem.code || '').trim();
               if (realCode) upd.taager_code = realCode;
+              // حدّث raw_data كمان حتى تظهر الكمية الجديدة في أي مكان يقرأ الـ raw_data
+              try {
+                var rawData = p.raw_data;
+                if (typeof rawData === 'string') { try { rawData = JSON.parse(rawData); } catch(e) { rawData = null; } }
+                if (rawData && typeof rawData === 'object') {
+                  if (rawData.stockAvailability && typeof rawData.stockAvailability === 'object') {
+                    rawData.stockAvailability.stockBucket = String(parsed.stock);
+                    rawData.stockAvailability.detailedStockRange = parsed.stock === 0 ? 'not_available' : String(parsed.stock);
+                  } else {
+                    rawData.stockAvailability = { stockBucket: String(parsed.stock), detailedStockRange: parsed.stock === 0 ? 'not_available' : String(parsed.stock) };
+                  }
+                  upd.raw_data = rawData;
+                }
+              } catch(e) {}
               if (parsed.status === 'out_of_stock') outOfStock++;
               var { error } = await _sb.from('taager_products').update(upd).eq('id', p.id);
               if (error) { errors++; showProgress(Math.round((i+1) / allRows.length * 100), i+1, allRows.length); continue; }
               done++;
             } catch(e) { errors++; }
             showProgress(Math.round((i+1) / allRows.length * 100), i+1, allRows.length);
-            if (i < allRows.length - 1) await new Promise(function(r){setTimeout(r,50);});
+            if (i < allRows.length - 1) await new Promise(function(r){setTimeout(r,25);});
           }
           showProgress(0);
           wrap.style.display = 'none';
           var msg = 'تم تحديث الكميات لـ ' + done + ' منتج';
-          if (outOfStock) msg += ' (منهم ' + outOfStock + ' نفد المخزون)';
-          if (skipped) msg += ' (تخطي ' + skipped + ' بدون تطابق/كمية)';
+          if (zeroed) msg += ' — ' + zeroed + ' نفد المخزون (مش موجودين في تاجر اتسجلوا 0)';
+          else if (outOfStock) msg += ' (منهم ' + outOfStock + ' نفد المخزون)';
+          if (skipped) msg += ' (تخطي ' + skipped + ' بدون كمية واضحة)';
           if (errors) msg += ' (' + errors + ' خطأ)';
           setStatus(msg, errors > 0);
           notify(msg, errors ? 'error' : 'success');
@@ -1022,6 +1075,116 @@
           await loadProducts();
         } catch(e) {
           wrap.style.display = 'none';
+          setStatus('خطأ: ' + (e.message || e).substring(0,100), true);
+          notify('خطأ: ' + (e.message || e), 'error');
+        }
+        btn.disabled = false; btn.innerHTML = origHtml;
+      }
+
+      // ===== زر 4: خصومات الكميات — استخراج financials.tieredPricing من تايجر وحفظها في taager_quantity_discounts =====
+      function round2(v){ return Math.round(safeVal(v) * 100) / 100; }
+      function extractTaagerTierRows(apiItem, dbRow) {
+        var out = [];
+        var fin = buildTaagerFinancials(apiItem, dbRow);
+        if (!fin || !Array.isArray(fin.tieredPricing) || !fin.tieredPricing.length) return out;
+        var unitOriginal = 0;
+        if (safeVal(fin.originalPrice, 0)) unitOriginal = safeVal(fin.originalPrice);
+        else if (apiItem) unitOriginal = safeVal(apiItem.originalPrice || apiItem.price, 0);
+        if (!unitOriginal && dbRow) unitOriginal = safeVal(dbRow.original_price || dbRow.price, 0);
+        var pid = String((dbRow && dbRow.taager_product_id) || (apiItem && (apiItem.taager_product_id || apiItem.variantId || apiItem.productId || apiItem.id)) || '');
+        if (!pid) return out;
+        var country = 'EG';
+        var rawR = dbRow && dbRow.raw_data;
+        if (typeof rawR === 'string') { try { rawR = JSON.parse(rawR); } catch(e) { rawR = null; } }
+        if (rawR && rawR._taager_country) country = String(rawR._taager_country).toUpperCase();
+        fin.tieredPricing.forEach(function(t) {
+          var q = parseInt(t.quantity, 10);
+          var price = safeVal(t.price, 0);
+          if (!q || q < 1) return;
+          var origTotal = unitOriginal * q;
+          var pct = 0;
+          if (origTotal > 0) {
+            pct = Math.round((1 - price / origTotal) * 1000) / 10;
+            if (pct > 999.9) pct = 999.9;
+            if (pct < -999.9) pct = -999.9;
+          }
+          out.push({
+            taager_product_id: pid,
+            quantity: q,
+            price: round2(price),
+            profit: round2(t.profit),
+            unit_original: round2(unitOriginal),
+            original_total: round2(origTotal),
+            discount_percent: pct,
+            country: country,
+            source: 'taager',
+            updated_at: new Date().toISOString()
+          });
+        });
+        return out;
+      }
+      function buildTaagerFinancials(apiItem, dbRow) {
+        if (apiItem && apiItem.financials) return apiItem.financials;
+        var rd = dbRow && dbRow.raw_data;
+        if (typeof rd === 'string') { try { rd = JSON.parse(rd); } catch(e) { rd = null; } }
+        if (rd && rd.financials) return rd.financials;
+        return null;
+      }
+      async function runQtyDiscountsSync() {
+        var btn = document.getElementById('fetch-qty-discounts');
+        var origHtml = btn.innerHTML;
+        btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري...';
+        var wrap = document.getElementById('tv-progress');
+        var bar = document.getElementById('tv-progress-bar');
+        wrap.style.display = 'block'; bar.style.width = '0%';
+        try {
+          if (!allRows.length) await loadProducts();
+          if (!allRows.length) throw new Error('لا توجد منتجات في قاعدة البيانات');
+          var apiLookup = null;
+          setStatus('محاولة جلب بيانات تاجر الحية...');
+          try {
+            var apiProducts = await fetchAllApiProductsWithFallback();
+            if (apiProducts && apiProducts.length) apiLookup = buildApiLookup(apiProducts);
+          } catch(e) {
+            setStatus('البيانات الحية فشلت — سأستخدم raw_data المخزن','error');
+          }
+          var rows = [];
+          var withTiers = 0;
+          for (var i = 0; i < allRows.length; i++) {
+            var p = allRows[i];
+            var apiItem = apiLookup ? findApiMatch(p, apiLookup) : null;
+            var trows = extractTaagerTierRows(apiItem, p);
+            if (trows.length) withTiers++;
+            for (var j = 0; j < trows.length; j++) rows.push(trows[j]);
+            showProgress(Math.round((i + 1) / allRows.length * 100), i + 1, allRows.length);
+          }
+          if (!rows.length) {
+            showProgress(0); wrap.style.display = 'none';
+            setStatus('لا توجد خصومات كميات لأي منتج','error');
+            notify('لا توجد خصومات كميات', 'error');
+            return;
+          }
+          setStatus('حفظ ' + rows.length + ' صف خصم...');
+          var BATCH = 500, done = 0;
+          for (var k = 0; k < rows.length; k += BATCH) {
+            var chunk = rows.slice(k, k + BATCH);
+            var { error } = await _sb.from('taager_quantity_discounts').upsert(chunk, { onConflict: 'taager_product_id,quantity,country' });
+            if (error) throw error;
+            done += chunk.length;
+            bar.style.width = Math.min(100, Math.round((k + chunk.length) / rows.length * 100)) + '%';
+          }
+          showProgress(0);
+          var uniqueProducts = {};
+          for (var m = 0; m < rows.length; m++) uniqueProducts[rows[m].taager_product_id] = 1;
+          wrap.style.display = 'none';
+          var productsTouched = Object.keys(uniqueProducts).length;
+          var msg = 'تم حفظ ' + done + ' صف خصم لـ ' + withTiers + ' منتج';
+          setStatus(msg);
+          notify(msg, 'success');
+          var st = document.getElementById('td-stats');
+          if (st) st.textContent = productsTouched + ' منتج / ' + done + ' صف';
+        } catch(e) {
+          showProgress(0); wrap.style.display = 'none';
           setStatus('خطأ: ' + (e.message || e).substring(0,100), true);
           notify('خطأ: ' + (e.message || e), 'error');
         }
@@ -1191,6 +1354,7 @@
       document.getElementById('fetch-stock').addEventListener('click',runStockUpdate);
       document.getElementById('fetch-codes').addEventListener('click',runTaagerCodeBackfill);
       document.getElementById('fetch-new').addEventListener('click',runFetchNew);
+      document.getElementById('fetch-qty-discounts').addEventListener('click',runQtyDiscountsSync);
       document.getElementById('fetch-images').addEventListener('click',function(){runTaagerFetch('images','all')});
       document.getElementById('fetch-qd').addEventListener('click',function(){runTaagerFetch('quick_details','all')});
       document.getElementById('fetch-ci').addEventListener('click',function(){runTaagerFetch('content_ideas','all')});
@@ -1287,6 +1451,7 @@
               if(detailVariant.specifications&&detailVariant.specifications.ar&&detailVariant.specifications.ar.length>2)detSpecs=detailVariant.specifications.ar;
             }
             var tpid=String(ap.variantId||ap.productId||ap.id||'');
+            var st=parseTaagerStock(ap);
             var row={
               id:tpid?'taager_'+tpid:'taager_'+Date.now()+'_'+i,
               taager_product_id:tpid,
@@ -1306,8 +1471,8 @@
               image8:rawImgs[7]||'',
               videos:rawVids,
               available_countries:[ap._taager_country||'EG'],
-              stock:999,
-              stock_status:'in_stock',
+              stock:st?st.stock:999,
+              stock_status:st?st.status:'in_stock',
               category:ap.type||'product',
               seller:'تاجر',
               source:'taager',

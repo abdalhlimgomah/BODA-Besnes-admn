@@ -69,6 +69,7 @@
         </a>
       </header>
       <section class="content-wrap orders-page">
+        <div id="serverSelector"></div>
         <section class="card summary-row">
           <div class="summary-item">
             <p>جميع الطلبات</p>
@@ -115,5 +116,13 @@
         </nav>
     <script src="./stock-deduction.common.js?v=20260820"></script>
     <script src="./admin-orders.page.js"></script>
+    <script src="./server-selector.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        if (window.ServerSelector) {
+          window.ServerSelector.render("serverSelector");
+        }
+      });
+    </script>
   </body>
 </html>

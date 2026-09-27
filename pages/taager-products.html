@@ -49,6 +49,7 @@
       </header>
 
       <section class="content-wrap">
+        <div id="serverSelector"></div>
         <div class="taager-grid" id="productsGrid"></div>
         <div id="loadMoreWrap" style="display:flex;justify-content:center;padding:14px 0">
           <button id="loadMoreBtn" class="btn btn-secondary" style="min-width:200px">عرض المزيد</button>
@@ -65,5 +66,13 @@
     </nav>
 
     <script src="./taager-products.page.js"></script>
+    <script src="./server-selector.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        if (window.ServerSelector) {
+          window.ServerSelector.render("serverSelector");
+        }
+      });
+    </script>
   </body>
 </html>

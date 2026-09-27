@@ -60,6 +60,7 @@
 
       <!-- Main Chat Interface -->
       <section class="content-wrap" style="flex: 1; padding: 0 24px 24px; display: flex; flex-direction: column;">
+        <div id="serverSelector" style="margin-bottom: 16px;"></div>
         
         <div class="support-chat-container" id="chat-container">
           
@@ -219,5 +220,13 @@
 
     <!-- Page Logic -->
     <script src="./admin-support.page.js"></script>
+    <script src="./server-selector.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        if (window.ServerSelector) {
+          window.ServerSelector.render("serverSelector");
+        }
+      });
+    </script>
   </body>
 </html>

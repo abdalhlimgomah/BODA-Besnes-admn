@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>نقل ومزامنة البيانات</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/app-shell.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="./auth-guard.js"></script>
+    <style>
+      .mig-hero { background: linear-gradient(135deg,#7c3aed,#5b21b6); color:#fff; border-radius:16px; padding:18px 22px; margin-bottom:18px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+      .mig-hero h2 { margin:0; font-size:1.15rem; }
+      .mig-hero p { margin:2px 0 0; opacity:.85; font-size:.85rem; }
+      .mig-grid { display:grid; grid-template-columns:1fr 320px; gap:16px; }
+      @media (max-width: 980px){ .mig-grid{ grid-template-columns:1fr; } }
+      .mig-box { background:var(--card-bg,#fff); border:1px solid var(--border,#ecf0f9); border-radius:14px; padding:16px; margin-bottom:16px; box-shadow:0 2px 8px rgba(0,0,0,.03); }
+      .mig-box h3 { margin:0 0 12px; font-size:.95rem; display:flex; align-items:center; gap:8px; }
+      .mig-box h3 i { color:#7c3aed; }
+      .src-opt { display:flex; align-items:center; gap:10px; padding:10px 12px; margin-bottom:8px; border:1.5px solid var(--border,#ecf0f9); border-radius:12px; cursor:pointer; }
+      .src-opt.active { border-color:#7c3aed; background:#faf5ff; }
+      .src-opt input { width:auto; }
+      .src-opt .is { font-size:.75rem; padding:3px 10px; border-radius:99px; }
+      .is.up { background:#e8f5e9; color:#2e7d32; }
+      .is.down { background:#fdecea; color:#c62828; }
+      .src-opt .cnt { margin-inline-start:auto; font-size:.78rem; color:var(--muted,#667085); }
+      .tables-groups { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+      @media (max-width:700px){ .tables-groups{ grid-template-columns:1fr; } }
+      .tg { border:1px solid var(--border,#ecf0f9); border-radius:12px; padding:10px 12px; }
+      .tg > b { font-size:.8rem; display:block; margin-bottom:8px; color:#6b7280; }
+      .tg label { display:flex; align-items:center; gap:7px; font-size:.82rem; padding:3px 0; cursor:pointer; }
+      .mode-opt { display:flex; gap:10px; margin-bottom:8px; }
+      .mode-opt label { flex:1; border:1.5px solid var(--border,#ecf0f9); border-radius:12px; padding:10px; cursor:pointer; font-size:.8rem; text-align:center; }
+      .mode-opt input:checked + span { color:#7c3aed; font-weight:700; }
+      .mode-opt label:has(input:checked){ border-color:#7c3aed; background:#faf5ff; }
+      .row-line { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:12px; }
+      .row-line input[type=date] { padding:7px 10px; border:1.5px solid var(--border,#ecf0f9); border-radius:9px; font-family:inherit; }
+      .log-line { font-size:.82rem; padding:6px 10px; border-radius:8px; margin-top:6px; background:#f8fafc; border:1px solid #eef2f7; }
+      .log-line.ok { border-right:3px solid #2e7d32; }
+      .log-line.err { border-right:3px solid #c62828; }
+      .copy-btn { border:none; background:#7c3aed; color:#fff; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:.8rem; }
+      #sqlSnippet { width:100%; min-height:220px; font-size:.72rem; direction:ltr; text-align:left; border:1px solid #e5e7eb; border-radius:10px; padding:10px; font-family:Consolas,monospace; background:#0f172a; color:#d1fae5; }
+      .steps li { font-size:.84rem; margin-bottom:6px; }
+      .log-sum { font-weight:700; }
+      .srv-sep { border-top:1px dashed var(--border,#e5e7eb); margin:14px 0 12px; display:flex; align-items:center; gap:8px; }
+      .srv-sep::after { content:""; flex:1; border-top:1px dashed var(--border,#e5e7eb); }
+      .srv-form { display:grid; gap:8px; }
+      .srv-form .f-group { display:grid; gap:4px; }
+      .srv-form label { font-size:.78rem; color:var(--muted,#667085); display:flex; align-items:center; justify-content:space-between; }
+      .srv-form input { padding:8px 10px; border:1.5px solid var(--border,#e5e7eb); border-radius:9px; font-family:inherit; font-size:.85rem; width:100%; box-sizing:border-box; }
+      .srv-form .f-group.disabled input { background:#f3f4f6; color:#9aa3b2; }
+      .srv-actions { display:flex; gap:8px; flex-wrap:wrap; }
+      .srv-actions .btn { font-size:.8rem; padding:7px 12px; }
+      .srv-note { font-size:.75rem; color:var(--muted,#667085); margin:8px 0 0; }
+      .custom-opt { display:flex; align-items:center; gap:10px; padding:10px 12px; margin-bottom:8px; border:1.5px solid var(--border,#ecf0f9); border-radius:12px; }
+      .custom-opt button { border:none; background:#fdecea; color:#c62828; border-radius:99px; width:22px; height:22px; cursor:pointer; font-size:.72rem; flex:0 0 auto; }
+      .health-box { font-size:.8rem; border-radius:10px; padding:10px 12px; margin-top:6px; }
+      .health-box.ok { background:#e8f5e9; color:#2e7d32; border:1px solid #c8e6c9; }
+      .health-box.warn { background:#fff7e6; color:#b45309; border:1px solid #fde68a; }
+      .health-box.err { background:#fdecea; color:#c62828; border:1px solid #f5c2c0; }
+      .health-box pre { direction:ltr; text-align:left; background:#0f172a; color:#d1fae5; border-radius:8px; padding:8px; overflow-x:auto; font-size:.72rem; margin:8px 0 0; }
+      @media (max-width:560px){ .srv-form .f-group{ grid-template-columns:1fr; } }
+    </style>
+  </head>
+  <body class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-badge">
+        <i class="fa-solid fa-arrows-rotate"></i>
+        <div>
+          <strong>نقل البيانات</strong>
+          <small>بين السيرفرات</small>
+        </div>
+      </div>
+      <nav class="side-nav">
+        <a class="side-link active" href="admin-data-migration.html">
+          <i class="fa-solid fa-arrows-rotate"></i>
+          <span>نقل / مزامنة</span>
+        </a>
+        <a class="side-link" href="shacksf.html">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>لوحة التحكم</span>
+        </a>
+        <a class="side-link" href="admin-orders.html">
+          <i class="fa-solid fa-receipt"></i>
+          <span>الطلبات</span>
+        </a>
+        <a class="side-link" href="taager-products.html">
+          <i class="fa-solid fa-database"></i>
+          <span>منتجات Taager</span>
+        </a>
+        <a class="side-link" href="admin-migration-guide.html">
+          <i class="fa-solid fa-book-open"></i>
+          <span>الدليل الكامل</span>
+        </a>
+      </nav>
+    </aside>
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-title">
+          <h1>نقل ومزامنة البيانات بين السيرفرات</h1>
+          <p>أضف الجديد من سيرفر لسيرفر أو انسخ لمشروع جديد بضغطة واحدة</p>
+        </div>
+        <div class="topbar-actions">
+          <a class="btn btn-secondary" href="admin-migration-guide.html"><i class="fa-solid fa-book-open"></i> الدليل الكامل</a>
+          <a class="btn btn-secondary" href="shacksf.html">العودة للوحة التحكم</a>
+        </div>
+      </header>
+      <div class="content-wrap">
+        <div class="mig-hero">
+          <i class="fa-solid fa-circle-info" style="font-size:1.4rem"></i>
+          <div>
+            <h2>كيف تعمل الصفحة؟</h2>
+            <p>اختر <b>المصدر</b> (السيرفر اللي فيه البيانات) ثم <b>الهدف</b>، واختار الجداول والوضعية واضغط "ابدأ". الوضعية الافتراضية تضيف الصفوف الجديدة فقط وتتجاهل الموجود. الأمان: التنفيذ يتم على السيرفر عبر خدمة خاصة، وتحتاج أن تكون مسجلاً دخولاً كأدمن.</p>
+          </div>
+        </div>
+
+        <div class="mig-grid">
+          <div>
+            <div class="mig-box">
+              <h3><i class="fa-solid fa-server"></i> المصدر (السيرفر اللي هنجيب منه البيانات)</h3>
+              <div id="sources"></div>
+
+              <div class="srv-sep"><i class="fa-solid fa-plus" style="color:#7c3aed"></i> إضافة مشروع / سيرفر جديد</div>
+              <div class="srv-form">
+                <div class="f-group">
+                  <label>اسم السيرفر (يظهر في القائمة)</label>
+                  <input type="text" id="svName" placeholder="مثال: مشروع جديد" />
+                </div>
+                <div class="f-group">
+                  <label>رابط المشروع (Project URL)</label>
+                  <input type="text" id="svUrl" placeholder="https://xxxx.supabase.co" dir="ltr" style="text-align:left" />
+                </div>
+                <div class="f-group">
+                  <label>المفتاح العام anon <span title="اختياري — يُستخدم للتحقق والرفع عبر المتصفح">(اختياري)</span></label>
+                  <input type="text" id="svAnon" placeholder="sb_publishable_..." dir="ltr" style="text-align:left" />
+                </div>
+                <div class="f-group">
+                  <label>مفتاح الخدمة service_role <span title="يُحفظ محليًا فقط ويُستخدم لتوليد أوامر الأهداف">(اختياري)</span></label>
+                  <input type="password" id="svKey" placeholder="sb_secret_..." dir="ltr" style="text-align:left" />
+                </div>
+                <div class="srv-actions">
+                  <button type="button" class="btn btn-primary" onclick="addServer()"><i class="fa-solid fa-plus"></i> أضف وافحص السيرفر</button>
+                  <button type="button" class="btn btn-secondary" id="btnGenCmd" onclick="genCmdForForm()" style="display:none">توليد أمر الأهداف</button>
+                  <button type="button" class="btn btn-secondary" onclick="copyGenCmd()" id="btnCopyCmd" style="display:none">نسخ الأمر</button>
+                </div>
+                <div id="healthBox"></div>
+                <p class="srv-note"><i class="fa-solid fa-circle-question"></i> عايز تعرف إزاي تجيب المفاتيح وتجهز المشروع؟ افتح <a href="admin-migration-guide.html" style="color:#7c3aed">الدليل الكامل</a>.</p>
+              </div>
+            </div>
+
+            <div class="mig-box">
+              <h3><i class="fa-solid fa-table-list"></i> الجداول المطلوب نقلها</h3>
+              <div class="row-line">
+                <button type="button" class="btn btn-secondary" onclick="selectGroup('all',true)">تحديد الكل</button>
+                <button type="button" class="btn btn-secondary" onclick="selectGroup('all',false)">مسح الكل</button>
+                <button type="button" class="btn btn-secondary" onclick="selectRecommended()">المهم فقط (موصى به)</button>
+              </div>
+              <div id="tables" class="tables-groups" style="margin-top:12px"></div>
+            </div>
+
+            <div class="mig-box">
+              <h3><i class="fa-solid fa-code-compare"></i> وضعية النقل</h3>
+              <div class="mode-opt">
+                <label>
+                  <input type="radio" name="mode" value="insert" checked />
+                  <span>إضافة الجديد فقط<br><small>تجاهل الموجود</small></span>
+                </label>
+                <label>
+                  <input type="radio" name="mode" value="sync" />
+                  <span>تحديث + إضافة<br><small>موجود = تحديث</small></span>
+                </label>
+                <label>
+                  <input type="radio" name="mode" value="copy" />
+                  <span>نسخة كاملة<br><small>لمشروع جديد فارغ</small></span>
+                </label>
+              </div>
+              <div class="row-line">
+                <label style="font-size:.85rem">من تاريخ (اختياري):
+                  <input type="date" id="since" />
+                </label>
+              </div>
+            </div>
+
+            <div class="mig-box">
+              <h3><i class="fa-solid fa-bullseye"></i> الأهداف (إلى أين ننقل؟)</h3>
+              <div id="targets" class="tables-groups">
+                <div class="tg"><b>جارٍ تحميل الأهداف...</b></div>
+              </div>
+              <div class="row-line" style="margin-top:14px;border-top:1px solid var(--border,#eef2f7);padding-top:14px">
+                <button type="button" class="btn btn-secondary" id="btnPreview" onclick="runMigrate(true)">معاينة (بدون تنفيذ)</button>
+                <button type="button" class="btn btn-primary" id="btnMigrate" onclick="runMigrate(false)"><i class="fa-solid fa-play"></i> ابدأ النقل الآن</button>
+                <span id="phase" style="font-size:.8rem;color:var(--muted,#667085)"></span>
+              </div>
+            </div>
+
+            <div class="mig-box">
+              <h3><i class="fa-solid fa-clock-rotate-left"></i> سجل النتيجة</h3>
+              <div id="result" style="max-height:420px;overflow:auto"></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="mig-box">
+              <h3><i class="fa-solid fa-link"></i> رابط الصفحة</h3>
+              <p style="font-size:.82rem;margin:0" id="pageLink"></p>
+              <p style="font-size:.78rem;color:var(--muted,#667085);margin:8px 0 0">انسخ الرابط وأضفه في أي مكان (مثلاً إحصائيات سريعة أو الشريط الجانبي).</p>
+            </div>
+
+            <div class="mig-box">
+              <h3><i class="fa-solid fa-diagram-project"></i> للنسخ إلى مشروع جديد خالص</h3>
+              <ol class="steps" style="padding-inline-start:18px;margin:0">
+                <li>انقل هيكل الجداول (schema) للمشروع الجديد — الأسهل بسكريبت <code>migrate-supabase.sh</code> القديم أو أنشئه نسخة من الأساسي.</li>
+                <li>شغّل الكود بالأسفل <b>مرة واحدة</b> في <b>SQL Editor</b> للمشروع الجديد (يجهز دوال الاستيراد والعدادات).</li>
+                <li>من سطر الأوامر أضف المشروع الجديد لسر الروابط (بالصيغة <code>name|url|key</code>، كل هدف مفصول بـ<code>;</code>): <code>supabase secrets set MIG_TARGETS='new|https://REF.supabase.co|sb_secret_...' --project-ref REF</code> في المشروع المصدر.</li>
+                <li>ارجع للصفحة، اختر المصدر ثم هدف <b>new</b> ووضعية "نسخة كاملة".</li>
+              </ol>
+            </div>
+
+            <div class="mig-box">
+              <h3><i class="fa-solid fa-code"></i> كود SQL المطلوب لمرة واحدة في أي مشروع هدف</h3>
+              <button type="button" class="copy-btn" onclick="copySql()"><i class="fa-regular fa-copy"></i> نسخ الكود</button>
+              <textarea id="sqlSnippet" readonly spellcheck="false"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <nav class="mobile-bottom-nav">
+      <a class="mobile-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>الرئيسية</span></a>
+      <a class="mobile-link active" href="admin-data-migration.html"><i class="fa-solid fa-arrows-rotate"></i><span>نقل</span></a>
+      <a class="mobile-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>طلبات</span></a>
+      <a class="mobile-link" href="taager-products.html"><i class="fa-solid fa-database"></i><span>تايجر</span></a>
+      <a class="mobile-link" href="admin-migration-guide.html"><i class="fa-solid fa-book-open"></i><span>دليل</span></a>
+    </nav>
+
+    <script>
+      const PRIMARY = { name: "primary", label: "السيرفر الأساسي (الرئيسي)", url: "https://msgqzgzoslearaprgiqq.supabase.co" };
+      const BACKUP = { name: "backup", label: "النسخة الاحتياطية (الثاني)", url: "https://wwlwwgqfjhmchrijaojr.supabase.co" };
+      const BACKUP3 = { name: "backup3", label: "النسخة الاحتياطية (الثالث)", url: "https://qhqkgrpezoaugyhzrgyc.supabase.co" };
+      const CUSTOM_KEY = "migration.servers";
+      function getCustomServers() {
+        try { return JSON.parse(localStorage.getItem(CUSTOM_KEY) || "[]"); } catch (e) { return []; }
+      }
+      function getSources() {
+        const built = [
+          { name: PRIMARY.name, label: PRIMARY.label, url: PRIMARY.url },
+          { name: BACKUP.name, label: BACKUP.label, url: BACKUP.url },
+          { name: BACKUP3.name, label: BACKUP3.label, url: BACKUP3.url },
+        ];
+        for (const s of getCustomServers()) {
+          built.push({ name: s.name, label: s.name, url: s.url, custom: true, key: s.key || "", anon: s.anon || "" });
+        }
+        return built;
+      }
+      function saveCustomServers(list) {
+        localStorage.setItem(CUSTOM_KEY, JSON.stringify(list.map(function (s) { return { name: s.name, url: s.url, key: s.key || "", anon: s.anon || "" }; })));
+      }
+      const RECOMMENDED = [
+        "orders", "order_items", "return_requests", "transfer_requests", "complaints",
+        "taager_products", "products", "my_products", "product_sellers",
+        "support_conversations", "support_messages",
+        "partners_requests", "partner_accounts", "partner_invoices",
+        "users", "profiles", "user_addresses", "ratings",
+        "categories", "brands", "store_config", "kobon",
+      ];
+      let STATE = {
+        sourceUrl: null,
+        info: null,
+        selectedTables: new Set(RECOMMENDED),
+        selectedTargets: new Set(),
+        running: false,
+      };
+      const INFO_CACHE = {};
+
+      const SQL_SNIPPET = `-- migration_rpc.sql — يُشغَّل مرة واحدة في أي مشروع "هدف" قبل أول sync
+CREATE OR REPLACE FUNCTION public.migration_table_meta(p_tables text[] DEFAULT array[]::text[])
+RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public
+AS $$
+DECLARE
+  t text; result jsonb := '[]'::jsonb; has_date boolean; id_identity boolean; cols text[];
+BEGIN
+  IF auth.role() <> 'service_role' THEN RAISE EXCEPTION 'forbidden: service_role only'; END IF;
+  FOREACH t IN ARRAY COALESCE(p_tables, array[]::text[]) LOOP
+    IF t !~ '^[a-z_][a-z0-9_]*$' OR to_regclass('public.' || t) IS NULL THEN CONTINUE; END IF;
+    SELECT COALESCE(bool_or(column_name='created_at'),false),
+           COALESCE(max(CASE WHEN is_identity='YES' THEN 1 ELSE 0 END),0)=1
+      INTO has_date, id_identity
+      FROM information_schema.columns
+     WHERE table_schema='public' AND table_name=t AND (column_name='created_at' OR column_name='id');
+    SELECT array_agg(column_name ORDER BY ordinal_position) INTO cols
+      FROM information_schema.columns
+     WHERE table_schema='public' AND table_name=t AND is_generated='NEVER';
+    result := result || jsonb_build_array(jsonb_build_object('name',t,'has_date',has_date,'id_identity',id_identity,'columns',to_jsonb(COALESCE(cols,array[]::text[]))));
+  END LOOP;
+  RETURN result;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.migration_existing_ids(p_table text, p_ids text[] DEFAULT array[]::text[])
+RETURNS SETOF text LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public
+AS $$
+DECLARE q text;
+BEGIN
+  IF auth.role() <> 'service_role' THEN RAISE EXCEPTION 'forbidden: service_role only'; END IF;
+  IF p_table !~ '^[a-z_][a-z0-9_]*$' OR to_regclass('public.' || p_table) IS NULL THEN RAISE EXCEPTION 'bad table name: %', p_table; END IF;
+  IF p_ids IS NULL OR array_length(p_ids, 1) IS NULL OR array_length(p_ids, 1) = 0 THEN RETURN; END IF;
+  q := format('SELECT id::text FROM public.%I WHERE id::text = ANY($1)', p_table);
+  RETURN QUERY EXECUTE q USING p_ids;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.migration_import(p_table text, p_rows jsonb, p_update boolean DEFAULT false)
+RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
+AS $$
+DECLARE
+  cols text; insert_cols text; update_set text; is_id_identity boolean;
+  _inserted bigint := 0; _existing bigint := 0; _sql text;
+BEGIN
+  IF auth.role() <> 'service_role' THEN RAISE EXCEPTION 'forbidden: service_role only'; END IF;
+  IF p_table !~ '^[a-z_][a-z0-9_]*$' OR to_regclass('public.' || p_table) IS NULL THEN RAISE EXCEPTION 'bad table name: %', p_table; END IF;
+  IF p_rows IS NULL OR jsonb_typeof(p_rows)<>'array' OR jsonb_array_length(p_rows)=0 THEN
+    RETURN jsonb_build_object('table',p_table,'inserted',0,'existing',0,'updated',0);
+  END IF;
+  SELECT COALESCE(max(CASE WHEN is_identity='YES' THEN 1 ELSE 0 END),0)=1 INTO is_id_identity
+    FROM information_schema.columns WHERE table_schema='public' AND table_name=p_table AND column_name='id';
+  SELECT string_agg(quote_ident(column_name),', ' ORDER BY ordinal_position) INTO cols
+    FROM information_schema.columns WHERE table_schema='public' AND table_name=p_table AND column_name<>'id' AND is_generated='NEVER';
+  insert_cols := 'id, ' || cols;
+  IF p_update THEN
+    SELECT string_agg(quote_ident(column_name)||' = EXCLUDED.'||quote_ident(column_name), ', ') INTO update_set
+      FROM information_schema.columns WHERE table_schema='public' AND table_name=p_table AND column_name<>'id' AND is_generated='NEVER';
+  END IF;
+  _sql := format('WITH ins AS (INSERT INTO public.%I AS t (%s) %s SELECT (rec).* FROM jsonb_populate_recordset(NULL::public.%I,$1) rec ON CONFLICT (id) DO %s RETURNING id,(t.xmax::text::bigint>0) AS _was_existing) SELECT count(*) FILTER (WHERE _was_existing), count(*) FILTER (WHERE NOT _was_existing) INTO _existing,_inserted FROM ins', p_table, insert_cols, CASE WHEN is_id_identity THEN 'OVERRIDING SYSTEM VALUE' ELSE '' END, p_table, CASE WHEN p_update THEN 'UPDATE SET '||update_set ELSE 'NOTHING' END);
+  EXECUTE _sql USING p_rows;
+  RETURN jsonb_build_object('table',p_table,'inserted',_inserted,'existing',_existing,'updated',CASE WHEN p_update THEN _existing ELSE 0 END,'total',_inserted+_existing);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.migration_set_sequences(p_tables text[] DEFAULT array[]::text[])
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
+AS $$
+DECLARE t text; maxid bigint;
+BEGIN
+  IF auth.role()<>'service_role' THEN RAISE EXCEPTION 'forbidden: service_role only'; END IF;
+  FOREACH t IN ARRAY COALESCE(p_tables,array[]::text[]) LOOP
+    IF t !~ '^[a-z_][a-z0-9_]*$' OR to_regclass('public.'||t) IS NULL THEN CONTINUE; END IF;
+    BEGIN
+      IF to_regclass('public.'||t||'_id_seq') IS NOT NULL THEN
+        EXECUTE format('SELECT max(id) FROM public.%I',t) INTO maxid;
+        IF maxid IS NOT NULL THEN
+          EXECUTE format('SELECT setval(%L,%s)','public.'||t||'_id_seq',GREATEST(maxid,1));
+        END IF;
+      END IF;
+    EXCEPTION WHEN OTHERS THEN NULL;
+    END;
+  END LOOP;
+END;
+$$;`;
+
+      function $(id) { return document.getElementById(id); }
+
+      function badgeText(ok) {
+        return ok ? '<span class="is up"><i class="fa-solid fa-circle-check"></i> شغال</span>' : '<span class="is down"><i class="fa-solid fa-triangle-exclamation"></i> واقف/خطأ</span>';
+      }
+
+      async function infoFrom(src) {
+        try {
+          const res = await fetch(
+            src.url + "/functions/v1/data-migrate",
+            { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "info" }) }
+          );
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          return await res.json();
+        } catch (e) {
+          return { success: false, error: String(e && e.message || e) };
+        }
+      }
+
+      function renderSources() {
+        const wrap = $("sources");
+        wrap.innerHTML = "";
+        for (const src of getSources()) {
+          const info = INFO_CACHE[src.url];
+          const div = document.createElement("div");
+          div.className = "src-opt" + (STATE.sourceUrl === src.url ? " active" : "");
+          div.dataset.url = src.url;
+          let statusHtml;
+          if (!info) statusHtml = '<span class="is" style="background:#eef2f7;color:#667085">فحص...</span>';
+          else if (info.success) statusHtml = badgeText(true);
+          else statusHtml = badgeText(false);
+          let cntText = info && info.success ? (info.tables.reduce(function (a, t) { return a + (t.count || 0); }, 0) + " صف في الجداول") : (info ? "غير قادر على الوصول" : "");
+          const customBadge = src.custom ? '<span style="font-size:.68rem;background:#f3e8ff;color:#6d28d9;border-radius:99px;padding:2px 8px">مخصص</span> ' : "";
+          div.innerHTML =
+            '<input type="radio" name="source" ' + (STATE.sourceUrl === src.url ? "checked" : "") + " />" +
+            '<div>' + customBadge + '<b>' + src.label + '</b><div style="font-size:.72rem;color:var(--muted,#667085);direction:ltr;text-align:left">' + src.url.replace("https://", "") + "</div></div>" +
+            '<div class="cnt">' + cntText + "</div>" +
+            "<div>" + statusHtml + "</div>" +
+            (src.custom ? '<button type="button" title="حذف السيرفر" onclick="event.stopPropagation();deleteServer(\'' + src.url.replace(/'/g, "") + '\')" style="border:none;background:#fdecea;color:#c62828;border-radius:99px;width:22px;height:22px;cursor:pointer;font-size:.7rem">&times;</button>' : "");
+          div.addEventListener("click", function () { selectSource(src.url); });
+          wrap.appendChild(div);
+        }
+      }
+
+      function selectSource(url) {
+        STATE.sourceUrl = url;
+        renderSources();
+        loadInfoFor(url);
+      }
+
+      async function loadInfoFor(url) {
+        $("phase").textContent = "جارٍ جلب معلومات السيرفر...";
+        const info = await infoFrom({ url: url });
+        INFO_CACHE[url] = info;
+        STATE.sourceUrl = url;
+        STATE.info = info;
+        renderSources();
+        renderTables();
+        renderTargets();
+        $("phase").textContent = "";
+      }
+
+      function renderTables() {
+        const info = STATE.info;
+        const box = $("tables");
+        box.innerHTML = "";
+        if (!info || !info.success || !info.tables.length) {
+          box.innerHTML = '<div class="tg"><b>لا توجد بيانات — تأكد أن المصدر شغال وأن الدوال مثبتة فيه.</b></div>';
+          return;
+        }
+        const groups = {};
+        for (const t of info.tables) {
+          (groups[t.group] = groups[t.group] || []).push(t);
+        }
+        Object.keys(groups).forEach(function (g) {
+          const sec = document.createElement("div");
+          sec.className = "tg";
+          const title = document.createElement("b");
+          title.textContent = g;
+          sec.appendChild(title);
+          for (const t of groups[g]) {
+            if (!t.exists) continue;
+            const label = document.createElement("label");
+            label.innerHTML =
+              '<input type="checkbox" class="tbl-check" data-table="' + t.name + '" ' + (STATE.selectedTables.has(t.name) ? "checked" : "") + ' />' +
+              '<span>' + t.label + '</span>' +
+              '<span style="margin-inline-start:auto;font-size:.7rem;color:var(--muted,#667085)">' + (t.count || 0) + '</span>';
+            sec.appendChild(label);
+          }
+          box.appendChild(sec);
+        });
+        box.addEventListener("change", function (e) {
+          const el = e.target;
+          if (el && el.classList.contains("tbl-check")) {
+            if (el.checked) STATE.selectedTables.add(el.dataset.table);
+            else STATE.selectedTables.delete(el.dataset.table);
+          }
+        });
+      }
+
+      function renderTargets() {
+        const info = STATE.info;
+        const box = $("targets");
+        box.innerHTML = "";
+        if (!info || !info.success || !info.targets.length) {
+          box.innerHTML = '<div class="tg"><b>لم يتم إعداد أهداف لهذا المصدر.</b><li style="font-size:.78rem;margin-top:6px">شغّل من السطر: <code style="direction:ltr">supabase secrets set MIG_TARGETS=\'name|URL|service_key\' --project-ref REF</code> (كل هدف بعدة أهداف بالصيغة نفسها مفصولة بـ<code>;</code>)</li></div>';
+          return;
+        }
+        for (const t of info.targets) {
+          const label = document.createElement("label");
+          label.className = "tg";
+          label.style.display = "flex";
+          label.style.alignItems = "center";
+          label.style.gap = "8px";
+          label.innerHTML =
+            '<input type="checkbox" class="tgt-check" data-target="' + t.name + '" ' + (STATE.selectedTargets.has(t.name) ? "checked" : "") + ' />' +
+            '<b style="margin:0">' + t.name + "</b>" +
+            '<span style="font-size:.7rem;color:var(--muted,#667085);direction:ltr;margin-inline-start:auto">' + t.url.replace("https://", "") + "</span>";
+          box.appendChild(label);
+        }
+        box.addEventListener("change", function (e) {
+          const el = e.target;
+          if (el && el.classList.contains("tgt-check")) {
+            if (el.checked) STATE.selectedTargets.add(el.dataset.target);
+            else STATE.selectedTargets.delete(el.dataset.target);
+          }
+        });
+      }
+
+      function getMode() {
+        const el = document.querySelector('input[name="mode"]:checked');
+        return el ? el.value : "insert";
+      }
+
+      function selectGroup(group, checked) {
+        const boxes = document.querySelectorAll("#tables .tbl-check");
+        for (const b of boxes) {
+          b.checked = !!checked;
+          STATE.selectedTables[b.checked ? "add" : "delete"](b.dataset.table);
+        }
+      }
+
+      function selectRecommended() {
+        const boxes = document.querySelectorAll("#tables .tbl-check");
+        for (const b of boxes) {
+          b.checked = RECOMMENDED.includes(b.dataset.table);
+          STATE.selectedTables[b.checked ? "add" : "delete"](b.dataset.table);
+        }
+      }
+
+      function esc(s) {
+        return String(s == null ? "" : s).replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      }
+
+      function logLine(text, cls, sub) {
+        const d = document.createElement("div");
+        d.className = "log-line " + (cls || "");
+        d.innerHTML = text + (sub ? '<div style="font-size:.75rem;color:#9aa3b2">' + sub + "</div>" : "");
+        $("result").appendChild(d);
+        $("result").scrollTop = $("result").scrollHeight;
+        return d;
+      }
+
+      async function runMigrate(dry) {
+        if (STATE.running) return;
+        if (!STATE.sourceUrl) return alert("اختر المصدر أولاً.");
+        if (!STATE.selectedTables.size) return alert("اختر ولو جدول واحد.");
+        if (!STATE.selectedTargets.size) return alert("اختر الهدف (الوجهة).");
+
+        const tables = Array.from(STATE.selectedTables);
+        const targets = Array.from(STATE.selectedTargets);
+        const token = window.adminAuth && window.adminAuth.getToken ? window.adminAuth.getToken() : "";
+        if (!token) return alert("يجب تسجيل الدخول كأدمن أولاً.");
+
+        const since = $("since").value || "";
+
+        if (!dry) {
+          const msg = "سيتم " + (getMode() === "insert" ? "إضافة الجديد فقط من" : "مزامنة") + " " + tables.length +
+            " جدول إلى " + targets.length + " هدف" + (since ? " من " + since : "") + ".\nهل تريد المتابعة؟";
+          if (!window.confirm(msg)) return;
+        }
+
+        STATE.running = true;
+        $("btnMigrate").disabled = true;
+        $("btnPreview").disabled = true;
+        $("phase").textContent = dry ? "معاينة..." : "جارٍ النقل...";
+        $("result").innerHTML = "";
+
+        const mode = getMode();
+
+        if (!dry) {
+          logLine('<i class="fa-solid fa-circle-info" style="color:#2563eb"></i> التنفيذ الحقيقي يتم <b>مرحلة-بمرحلة</b>: كل استدعاء ينقل صفحة (حتى 1000 صف) من كل جدول حتى اكتماله بالكامل، والنقل قابل للاستئناف عند أي انقطاع.', "ok");
+          await runSteps(tables, targets, mode, since, token);
+          STATE.running = false;
+          $("btnMigrate").disabled = false;
+          $("btnPreview").disabled = false;
+          $("phase").textContent = "";
+          return;
+        }
+
+        const payload = {
+          action: "migrate",
+          mode: mode,
+          tables: tables,
+          targets: targets,
+          since: since || undefined,
+          dryRun: true,
+          adminToken: token,
+        };
+
+        try {
+          const res = await fetch(STATE.sourceUrl + "/functions/v1/data-migrate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const body = await res.json().catch(function () { return {}; });
+          if (!res.ok || !body.success) {
+            logLine('<i class="fa-solid fa-xmark" style="color:#c62828"></i> ' + esc(body.error || ("HTTP " + res.status)), "err");
+            return;
+          }
+          renderResult(body);
+        } catch (e) {
+          logLine('<i class="fa-solid fa-xmark" style="color:#c62828"></i> فشل الاتصال: ' + esc(e && e.message || e), "err");
+        } finally {
+          STATE.running = false;
+          $("btnMigrate").disabled = false;
+          $("btnPreview").disabled = false;
+          $("phase").textContent = "";
+        }
+      }
+
+      function tableLabel(table) {
+        const info = STATE.info;
+        if (info && info.tables) {
+          const t = info.tables.find(function (x) { return x.name === table; });
+          if (t && t.label) return t.label;
+        }
+        return table;
+      }
+
+      async function runSteps(tables, targets, mode, since, token) {
+        let insertedTotal = 0;
+        let existingTotal = 0;
+        let updatedTotal = 0;
+        let stepsTotal = 0;
+
+        for (let ti = 0; ti < tables.length; ti++) {
+          const table = tables[ti];
+          const label = tableLabel(table);
+          logLine('<i class="fa-solid fa-play" style="color:#7c3aed"></i> <b>' + esc(label) + '</b> — بدء النقل بمراحل حتى اكتمال كل صفوف الجدول...', "ok");
+          let lastId = null;
+          let done = false;
+          let tableInserted = 0;
+          let tableExisting = 0;
+          let tableUpdated = 0;
+          let stepErr = null;
+          let steps = 0;
+
+          while (!done) {
+            steps++;
+            const payload = {
+              action: "migrate-step",
+              adminToken: token,
+              mode: mode,
+              table: table,
+              since: since || undefined,
+              targets: targets,
+              lastId: lastId == null ? undefined : String(lastId),
+            };
+
+            let body = null;
+            let ok = false;
+            for (let attempt = 0; attempt < 3 && !ok; attempt++) {
+              try {
+                const res = await fetch(STATE.sourceUrl + "/functions/v1/data-migrate", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(payload),
+                });
+                body = await res.json().catch(function () { return {}; });
+                if (res.ok && body && body.success) {
+                  ok = true;
+                  break;
+                }
+                if (res.ok && !body.success) break;
+                if (res.status === 402) {
+                  logLine('<i class="fa-solid fa-xmark" style="color:#c62828"></i> المصدر رجع 402 (تجاوز حدود الخطة) أثناء النقل — رقِّ الحساب أو انتقل لمصدر آخر.', "err");
+                  return false;
+                }
+              } catch (e) {
+                body = { error: (e && e.message) || String(e) };
+              }
+              await new Promise(function (x) { setTimeout(x, 1000 * (attempt + 1)); });
+            }
+
+            if (!ok || !body) {
+              stepErr = (body && body.error) || "فشل متكرر بعد 3 محاولات (أعد المحاولة وسيكمل النقل من حيث توقف).";
+              break;
+            }
+
+            const rowsGot = Number(body.rows) || 0;
+            if (rowsGot > 0) {
+              const ins = Number(body.inserted) || 0;
+              const exs = Number(body.existing) || 0;
+              const upd = Number(body.updated) || 0;
+              tableInserted += ins;
+              tableExisting += exs;
+              tableUpdated += upd;
+              insertedTotal += ins;
+              existingTotal += exs;
+              updatedTotal += upd;
+              stepsTotal++;
+            }
+
+            const errs = Array.isArray(body.errors) ? body.errors.filter(function (e) { return !!e; }) : [];
+            if (errs.length) {
+              stepErr = errs.slice(0, 3).join(" • ");
+              break;
+            }
+
+            done = !!body.done;
+            lastId = body.nextLastId || null;
+            if (!done) {
+              $("phase").textContent = "نقل " + label + "… " + (tableInserted + tableExisting).toLocaleString("en") + " صف";
+              if (steps % 25 === 0) {
+                logLine('… جاري: ' + esc(label) + " — " + (tableInserted + tableExisting).toLocaleString("en") + " صف منقول حتى الآن (جديد " + tableInserted.toLocaleString("en") + ")", "ok");
+              }
+            }
+          }
+
+          if (done) {
+            const flags = [];
+            if (tableInserted > 0) flags.push('<span style="color:#2e7d32">+ ' + tableInserted.toLocaleString("en") + " جديد</span>");
+            flags.push("موجود " + tableExisting.toLocaleString("en"));
+            if (tableUpdated > 0) flags.push('<span style="color:#2563eb">مُحدَّث ' + tableUpdated.toLocaleString("en") + "</span>");
+            flags.push(steps.toLocaleString("en") + " خطوة");
+            logLine('<i class="fa-solid fa-circle-check" style="color:#2e7d32"></i> <b>' + esc(label) + '</b> — اكتمل بالكامل: ' + flags.join(" • "), "ok");
+          } else {
+            logLine('<i class="fa-solid fa-xmark" style="color:#c62828"></i> <b>' + esc(label) + '</b> — توقف قبل الاكتمال: ' + esc(stepErr || "خطأ غير معروف") + " (نُقل " + tableInserted.toLocaleString("en") + " صف). أعد المحاولة وسيُكمّل تلقائيًا.", "err");
+            break;
+          }
+        }
+
+        logLine('<i class="fa-solid fa-flag-checkered" style="color:#7c3aed"></i> <b>ملخص النقل الكامل:</b> ' + insertedTotal.toLocaleString("en") + " جديد • " + existingTotal.toLocaleString("en") + " موجود • " + updatedTotal.toLocaleString("en") + " مُحدَّث • " + stepsTotal.toLocaleString("en") + " خطوة", "ok");
+        return true;
+      }
+
+      function renderResult(body) {
+        if (body.dryRun) {
+          logLine('<i class="fa-solid fa-magnifying-glass" style="color:#2563eb"></i> <b>معاينة</b> — لن يُكتب أي شيء.', "ok");
+        } else {
+          logLine('<i class="fa-solid fa-circle-check" style="color:#2e7d32"></i> <b>تمت العملية بنجاح</b> (وضعية: ' + getMode() + ")", "ok");
+        }
+        for (const r of body.results) {
+          if (r.error) {
+            logLine("<b>" + esc(r.label) + "</b> — " + esc(r.error), "err");
+            continue;
+          }
+          const lines = [];
+          for (const tname of Object.keys(r.targets || {})) {
+            const t = r.targets[tname];
+            const n = function (v, suffix) {
+              if (typeof v !== "number" || !isFinite(v)) return "؟";
+              return v.toLocaleString("en") + (suffix || "");
+            };
+            if (t.dry) {
+              lines.push("<b>" + esc(tname) + "</b>: سيُضاف " + n(t.toInsert) + " جديد • موجود " + n(t.present) + (getMode() === "insert" ? "" : " • سيُحدَّث " + n(t.willUpdate)));
+            } else {
+              lines.push("<b>" + esc(tname) + "</b>: <span style='color:#2e7d32'>+ " + n(t.inserted) + " جديد</span> • موجود " + n(t.existing) + (getMode() === "insert" ? "" : " • <span style='color:#2563eb'>مُحدَّث " + n(t.updated) + "</span>") +
+                (t.errors && t.errors.length ? " • <span style='color:#c62828'>أخطاء " + t.errors.length + "</span>" : ""));
+            }
+          }
+          const brief = r.huge ? " <span class='is warn'>جدول كبير — تفاصيل أقل</span>" : "";
+          logLine("<b>" + esc(r.label) + "</b> (" + (typeof r.rows === "number" ? r.rows.toLocaleString("en") : "؟") + " صف) • " + lines.join("<br>") + brief, "ok");
+        }
+      }
+
+      function copySql() {
+        const ta = $("sqlSnippet");
+        ta.readOnly = false;
+        ta.select();
+        try { document.execCommand("copy"); } catch (e) {}
+        ta.readOnly = true;
+        alert("تم نسخ كود SQL. شغّله في SQL Editor بالمشروع الهدف.");
+      }
+
+      function refFromUrl(url) {
+        const m = String(url || "").match(/https:\/\/([^.]+)\./);
+        return m ? m[1] : "";
+      }
+
+      function genCmdForForm() {
+        const url = ($("svUrl").value || "").trim().replace(/\/+$/, "");
+        const key = ($("svKey").value || "").trim();
+        const name = ($("svName").value || "").trim() || "new";
+        const box = $("healthBox");
+        if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url)) {
+          box.className = "health-box err";
+          box.innerHTML = "رابط المشروع مش صحيح — لازم يكون بالشكل <code dir=ltr>https://xxx.supabase.co</code>";
+          return;
+        }
+        if (!key) {
+          box.className = "health-box warn";
+          box.innerHTML = "اكتب مفتاح service_role أولًا عشان يظهر أمر الأهداف.";
+          return;
+        }
+        const ref = refFromUrl(url);
+        const cmd = "supabase secrets set MIG_TARGETS='" + name + "|" + url + "|" + key + "' --project-ref " + (ref || "REF") + "\n# ثم أعد النشر حتى يلتقط السر:\nsupabase functions deploy data-migrate --project-ref " + (ref || "REF") + " --no-verify-jwt";
+        window.__genCmd = cmd;
+        box.className = "health-box ok";
+        box.innerHTML = "<b>أمر الأهداف جاهز — انسخه وشغّله في مجلد اللوحة على جهازك:</b><pre>" + esc(cmd) + "</pre><i>لو عندك أهداف تانية لنفس المصدر ادمجها بنفس الصيغة مفصولة بـ <code>;</code></i>";
+        $("btnCopyCmd").style.display = "";
+      }
+
+      function copyGenCmd() {
+        if (!window.__genCmd) return;
+        const ta = document.createElement("textarea");
+        ta.value = window.__genCmd;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); } catch (e) {}
+        document.body.removeChild(ta);
+        alert("تم نسخ الأمر. شغّله من مجلد اللوحة ثم أعد النشر كما في الأمر نفسه.");
+      }
+
+      async function probeServer(src) {
+        // 1) حاول توظيف data-migrate
+        try {
+          const res = await fetch(src.url + "/functions/v1/data-migrate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "info" }),
+          });
+          if (res.ok) {
+            const j = await res.json().catch(function () { return {}; });
+            if (j && j.success) {
+              const rows = (j.tables || []).reduce(function (a, t) { return a + (t.count || 0); }, 0);
+              return { level: "mig", tables: (j.tables || []).length, rows: rows };
+            }
+            return { level: "mig-err", note: j && j.error };
+          }
+          if (res.status === 402) return { level: "quota", note: "المشروع راجع 402 — تجاوز الحدود (exceed_egress_quota). لازم ترقية الباقة أو إزالة حد الإنفاق." };
+          if (res.status === 401) {
+            // يتطلب توكن — جرّب بمفتاح anon لو موجود
+            if (src.anon) {
+              const res2 = await fetch(src.url + "/functions/v1/data-migrate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", apikey: src.anon, Authorization: "Bearer " + src.anon },
+                body: JSON.stringify({ action: "info" }),
+              });
+              if (res2.status === 401 || res2.status === 403) return { level: "fail", note: "الوظيفة مشغّلة ومحمية بتوكن — مش لازم (أعد نشرها بـ --no-verify-jwt)." };
+              if (res2.ok) {
+                const j = await res2.json().catch(function () { return {}; });
+                if (j && j.success) return { level: "mig", tables: (j.tables || []).length, rows: j.tables.reduce(function (a, t) { return a + (t.count || 0); }, 0) };
+              }
+            }
+            return { level: "fail", note: "الوظيفة مشغّلة ومحمية بتوكن — أعد نشرها بـ --no-verify-jwt لتشتغل مباشرة." };
+          }
+          if (res.status === 404) return { level: "nodeploy", note: "المشروع شغال لكن وظيفة النقل (data-migrate) غير منشورة فيه." };
+          if (res.status === 500) return { level: "mig-err", note: "وظيفة النقل راجعت خطأ 500 — تأكد أن السكربت SQL شغّال في المشروع." };
+          return { level: "fail", note: "استجابة غير متوقعة: HTTP " + res.status };
+        } catch (e) {
+          return { level: "unreachable", note: "مشروع غير قابل للوصول من المتصفح (CORS أو مطفى/معلق أو الخطة موقوفة عن الأنترنت)." };
+        }
+      }
+
+      async function addServer() {
+        const name = ($("svName").value || "").trim();
+        const url = ($("svUrl").value || "").trim().replace(/\/+$/, "");
+        const anon = ($("svAnon").value || "").trim();
+        const key = ($("svKey").value || "").trim();
+        const box = $("healthBox");
+        if (!name) { box.className = "health-box err"; box.innerHTML = "اكتب اسم السيرفر."; return; }
+        if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url)) {
+          box.className = "health-box err";
+          box.innerHTML = "رابط المشروع مش صحيح — لازم يكون بالشكل <code dir=ltr>https://xxx.supabase.co</code>";
+          return;
+        }
+        box.className = "health-box warn";
+        box.innerHTML = "التحقق من السيرفر...";
+        const src = { name: name, url: url, anon: anon, key: key };
+        const probe = await probeServer(src);
+        $("btnGenCmd").style.display = "";
+        $("btnCopyCmd").style.display = "";
+
+        if (probe.level === "mig") {
+          const list = getCustomServers().filter(function (s) { return s.url !== url; });
+          list.push(src);
+          saveCustomServers(list);
+          box.className = "health-box ok";
+          box.innerHTML = "<b>تمام! السيرفر شغال ووظيفة النقل منصوبة فيه ✓</b><br>اتصل بالجداول: " + probe.tables + " جدول • " + probe.rows + " صف. تمت إضافته للمصادر.";
+          STATE.sourceUrl = url;
+          const custom = getSources().find(function (s) { return s.url === url; });
+          custom.__info = { success: true, tables: [], targets: [] };
+          const info = await infoFrom(custom);
+          custom.__info = info;
+          STATE.info = info;
+          renderSources(); renderTables(); renderTargets();
+          return;
+        }
+        if (probe.level === "quota") {
+          box.className = "health-box err";
+          box.innerHTML = "<b>" + probe.note + "</b><br>لما يشتغل تمام هيتضاف للسيرفرات. تحقق من المشروع تاني كلمه يرجعلو الشغل.";
+          return;
+        }
+        if (probe.level === "nodeploy" || probe.level === "fail" || probe.level === "mig-err") {
+          const ref = refFromUrl(url);
+          box.className = "health-box warn";
+          box.innerHTML = "<b>" + probe.note + "</b><br>" +
+            "تجهيز المشروع الجديد بيحتاج 3 خطوات (مفصلة في " + '<a href="admin-migration-guide.html" style="text-decoration:underline">الدليل الكامل</a>):' +
+            '<ol style="margin:6px 0;padding-inline-start:20px">' +
+            "<li><b>شغّل كود SQL الموجود أسفل الصفحة (زر نسخ الكود) الأول في SQL Editor بتاع المشروع الجديد</b> — بيجهز دوال الاستيراد والعدادات.</li>" +
+            "<li>انشر وظيفة النقل في المشروع الجديد (من مجلد اللوحة):<pre>supabase functions deploy data-migrate --project-ref " + (ref || "REF") + " --no-verify-jwt</pre></li>" +
+            "<li>أضف المشروع الجديد كهدف عند المصدر بأمر الأهداف (الزر التالي) ثم أعد النشر.</li>" +
+            "</ol>" +
+            "بعد ما تخلص اضغط <b>أضف وافحص السيرفر</b> تاني.";
+          return;
+        }
+        box.className = "health-box err";
+        box.innerHTML = probe.note + "<br>تأكد إن المشروع فاتح من الداشبورد (مش متجاوز حدود) وإن الحساب عليه خطة نشطة.";
+      }
+
+      function deleteServer(url) {
+        const list = getCustomServers().filter(function (s) { return s.url !== url; });
+        saveCustomServers(list);
+        if (STATE.sourceUrl === url) {
+          STATE.sourceUrl = null;
+          STATE.info = null;
+        }
+        renderSources();
+      }
+
+      function init() {
+        $("pageLink").innerHTML = '<code style="direction:ltr;display:block;word-break:break-all">' + esc(location.origin + location.pathname.replace(/\/[^/]*$/, "/") + "admin-data-migration.html") + "</code>";
+        $("sqlSnippet").value = SQL_SNIPPET;
+
+        if (!window.adminAuth || !window.adminAuth.requireAuth || !window.adminAuth.requireAuth()) {
+          if (window.adminAuth) window.adminAuth.requireAuth();
+          return;
+        }
+
+        // تبدأ بالمشروع النشط (اللي اللوحة واقفة عليه) كلافتزاضي
+        const activeUrl = (window.adminAuth.getActiveBackend && window.adminAuth.getActiveBackend().url) || PRIMARY.url;
+        STATE.sourceUrl = activeUrl;
+
+        // نفحص كل السيرفرات بالتوازي
+        (async function () {
+          const srcs = getSources();
+          const results = await Promise.all(srcs.map(function (s) { return infoFrom(s); }));
+          for (let i = 0; i < srcs.length; i++) INFO_CACHE[srcs[i].url] = results[i];
+          const working = srcs.filter(function (s, i) { return (results[i] || {}).success; });
+          const activeMatch = srcs.filter(function (s) { return s.url === activeUrl; })[0];
+          if (working.length) {
+            const activeInfo = activeMatch ? INFO_CACHE[activeMatch.url] : null;
+            if (!activeMatch || !activeInfo || !activeInfo.success) STATE.sourceUrl = working[0].url;
+          }
+          const sel = srcs.filter(function (s) { return s.url === STATE.sourceUrl; })[0];
+          STATE.info = sel ? (INFO_CACHE[sel.url] || null) : null;
+          renderSources();
+          renderTables();
+          renderTargets();
+          $("phase").textContent = "";
+        })();
+      }
+
+      init();
+    </script>
+  </body>
+</html>

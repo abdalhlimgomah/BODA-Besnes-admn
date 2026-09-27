@@ -55,6 +55,7 @@
     </header>
 
     <section class="content-wrap">
+      <div id="serverSelector"></div>
       <!-- Stats Cards -->
       <div class="cat-stats-row" id="catStatsRow">
         <div class="cat-stat-card">
@@ -307,5 +308,13 @@
 
   <script src="../assets/vendor/supabase/supabase-js@2.js"></script>
   <script src="./admin-categories.js?v=20260724"></script>
+  <script src="./server-selector.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      if (window.ServerSelector) {
+        window.ServerSelector.render("serverSelector");
+      }
+    });
+  </script>
 </body>
 </html>

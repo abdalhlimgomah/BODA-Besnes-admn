@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>لوحة تحكم منتجات Taager</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/app-shell.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+    <link rel="stylesheet" href="../css/taager-products.css" />
+    <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="./auth-guard.js"></script>
+  </head>
+  <body class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-badge">
+        <i class="fa-solid fa-bag-shopping"></i>
+        <div>
+          <strong>Buda Admin</strong>
+          <small>إدارة المتجر</small>
+        </div>
+      </div>
+      <nav class="side-nav">
+        <a class="side-link" href="shacksf.html">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>لوحة التحكم</span>
+        </a>
+        <a class="side-link" href="admin-data-migration.html">
+          <i class="fa-solid fa-arrows-rotate"></i>
+          <span>نقل / مزامنة البيانات</span>
+        </a>
+        <a class="side-link" href="admin.html">
+          <i class="fa-solid fa-square-plus"></i>
+          <span>إضافة المنتجات</span>
+        </a>
+        <a class="side-link" href="admin-orders.html">
+          <i class="fa-solid fa-receipt"></i>
+          <span>الطلبات</span>
+        </a>
+        <a class="side-link" href="admin-stock-changes.html">
+          <i class="fa-solid fa-warehouse"></i>
+          <span>حركات المخزون</span>
+        </a>
+        <a class="side-link" href="admin-partners.html">
+          <i class="fa-solid fa-handshake"></i>
+          <span>طلبات الشراكة</span>
+        </a>
+        <a class="side-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>رسائل الدعم</span></a>
+        <a class="side-link" href="admin-complaints.html">
+          <i class="fa-solid fa-message"></i>
+          <span>الشكاوي</span>
+        </a>
+        <a class="side-link" href="admin-ai-details.html">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span>AI محتوى</span>
+        </a>
+        <a class="side-link" href="../admin-pricing.html">
+          <i class="fa-solid fa-coins"></i>
+          <span>شرائح الأسعار</span>
+        </a>
+        <a class="side-link" href="admin-coupons.html">
+          <i class="fa-solid fa-tags"></i>
+          <span>إدارة الكوبونات</span>
+        </a>
+        <a class="side-link" href="view-products.html">
+          <i class="fa-solid fa-box-open"></i>
+          <span>مراجعة المنتجات</span>
+        </a>
+        <a class="side-link" href="admin-categories.html">
+          <i class="fa-solid fa-layer-group"></i>
+          <span>إدارة الأقسام</span>
+        </a>
+        <a class="side-link" href="admin-sellers.html">
+          <i class="fa-solid fa-store"></i>
+          <span>إدارة البائعين</span>
+        </a>
+        <a class="side-link" href="admin-fake-prices.html">
+          <i class="fa-solid fa-percent"></i>
+          <span>الأسعار </span>
+        </a>
+        <a class="side-link" href="taager-products.html">
+          <i class="fa-solid fa-database"></i>
+          <span>منتجات Taager</span>
+        </a>
+        <a class="side-link active" href="taager-dashboard.html">
+          <i class="fa-solid fa-database"></i>
+          <span>لوحة منتجات Taager</span>
+        </a>
+        <a class="side-link" href="analytics.html"><i class="fa-solid fa-chart-pie"></i><span>تحليلات المتجر</span></a>
+        <a class="side-link" href="seo-dashboard.html"><i class="fa-solid fa-search"></i><span>SEO لوحة المعلومات</span></a>
+        <a class="side-link" href="merchant-center.html"><i class="fa-brands fa-google"></i><span>Google Merchant</span></a>
+        <a class="side-link" href="content-manager.html"><i class="fa-solid fa-newspaper"></i><span>إدارة المحتوى</span></a><a class="side-link" href="admin-taager-sizes.html">
+          <i class="fa-solid fa-ruler-combined"></i>
+          <span>المقاسات</span>
+        </a>
+        <a class="side-link" href="admin-taager-token.html">
+          <i class="fa-solid fa-key"></i>
+          <span>توكن تاجر</span>
+        </a>
+        <a class="side-link" href="admin-home-layout.html">
+          <i class="fa-solid fa-palette"></i>
+          <span>تخطيط الصفحة الرئيسية</span>
+        </a>
+        <a class="side-link" href="admin-landing-pages.html">
+          <i class="fa-solid fa-layer-group"></i>
+          <span>صفحات الفئات الذكية</span>
+        </a>
+        <a class="side-link" href="admin-partner-accounts.html">
+          <i class="fa-solid fa-users-gear"></i>
+          <span>حسابات الشركاء</span>
+        </a>
+        <a class="side-link" href="admin-transfer-requests.html">
+          <i class="fa-solid fa-file-invoice"></i>
+          <span>طلبات التحويل</span>
+        </a>
+        <a class="side-link" href="admin-buda-rewards.html">
+          <i class="fa-solid fa-trophy"></i>
+          <span>مسابقة Buda Rewards</span>
+        </a>
+        <a class="side-link" href="admin-fake-ratings.html">
+          <i class="fa-solid fa-star"></i>
+          <span>تقييمات </span>
+        </a>
+      </nav>
+    </aside>
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-title">
+          <h1>لوحة تحكم منتجات Taager</h1>
+          <p>إدارة وتعديل منتجات Taager من قاعدة البيانات — إجمالي <strong id="productsCount">0</strong> منتج</p>
+        </div>
+        <div class="topbar-actions">
+          <input type="text" id="searchInput" placeholder="ابحث باسم المنتج أو المعرف..." style="min-height:36px;border-radius:8px;border:1px solid var(--border);padding:6px 10px;font-size:13px;width:250px" />
+        </div>
+      </header>
+      <section class="content-wrap">
+        <section id="dashboard" class="section active">
+          <h3 class="section-title">إحصائيات سريعة</h3>
+          <div class="stats-grid">
+            <article class="stat-card card" style="cursor:pointer">
+              <div class="stat-icon products-icon"><i class="fa-solid fa-database"></i></div>
+              <div>
+                <p class="stat-label">منتجات Taager</p>
+                <p class="stat-value" id="taagerCount">0</p>
+              </div>
+            </article>
+            <article class="stat-card card" style="cursor:pointer">
+              <div class="stat-icon" style="background:#e8f5e9;color:#2e7d32"><i class="fa-solid fa-check-circle"></i></div>
+              <div>
+                <p class="stat-label">منتجات نشطة</p>
+                <p class="stat-value" id="activeCount">0</p>
+              </div>
+            </article>
+            <article class="stat-card card" style="cursor:pointer">
+              <div class="stat-icon" style="background:#fff3cd;color:#856404"><i class="fa-solid fa-pause-circle"></i></div>
+              <div>
+                <p class="stat-label">منتجات غير نشطة</p>
+                <p class="stat-value" id="inactiveCount">0</p>
+              </div>
+            </article>
+            <article class="stat-card card" style="cursor:pointer">
+              <div class="stat-icon" style="background:#e3f2fd;color:#1565c0"><i class="fa-solid fa-warehouse"></i></div>
+              <div>
+                <p class="stat-label">إجمالي المخزون</p>
+                <p class="stat-value" id="totalStock">0</p>
+              </div>
+            </article>
+          </div>
+          
+          <h3 class="section-title" style="margin-top:24px">قائمة المنتجات</h3>
+          <div class="taager-grid" id="productsGrid"></div>
+          <div id="loadMoreWrap" style="display:flex;justify-content:center;padding:14px 0">
+            <button id="loadMoreBtn" class="btn btn-secondary" style="min-width:200px">عرض المزيد</button>
+          </div>
+        </section>
+      </section>
+    </main>
+    <nav class="mobile-bottom-nav">
+      <a class="mobile-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>الرئيسية</span></a>
+      <a class="mobile-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة</span></a>
+      <a class="mobile-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>طلبات</span></a>
+      <a class="mobile-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>شراكة</span></a>
+      <a class="mobile-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة</span></a>
+    </nav>
+    <script src="./taager-dashboard.page.js"></script>
+  </body>
+</html>

@@ -2,13 +2,16 @@
 const eye = document.getElementById("eye");
 const loginForm = document.getElementById("loginForm");
 
-const SUPABASE_URL = "https://msgqzgzoslearaprgiqq.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE";
-
-if (typeof supabase === "undefined") {
-  console.error("Supabase library not loaded. Check network/script.");
+function getActiveLoginUrl() {
+  try {
+    const backend =
+      window.adminAuth && typeof window.adminAuth.getActiveBackend === "function"
+        ? window.adminAuth.getActiveBackend()
+        : null;
+    if (backend && backend.url) return backend.url + "/functions/v1/admin-login";
+  } catch (_e) {}
+  return "https://msgqzgzoslearaprgiqq.supabase.co/functions/v1/admin-login";
 }
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 function showInlineError(message) {
   let alertNode = document.getElementById("loginError");
@@ -52,32 +55,26 @@ async function handleLogin() {
   }
 
   try {
-    const { data, error } = await supabaseClient
-      .from("admin_users")
-      .select("id, username, password")
-      .eq("username", userInput)
-      .limit(1);
+    const response = await fetch(getActiveLoginUrl(), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "login", username: userInput, password: pwdInput }),
+    });
 
-    if (error) throw error;
+    const result = await response.json().catch(() => ({}));
 
-    if (!data || data.length === 0) {
-      showInlineError("اسم المستخدم أو كلمة المرور غير صحيحة.");
-      return;
-    }
-
-    const user = data[0];
-    if (pwdInput !== user.password) {
-      showInlineError("اسم المستخدم أو كلمة المرور غير صحيحة.");
+    if (!response.ok || !result?.success || !result?.token) {
+      showInlineError(result?.error || "اسم المستخدم أو كلمة المرور غير صحيحة.");
       return;
     }
 
     if (window.adminAuth?.createSession) {
-      window.adminAuth.createSession(user.username);
+      window.adminAuth.createSession(result.username || userInput, result.token);
     }
     window.location.replace("shacksf.html");
   } catch (err) {
     console.error("Login error:", err);
-    showInlineError("حدث خطأ في الاتصال بقاعدة البيانات.");
+    showInlineError("حدث خطأ في الاتصال بخادم تسجيل الدخول.");
   }
 }
 

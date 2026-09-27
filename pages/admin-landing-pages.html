@@ -372,6 +372,8 @@
     .studio-table th { background: var(--gray-50); color: var(--gray-500); font-size: .75rem; }
     .studio-table tr:hover td { background: #fafaff; }
     .st-block-btn { padding: 9px 16px; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: .8rem; font-weight: 600; background: var(--primary); color: #fff; }
+    .st-page-link { font-size: .78rem; color: var(--primary); text-decoration: none; font-weight: 600; word-break: break-all; }
+    .st-page-link:hover { text-decoration: underline; }
     .st-block-btn.ghost { background: var(--gray-100); color: var(--gray-600); }
     .st-block-btn.danger { background: #fee2e2; color: #991b1b; }
     .st-editor { display: grid; grid-template-columns: 470px 1fr; gap: 18px; align-items: start; }
@@ -852,6 +854,15 @@ function toast(msg, type = 'success') {
 function escapeHtml(s) {
   if (s == null) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function landingPageHref(pageFile, slug) {
+  var rel = '../../موقع الخاص بك/pages/' + pageFile + '?slug=' + encodeURIComponent(slug);
+  // في التطوير المحلي (لوحة التحكم :5502 والموقع :5501) نفتح الموقع مباشرة على بورت الموقع
+  if (/^(https?:\/\/|\/\/)(localhost|127\.0\.0\.1):5502(\/|$)/.test(location.href)) {
+    return 'http://127.0.0.1:5501/pages/' + pageFile + '?slug=' + encodeURIComponent(slug);
+  }
+  return rel;
 }
 
 function init() {
@@ -1419,10 +1430,13 @@ async function studioLoadPages() {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const rows = (await res.json()) || [];
     document.getElementById('studioListEmpty').classList.toggle('studio-hidden', rows.length > 0);
-    tbody.innerHTML = rows.map(p => `<tr>
+    tbody.innerHTML = rows.map(p => {
+      const pageFile = p.page_type === 'category' ? 'category-landing.html' : 'brand-landing.html';
+      const pageHref = landingPageHref(pageFile, p.slug);
+      return `<tr>
       <td><b>${escapeHtml(p.title || p.slug)}</b></td>
       <td>${p.page_type === 'category' ? 'تصنيف / فئة' : 'ماركة / شراكة'}</td>
-      <td><code style="font-size:.75rem">${escapeHtml(p.slug)}</code></td>
+      <td><a class="st-page-link" dir="ltr" target="_blank" rel="noopener" href="${pageHref}" title="فتح «${escapeHtml(p.title || p.slug)}» في تبويب جديد">${escapeHtml(p.slug)} <span style="font-size:.65rem">↗</span></a></td>
       <td>${p.country_code}</td>
       <td>${p.is_active !== false ? '<span class="status-badge status-active">نشط</span>' : '<span class="status-badge status-inactive">متوقف</span>'}</td>
       <td>${blockMap[p.id] || 0}</td>
@@ -1432,7 +1446,8 @@ async function studioLoadPages() {
         <button class="st-block-btn ghost" onclick="studioCopyPageToCountry('${p.id}')" title="نسخ الصفحة بكل أجزائها للدولة التانية">${p.country_code === 'SA' ? '📄 نسخ 🇪🇬' : '📄 نسخ 🇸🇦'}</button>
         <button class="st-block-btn danger" onclick="studioDeletePage('${p.id}')">🗑 حذف</button>
       </td>
-    </tr>`).join('');
+    </tr>`;
+    }).join('');
   } catch (e) {
     tbody.innerHTML = `<tr><td colspan="7">تعذر التحميل (${escapeHtml(e.message)}) — هل نفّذت SQL إنشاء جداول الصفحات الذكية؟ انسخه من sql/setup_smart_pages.sql</td></tr>`;
   }

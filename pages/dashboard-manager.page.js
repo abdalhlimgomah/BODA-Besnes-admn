@@ -154,7 +154,7 @@ class DashboardManager {
   async updateStats() {
     const currencySymbol = this.getCurrencySymbol();
 
-    const [{ count: productCount }, { count: orderCount }, { data: deliveredOrders }, { count: taagerCount }, { count: complaintsCount }, { count: variantGroupsCount }, { count: stockChangesCount }] = await Promise.all([
+    const [{ count: productCount }, { count: orderCount }, { data: deliveredOrders }, { count: taagerCount }, { count: complaintsCount }, { count: variantGroupsCount }, { count: stockChangesCount }, { count: returnsCount }] = await Promise.all([
       supabaseClient.from("products").select("*", { count: "exact", head: true }),
       supabaseClient.from("orders").select("*", { count: "exact", head: true }),
       supabaseClient.from("orders").select("total_price,total").eq("status", "completed"),
@@ -162,6 +162,7 @@ class DashboardManager {
       supabaseClient.from("complaints").select("*", { count: "exact", head: true }).eq("status", "pending"),
       supabaseClient.from("taager_variant_groups").select("*", { count: "exact", head: true }),
       supabaseClient.from("stock_change_log").select("*", { count: "exact", head: true }),
+      supabaseClient.from("return_requests").select("*", { count: "exact", head: true }),
     ]);
 
     const totalSales = (deliveredOrders || []).reduce((sum, order) => {
@@ -188,6 +189,9 @@ class DashboardManager {
 
     const stockChangesEl = document.getElementById("stockChangesCount");
     if (stockChangesEl) stockChangesEl.textContent = stockChangesCount ?? 0;
+
+    const returnsEl = document.getElementById("returnsCount");
+    if (returnsEl) returnsEl.textContent = returnsCount ?? 0;
   }
 
   async handleSettingsSubmit(event) {

@@ -180,6 +180,8 @@
       [
         { col: "id", val: pid },
         { col: "taager_product_id", val: pid },
+        { col: "id", val: bareId },
+        { col: "taager_product_id", val: bareId },
       ],
       "id,stock,colors,sizes"
     );
@@ -278,8 +280,8 @@
       if (base.indexOf("taager_") !== 0) base = "taager_" + base;
       if (!grouped[base]) grouped[base] = [];
       grouped[base].push({
-        color: String(it?.color ?? "").trim() || parsed.color || "",
-        size: String(it?.size ?? "").trim() || parsed.size || "",
+        color: String(it?.color ?? "").trim() || String(it?.selected_color ?? "").trim() || parsed.color || "",
+        size: String(it?.size ?? "").trim() || String(it?.selected_size ?? "").trim() || parsed.size || "",
         qty: Math.max(1, Number(it?.quantity) || 1),
       });
       if (!grouped[base].sample) {

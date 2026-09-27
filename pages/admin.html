@@ -157,6 +157,7 @@
         </div>
       </header>
       <section class="content-wrap admin-page">
+        <div id="serverSelector"></div>
         <section class="card form-card">
           <h2><i class="fa-solid fa-cube"></i> إضافة منتج جديد</h2>
 
@@ -425,5 +426,13 @@
       </div>
     </div>
     <script src="./admin.page.js"></script>
+    <script src="./server-selector.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        if (window.ServerSelector) {
+          window.ServerSelector.render("serverSelector");
+        }
+      });
+    </script>
   </body>
 </html>

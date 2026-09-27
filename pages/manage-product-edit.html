@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>تعديل المنتج</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/app-shell.css" />
+    <link rel="stylesheet" href="../css/taager-products.css" />
+    <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="./auth-guard.js"></script>
+    <style>
+      .editor-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 16px;
+      }
+      .field-block {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .field-block.span-2 { grid-column: span 2; }
+      .field-block.span-3 { grid-column: span 3; }
+      .field-block.span-4 { grid-column: span 4; }
+      .field-block label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-muted);
+      }
+      .field-block input,
+      .field-block select,
+      .field-block textarea {
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 14px;
+        font-family: inherit;
+        background: var(--bg-input);
+        color: var(--text);
+      }
+      .field-block input:focus,
+      .field-block select:focus,
+      .field-block textarea:focus {
+        border-color: var(--accent);
+        outline: none;
+        box-shadow: 0 0 0 3px var(--shadow-focus);
+      }
+      .field-block textarea {
+        resize: vertical;
+        min-height: 80px;
+      }
+      .form-actions-row {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 24px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border);
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        border: 0;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.15s;
+      }
+      .btn-primary { background: var(--accent); color: var(--accent-text); }
+      .btn-primary:hover { filter: brightness(1.1); }
+      .btn-secondary { background: var(--bg-hover); color: var(--text); border: 1px solid var(--border); }
+      .btn-secondary:hover { background: var(--border); }
+      .btn-danger { background: var(--bg-danger); color: #fff; }
+      .section-divider {
+        margin: 24px 0;
+        padding-top: 16px;
+        border-top: 1px solid var(--border);
+      }
+      .section-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .image-preview {
+        width: 100px;
+        height: 100px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 1px solid var(--border);
+        background: var(--bg-hover);
+      }
+      .sizes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+      }
+      .size-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 10px;
+        background: var(--bg-hover);
+        border-radius: 8px;
+        border: 1px solid var(--border);
+      }
+      .size-item label { font-size: 11px; color: var(--text-muted); }
+      .size-item input { padding: 6px 8px; font-size: 13px; }
+      .empty-text { text-align: center; padding: 40px; color: var(--text-muted); }
+      .toast-wrap { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+      .toast-item { padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; animation: slideIn 0.3s; }
+      .toast-success { background: #16a34a; color: #fff; }
+      .toast-error { background: #dc2626; color: #fff; }
+      .toast-warning { background: #d97706; color: #fff; }
+      .toast-info { background: #2563eb; color: #fff; }
+      @keyframes slideIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+    </style>
+  </head>
+  <body class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-badge">
+        <i class="fa-solid fa-bag-shopping"></i>
+        <div>
+          <strong>Buda Admin</strong>
+          <small>إدارة المتجر</small>
+        </div>
+      </div>
+      <nav class="side-nav">
+        <a class="side-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>لوحة التحكم</span></a>
+        <a class="side-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>رسائل الدعم</span></a>
+        <a class="side-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة المنتجات</span></a>
+        <a class="side-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>الطلبات</span></a>
+        <a class="side-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>طلبات الشراكة</span></a>
+        <a class="side-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة المنتجات</span></a>
+        <a class="side-link" href="taager-products.html"><i class="fa-solid fa-database"></i><span>منتجات Taager</span></a>
+        <a class="side-link" href="admin-sellers.html"><i class="fa-solid fa-store"></i><span>إدارة البائعين</span></a>
+        <a class="side-link" href="manage-all-products.html"><i class="fa-solid fa-boxes-stacked"></i><span>إدارة جميع المنتجات</span></a>
+      </nav>
+    </aside>
+
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-title">
+          <h1>تعديل المنتج</h1>
+          <p id="editProductName">تحميل...</p>
+        </div>
+        <div class="topbar-actions">
+          <a class="btn btn-secondary" href="manage-all-products.html" style="text-decoration:none">
+            <i class="fa-solid fa-arrow-right"></i> عودة
+          </a>
+        </div>
+      </header>
+
+      <section class="content-wrap">
+        <div id="serverSelector"></div>
+        <div class="edit-form-card card" id="editForm" style="display:none">
+          
+          <!-- Basic Info -->
+          <h3 class="section-title"><i class="fa-solid fa-info-circle"></i> المعلومات الأساسية</h3>
+          <div class="editor-grid">
+            <div class="field-block span-2">
+              <label for="product_name">اسم المنتج *</label>
+              <input type="text" id="product_name" placeholder="اسم المنتج" />
+            </div>
+            <div class="field-block">
+              <label for="name">الاسم البديل (name)</label>
+              <input type="text" id="name" placeholder="الاسم البديل" />
+            </div>
+            <div class="field-block">
+              <label for="sku">SKU / الكود</label>
+              <input type="text" id="sku" placeholder="كود المنتج" />
+            </div>
+            <div class="field-block">
+              <label for="slug">Slug (رابط المنتج)</label>
+              <input type="text" id="slug" placeholder="رابط المنتج" />
+            </div>
+            <div class="field-block span-2">
+              <label for="category">القسم / الفئة</label>
+              <input type="text" id="category" placeholder="القسم" />
+            </div>
+            <div class="field-block">
+              <label for="store_category">فئة المتجر</label>
+              <input type="text" id="store_category" placeholder="فئة المتجر" />
+            </div>
+            <div class="field-block">
+              <label for="brand">العلامة التجارية</label>
+              <input type="text" id="brand" placeholder="العلامة التجارية" />
+            </div>
+            <div class="field-block">
+              <label for="status">الحالة</label>
+              <select id="status">
+                <option value="active">نشط</option>
+                <option value="inactive">غير نشط</option>
+                <option value="draft">مسودة</option>
+              </select>
+            </div>
+            <div class="field-block">
+              <label for="is_active">مفعل</label>
+              <select id="is_active">
+                <option value="true">نعم</option>
+                <option value="false">لا</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Pricing -->
+          <div class="section-divider"></div>
+          <h3 class="section-title"><i class="fa-solid fa-money-bill-wave"></i> الأسعار</h3>
+          <div class="editor-grid">
+            <div class="field-block">
+              <label for="price">السعر الأساسي *</label>
+              <input type="number" id="price" step="0.01" min="0" placeholder="0.00" />
+            </div>
+            <div class="field-block">
+              <label for="price_after_discount">السعر بعد الخصم</label>
+              <input type="number" id="price_after_discount" step="0.01" min="0" placeholder="0.00" />
+            </div>
+            <div class="field-block">
+              <label for="discount_percent">نسبة الخصم %</label>
+              <input type="number" id="discount_percent" step="0.01" min="0" max="100" placeholder="0" />
+            </div>
+            <div class="field-block">
+              <label for="original_price">السعر الأصلي (للعرض)</label>
+              <input type="number" id="original_price" step="0.01" min="0" placeholder="0.00" />
+            </div>
+            <div class="field-block">
+              <label for="cost_price">سعر التكلفة</label>
+              <input type="number" id="cost_price" step="0.01" min="0" placeholder="0.00" />
+            </div>
+            <div class="field-block">
+              <label for="compare_at_price">سعر المقارنة</label>
+              <input type="number" id="compare_at_price" step="0.01" min="0" placeholder="0.00" />
+            </div>
+          </div>
+
+          <!-- Inventory -->
+          <div class="section-divider"></div>
+          <h3 class="section-title"><i class="fa-solid fa-warehouse"></i> المخزون والكميات</h3>
+          <div class="editor-grid">
+            <div class="field-block">
+              <label for="quantity">الكمية المتاحة</label>
+              <input type="number" id="quantity" min="0" placeholder="0" />
+            </div>
+            <div class="field-block">
+              <label for="stock">المخزون (stock)</label>
+              <input type="number" id="stock" min="0" placeholder="0" />
+            </div>
+            <div class="field-block">
+              <label for="reserved_quantity">الكمية المحجوزة</label>
+              <input type="number" id="reserved_quantity" min="0" placeholder="0" />
+            </div>
+            <div class="field-block">
+              <label for="low_stock_threshold">تنبيه مخزون منخفض</label>
+              <input type="number" id="low_stock_threshold" min="0" placeholder="5" />
+            </div>
+            <div class="field-block">
+              <label for="track_inventory">تتبع المخزون</label>
+              <select id="track_inventory">
+                <option value="true">نعم</option>
+                <option value="false">لا</option>
+              </select>
+            </div>
+            <div class="field-block">
+              <label for="allow_backorder">السماح بالطلب عند النفاذ</label>
+              <select id="allow_backorder">
+                <option value="false">لا</option>
+                <option value="true">نعم</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Sizes / Variants -->
+          <div class="section-divider"></div>
+          <h3 class="section-title"><i class="fa-solid fa-ruler-combined"></i> المقاسات / المتغيرات</h3>
+          <div class="editor-grid">
+            <div class="field-block span-4">
+              <label>المقاسات (كل سطر: المقاس:الكمية، مثال: S:10,M:20,L:15)</label>
+              <textarea id="sizes_input" rows="3" placeholder="S:10,M:20,L:15,XL:5"></textarea>
+            </div>
+          </div>
+          <div id="sizesPreview" class="sizes-grid" style="display:none;"></div>
+
+          <!-- Sales & Stats -->
+          <div class="section-divider"></div>
+          <h3 class="section-title"><i class="fa-solid fa-chart-line"></i> المبيعات والإحصائيات</h3>
+          <div class="editor-grid">
+            <div class="field-block">
+              <label for="sold_count">عدد المبيعات</label>
+              <input type="number" id="sold_count" min="0" placeholder="0" />
+            </div>
+            <div class="field-block">
+              <label for="total_sold">إجمالي المباع</label>
+              <input type="number" id="total_sold" min="0" placeholder="0" />
+            </div>
+            <div class="field-block">
+              <label for="sales_count">عداد المبيعات</label>
+              <input type="number" id="sales_count" min="0" placeholder="0" />
+            </div>
+            <div class="field-block">
+              <label for="view_count">عدد المشاهدات</label>
+              <input type="number" id="view_count" min="0" placeholder="0" />
+            </div>
+            <div class="field-block">
+              <label for="rating">التقييم</label>
+              <input type="number" id="rating" step="0.1" min="0" max="5" placeholder="0.0" />
+            </div>
+            <div class="field-block">
+              <label for="review_count">عدد التقييمات</label>
+              <input type="number" id="review_count" min="0" placeholder="0" />
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="section-divider"></div>
+          <h3 class="section-title"><i class="fa-solid fa-align-left"></i> الوصف</h3>
+          <div class="editor-grid">
+            <div class="field-block span-4">
+              <label for="description">الوصف الكامل</label>
+              <textarea id="description" rows="5" placeholder="وصف المنتج..."></textarea>
+            </div>
+            <div class="field-block span-4">
+              <label for="short_description">الوصف المختصر</label>
+              <textarea id="short_description" rows="3" placeholder="وصف مختصر للمنتج..."></textarea>
+            </div>
+          </div>
+
+          <!-- Images -->
+          <div class="section-divider"></div>
+          <h3 class="section-title"><i class="fa-solid fa-images"></i> الصور</h3>
+          <div class="editor-grid">
+            <div class="field-block span-2">
+              <label for="image">الصورة الرئيسية</label>
+              <input type="url" id="image" dir="ltr" placeholder="https://..." />
+              <img id="imagePreview" class="image-preview" style="display:none; margin-top:8px;" />
+            </div>
+            <div class="field-block span-2">
+              <label for="images">صور إضافية (مفصولة بفاصلة)</label>
+              <input type="text" id="images" dir="ltr" placeholder="https://img1.jpg, https://img2.jpg" />
+            </div>
+            <div class="field-block span-2">
+              <label for="img1">صورة 1</label>
+              <input type="url" id="img1" dir="ltr" placeholder="https://..." />
+            </div>
+            <div class="field-block span-2">
+              <label for="img2">صورة 2</label>
+              <input type="url" id="img2" dir="ltr" placeholder="https://..." />
+            </div>
+            <div class="field-block span-2">
+              <label for="img3">صورة 3</label>
+              <input type="url" id="img3" dir="ltr" placeholder="https://..." />
+            </div>
+            <div class="field-block span-2">
+              <label for="img4">صورة 4</label>
+              <input type="url" id="img4" dir="ltr" placeholder="https://..." />
+            </div>
+            <div class="field-block span-2">
+              <label for="img5">صورة 5</label>
+              <input type="url" id="img5" dir="ltr" placeholder="https://..." />
+            </div>
+            <div class="field-block span-2">
+              <label for="thumbnail">الصورة المصغرة</label>
+              <input type="url" id="thumbnail" dir="ltr" placeholder="https://..." />
+            </div>
+          </div>
+
+          <!-- Video -->
+          <div class="section-divider"></div>
+          <h3 class="section-title"><i class="fa-solid fa-video"></i> الفيديو</h3>
+          <div class="editor-grid">
+            <div class="field-block span-2">
+              <label for="video_url">رابط الفيديو</label>
+              <input type="url" id="video_url" dir="ltr" placeholder="https://..." />
+            </div>
+          </div>
+
+          <!-- SEO -->
+          <div class="section-divider"></div>
+          <h3 class="section-title"><i class="fa-solid fa-search"></i> SEO</h3>
+          <div class="editor-grid">
+            <div class="field-block span-2">
+              <label for="meta_title">عنوان الميتا</label>
+              <input type="text" id="meta_title" placeholder="عنوان الصفحة لمحركات البحث" />
+            </div>
+            <div class="field-block span-2">
+              <label for="meta_description">وصف الميتا</label>
+              <textarea id="meta_description" rows="3" placeholder="وصف الصفحة لمحركات البحث..."></textarea>
+            </div>
+            <div class="field-block span-2">
+              <label for="meta_keywords">كلمات مفتاحية</label>
+              <input type="text" id="meta_keywords" placeholder="كلمة1, كلمة2, كلمة3" />
+            </div>
+          </div>
+
+          <!-- Shipping -->
+          <div class="section-divider"></div>
+          <h3 class="section-title"><i class="fa-solid fa-truck"></i> الشحن</h3>
+          <div class="editor-grid">
+            <div class="field-block">
+              <label for="weight">الوزن (كجم)</label>
+              <input type="number" id="weight" step="0.01" min="0" placeholder="0" />
+            </div>
+            <div class="field-block">
+              <label for="length">الطول (سم)</label>
+              <input type="number" id="length" step="0.1" min="0" placeholder="0" />
+            </div>
+            <div class="field-block">
+              <label for="width">العرض (سم)</label>
+              <input type="number" id="width" step="0.1" min="0" placeholder="0" />
+            </div>
+            <div class="field-block">
+              <label for="height">الارتفاع (سم)</label>
+              <input type="number" id="height" step="0.1" min="0" placeholder="0" />
+            </div>
+            <div class="field-block">
+              <label for="shipping_class">فئة الشحن</label>
+              <input type="text" id="shipping_class" placeholder="standard" />
+            </div>
+            <div class="field-block">
+              <label for="free_shipping">شحن مجاني</label>
+              <select id="free_shipping">
+                <option value="false">لا</option>
+                <option value="true">نعم</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Other Fields -->
+          <div class="section-divider"></div>
+          <h3 class="section-title"><i class="fa-solid fa-ellipsis"></i> حقول أخرى</h3>
+          <div class="editor-grid">
+            <div class="field-block">
+              <label for="product_type">نوع المنتج</label>
+              <select id="product_type">
+                <option value="simple">بسيط</option>
+                <option value="variable">بمتغيرات</option>
+                <option value="grouped">مجموعة</option>
+                <option value="external">خارجي</option>
+              </select>
+            </div>
+            <div class="field-block">
+              <label for="tax_class">فئة الضريبة</label>
+              <input type="text" id="tax_class" placeholder="standard" />
+            </div>
+            <div class="field-block">
+              <label for="manage_stock">إدارة المخزون</label>
+              <select id="manage_stock">
+                <option value="true">نعم</option>
+                <option value="false">لا</option>
+              </select>
+            </div>
+            <div class="field-block">
+              <label for="backorders">الطلبات المؤجلة</label>
+              <select id="backorders">
+                <option value="no">لا</option>
+                <option value="notify">إشعار</option>
+                <option value="yes">نعم</option>
+              </select>
+            </div>
+            <div class="field-block">
+              <label for="purchasable">قابل للشراء</label>
+              <select id="purchasable">
+                <option value="true">نعم</option>
+                <option value="false">لا</option>
+              </select>
+            </div>
+            <div class="field-block">
+              <label for="virtual">منتج افتراضي</label>
+              <select id="virtual">
+                <option value="false">لا</option>
+                <option value="true">نعم</option>
+              </select>
+            </div>
+            <div class="field-block">
+              <label for="downloadable">قابل للتحميل</label>
+              <select id="downloadable">
+                <option value="false">لا</option>
+                <option value="true">نعم</option>
+              </select>
+            </div>
+            <div class="field-block">
+              <label for="featured">مميز</label>
+              <select id="featured">
+                <option value="false">لا</option>
+                <option value="true">نعم</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-actions-row">
+            <button class="btn btn-primary submit-btn" onclick="saveProduct()">
+              <i class="fa-solid fa-floppy-disk"></i> حفظ التعديلات
+            </button>
+            <a class="btn btn-secondary" href="manage-all-products.html" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px">
+              <i class="fa-solid fa-times"></i> إلغاء
+            </a>
+          </div>
+        </div>
+        <div id="loadingState" class="empty-text" style="padding:40px">جاري تحميل بيانات المنتج...</div>
+      </section>
+    </main>
+
+    <nav class="mobile-bottom-nav">
+      <a class="mobile-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>الرئيسية</span></a>
+      <a class="mobile-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة</span></a>
+      <a class="mobile-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>طلبات</span></a>
+      <a class="mobile-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>شراكة</span></a>
+      <a class="mobile-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة</span></a>
+    </nav>
+
+    <script src="./manage-product-edit.page.js"></script>
+    <script src="./server-selector.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        if (window.ServerSelector) {
+          window.ServerSelector.render("serverSelector");
+        }
+      });
+    </script>
+  </body>
+</html>

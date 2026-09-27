@@ -66,6 +66,7 @@
         </div>
       </header>
       <section class="content-wrap review-page">
+        <div id="serverSelector"></div>
         <section class="card review-summary">
           <div class="summary-item">
             <p>إجمالي المنتجات</p>
@@ -124,5 +125,13 @@
       <a class="mobile-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>الدعم</span></a>
         </nav>
     <script src="./view-products.page.js?v=5"></script>
+    <script src="./server-selector.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        if (window.ServerSelector) {
+          window.ServerSelector.render("serverSelector");
+        }
+      });
+    </script>
   </body>
 </html>

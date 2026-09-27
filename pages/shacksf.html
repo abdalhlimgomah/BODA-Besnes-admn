@@ -25,9 +25,13 @@
         </div>
       </div>
       <nav class="side-nav">
-        <a class="side-link active" href="shacksf.html">
+        <a class="side-link" href="shacksf.html">
           <i class="fa-solid fa-chart-line"></i>
           <span>لوحة التحكم</span>
+        </a>
+        <a class="side-link" href="admin-data-migration.html">
+          <i class="fa-solid fa-arrows-rotate"></i>
+          <span>نقل / مزامنة البيانات</span>
         </a>
                 <a class="side-link" href="admin.html">
           <i class="fa-solid fa-square-plus"></i>
@@ -99,6 +103,10 @@
           <i class="fa-solid fa-key"></i>
           <span>توكن تاجر</span>
         </a>
+        <a class="side-link" href="manage-all-products.html">
+          <i class="fa-solid fa-boxes-stacked"></i>
+          <span>إدارة جميع المنتجات</span>
+        </a>
         <a class="side-link" href="admin-home-layout.html">
           <i class="fa-solid fa-palette"></i>
           <span>تخطيط الصفحة الرئيسية</span>
@@ -156,6 +164,7 @@
           </div>
         </section>
         <section id="dashboard" class="section active">
+          <div id="serverSelector"></div>
           <h3 class="section-title">إحصائيات سريعة</h3>
           <div class="stats-grid">
             <article class="stat-card card" onclick="window.location.href='taager-products.html'" style="cursor:pointer">
@@ -170,6 +179,13 @@
               <div>
                 <p class="stat-label">الطلبات</p>
                 <p id="orderCount" class="stat-value">0</p>
+              </div>
+            </article>
+                        <article class="stat-card card" onclick="window.location.href='admin-returns.html'" style="cursor:pointer">
+              <div class="stat-icon" style="background:#e3f2fd;color:#1565c0"><i class="fa-solid fa-rotate-left"></i></div>
+              <div>
+                <p class="stat-label">المرتجعات</p>
+                <p class="stat-value" id="returnsCount">0</p>
               </div>
             </article>
                         <article class="stat-card card" onclick="window.location.href='admin-stock-changes.html'" style="cursor:pointer">
@@ -293,6 +309,20 @@
                 <p class="stat-label">تقييمات</p>
               </div>
             </article>
+            <article class="stat-card card" onclick="window.location.href='manage-all-products.html'" style="cursor:pointer">
+              <div class="stat-icon" style="background:#f0fdf4;color:#166534"><i class="fa-solid fa-boxes-stacked"></i></div>
+              <div>
+                <p class="stat-label">إدارة جميع المنتجات</p>
+                <p class="stat-value" id="allProductsCount">0</p>
+              </div>
+            </article>
+            <article class="stat-card card" onclick="window.location.href='admin-data-migration.html'" style="cursor:pointer">
+              <div class="stat-icon" style="background:#f3e8ff;color:#6D28D9"><i class="fa-solid fa-arrows-rotate"></i></div>
+              <div>
+                <p class="stat-label">نقل / مزامنة البيانات</p>
+                <p class="stat-value" style="font-size:.72rem;color:var(--muted,#667085)" id="migrationActiveBackend">—</p>
+              </div>
+            </article>
           </div>
         </section>
         <section id="settings" class="section">
@@ -365,6 +395,15 @@
     })();
     </script>
     <script>
+      (function() {
+        var el = document.getElementById("migrationActiveBackend");
+        if (el && window.adminAuth && typeof window.adminAuth.getActiveBackend === "function") {
+          var b = window.adminAuth.getActiveBackend();
+          el.textContent = b && b.name === "backup" ? "النسخة الاحتياطية" : "السيرفر الأساسي";
+        }
+      })();
+    </script>
+    <script>
       function initializeNewSeller() {
         const params = new URLSearchParams(window.location.search);
         const sellerEmail = params.get("seller");
@@ -389,6 +428,42 @@
         }
       }
       window.addEventListener("load", initializeNewSeller);
+    </script>
+    <script>
+      (function() {
+        var url = window.SUPABASE_URL || "https://msgqzgzoslearaprgiqq.supabase.co";
+        var key = window.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE";
+        var { createClient } = window.supabase;
+        var client = createClient(url, key);
+        
+        // Get total products count
+        client.from("products").select("*", { count: "exact", head: true }).then(function(res) {
+          var totalCount = res.count || 0;
+          
+          // Now we need to subtract vendor products
+          // We'll fetch vendor products count separately
+          client.from("products").select("id,product_name,name", { count: "exact", head: false })
+            .or("product_name.ilike.vendor_%,name.ilike.vendor_%")
+            .then(function(vendorRes) {
+              var vendorCount = vendorRes.data ? vendorRes.data.length : 0;
+              var nonVendorCount = totalCount - vendorCount;
+              var el = document.getElementById("allProductsCount");
+              if (el) el.textContent = nonVendorCount > 0 ? nonVendorCount : 0;
+            }).catch(function() {
+              // Fallback to total count
+              var el = document.getElementById("allProductsCount");
+              if (el) el.textContent = totalCount;
+            });
+        }).catch(function() {});
+      })();
+    </script>
+    <script src="./server-selector.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        if (window.ServerSelector) {
+          window.ServerSelector.render("serverSelector");
+        }
+      });
     </script>
   </body>
 </html>

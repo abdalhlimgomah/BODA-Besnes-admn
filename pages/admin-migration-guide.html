@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>الدليل الكامل — نقل ومزامنة البيانات</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/app-shell.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="./auth-guard.js"></script>
+    <style>
+      .guide-hero { background: linear-gradient(135deg,#7c3aed,#5b21b6); color:#fff; border-radius:16px; padding:18px 22px; margin-bottom:18px; }
+      .guide-hero h2 { margin:0; font-size:1.15rem; }
+      .guide-hero p { margin:6px 0 0; opacity:.92; font-size:.85rem; max-width:780px; line-height:1.8; }
+      .guide-box { background:var(--card-bg,#fff); border:1px solid var(--border,#ecf0f9); border-radius:14px; padding:16px 18px; margin-bottom:16px; box-shadow:0 2px 8px rgba(0,0,0,.03); }
+      .guide-box h3 { margin:0 0 10px; font-size:1rem; display:flex; align-items:center; gap:8px; }
+      .guide-box h3 i { color:#7c3aed; }
+      .guide-box p, .guide-box li { font-size:.87rem; line-height:1.9; color:#374151; }
+      .guide-box ol, .guide-box ul { padding-inline-start:20px; margin:6px 0; }
+      .guide-box code { display:inline-block; background:#f3f4f6; color:#b45309; border-radius:6px; padding:1px 7px; font-size:.76rem; font-family:Consolas,monospace; direction:ltr; }
+      .cmd { direction:ltr; text-align:left; background:#0f172a; color:#d1fae5; border-radius:10px; padding:10px 12px; overflow-x:auto; font-size:.76rem; font-family:Consolas,monospace; margin:8px 0; line-height:1.7; white-space:pre; }
+      .note { border-radius:10px; padding:10px 12px; margin:10px 0; font-size:.84rem; line-height:1.8; }
+      .note.warn { background:#fff7e6; color:#b45309; border:1px solid #fde68a; }
+      .note.ok { background:#e8f5e9; color:#2e7d32; border:1px solid #c8e6c9; }
+      .note.err { background:#fdecea; color:#c62828; border:1px solid #f5c2c0; }
+      table.kv { width:100%; border-collapse:collapse; font-size:.82rem; margin:8px 0; }
+      table.kv th, table.kv td { border:1px solid var(--border,#e5e7eb); padding:8px 10px; text-align:right; vertical-align:top; }
+      table.kv th { background:#f8fafc; color:#374151; }
+      table.kv code { direction:ltr; }
+      .stepnum { display:inline-grid; place-items:center; width:24px; height:24px; border-radius:99px; background:#7c3aed; color:#fff; font-size:.78rem; font-weight:700; margin-inline-end:6px; vertical-align:middle; }
+    </style>
+  </head>
+  <body class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-badge">
+        <i class="fa-solid fa-book-open"></i>
+        <div>
+          <strong>الدليل الكامل</strong>
+          <small>نقل / مزامنة البيانات</small>
+        </div>
+      </div>
+      <nav class="side-nav">
+        <a class="side-link active" href="admin-migration-guide.html">
+          <i class="fa-solid fa-book-open"></i>
+          <span>الدليل الكامل</span>
+        </a>
+        <a class="side-link" href="admin-data-migration.html">
+          <i class="fa-solid fa-arrows-rotate"></i>
+          <span>نقل / مزامنة</span>
+        </a>
+        <a class="side-link" href="shacksf.html">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>لوحة التحكم</span>
+        </a>
+        <a class="side-link" href="admin-orders.html">
+          <i class="fa-solid fa-receipt"></i>
+          <span>الطلبات</span>
+        </a>
+        <a class="side-link" href="taager-products.html">
+          <i class="fa-solid fa-database"></i>
+          <span>منتجات Taager</span>
+        </a>
+      </nav>
+    </aside>
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-title">
+          <h1>الدليل الكامل</h1>
+          <p>نقل ومزامنة البيانات بين سيرفرات Supabase من أول ما تنشئ المشروع لحد ما تظهر البيانات</p>
+        </div>
+        <div class="topbar-actions">
+          <a class="btn btn-secondary" href="admin-data-migration.html"><i class="fa-solid fa-arrows-rotate"></i> صفحة النقل</a>
+          <a class="btn btn-secondary" href="shacksf.html">العودة للوحة التحكم</a>
+        </div>
+      </header>
+      <div class="content-wrap">
+        <div class="guide-hero">
+          <h2><i class="fa-solid fa-circle-question"></i> إزاي بتشتغل عملية النقل بالظبط؟</h2>
+          <p>
+            صفحة "نقل / مزامنة البيانات" بتقرأ الجداول من <b>المصدر</b> (السيرفر اللي فيه البيانات باستخدام مفاتيح
+            خدمة محفوظة على السيرفر نفسه مش في المتصفح)، وبتبعت كل صف للـ <b>الهدف</b> عبر دوال استيراد مثبتة في قاعدة
+            البيانات. وكل حاجة بتتم من السيرفر، فالبيانات الكبيرة بتتمنقل على دفعات بحجم ثابت.
+          </p>
+        </div>
+
+        <div class="guide-box">
+          <h3><i class="fa-solid fa-font"></i> المصطلحات اللي لازم تعرفها</h3>
+          <ul>
+            <li><b>المصدر (Source):</b> المشروع اللي هتاخد منه البيانات، بتختاره من أول الصفحة تحت "المصدر".</li>
+            <li><b>الهدف (Target):</b> المشروع اللي هتنقل له البيانات، بيظهر من السر <code>MIG_TARGETS</code> اللي بيتظبط على كل مصدر.</li>
+            <li><b>إضافة الجديد فقط (insert):</b> يضيف الصفوف الجديدة فقط ويتجاهل أي id موجود في الهدف.</li>
+            <li><b>تحديث + إضافة (sync):</b> يضيف الجديد ويحدث أي صف موجود (نفس الـ id).</li>
+            <li><b>نسخة كاملة (copy):</b> للمشروع الجديد الفاضي — 1:1 لكل الصفوف.</li>
+            <li><b>معاينة (Preview):</b> بتحسب اللي هيحصل فعلاً من غير ما تكتب أي حاجة — جرّبها دايماً قبل أي نقل.</li>
+            <li><b>من تاريخ (since):</b> فلتر اختياري بيجيب بس الصفوف اللي <code>created_at</code> بتاعها أحدث من التاريخ.</li>
+          </ul>
+        </div>
+
+        <div class="guide-box">
+          <h3><i class="fa-solid fa-rocket"></i> تجهيز مشروع جديد من الصفر (بالترتيب الصحيح)</h3>
+          <div class="note warn"><b>مهم:</b> الترتيب مهم. لو فوت خطوة التجهيز هتشوف أخطاء زي "دوال الاستيراد غير موجودة" أو الجداول مش ظاهرة.</div>
+          <ol>
+            <li><span class="stepnum">1</span>أنشئ المشروع الجديد من Supabase Dashboard، وجهّز فيه الجداول بنفس أسماء وهيكل المشروع الأساسي (أسهل طريقة: سكريبت <code>migrate-supabase.sh</code> القديم لنسخ الـ schema).</li>
+            <li><span class="stepnum">2</span><b>أول حاجة في المشروع الجديد:</b> افتح <b>SQL Editor</b> وشغّل ملف <code>sql/migration_rpc.sql</code> أو الكود اللي بتنسخه بزر "نسخ الكود" داخل صفحة النقل. الخطوة دي <b>مطلوبة مرة واحدة</b> وبتجهّز 3 دوال. من غيرها مفيش نقل هيشتغل.</li>
+            <li><span class="stepnum">3</span>من مجلد اللوحة (اللي فيه الـ supabase CLI) انشر وظيفة النقل في المشروع الجديد:
+              <div class="cmd">supabase functions deploy data-migrate --project-ref REF --no-verify-jwt</div>
+            </li>
+            <li><span class="stepnum">4</span>أضف المشروع الجديد كهدف في <b>المصدر</b> اللي هتنقل منه (مش عند المشروع الجديد):
+              <div class="cmd">supabase secrets set MIG_TARGETS='new|https://REF.supabase.co|SERVICE_ROLE_KEY' --project-ref REF_OF_SOURCE</div>
+              لو عندك أكتر من هدف افصلها بـ <code>;</code>: <code>backup|url|key;new|url|key</code>. ممنوع الأقواس أو المسافات داخل القيمة.
+            </li>
+            <li><span class="stepnum">5</span><b>بعد ضبط السر لازمة إعادة نشر</b> الوظيفة عشان تلتقطه:
+              <div class="cmd">supabase functions deploy data-migrate --project-ref REF_OF_SOURCE --no-verify-jwt</div>
+            </li>
+            <li><span class="stepnum">6</span>ارجع لصفحة النقل، اعمل "معاينة" الأول ثم "ابدأ النقل" واختار وضعية <b>نسخة كاملة</b>.</li>
+          </ol>
+          <div class="note ok">في صندوق "إضافة مشروع / سيرفر جديد" بالصفحة، عند إضافة المشروع هيتم فحصه تلقائيًا ويظهرلك اللي ناقص خطوة بخطوة.</div>
+        </div>
+
+        <div class="guide-box">
+          <h3><i class="fa-solid fa-key"></i> المفاتيح: إيه هي ومن أين تجيبها</h3>
+          <p>من المشروع على Supabase Dashboard افتح <b>Settings ← API</b> وستجد:</p>
+          <table class="kv">
+            <tr><th>الاسم</th><th>البداية</th><th>وظيفته وأين يُستخدم</th><th>مستوى الخطر</th></tr>
+            <tr>
+              <td><b>Project URL</b></td>
+              <td><code>https://xxx.supabase.co</code></td>
+              <td>رابط المشروع، بتحطه في الصفحة أو كهدف.</td>
+              <td>عام</td>
+            </tr>
+            <tr>
+              <td><b>anon / public key</b></td>
+              <td><code>sb_publishable_...</code></td>
+              <td>المفتاح اللي بتستخدمه التطبيقات الأمامية (المتجر نفسه). هنا اختياري — للتحقق أن المشروع شغال.</td>
+              <td>عام ضمن قواعد RLS</td>
+            </tr>
+            <tr>
+              <td><b>service_role</b></td>
+              <td><code>sb_secret_...</code></td>
+              <td>مفتاح الخدمة اللي بيعدّي كل القواعد، بيستخدم: محفوظ داخل سر <code>MIG_TARGETS</code> للاستيراد في الهدف، ومن الصفحة فقط للتحقق أو توليد الأوامر.</td>
+              <td><b>سرّي للغاية — ممنوع في أي تطبيق أمامي نهائيًا.</b></td>
+            </tr>
+          </table>
+          <div class="note warn">لو ظهر service_role في كود منشور في المتصفح فده خرق أمني كبير. إحنا حافظينه داخل سر السيرفر فقط واختياريًا محليًا في متصفحك.</div>
+        </div>
+
+        <div class="guide-box">
+          <h3><i class="fa-solid fa-file-code"></i> ملف الـ SQL: هل هو الأول؟ وليه؟</h3>
+          <p>ملف <code>migration_rpc.sql</code> (أو كود "نسخ الكود") بيجهز في قاعدة المشروع 4 دوال مش موجودة افتراضيًا:</p>
+          <ul>
+            <li><b><code>migration_table_meta</code>:</b> بتجيب معلومات الجداول (اللي فيه <code>created_at</code>؟ الـ <code>id</code> Identity ولا لأ؟ الأعمدة) — بيها بس صفحة النقل تعرض الجداول والعدّادات.</li>
+            <li><b><code>migration_import</code>:</b> بتستورد الصفوف وتحافظ على نفس الـ <code>id</code> (بـ <code>ON CONFLICT</code> تجاهل أو تحديث حسب الوضعية).</li>
+            <li><b><code>migration_existing_ids</code>:</b> بتقول أي الـ ids موجودين في الهدف من غير ما تحمّل الرابط بقوائم ضخمة (دي اللي كانت بتقطع الاتصال بالخطأ <span dir="ltr">http2 stream error</span>).</li>
+            <li><b><code>migration_set_sequences</code>:</b> بتعدّل عدّاد الـ <code>id</code> لأكبر قيمة بعد الاستيراد عشان الـ <code>id</code> الجديد ميتكررش.</li>
+          </ul>
+          <p><b>هل بيتشغل الأول في المشروع الجديد؟</b> نعم — دي أول حاجة في أي مشروع هدف قبل أول نقل.</p>
+          <p><b>هل نحتاج نشغّله في الأصل كمان؟</b> نعم — شغّل الملف كامل في <b>كل</b> مشروع (مصدر أو هدف). مش بيأذي (بيستبدل الدوال أو ينشئها)، وضروري في المصدر عشان دالة معلومات الجداول تشتغل. التثبيت مرة واحدة بس لكل مشروع.</p>
+        </div>
+
+        <div class="guide-box">
+          <h3><i class="fa-solid fa-triangle-exclamation"></i> الأخطاء والرسائل: إيه معناها وإيه تعمل</h3>
+          <table class="kv">
+            <tr><th>الرسالة / السلوك</th><th>السبب</th><th>الحل</th></tr>
+            <tr>
+              <td>"غير قادر على الوصول" / الطلب محظور من المتصفح</td>
+              <td>البوابة راجعت 402 أو المشروع مطفى/مقيد، فالمتصفح بيحظر الردود</td>
+              <td>تحقق من رسالة التقييد في <b>Billing ← Usage</b> وارفع الحد أو فعّل الخطة.</td>
+            </tr>
+            <tr>
+              <td><code>402 Payment Required</code> / <code>exceed_egress_quota</code></td>
+              <td>المشروع تجاوز حد الاستهلاك الشهري (خروج البيانات)</td>
+              <td>ارفع حدود الإنفاق أو رقّي الباقة — دي حالة الأساسي حاليًا.</td>
+            </tr>
+            <tr>
+              <td>"لم يتم إعداد أهداف لهذا المصدر"</td>
+              <td>السر <code>MIG_TARGETS</code> مش متحط على المصدر أو قيمته فاضية</td>
+              <td>اضبط السر ثم <b>أعد نشر</b> الوظيفة.</td>
+            </tr>
+            <tr>
+              <td>"تأكد أن الدوال مثبتة" / الجداول كلها راجعة 0</td>
+              <td>ملف <code>migration_rpc.sql</code> مش متشغّل في هذا المشروع</td>
+              <td>شغّل الكود في SQL Editor للمصدر والهدف.</td>
+            </tr>
+            <tr>
+              <td>"توكن الأدمن غير صالح"</td>
+              <td>جلسة الدخول انتهت (صلاحيتها 12 ساعة)</td>
+              <td>سجّل دخولك من جديد من اللوحة.</td>
+            </tr>
+            <tr>
+              <td>وظيفة النقل ترجع 500 في سجل النتيجة</td>
+              <td>جدول مش موجود في الهدف أو الـ schema مش متطابق</td>
+              <td>تأكد إن جدول الهدف بنفس الاسم ونفس الأعمدة بتاعة المصدر.</td>
+            </tr>
+            <tr>
+              <td>فحص سيرفر مخصص رجع 401</td>
+              <td>الوظيفة منشورة لكنها محمية بتوكن (verify-jwt)</td>
+              <td>أعد نشرها بـ <code>--no-verify-jwt</code>.</td>
+            </tr>
+          </table>
+          <div class="note warn">ابدأ دايماً بـ <b>معاينة</b> قبل كل نقل فعلي، ولأول مرة اختبر بجداول صغيرة الأول وبعدها كبّر.</div>
+        </div>
+
+        <div class="guide-box">
+          <h3><i class="fa-solid fa-shield-halved"></i> نصائح أمان سريعة</h3>
+          <ul>
+            <li>مفاتيح service_role محفوظة في سر السيرفر فقط — متنسخهاش في أي ملف ثابت على جيت.</li>
+            <li>دوال الاستيراد تقبل التنفيذ من service_role بس (السكربت بيمنع غير الـ service_role).</li>
+            <li>تأكيد النقل بيتم بتوكن أدمن موقّع (نفس توقيع صفحة الدخول) ومدته 12 ساعة.</li>
+            <li>لو هتفتح قدرة شراء على حسابك: اعمل حد إنفاق (spend limit) بدل ما تسيبه مفتوح.</li>
+          </ul>
+        </div>
+      </div>
+    </main>
+
+    <nav class="mobile-bottom-nav">
+      <a class="mobile-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>الرئيسية</span></a>
+      <a class="mobile-link" href="admin-data-migration.html"><i class="fa-solid fa-arrows-rotate"></i><span>نقل</span></a>
+      <a class="mobile-link active" href="admin-migration-guide.html"><i class="fa-solid fa-book-open"></i><span>دليل</span></a>
+      <a class="mobile-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>طلبات</span></a>
+      <a class="mobile-link" href="taager-products.html"><i class="fa-solid fa-database"></i><span>تايجر</span></a>
+    </nav>
+  </body>
+</html>
