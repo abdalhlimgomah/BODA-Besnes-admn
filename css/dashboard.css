@@ -158,4 +158,202 @@ body.dark-mode .mobile-link.active { color: #ffc107; }
   .stat-icon { width: 42px; height: 42px; font-size: 1rem; }
   .stat-value { font-size: 1.1rem; }
   .settings-grid { grid-template-columns: 1fr; }
+  .server-options { flex-direction: column; }
+  .server-btn { justify-content: center; }
+}
+
+/* ─── Server Selector ─── */
+.server-selector {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: var(--card-bg,#fff);
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  border: 2px solid transparent;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.server-selector:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+.server-selector-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.server-selector-header i {
+  font-size: 1.3rem;
+  color: #f59e0b;
+}
+.server-options {
+  display: flex;
+  gap: 12px;
+}
+.server-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.server-btn:hover {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+.server-btn.active {
+  border-color: #0d9488;
+  background: #ecfdf5;
+}
+.server-btn.active .server-status {
+  background: #0d9488;
+  color: #fff;
+}
+.server-btn.active .server-check {
+  opacity: 1;
+  color: #0d9488;
+}
+.server-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: right;
+  flex: 1;
+}
+.server-name {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text,#1f2937);
+}
+.server-status {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #9ca3af;
+  width: fit-content;
+  align-self: flex-end;
+}
+.server-check {
+  font-size: 1.2rem;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.server-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: #e5e7eb;
+  background: #f9fafb;
+}
+.server-btn.disabled:hover {
+  border-color: #e5e7eb;
+  background: #f9fafb;
+}
+.server-status.healthy {
+  background: #dcfce7;
+  color: #166534;
+}
+.server-status.down {
+  background: #fef2f2;
+  color: #dc2626;
+}
+.server-status.checking {
+  background: #fef3c7;
+  color: #92400e;
+}
+.server-selector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.health-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f9fafb;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.health-refresh-btn:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+.health-refresh-btn.spinning i {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+body.dark-mode .server-selector {
+  background: rgba(23,35,52,0.9);
+  border-color: rgba(69,84,101,0.5);
+}
+body.dark-mode .server-btn {
+  background: #0f1824;
+  border-color: #374151;
+}
+body.dark-mode .server-btn:hover {
+  background: #1a2535;
+  border-color: #f59e0b;
+}
+body.dark-mode .server-btn.active {
+  border-color: #0d9488;
+  background: #064e3b;
+}
+body.dark-mode .server-status {
+  background: #374151;
+  color: #9ca3af;
+}
+body.dark-mode .server-btn.active .server-status {
+  background: #0d9488;
+  color: #fff;
+}
+body.dark-mode .server-status.healthy {
+  background: #064e3b;
+  color: #6ee7b7;
+}
+body.dark-mode .server-status.down {
+  background: #7f1d1d;
+  color: #fca5a5;
+}
+body.dark-mode .server-status.checking {
+  background: #78350f;
+  color: #fde047;
+}
+body.dark-mode .server-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: #374151;
+  background: #0f1824;
+}
+body.dark-mode .server-btn.disabled:hover {
+  border-color: #374151;
+  background: #0f1824;
+}
+body.dark-mode .health-refresh-btn {
+  background: #0f1824;
+  border-color: #374151;
+  color: #9ca3af;
+}
+body.dark-mode .health-refresh-btn:hover {
+  background: #1a2535;
+  color: #f3f4f6;
+}
+body.dark-mode .server-name {
+  color: #f3f4f6;
 }
