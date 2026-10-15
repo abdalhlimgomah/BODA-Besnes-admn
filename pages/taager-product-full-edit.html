@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>محرر المنتج المتقدم</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/app-shell.css" />
+    <link rel="stylesheet" href="../css/taager-products.css" />
+    <style>
+      .fx-topbar-meta {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-top: 4px;
+      }
+
+      .fx-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 10px;
+        border-radius: 999px;
+        background: var(--surface-muted);
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--muted);
+        direction: ltr;
+      }
+
+      .fx-chip.dirty {
+        background: #fff3d6;
+        color: #8f5f00;
+      }
+
+      .fx-chip.ok {
+        background: #deffec;
+        color: #11693b;
+      }
+
+      .fx-tabs {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        padding: 8px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface-alt);
+        border-radius: var(--radius-md) var(--radius-md) 0 0;
+      }
+
+      .fx-tab {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        min-height: 38px;
+        padding: 8px 14px;
+        border-radius: 10px;
+        background: transparent;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .fx-tab:hover {
+        background: var(--surface-muted);
+        color: var(--text);
+      }
+
+      .fx-tab.active {
+        background: linear-gradient(135deg, var(--brand-teal), var(--brand-teal-deep));
+        color: #fff;
+        box-shadow: 0 8px 18px rgba(0, 184, 169, 0.24);
+      }
+
+      .fx-tab .badge {
+        min-width: 20px;
+        padding: 1px 6px;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.08);
+        font-size: 10px;
+        font-weight: 800;
+      }
+
+      .fx-tab.active .badge {
+        background: rgba(255, 255, 255, 0.25);
+      }
+
+      .fx-panel {
+        display: none;
+        padding: 18px;
+      }
+
+      .fx-panel.active {
+        display: block;
+      }
+
+      .fx-grid {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .fx-field {
+        grid-column: span 6;
+        display: grid;
+        gap: 6px;
+      }
+
+      .fx-field.span-2 {
+        grid-column: span 12;
+      }
+
+      .fx-field.span-3 {
+        grid-column: span 4;
+      }
+
+      .fx-field.span-4 {
+        grid-column: span 3;
+      }
+
+      .fx-field.span-6 {
+        grid-column: span 6;
+      }
+
+      .fx-field.span-8 {
+        grid-column: span 8;
+      }
+
+      .fx-field > label {
+        font-size: 12px;
+        font-weight: 800;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .fx-field > label .req {
+        color: var(--danger);
+      }
+
+      .fx-field .hint {
+        font-size: 11px;
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      .fx-field textarea {
+        min-height: 92px;
+        line-height: 1.7;
+      }
+
+      .fx-field textarea.tall {
+        min-height: 170px;
+      }
+
+      .fx-field textarea.json {
+        direction: ltr;
+        text-align: left;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 12px;
+        min-height: 320px;
+        line-height: 1.6;
+      }
+
+      .fx-field input[dir="ltr"],
+      .fx-field select[dir="ltr"] {
+        direction: ltr;
+        text-align: left;
+      }
+
+      .fx-section-title {
+        grid-column: span 12;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 6px;
+        padding-bottom: 6px;
+        border-bottom: 1px dashed var(--border);
+        font-family: "Tajawal", sans-serif;
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--brand-orange-deep);
+      }
+
+      .fx-switch {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--surface-alt);
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .fx-switch input {
+        width: 18px;
+        height: 18px;
+        min-height: 0;
+        accent-color: var(--brand-teal);
+      }
+
+      .fx-switch span {
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .fx-list {
+        grid-column: span 12;
+        display: grid;
+        gap: 8px;
+      }
+
+      .fx-list-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .fx-list-head strong {
+        font-size: 12px;
+        font-weight: 800;
+        color: var(--muted);
+      }
+
+      .fx-list-row {
+        display: grid;
+        grid-template-columns: 44px 1fr auto;
+        gap: 8px;
+        align-items: center;
+        padding: 8px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--surface-alt);
+      }
+
+      .fx-list-row img,
+      .fx-list-row .fx-thumb {
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 1px solid var(--border);
+        background: #fff;
+        display: grid;
+        place-items: center;
+        font-size: 15px;
+      }
+
+      .fx-list-row input {
+        min-height: 40px;
+      }
+
+      .fx-icon-btn {
+        min-height: 38px;
+        width: 38px;
+        padding: 0;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        background: var(--surface-muted);
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .fx-icon-btn:hover {
+        background: #ffe5e5;
+        color: var(--danger);
+      }
+
+      .fx-icon-btn.add:hover {
+        background: #deffec;
+        color: var(--success);
+      }
+
+      .fx-variant {
+        grid-column: span 12;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        background: var(--surface);
+      }
+
+      .fx-variant-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        background: var(--surface-alt);
+        border-bottom: 1px solid var(--border);
+        flex-wrap: wrap;
+      }
+
+      .fx-variant-head input {
+        min-height: 38px;
+        flex: 1 1 160px;
+        width: auto;
+      }
+
+      .fx-variant-body {
+        padding: 10px;
+        display: grid;
+        gap: 8px;
+      }
+
+      .fx-size-row {
+        display: grid;
+        grid-template-columns: 1fr 100px 90px auto;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .fx-size-row input {
+        min-height: 38px;
+      }
+
+      .fx-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        padding: 14px 18px;
+        border-top: 1px solid var(--border);
+        background: var(--surface-alt);
+        border-radius: 0 0 var(--radius-md) var(--radius-md);
+        position: sticky;
+        bottom: 0;
+        z-index: 5;
+      }
+
+      .fx-actions .spacer {
+        flex: 1 1 auto;
+      }
+
+      .fx-actions .save-state {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--muted);
+      }
+
+      .fx-preview {
+        grid-column: span 12;
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 16px;
+        padding: 14px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background: var(--surface-alt);
+      }
+
+      .fx-preview img {
+        width: 100%;
+        aspect-ratio: 1;
+        object-fit: contain;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        background: #fff;
+      }
+
+      .fx-preview h4 {
+        font-size: 17px;
+        margin-bottom: 6px;
+      }
+
+      .fx-preview .meta {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+
+      .fx-preview .desc {
+        font-size: 13px;
+        line-height: 1.8;
+        white-space: pre-wrap;
+        max-height: 220px;
+        overflow: auto;
+      }
+
+      .fx-preview .thumbs {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+
+      .fx-preview .thumbs img {
+        width: 54px;
+        height: 54px;
+        aspect-ratio: auto;
+        border-radius: 8px;
+      }
+
+      .fx-thumbs {
+        grid-column: span 12;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .fx-thumb-box {
+        position: relative;
+        width: 96px;
+      }
+
+      .fx-thumb-box img {
+        width: 96px;
+        height: 96px;
+        object-fit: cover;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        background: #fff;
+      }
+
+      .fx-thumb-box input {
+        min-height: 34px;
+        margin-top: 4px;
+        font-size: 11px;
+        padding: 4px 8px;
+      }
+
+      .fx-thumb-box .fx-icon-btn {
+        position: absolute;
+        top: -6px;
+        left: -6px;
+        min-height: 26px;
+        width: 26px;
+        font-size: 11px;
+        border-radius: 50%;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .fx-readonly {
+        grid-column: span 12;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px;
+      }
+
+      .fx-readonly .kv {
+        padding: 9px 11px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--surface-alt);
+      }
+
+      .fx-readonly .kv span {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--muted);
+        direction: ltr;
+        text-align: right;
+      }
+
+      .fx-readonly .kv strong {
+        font-size: 13px;
+        word-break: break-all;
+      }
+
+      .fx-error-box {
+        padding: 12px 14px;
+        border-radius: var(--radius-md);
+        background: #ffe5e5;
+        border: 1px solid #f4a7a7;
+        color: #8f1f1f;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.8;
+      }
+
+      .fx-ok-box {
+        padding: 12px 14px;
+        border-radius: var(--radius-md);
+        background: #deffec;
+        border: 1px solid #9be0bd;
+        color: #11693b;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      body.dark-mode .fx-tabs,
+      body.dark-mode .fx-actions {
+        background: #1f2937;
+        border-color: #374151;
+      }
+
+      body.dark-mode .fx-tab:hover {
+        background: #374151;
+        color: #f3f4f6;
+      }
+
+      body.dark-mode .fx-list-row,
+      body.dark-mode .fx-variant,
+      body.dark-mode .fx-preview,
+      body.dark-mode .fx-readonly .kv,
+      body.dark-mode .fx-switch,
+      body.dark-mode .fx-variant-head {
+        background: #111827;
+        border-color: #374151;
+      }
+
+      body.dark-mode .fx-chip {
+        background: #374151;
+        color: #d1d5db;
+      }
+
+      @media (max-width: 900px) {
+        .fx-field,
+        .fx-field.span-3,
+        .fx-field.span-4,
+        .fx-field.span-6,
+        .fx-field.span-8 {
+          grid-column: span 12;
+        }
+
+        .fx-preview {
+          grid-template-columns: 1fr;
+        }
+
+        .fx-size-row {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+    </style>
+    <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="./auth-guard.js"></script>
+  </head>
+  <body class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-badge">
+        <i class="fa-solid fa-bag-shopping"></i>
+        <div>
+          <strong>Buda Admin</strong>
+          <small>إدارة المتجر</small>
+        </div>
+      </div>
+      <nav class="side-nav">
+        <a class="side-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>لوحة التحكم</span></a>
+        <a class="side-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>رسائل الدعم</span></a>
+        <a class="side-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة المنتجات</span></a>
+        <a class="side-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>الطلبات</span></a>
+        <a class="side-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>طلبات الشراكة</span></a>
+        <a class="side-link" href="taager-products.html"><i class="fa-solid fa-database"></i><span>منتجات Taager</span></a>
+        <a class="side-link active" href="manage-all-products.html"><i class="fa-solid fa-boxes-stacked"></i><span>إدارة جميع المنتجات</span></a>
+        <a class="side-link" href="admin-sellers.html"><i class="fa-solid fa-store"></i><span>إدارة البائعين</span></a>
+      </nav>
+    </aside>
+
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-title">
+          <h1 id="fxTitle">محرر المنتج المتقدم</h1>
+          <p id="fxSubtitle">جاري تحميل بيانات المنتج...</p>
+          <div class="fx-topbar-meta" id="fxMeta"></div>
+        </div>
+        <div class="topbar-actions">
+          <a class="btn btn-secondary" id="fxBackLink" href="manage-all-products.html" style="text-decoration:none">
+            <i class="fa-solid fa-arrow-right"></i> رجوع للقائمة
+          </a>
+        </div>
+      </header>
+
+      <section class="content-wrap">
+        <div id="fxLoading" class="card" style="padding:40px;text-align:center;color:var(--muted);font-weight:700">
+          <i class="fa-solid fa-spinner fa-spin" style="font-size:22px;margin-bottom:10px"></i>
+          <div>جاري تحميل بيانات المنتج...</div>
+        </div>
+
+        <div id="fxShell" class="card" style="display:none">
+          <div class="fx-tabs" id="fxTabs"></div>
+
+          <div class="fx-panel active" data-panel="basic">
+            <div class="fx-grid" id="fxBasicGrid"></div>
+          </div>
+
+          <div class="fx-panel" data-panel="content">
+            <div class="fx-grid" id="fxContentGrid"></div>
+          </div>
+
+          <div class="fx-panel" data-panel="media">
+            <div class="fx-grid" id="fxMediaGrid"></div>
+          </div>
+
+          <div class="fx-panel" data-panel="variants">
+            <div class="fx-grid" id="fxVariantsGrid"></div>
+          </div>
+
+          <div class="fx-panel" data-panel="meta">
+            <div class="fx-grid" id="fxMetaGrid"></div>
+          </div>
+
+          <div class="fx-panel" data-panel="raw">
+            <div class="fx-grid" id="fxRawGrid"></div>
+          </div>
+
+          <div class="fx-actions">
+            <button type="button" class="btn btn-primary" id="fxSaveBtn">
+              <i class="fa-solid fa-floppy-disk"></i> حفظ كل التعديلات
+            </button>
+            <button type="button" class="btn btn-secondary" id="fxResetBtn" style="color:#fff">
+              <i class="fa-solid fa-rotate-left"></i> استرجاع الأصلي
+            </button>
+            <button type="button" class="fx-icon-btn" id="fxJsonBtn" title="تطبيق التعديلات من JSON">
+              <i class="fa-solid fa-code"></i>
+            </button>
+            <span class="spacer"></span>
+            <span class="save-state" id="fxSaveState"></span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="mobile-bottom-nav">
+      <a class="mobile-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>الرئيسية</span></a>
+      <a class="mobile-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة</span></a>
+      <a class="mobile-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>الطلبات</span></a>
+      <a class="mobile-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>شراكة</span></a>
+      <a class="mobile-link" href="manage-all-products.html"><i class="fa-solid fa-boxes-stacked"></i><span>المنتجات</span></a>
+    </nav>
+
+    <script src="./taager-product-full-edit.page.js"></script>
+  </body>
+</html>

@@ -7,134 +7,158 @@
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/app-shell.css" />
     <link rel="stylesheet" href="../css/taager-products.css" />
-    <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <script src="./auth-guard.js"></script>
     <style>
+      .table-scroll {
+        overflow-x: auto;
+      }
+
       .products-table {
         width: 100%;
         border-collapse: collapse;
-        background: var(--bg-card);
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: var(--shadow);
+        font-size: 13px;
       }
-      .products-table th {
-        background: var(--bg-th);
-        padding: 12px 10px;
-        border-bottom: 2px solid var(--border);
-        color: var(--text-table-header);
-        font-weight: 700;
+
+      .products-table th,
+      .products-table td {
+        padding: 10px 12px;
         text-align: right;
+        border-bottom: 1px solid var(--border);
         white-space: nowrap;
       }
-      .products-table td {
-        padding: 10px;
-        border-bottom: 1px solid var(--border-table);
-        vertical-align: middle;
+
+      .products-table thead th {
+        background: var(--surface-muted);
+        font-family: "Tajawal", sans-serif;
+        font-size: 13px;
+        font-weight: 800;
+        position: sticky;
+        top: 0;
       }
-      .products-table tr:hover td {
-        background: var(--bg-hover);
+
+      .products-table tbody tr:hover {
+        background: var(--surface-alt);
       }
-      .products-table img {
-        width: 50px;
-        height: 50px;
-        border-radius: 6px;
+
+      .products-table td img {
+        width: 46px;
+        height: 46px;
         object-fit: cover;
-        background: var(--bg-hover);
-      }
-      .search-row {
-        display: flex;
-        gap: 12px;
-        margin-bottom: 16px;
-        flex-wrap: wrap;
-        align-items: center;
-      }
-      .search-row input {
-        flex: 1;
-        min-width: 250px;
-        padding: 10px 14px;
+        border-radius: 10px;
         border: 1px solid var(--border);
-        border-radius: 8px;
-        font-size: 14px;
-        font-family: inherit;
-        background: var(--bg-input);
-        color: var(--text);
+        background: var(--surface-alt);
       }
-      .search-row input:focus {
-        border-color: var(--accent);
-        outline: none;
-        box-shadow: 0 0 0 3px var(--shadow-focus);
+
+      .product-name-cell strong {
+        display: block;
+        max-width: 260px;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
+
+      .product-name-cell small {
+        display: block;
+        max-width: 260px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--muted);
+        font-size: 11px;
+        direction: ltr;
+        text-align: right;
+      }
+
       .stat-badge {
-        display: inline-block;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-size: 0.7rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 26px;
+        padding: 3px 10px;
+        border-radius: 999px;
+        font-size: 12px;
         font-weight: 700;
       }
-      .stat-active { background: var(--badge-l-bg); color: var(--badge-l-c); }
-      .stat-inactive { background: var(--badge-t-bg); color: var(--badge-t-c); }
+
+      .stat-active {
+        background: #deffec;
+        color: #11693b;
+      }
+
+      .stat-inactive {
+        background: #ffe5e5;
+        color: #9b1c1c;
+      }
+
       .edit-btn {
         display: inline-flex;
         align-items: center;
         gap: 6px;
         padding: 6px 12px;
-        background: var(--accent);
-        color: var(--accent-text);
-        border: 0;
-        border-radius: 6px;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        text-decoration: none;
-        transition: all 0.15s;
+        border-radius: var(--radius-sm);
+        background: linear-gradient(135deg, var(--brand-teal), var(--brand-teal-deep));
+        color: #fff;
+        font-weight: 700;
+        box-shadow: 0 6px 14px rgba(0, 184, 169, 0.25);
+        transition: transform var(--transition), box-shadow var(--transition);
       }
+
       .edit-btn:hover {
-        filter: brightness(1.1);
+        transform: translateY(-1px);
+        box-shadow: 0 10px 20px rgba(0, 184, 169, 0.32);
       }
-      .empty-state {
-        text-align: center;
-        padding: 40px;
-        color: var(--text-muted);
-      }
+
       .pagination {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
-        margin-top: 16px;
+        gap: 12px;
+        margin-top: 14px;
       }
+
       .pagination button {
+        min-height: 40px;
         padding: 8px 16px;
-        border: 1px solid var(--border);
-        background: var(--bg-card);
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 13px;
+        background: linear-gradient(135deg, var(--brand-teal), var(--brand-teal-deep));
+        color: #fff;
+        font-weight: 700;
+        box-shadow: 0 8px 18px rgba(0, 184, 169, 0.22);
       }
+
       .pagination button:disabled {
-        opacity: 0.5;
+        background: var(--surface-muted);
+        color: var(--muted);
+        box-shadow: none;
         cursor: not-allowed;
       }
-      .pagination span {
-        color: var(--text-muted);
+
+      .pagination #pageInfo {
         font-size: 13px;
+        font-weight: 700;
+        color: var(--muted);
+        white-space: nowrap;
       }
-      .product-name-cell {
-        max-width: 300px;
+
+      #debugInfo:not(:empty) {
+        margin-bottom: 12px;
       }
-      .product-name-cell strong {
-        display: block;
-        font-size: 14px;
-        margin-bottom: 4px;
+
+      body.dark-mode .products-table thead th {
+        background: #1f2937;
+        color: #f3f4f6;
       }
-      .product-name-cell small {
-        color: var(--text-muted);
-        font-size: 12px;
+
+      body.dark-mode .stat-active {
+        background: #12402a;
+        color: #7ee2b0;
+      }
+
+      body.dark-mode .stat-inactive {
+        background: #4a1d1d;
+        color: #ffb4b4;
       }
     </style>
+    <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="./auth-guard.js"></script>
   </head>
   <body class="app-shell">
     <aside class="app-sidebar">
@@ -151,13 +175,10 @@
         <a class="side-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة المنتجات</span></a>
         <a class="side-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>الطلبات</span></a>
         <a class="side-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>طلبات الشراكة</span></a>
-        <a class="side-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة المنتجات</span></a>
+        <a class="side-link active" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة المنتجات</span></a>
         <a class="side-link" href="taager-products.html"><i class="fa-solid fa-database"></i><span>منتجات Taager</span></a>
         <a class="side-link" href="admin-sellers.html"><i class="fa-solid fa-store"></i><span>إدارة البائعين</span></a>
         <a class="side-link" href="admin-coupons.html"><i class="fa-solid fa-tags"></i><span>إدارة الكوبونات</span></a>
-        <a class="side-link" href="admin-fake-prices.html"><i class="fa-solid fa-percent"></i><span>الأسعار الوهمية</span></a>
-        <a class="side-link" href="admin-taager-token.html"><i class="fa-solid fa-key"></i><span>توكن تاجر</span></a>
-        <a class="side-link active" href="manage-all-products.html"><i class="fa-solid fa-boxes-stacked"></i><span>إدارة جميع المنتجات</span></a>
       </nav>
     </aside>
 
@@ -165,43 +186,56 @@
       <header class="app-topbar">
         <div class="topbar-title">
           <h1>إدارة جميع المنتجات</h1>
-          <p>عرض وتعديل المنتجات (باستثناء منتجات الفندور)</p>
+          <p>فلتر حسب نمط المعرف (ID)</p>
+        </div>
+        <div class="topbar-actions">
+          <!-- reserved for future -->
         </div>
       </header>
 
       <section class="content-wrap">
-        <div class="search-row">
-          <input type="text" id="searchInput" placeholder="ابحث باسم المنتج، الكود، أو المعرف..." />
-          <span id="productsCount" style="color: var(--text-muted); font-size: 13px;">إجمالي: 0 منتج</span>
+        <div class="search-row" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="ابحث..."
+            style="flex:1 1 220px;min-height:44px"
+          />
+          <select
+            id="idGroupFilter"
+            style="min-height:44px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:#fff;font-size:13px;font-weight:700;max-width:100%"
+          >
+            <option value="all">جميع المعرفات (الكل)</option>
+            <option value="taager">taager_*</option>
+            <option value="vendor">vendor_*</option>
+            <option value="prefixed">بادئة + _</option>
+            <option value="numeric">أرقام فقط</option>
+            <option value="other">أخرى</option>
+          </select>
+          <span id="productsCount" style="font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap">إجمالي: 0 منتج</span>
         </div>
-
-        <div id="serverSelector"></div>
-
-        <div id="debugInfo"></div>
-
-        <div class="card" style="overflow-x: auto;">
+        <div class="card table-scroll">
           <table class="products-table" id="productsTable">
             <thead>
               <tr>
-                <th style="width: 60px;">صورة</th>
-                <th class="product-name-cell">المنتج</th>
-                <th style="width: 100px;">السعر</th>
-                <th style="width: 100px;">بعد الخصم</th>
-                <th style="width: 80px;">الكمية</th>
-                <th style="width: 120px;">القسم</th>
-                <th style="width: 100px;">الحالة</th>
-                <th style="width: 80px;">المبيعات</th>
-                <th style="width: 100px;">الإجراءات</th>
+                <th>صورة</th>
+                <th>المنتج</th>
+                <th>السعر</th>
+                <th>بعد الخصم</th>
+                <th>الكمية</th>
+                <th>القسم</th>
+                <th>الحالة</th>
+                <th>المبيعات</th>
+                <th>إجراءات</th>
               </tr>
             </thead>
             <tbody id="productsBody"></tbody>
           </table>
         </div>
-
         <div class="pagination">
-          <button id="prevBtn" onclick="changePage(-1)" disabled><i class="fa-solid fa-chevron-right"></i> السابق</button>
+          <button type="button" id="prevBtn" onclick="changePage(-1)" disabled>السابق</button>
           <span id="pageInfo">صفحة 1 من 1</span>
-          <button id="nextBtn" onclick="changePage(1)" disabled>التالي <i class="fa-solid fa-chevron-left"></i></button>
+          <button type="button" id="nextBtn" onclick="changePage(1)" disabled>التالي</button>
         </div>
       </section>
     </main>
@@ -209,9 +243,9 @@
     <nav class="mobile-bottom-nav">
       <a class="mobile-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>الرئيسية</span></a>
       <a class="mobile-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة</span></a>
-      <a class="mobile-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>طلبات</span></a>
+      <a class="mobile-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>الطلبات</span></a>
       <a class="mobile-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>شراكة</span></a>
-      <a class="mobile-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة</span></a>
+      <a class="mobile-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>المنتجات</span></a>
     </nav>
 
     <script src="./manage-all-products.page.js"></script>
