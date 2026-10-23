@@ -154,6 +154,195 @@
         background: #4a1d1d;
         color: #ffb4b4;
       }
+
+      .bulk-bar {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 12px;
+        padding: 14px 16px;
+      }
+
+      .bulk-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .bulk-check {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 10px;
+        border: 1px dashed var(--border);
+        background: var(--surface);
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .bulk-check input {
+        width: 17px;
+        height: 17px;
+        accent-color: var(--brand-teal, #00b8a9);
+        cursor: pointer;
+      }
+
+      .edits-count {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--muted);
+      }
+
+      .bulk-message {
+        font-size: 13px;
+        font-weight: 700;
+        min-height: 18px;
+      }
+
+      .bulk-message.ok {
+        color: #11693b;
+      }
+
+      .bulk-message.error {
+        color: #b91c1c;
+      }
+
+      .bulk-message.info {
+        color: #1d4ed8;
+      }
+
+      .server-summary {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .server-summary-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .server-summary-item .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--muted);
+        flex: 0 0 auto;
+      }
+
+      .server-summary-item.healthy .dot {
+        background: #16a34a;
+      }
+
+      .server-summary-item.down .dot {
+        background: #dc2626;
+      }
+
+      .server-summary-item.active {
+        border-color: var(--brand-teal);
+      }
+
+      .row-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-items: flex-start;
+      }
+
+      .row-stock {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .stock-input {
+        width: 78px;
+        min-height: 34px;
+        padding: 4px 8px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        font-weight: 700;
+        text-align: center;
+      }
+
+      .stock-input.dirty {
+        border-color: #f59e0b;
+        background: #fff7e6;
+      }
+
+      .row-msg {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--muted);
+      }
+
+      .row-msg.dirty {
+        color: #b45309;
+      }
+
+      .row-msg.ok {
+        color: #11693b;
+      }
+
+      .row-msg.error {
+        color: #b91c1c;
+      }
+
+      .servers-cell {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+      }
+
+      .srv-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        padding: 2px 7px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        background: var(--surface-muted);
+        color: var(--muted);
+      }
+
+      .srv-badge.yes {
+        background: #deffec;
+        color: #11693b;
+      }
+
+      .srv-badge.no {
+        background: #ffe5e5;
+        color: #9b1c1c;
+      }
+
+      .srv-badge.unknown {
+        background: #fff3d6;
+        color: #8f5f00;
+      }
+
+      body.dark-mode .bulk-check,
+      body.dark-mode .server-summary-item,
+      body.dark-mode .stock-input {
+        background: #0f1824;
+        border-color: #374151;
+        color: #f3f4f6;
+      }
+
+      body.dark-mode .stock-input.dirty {
+        background: #3a2c12;
+      }
     </style>
     <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -194,6 +383,24 @@
       </header>
 
       <section class="content-wrap">
+        <div class="card bulk-bar" id="bulkBar">
+          <div class="bulk-row">
+            <label class="bulk-check" for="publishAllServers">
+              <input type="checkbox" id="publishAllServers" />
+              <span><i class="fa-solid fa-server"></i> تطبيق على السيرفرات الثلاثة</span>
+            </label>
+            <button type="button" class="btn btn-primary" id="saveEditsBtn">
+              <i class="fa-solid fa-floppy-disk"></i> حفظ التعديلات
+            </button>
+            <span class="edits-count" id="editsCount">0 تعديلات</span>
+            <div style="flex:1"></div>
+            <a class="btn btn-secondary" href="./product-sync.html" target="_blank" title="مزامنة المنتجات بين السيرفرات الثلاثة">
+              <i class="fa-solid fa-sync"></i> مزامنة المنتجات بين السيرفرات
+            </a>
+          </div>
+          <div class="server-summary" id="serverSummary"></div>
+          <div class="bulk-message" id="bulkMessage"></div>
+        </div>
         <div class="search-row" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">
           <input
             type="text"
@@ -226,6 +433,7 @@
                 <th>القسم</th>
                 <th>الحالة</th>
                 <th>المبيعات</th>
+                <th>السيرفرات</th>
                 <th>إجراءات</th>
               </tr>
             </thead>

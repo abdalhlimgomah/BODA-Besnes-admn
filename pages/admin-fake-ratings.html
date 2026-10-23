@@ -69,6 +69,35 @@
       body.dark-mode .fr-star-count input { background:var(--surface,#0f172a); color:#e2e8f0; }
       body.dark-mode .fr-seg button.active { background:#334155; color:#e2e8f0; }
       .fr-hint { font-size:0.72rem; color:var(--muted,#667085); margin-right:auto; }
+      /* ─── Server Selector ─── */
+      .server-selector { padding:16px 20px; background:var(--card-bg,#fff); border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.05); border:2px solid transparent; }
+      .server-selector-header { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px; }
+      .server-selector-header i { font-size:1.3rem; color:#f59e0b; }
+      .server-options { display:flex; gap:12px; flex-wrap:wrap; }
+      .server-btn { flex:1; min-width:180px; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 18px; background:#f9fafb; border:2px solid #e5e7eb; border-radius:12px; cursor:pointer; transition:all 0.2s; font-family:inherit; }
+      .server-btn:hover { border-color:#f59e0b; background:#fffbeb; }
+      .server-btn.active { border-color:#0d9488; background:#ecfdf5; }
+      .server-btn.disabled { opacity:0.5; cursor:not-allowed; border-color:#e5e7eb; background:#f9fafb; }
+      .server-btn.disabled:hover { border-color:#e5e7eb; background:#f9fafb; }
+      .server-info { display:flex; flex-direction:column; gap:4px; text-align:right; flex:1; }
+      .server-name { font-size:1rem; font-weight:800; color:var(--text,#1f2937); }
+      .server-status { font-size:0.72rem; font-weight:700; padding:3px 10px; border-radius:999px; background:#f3f4f6; color:#9ca3af; width:fit-content; align-self:flex-end; }
+      .server-status.healthy { background:#dcfce7; color:#166534; }
+      .server-status.down { background:#fef2f2; color:#dc2626; }
+      .server-status.checking { background:#fef3c7; color:#92400e; }
+      .server-selector-header .section-title { font-size:1rem; margin:0; }
+      .server-btn.active .server-status { background:#0d9488; color:#fff; }
+      .server-btn.active .server-check { opacity:1; color:#0d9488; }
+      .server-check { font-size:1.2rem; opacity:0; transition:opacity 0.2s; }
+      .health-refresh-btn { display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border:1px solid #e5e7eb; border-radius:8px; background:#f9fafb; color:#6b7280; cursor:pointer; transition:all 0.2s; }
+      .health-refresh-btn:hover { background:#f3f4f6; color:#374151; }
+      .health-refresh-btn.spinning i { animation:fr-spin 1s linear infinite; }
+      @keyframes fr-spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+      body.dark-mode .server-selector { background:var(--card-bg,#1e293b); }
+      body.dark-mode .server-btn { background:#0f1824; border-color:#374151; }
+      body.dark-mode .server-btn.active { border-color:#0d9488; background:#064e3b; }
+      body.dark-mode .server-name { color:#f3f4f6; }
+      body.dark-mode .health-refresh-btn { background:#0f1824; border-color:#374151; color:#9ca3af; }
     </style>
   </head>
   <body class="app-shell">
@@ -102,6 +131,7 @@
         </div>
       </header>
       <section class="content-wrap admin-page fr-wrap">
+        <div id="serverSelector" style="margin-bottom:16px;"></div>
         <div id="fr-status" class="fr-status"></div>
         <div id="fr-stats" class="fr-stats"></div>
         <div class="fr-toolbar">
@@ -118,7 +148,7 @@
             <button class="fr-btn secondary" onclick="runAddCount()" title="يضيف هذا العدد بالضبط لكل منتج في الفلتر الحالي"><i class="fa-solid fa-plus"></i> أضف العدد</button>
           </span>
           <button class="fr-btn secondary" onclick="loadAll()"><i class="fa-solid fa-rotate"></i> تحديث</button>
-          <span class="fr-hint">لكل نجمه عدد عشوائي من 5–60 · لكل منتج توزيع مختلف ومواعيد عشوائية خلال 6 شهور</span>
+          <span class="fr-hint">لكل نجمه عدد عشوائي من 5–60 · لكل منتج توزيع مختلف ومواعيد عشوائية خلال 6 شهور · الجدول يعرض 10 منتجات فقط لكل صفحة (الأرقام فوق للكل)</span>
         </div>
         <div id="fr-progress" class="fr-progress" style="display:none;"><div id="fr-progress-bar" class="fr-progress-bar"></div></div>
         <div id="fr-progress-label" style="text-align:center;font-size:13px;color:var(--muted,#667085);display:none;margin-top:4px;"></div>
@@ -140,6 +170,7 @@
             <tbody id="fr-tbody"></tbody>
           </table>
         </div>
+        <div id="fr-pager" style="display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:14px;"></div>
       </section>
     </main>
 
@@ -164,7 +195,7 @@
         _sb = window.supabase.createClient("https://msgqzgzoslearaprgiqq.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE");
       }
 
-      var FR = { products: [], ratings: {}, filter: 'all', editId: null };
+      var FR = { products: [], ratings: {}, filter: 'all', editId: null, page: 1, pageSize: 10, totalRatings: 0 };
 
       function notify(msg, type) {
         var el = document.getElementById("fr-status");
@@ -220,8 +251,8 @@
         var added = 0;
         FR.products.forEach(function(p) { if (FR.ratings[String(p.id)] && FR.ratings[String(p.id)].total > 0) added++; });
         var missing = total - added;
-        var allRows = 0;
-        Object.keys(FR.ratings).forEach(function(k) { allRows += FR.ratings[k].total; });
+        var allRows = FR.totalRatings || 0;
+        if (!allRows) Object.keys(FR.ratings).forEach(function(k) { allRows += FR.ratings[k].total; });
         var cont = document.getElementById("fr-stats");
         cont.innerHTML =
           '<div class="fr-stat-card info"><div class="num">' + total + '</div><div class="label">إجمالي المنتجات</div></div>' +
@@ -238,18 +269,24 @@
           if (FR.filter === 'missing' && has) return false;
           return true;
         });
+        var totalPages = Math.max(1, Math.ceil(list.length / FR.pageSize));
+        if (FR.page > totalPages) FR.page = totalPages;
+        if (FR.page < 1) FR.page = 1;
+        var start = (FR.page - 1) * FR.pageSize;
+        var pageList = list.slice(start, start + FR.pageSize);
+        renderPager(list.length, totalPages);
         if (!list.length) {
           tbody.innerHTML = '<tr><td colspan="11" style="padding:40px;color:var(--muted,#667085);">لا توجد منتجات مطابقة.</td></tr>';
           return;
         }
-        tbody.innerHTML = list.map(function(p, i) {
+        tbody.innerHTML = pageList.map(function(p, i) {
           var c = countsFor(p.id);
           var has = c.total > 0;
           var avg = avgFor(p.id);
           var badge = has ? '<span class="fr-badge ok">مضاف ✔</span>' : '<span class="fr-badge miss">ناقص ✖</span>';
           var src = p.src === 'taager' ? '<span class="fr-badge src">تاجر</span>' : '<span class="fr-badge src">متجر</span>';
           return '<tr>' +
-            '<td>' + (i + 1) + '</td>' +
+            '<td>' + (start + i + 1) + '</td>' +
             '<td class="name-cell"><span title="' + String(p.name || 'منتج').replace(/"/g, "&quot;") + '">' + (p.name || 'منتج') + '</span>' + src + '</td>' +
             '<td>' + badge + '</td>' +
             '<td>' + c.total + '</td>' +
@@ -264,8 +301,30 @@
         }).join('');
       }
 
+      function renderPager(total, totalPages) {
+        var el = document.getElementById("fr-pager");
+        if (!el) return;
+        if (total <= FR.pageSize) {
+          el.innerHTML = '<span class="fr-hint">إجمالي ' + total.toLocaleString("ar-EG") + ' منتج (معروض ' + total + ')</span>';
+          return;
+        }
+        el.innerHTML =
+          '<button class="fr-btn secondary" style="padding:6px 14px;" onclick="gotoPage(1)"' + (FR.page === 1 ? ' disabled' : '') + '>« الأول</button>' +
+          '<button class="fr-btn secondary" style="padding:6px 14px;" onclick="gotoPage(' + (FR.page - 1) + ')"' + (FR.page === 1 ? ' disabled' : '') + '>السابق</button>' +
+          '<span class="fr-hint" style="margin:0 10px;">صفحة ' + FR.page + ' من ' + totalPages + ' — إجمالي ' + total.toLocaleString("ar-EG") + ' منتج</span>' +
+          '<button class="fr-btn secondary" style="padding:6px 14px;" onclick="gotoPage(' + (FR.page + 1) + ')"' + (FR.page === totalPages ? ' disabled' : '') + '>التالي</button>' +
+          '<button class="fr-btn secondary" style="padding:6px 14px;" onclick="gotoPage(' + totalPages + ')"' + (FR.page === totalPages ? ' disabled' : '') + '>الأخير »</button>';
+      }
+      function gotoPage(p) {
+        FR.page = p;
+        renderTable();
+        var wrap = document.querySelector('.fr-table-wrap');
+        if (wrap && wrap.scrollIntoView) wrap.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      }
+
       function setFilter(f) {
         FR.filter = f;
+        FR.page = 1;
         var seg = document.getElementById("frFilterSeg");
         seg.querySelectorAll('button').forEach(function(b) {
           b.classList.toggle('active', b.getAttribute('data-f') === f);
@@ -276,11 +335,16 @@
       async function loadAll() {
         setStatus('جاري تحميل المنتجات والتقييمات...');
         try {
-          var shop = await fetchPaged('products', 'id,name');
-          var taager = await fetchPaged('taager_products', 'id,name');
+          var parts = await Promise.all([
+            fetchPaged('products', 'id,name').catch(function() { return []; }),
+            fetchPaged('taager_products', 'id,name'),
+            getRatingsCount()
+          ]);
+          var shop = parts[0], taager = parts[1];
+          FR.totalRatings = parts[2] || 0;
           FR.products = shop.map(function(p) { return { id: p.id, name: p.name, src: 'shop' }; })
             .concat(taager.map(function(p) { return { id: p.id, name: p.name, src: 'taager' }; }));
-          FR.ratings = await loadRatingsMap();
+          FR.ratings = await loadRatingsMap(FR.products.map(function(p) { return String(p.id); }));
           renderStats();
           renderTable();
           setStatus('تم تحميل ' + FR.products.length + ' منتج و' + Object.keys(FR.ratings).length + ' منتج عليه تقييمات.');
@@ -289,24 +353,30 @@
         }
       }
 
-      async function loadRatingsMap() {
-        var map = {};
+      async function getRatingsCount() {
         try {
-          var ids = [], off = 0, pg = 1000;
-          while (true) {
-            var { data, error } = await _sb.from('ratings').select('item_id').order('id', { ascending: true }).range(off, off + pg - 1);
-            if (error) throw error;
-            if (!data || !data.length) break;
-            data.forEach(function(r) { if (r.item_id) ids.push(String(r.item_id)); });
-            off += pg;
-            if (data.length < pg) break;
-          }
-          ids = Array.from(new Set(ids));
-          for (var i = 0; i < ids.length; i += 100) {
-            var chunk = ids.slice(i, i + 100);
-            var { data: rpcData, error } = await _sb.rpc('get_ratings_summary', { product_ids: chunk });
-            if (error) throw error;
-            (rpcData || []).forEach(function(r) {
+          var { count, error } = await _sb.from('ratings').select('*', { count: 'exact', head: true });
+          if (error) return 0;
+          return count || 0;
+        } catch(e) { return 0; }
+      }
+
+      async function loadRatingsMap(ids) {
+        var map = {};
+        ids = (ids || []).filter(function(id) { return id; });
+        if (!ids.length) return map;
+        var CHUNK = 1000;
+        var chunks = [];
+        for (var i = 0; i < ids.length; i += CHUNK) chunks.push(ids.slice(i, i + CHUNK));
+        var CONC = 4;
+        for (var c = 0; c < chunks.length; c += CONC) {
+          var batch = chunks.slice(c, c + CONC);
+          var results = await Promise.all(batch.map(function(chunk) {
+            return _sb.rpc('get_ratings_summary', { product_ids: chunk });
+          }));
+          results.forEach(function(res) {
+            if (res.error) throw res.error;
+            (res.data || []).forEach(function(r) {
               map[String(r.item_id)] = {
                 1: Math.round(Number(r.star1)) || 0,
                 2: Math.round(Number(r.star2)) || 0,
@@ -316,26 +386,9 @@
                 total: Math.round(Number(r.total)) || 0
               };
             });
-          }
-          return map;
-        } catch(e) {
-          var off2 = 0, pg2 = 1000;
-          while (true) {
-            var { data, error } = await _sb.from('ratings').select('item_id,rating').order('id', { ascending: true }).range(off2, off2 + pg2 - 1);
-            if (error) throw error;
-            if (!data || !data.length) break;
-            data.forEach(function(r) {
-              var itemId = String(r.item_id);
-              var v = Math.round(Number(r.rating)) || 0;
-              if (v < 1 || v > 5) v = 0;
-              if (!map[itemId]) map[itemId] = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, total: 0 };
-              if (v) { map[itemId][v]++; map[itemId].total++; }
-            });
-            off2 += pg2;
-            if (data.length < pg2) break;
-          }
-          return map;
+          });
         }
+        return map;
       }
 
       // ===== Distribution generation: stars only, random per product =====
@@ -530,6 +583,12 @@
       });
 
       loadAll();
+    </script>
+    <script src="./server-selector.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        if (window.ServerSelector) window.ServerSelector.render("serverSelector");
+      });
     </script>
   </body>
 </html>

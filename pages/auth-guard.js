@@ -1,4 +1,5 @@
 ﻿(function () {
+  var __authGuardScriptSrc = (document.currentScript && document.currentScript.src) || "";
   // ============================================================
   // Luha (Admin Panel)Failover بين 3 سيرفرات + هوية أدمن بتوكن ممضى
   // ------------------------------------------------------------
@@ -426,4 +427,32 @@
   }
 
   enforceRouteGuard();
+
+  // ============================================================
+  // اختيار السيرفر: يُحمّل ويُفعّل تلقائياً في كل صفحات الأدمن
+  // ============================================================
+  function loadServerSelector() {
+    if (window.ServerSelector && typeof window.ServerSelector.autoInit === "function") {
+      window.ServerSelector.autoInit();
+      return;
+    }
+    if (document.getElementById("bodaServerSelectorScript")) return;
+    var script = document.createElement("script");
+    script.id = "bodaServerSelectorScript";
+    script.src = __authGuardScriptSrc
+      ? __authGuardScriptSrc.replace(/auth-guard\.js(\?.*)?$/, "server-selector.js")
+      : "server-selector.js";
+    script.onload = function () {
+      if (window.ServerSelector && typeof window.ServerSelector.autoInit === "function") {
+        window.ServerSelector.autoInit();
+      }
+    };
+    (document.head || document.documentElement).appendChild(script);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", loadServerSelector);
+  } else {
+    loadServerSelector();
+  }
 })();

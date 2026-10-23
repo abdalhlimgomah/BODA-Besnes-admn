@@ -2,9 +2,50 @@
   const STORAGE_KEY = "boda_admin_active_backend";
   const TTL_MS = 15 * 60 * 1000;
   const HEALTH_CHECK_CACHE_MS = 30 * 1000; // Cache health status for 30 seconds
+  const STYLE_ID = "bodaServerSelectorStyles";
+  const AUTO_CONTAINER_ID = "bodaServerSelector";
 
   let healthCache = { primary: null, backup: null, backup2: null };
   let healthCheckTimers = {};
+
+  const SELECTOR_CSS = `
+    .server-selector { padding:16px 20px; background:var(--card-bg,#fff); border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.05); border:2px solid transparent; }
+    .server-selector-header { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px; }
+    .server-selector-header i { font-size:1.3rem; color:#f59e0b; }
+    .server-selector-header .section-title { font-size:1rem; margin:0; }
+    .server-options { display:flex; gap:12px; flex-wrap:wrap; }
+    .server-btn { flex:1; min-width:170px; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 18px; background:#f9fafb; border:2px solid #e5e7eb; border-radius:12px; cursor:pointer; transition:all 0.2s; font-family:inherit; }
+    .server-btn:hover { border-color:#f59e0b; background:#fffbeb; }
+    .server-btn.active { border-color:#0d9488; background:#ecfdf5; }
+    .server-btn.disabled { opacity:0.5; cursor:not-allowed; border-color:#e5e7eb; background:#f9fafb; }
+    .server-btn.disabled:hover { border-color:#e5e7eb; background:#f9fafb; }
+    .server-info { display:flex; flex-direction:column; gap:4px; text-align:right; flex:1; }
+    .server-name { font-size:1rem; font-weight:800; color:var(--text,#1f2937); }
+    .server-status { font-size:0.72rem; font-weight:700; padding:3px 10px; border-radius:999px; background:#f3f4f6; color:#9ca3af; width:fit-content; align-self:flex-end; }
+    .server-status.healthy { background:#dcfce7; color:#166534; }
+    .server-status.down { background:#fef2f2; color:#dc2626; }
+    .server-status.checking { background:#fef3c7; color:#92400e; }
+    .server-btn.active .server-status { background:#0d9488; color:#fff; }
+    .server-btn.active .server-check { opacity:1; color:#0d9488; }
+    .server-check { font-size:1.2rem; opacity:0; transition:opacity 0.2s; }
+    .health-refresh-btn { display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border:1px solid #e5e7eb; border-radius:8px; background:#f9fafb; color:#6b7280; cursor:pointer; transition:all 0.2s; }
+    .health-refresh-btn:hover { background:#f3f4f6; color:#374151; }
+    .health-refresh-btn.spinning i { animation:bodaSsSpin 1s linear infinite; }
+    @keyframes bodaSsSpin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+    body.dark-mode .server-selector { background:var(--card-bg,#1e293b); }
+    body.dark-mode .server-btn { background:#0f1824; border-color:#374151; }
+    body.dark-mode .server-btn.active { border-color:#0d9488; background:#064e3b; }
+    body.dark-mode .server-name { color:#f3f4f6; }
+    body.dark-mode .health-refresh-btn { background:#0f1824; border-color:#374151; color:#9ca3af; }
+  `;
+
+  function injectStyles() {
+    if (document.getElementById(STYLE_ID)) return;
+    const style = document.createElement("style");
+    style.id = STYLE_ID;
+    style.textContent = SELECTOR_CSS;
+    (document.head || document.documentElement).appendChild(style);
+  }
 
   function getActiveBackendName() {
     try {
@@ -35,14 +76,7 @@
     document.dispatchEvent(new CustomEvent("boda:admin-failover", {
       detail: { from: getActiveBackendName() === "primary" ? "backup" : "primary", to: name, reason: "manual" }
     }));
-    if (window.adminAuth && window.adminAuth.getToken) {
-      const token = window.adminAuth.getToken();
-      if (token) {
-        window.location.reload();
-      }
-    } else {
-      window.location.reload();
-    }
+    window.location.reload();
   }
 
   function getBackendDisplayName(name) {
@@ -125,9 +159,9 @@
     return health.healthy ? "healthy" : "down";
   }
 
-  function renderServerSelector(containerId) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
+  function buildInto(container) {
+    if (!container || container.dataset.bodaSsInit === "1") return;
+    container.dataset.bodaSsInit = "1";
 
     const active = getActiveBackendName();
     const backends = ["primary", "backup", "backup2"];
@@ -138,20 +172,20 @@
           <span class="server-name">${getBackendDisplayName(name)}</span>
           <span class="server-status health-${name}" data-health="${name}">${getHealthStatusText(healthCache[name])}</span>
         </span>
-        <i class="fa-solid fa-check server-check" id="${name}Check" style="opacity: ${active === name ? "1" : "0"}"></i>
+        <i class="fa-solid fa-check server-check" id="boda${name}Check" style="opacity: ${active === name ? "1" : "0"}"></i>
       </button>
     `).join("");
 
     container.innerHTML = `
-      <div class="server-selector card" id="serverSelector">
+      <div class="server-selector card">
         <div class="server-selector-header">
           <i class="fa-solid fa-server"></i>
           <h3 class="section-title" style="margin:0">اختيار السيرفر</h3>
-          <button type="button" class="health-refresh-btn" id="healthRefreshBtn" title="فحص حالة السيرفرات">
+          <button type="button" class="health-refresh-btn" data-role="refresh" title="فحص حالة السيرفرات">
             <i class="fa-solid fa-rotate-right"></i>
           </button>
         </div>
-        <div class="server-options" id="serverOptions">
+        <div class="server-options">
           ${buttonsHtml}
         </div>
       </div>
@@ -164,17 +198,17 @@
     backends.forEach(name => {
       btnElements[name] = container.querySelector(`[data-backend="${name}"]`);
       statusElements[name] = container.querySelector(`.health-${name}`);
-      checkElements[name] = container.querySelector(`#${name}Check`);
+      checkElements[name] = container.querySelector(`#boda${name}Check`);
     });
 
-    const refreshBtn = container.querySelector('#healthRefreshBtn');
+    const refreshBtn = container.querySelector('[data-role="refresh"]');
     let isChecking = false;
 
     function updateUI() {
       const current = getActiveBackendName();
       backends.forEach(name => {
-        btnElements[name].classList.toggle("active", current === name);
-        checkElements[name].style.opacity = current === name ? "1" : "0";
+        if (btnElements[name]) btnElements[name].classList.toggle("active", current === name);
+        if (checkElements[name]) checkElements[name].style.opacity = current === name ? "1" : "0";
       });
     }
 
@@ -186,7 +220,6 @@
           statusEl.textContent = getHealthStatusText(health);
           statusEl.className = `server-status health-${name} ${getHealthStatusClass(health)}`;
         }
-        // Disable button if server is down (but keep active one enabled)
         if (btnElements[name]) {
           if (!health?.healthy && name !== getActiveBackendName()) {
             btnElements[name].classList.add("disabled");
@@ -202,10 +235,8 @@
     async function runHealthCheck() {
       if (isChecking) return;
       isChecking = true;
-      refreshBtn.classList.add("spinning");
-      refreshBtn.disabled = true;
+      if (refreshBtn) { refreshBtn.classList.add("spinning"); refreshBtn.disabled = true; }
 
-      // Show checking state
       backends.forEach(name => {
         const statusEl = statusElements[name];
         if (statusEl && !healthCache[name]) {
@@ -219,12 +250,12 @@
         updateHealthUI(results);
       } finally {
         isChecking = false;
-        refreshBtn.classList.remove("spinning");
-        refreshBtn.disabled = false;
+        if (refreshBtn) { refreshBtn.classList.remove("spinning"); refreshBtn.disabled = false; }
       }
     }
 
     backends.forEach(name => {
+      if (!btnElements[name]) return;
       btnElements[name].addEventListener("click", () => {
         if (!btnElements[name].classList.contains("disabled")) {
           setActiveBackend(name);
@@ -232,19 +263,58 @@
       });
     });
 
-    refreshBtn.addEventListener("click", runHealthCheck);
+    if (refreshBtn) refreshBtn.addEventListener("click", runHealthCheck);
 
-    // Initial health check
     runHealthCheck();
 
-    // Periodic health check every 60 seconds
     const intervalId = setInterval(runHealthCheck, 60000);
-    
-    // Cleanup on page unload
     window.addEventListener("beforeunload", () => clearInterval(intervalId));
 
     document.addEventListener("boda:admin-failover", updateUI);
   }
 
-  window.ServerSelector = { render: renderServerSelector };
+  function renderServerSelector(containerId) {
+    injectStyles();
+    const container = typeof containerId === "string"
+      ? document.getElementById(containerId)
+      : containerId;
+    if (!container) return;
+    buildInto(container);
+  }
+
+  function pickHost() {
+    return document.querySelector(".content-wrap")
+      || document.querySelector("main.app-main")
+      || document.querySelector(".app-main")
+      || document.body;
+  }
+
+  function autoInit() {
+    try {
+      injectStyles();
+      // Prefer an explicit container placed by the page.
+      const manual = document.getElementById("serverSelector");
+      if (manual) {
+        if (!manual.dataset.bodaSsInit) buildInto(manual);
+        return;
+      }
+      if (document.getElementById(AUTO_CONTAINER_ID)) return;
+
+      const host = pickHost();
+      if (!host) return;
+      const div = document.createElement("div");
+      div.id = AUTO_CONTAINER_ID;
+      div.style.marginBottom = "16px";
+      host.insertBefore(div, host.firstChild);
+      buildInto(div);
+    } catch (_e) {}
+  }
+
+  window.ServerSelector = { render: renderServerSelector, autoInit: autoInit };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", autoInit);
+  } else {
+    autoInit();
+  }
 })();

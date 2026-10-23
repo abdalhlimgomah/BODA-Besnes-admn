@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تغيير بادئة المعرفات</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/app-shell.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+      :root {
+        --bg: #f8fafc;
+        --card: #ffffff;
+        --text: #1f2937;
+        --muted: #667085;
+        --border: #e5e7eb;
+        --primary: #0ea5e9;
+        --success: #059669;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+      }
+      body.dark-mode {
+        --bg: #0f172a;
+        --card: #1e293b;
+        --text: #f1f5f9;
+        --muted: #94a3b8;
+        --border: #334155;
+        --primary: #38bdf8;
+      }
+      * {
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+          "Noto Sans Arabic", sans-serif;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+      }
+      .app-header {
+        background: var(--card);
+        border-bottom: 1px solid var(--border);
+        padding: 0.85rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+      }
+      .back-link {
+        color: var(--muted);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 10px;
+        transition: all 0.15s ease;
+      }
+      .back-link:hover {
+        background: var(--bg);
+        color: var(--text);
+      }
+      .header-title h1 {
+        margin: 0;
+        font-size: clamp(1rem, 2.5vw, 1.25rem);
+        font-weight: 700;
+      }
+      .header-title p {
+        margin: 0;
+        font-size: 0.875rem;
+        color: var(--muted);
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: clamp(1rem, 2vw, 1.5rem);
+        display: flex;
+        flex-direction: column;
+        gap: clamp(1rem, 2vw, 1.5rem);
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: clamp(1rem, 2vw, 1.25rem);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+      }
+      .card-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: clamp(0.85rem, 2vw, 1rem);
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+      .card-title {
+        margin: 0;
+        font-size: clamp(0.95rem, 2vw, 1.05rem);
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .tiny {
+        font-size: 0.8rem;
+      }
+      .row {
+        display: flex;
+        gap: 0.85rem;
+        flex-wrap: wrap;
+      }
+      .col {
+        flex: 1;
+        min-width: min(280px, 100%);
+      }
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+      label {
+        font-weight: 600;
+        font-size: 0.92rem;
+      }
+      .input {
+        padding: 0.65rem 0.8rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--card);
+        color: var(--text);
+        font-size: 0.95rem;
+        transition: border 0.15s ease, box-shadow 0.15s ease;
+      }
+      .input:focus {
+        outline: none;
+        border-color: rgba(14, 165, 233, 0.55);
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+      }
+      .btn {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0.62rem 1rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.55rem;
+        cursor: pointer;
+        background: var(--bg);
+        color: var(--text);
+        transition: transform 0.05s ease, filter 0.15s ease,
+          background 0.15s ease;
+        white-space: nowrap;
+        line-height: 1;
+      }
+      .btn:hover {
+        filter: brightness(0.985);
+      }
+      .btn:active {
+        transform: translateY(1px);
+      }
+      .btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+      .btn-primary {
+        background: var(--primary);
+        color: #fff;
+        border-color: transparent;
+      }
+      .btn-success {
+        background: var(--success);
+        color: #fff;
+        border-color: transparent;
+      }
+      .btn-danger {
+        background: var(--danger);
+        color: #fff;
+        border-color: transparent;
+      }
+      .btn-small {
+        padding: 0.45rem 0.55rem;
+        font-size: 0.85rem;
+      }
+      .source-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: clamp(0.75rem, 2vw, 1rem);
+      }
+      .source-card {
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        padding: clamp(0.85rem, 2vw, 1rem);
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        background: var(--card);
+        position: relative;
+      }
+      .source-card:hover {
+        border-color: rgba(14, 165, 233, 0.45);
+        transform: translateY(-1px);
+      }
+      .source-card.active {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+        background: linear-gradient(
+          180deg,
+          rgba(14, 165, 233, 0.05) 0%,
+          transparent 100%
+        );
+      }
+      .source-card.active::after {
+        content: "\f058";
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        position: absolute;
+        top: 0.65rem;
+        left: 0.85rem;
+        color: var(--primary);
+      }
+      .source-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+      }
+      .source-title {
+        font-weight: 800;
+        font-size: clamp(0.98rem, 2vw, 1.05rem);
+      }
+      .badge {
+        padding: 0.15rem 0.5rem;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        background: rgba(14, 165, 233, 0.12);
+        color: var(--primary);
+        border: 1px solid rgba(14, 165, 233, 0.25);
+      }
+      .badge.success {
+        background: rgba(5, 150, 105, 0.12);
+        color: var(--success);
+        border-color: rgba(5, 150, 105, 0.25);
+      }
+      .source-url {
+        font-size: 0.82rem;
+        color: var(--muted);
+        direction: ltr;
+        text-align: left;
+        word-break: break-all;
+      }
+      .source-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 0.75rem;
+        font-size: 0.86rem;
+        color: var(--muted);
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.15rem 0.5rem;
+        border-radius: 999px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+      }
+      .product-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+      }
+      .product-card {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: clamp(0.75rem, 2vw, 0.85rem);
+        display: flex;
+        align-items: center;
+        gap: clamp(0.75rem, 2vw, 1rem);
+      }
+      .product-thumb {
+        width: clamp(64px, 8vw, 88px);
+        height: clamp(64px, 8vw, 88px);
+        border-radius: 10px;
+        object-fit: cover;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        flex-shrink: 0;
+      }
+      .product-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        flex: 1;
+        min-width: 0;
+      }
+      .product-name {
+        font-weight: 700;
+        font-size: clamp(0.98rem, 2vw, 1.05rem);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+      .product-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 0.75rem;
+        align-items: center;
+        color: var(--muted);
+        font-size: clamp(0.85rem, 2vw, 0.92rem);
+      }
+      .id-box {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        align-items: center;
+        padding: 0.5rem 0.65rem;
+        border-radius: 10px;
+        background: var(--bg);
+        border: 1px dashed var(--border);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", "Courier New", monospace;
+        direction: ltr;
+        max-width: 100%;
+      }
+      .id-old {
+        color: var(--muted);
+        font-size: 0.85rem;
+        text-decoration: line-through;
+        text-decoration-color: rgba(239, 68, 68, 0.45);
+        word-break: break-all;
+      }
+      .id-new {
+        color: var(--success);
+        font-weight: 700;
+        font-size: clamp(0.95rem, 2vw, 1.02rem);
+        word-break: break-all;
+      }
+      .id-arrow {
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+      .empty-state {
+        text-align: center;
+        color: var(--muted);
+        padding: clamp(1.25rem, 4vw, 2rem);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.65rem;
+      }
+      .check-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.6rem 0.85rem;
+        padding: 0.75rem 0.85rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+      }
+      .result-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+      }
+      .result-item {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 0.85rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        background: var(--bg);
+      }
+      .result-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        font-size: 0.88rem;
+        color: var(--muted);
+      }
+      .hidden {
+        display: none !important;
+      }
+      .alert {
+        padding: 0.75rem 0.85rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(245, 158, 11, 0.12);
+        color: var(--warning);
+        font-size: 0.95rem;
+      }
+      .alert.success {
+        background: rgba(5, 150, 105, 0.12);
+        color: var(--success);
+      }
+      .alert.danger {
+        background: rgba(239, 68, 68, 0.12);
+        color: var(--danger);
+      }
+      .alert.info {
+        background: rgba(14, 165, 233, 0.12);
+        color: var(--primary);
+      }
+      .spinner {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255, 255, 255, 0.35);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @media (max-width: 768px) {
+        .product-card {
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="app-header">
+      <a class="back-link" href="shacksf.html">
+        <i class="fa-solid fa-arrow-right"></i>
+        العودة للوحة التحكم
+      </a>
+      <div class="header-title">
+        <h1>تغيير بادئة المعرفات</h1>
+        <p>يغير بادئة الـ ID فقط مع الحفاظ على الرقم بالكامل</p>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- اختيار مصدر البيانات -->
+      <section class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <i class="fa-solid fa-database"></i>
+            ١) اختيار مصدر البيانات (السيرفر)
+          </h2>
+          <span class="muted"
+            >يتم البحث والقراءة من السيرفر المختار مباشرة من جدول
+            <strong>taager_products</strong></span
+          >
+        </div>
+
+        <div class="source-grid">
+          <article class="source-card active" data-source="main">
+            <div class="source-header">
+              <span class="source-title">السيرفر الأساسي (الرئيسي)</span>
+              <span class="badge success">مفعل</span>
+            </div>
+            <div class="source-url">https://msgqzgzoslearaprgiqq.supabase.co</div>
+            <div class="source-meta">
+              <span class="chip">
+                <i class="fa-solid fa-table"></i> taager_products
+              </span>
+              <span class="chip">
+                <i class="fa-solid fa-database"></i> 1,675,438 صف
+              </span>
+              <span class="chip" id="live-main">
+                <i class="fa-solid fa-circle-notch"></i> جاري الفحص
+              </span>
+            </div>
+          </article>
+
+          <article class="source-card" data-source="backup1">
+            <div class="source-header">
+              <span class="source-title">النسخة الاحتياطية (الثاني)</span>
+            </div>
+            <div class="source-url">https://wwlwwgqfjhmchrijaojr.supabase.co</div>
+            <div class="source-meta">
+              <span class="chip">
+                <i class="fa-solid fa-table"></i> taager_products
+              </span>
+              <span class="chip">
+                <i class="fa-solid fa-database"></i> 2,745,240 صف
+              </span>
+              <span class="chip" id="live-backup1">
+                <i class="fa-solid fa-circle-notch"></i> جاري الفحص
+              </span>
+            </div>
+          </article>
+
+          <article class="source-card" data-source="backup2">
+            <div class="source-header">
+              <span class="source-title">النسخة الاحتياطية (الثالث)</span>
+            </div>
+            <div class="source-url">https://qhqkgrpezoaugyhzrgyc.supabase.co</div>
+            <div class="source-meta">
+              <span class="chip">
+                <i class="fa-solid fa-table"></i> taager_products
+              </span>
+              <span class="chip">
+                <i class="fa-solid fa-database"></i> 2,022,594 صف
+              </span>
+              <span class="chip" id="live-backup2">
+                <i class="fa-solid fa-circle-notch"></i> جاري الفحص
+              </span>
+            </div>
+          </article>
+        </div>
+
+        <div class="muted tiny" style="margin-top: 0.75rem">
+          ملاحظة: يتم التحقق من وجود المنتج مباشرة من السيرفر المختار قبل إضافته
+          للقائمة.
+        </div>
+      </section>
+
+      <!-- إضافة المنتجات -->
+      <section class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            ٢) إضافة المنتجات
+          </h2>
+          <span class="muted"
+            >اكتب ID كامل مثل <strong>taager_22152</strong> أو الرقم فقط
+            <strong>22152</strong></span
+          >
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <div class="form-group" style="margin-bottom: 0">
+              <label for="searchId">معرف المنتج أو الرقم</label>
+              <input
+                class="input"
+                id="searchId"
+                placeholder="مثال: taager_22152 أو 22152"
+                autocomplete="off"
+              />
+            </div>
+          </div>
+          <div
+            class="col"
+            style="flex: 0; display: flex; align-items: flex-end; min-width: auto"
+          >
+            <button class="btn btn-primary" id="addBtn">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              بحث وإضافة المنتج
+            </button>
+          </div>
+        </div>
+
+        <div id="addStatus" style="margin-top: 0.75rem"></div>
+      </section>
+
+      <!-- قائمة المنتجات -->
+      <section class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <i class="fa-solid fa-boxes-stacked"></i>
+            ٣) قائمة المنتجات المضافة
+          </h2>
+          <span class="muted"
+            >يتم عرض الصورة والاسم والسعر ومعرف المنتج الحالي والجديد</span
+          >
+        </div>
+
+        <div class="product-list" id="productList"></div>
+
+        <div class="empty-state hidden" id="listEmpty">
+          <i class="fa-regular fa-folder-open fa-2x"></i>
+          <div>لا توجد منتجات مضافة بعد</div>
+          <div class="tiny">ابحث وأضف منتج موجود في السيرفر أولاً</div>
+        </div>
+      </section>
+
+      <!-- تغيير البادئة -->
+      <section class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <i class="fa-solid fa-arrow-right-arrow-left"></i>
+            ٤) تغيير البادئة
+          </h2>
+          <span class="muted"
+            >يتم تغيير البادئة فقط، الرقم يبقى كما هو تماماً</span
+          >
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <div class="form-group" style="margin-bottom: 0">
+              <label for="prefixInput">البادئة الجديدة</label>
+              <input
+                class="input"
+                id="prefixInput"
+                placeholder="مثال: vendor أو store أو buda"
+                autocomplete="off"
+              />
+            </div>
+          </div>
+          <div
+            class="col"
+            style="flex: 0; display: flex; align-items: flex-end; min-width: auto"
+          >
+            <button class="btn" id="previewBtn">
+              <i class="fa-solid fa-rotate"></i>
+              تحديث المعاينة
+            </button>
+          </div>
+        </div>
+
+        <div id="previewInfo" style="margin-top: 0.75rem"></div>
+      </section>
+
+      <!-- فحص السيرفرات -->
+      <section class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <i class="fa-solid fa-server"></i>
+            ٥) فحص السيرفرات
+          </h2>
+          <span class="muted"
+            >عدد المنتجات الموجودة في كل سيرفر من المنتجات المضافة</span
+          >
+        </div>
+
+        <div class="source-grid">
+          <article class="source-card">
+            <div class="source-header">
+              <span class="source-title">السيرفر الأساسي (الرئيسي)</span>
+              <span class="muted" id="scan-main">موجود: ٠</span>
+            </div>
+            <div class="source-url">https://msgqzgzoslearaprgiqq.supabase.co</div>
+          </article>
+
+          <article class="source-card">
+            <div class="source-header">
+              <span class="source-title">النسخة الاحتياطية (الثاني)</span>
+              <span class="muted" id="scan-backup1">موجود: ٠</span>
+            </div>
+            <div class="source-url">https://wwlwwgqfjhmchrijaojr.supabase.co</div>
+          </article>
+
+          <article class="source-card">
+            <div class="source-header">
+              <span class="source-title">النسخة الاحتياطية (الثالث)</span>
+              <span class="muted" id="scan-backup2">موجود: ٠</span>
+            </div>
+            <div class="source-url">https://qhqkgrpezoaugyhzrgyc.supabase.co</div>
+          </article>
+        </div>
+
+        <div class="check-row" style="margin-top: 1rem">
+          <input type="checkbox" id="applyOthers" />
+          <label for="applyOthers"
+            >تطبيق التغيير على السيرفرات الأخرى أيضاً (النسختين
+            الاحتياطيتين)</label
+          >
+          <span class="muted tiny"
+            >لو غير مفعل، سيتم التطبيق على السيرفر المختار فقط</span
+          >
+        </div>
+
+        <div class="row" style="margin-top: 1rem">
+          <button class="btn btn-success" id="scanBtn">
+            <i class="fa-solid fa-magnifying-glass-location"></i>
+            فحص السيرفرات الآن
+          </button>
+          <button class="btn btn-primary" id="applyBtn">
+            <i class="fa-solid fa-floppy-disk"></i>
+            تغيير المعرفات الآن
+          </button>
+        </div>
+
+        <div id="actionStatus" style="margin-top: 0.75rem"></div>
+      </section>
+
+      <!-- نتائج التغيير -->
+      <section class="card hidden" id="resultCard">
+        <div class="card-header">
+          <h2 class="card-title">
+            <i class="fa-solid fa-circle-check"></i>
+            نتائج التحديث
+          </h2>
+          <span class="muted">المنتجات التي تم تحديث بادئة الـ ID لها</span>
+        </div>
+
+        <div class="result-panel" id="resultPanel"></div>
+      </section>
+    </main>
+
+    <script>
+      const TABLE = "taager_products";
+      const ID_COLUMN = "id";
+
+      const SOURCES = {
+        main: {
+          url: "https://msgqzgzoslearaprgiqq.supabase.co",
+          name: "السيرفر الأساسي (الرئيسي)",
+          key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE",
+        },
+        backup1: {
+          url: "https://wwlwwgqfjhmchrijaojr.supabase.co",
+          name: "النسخة الاحتياطية (الثاني)",
+          key: "sb_publishable_wIxpA7t3a2hII8asqYZ1Bg__NoMLLUU",
+        },
+        backup2: {
+          url: "https://qhqkgrpezoaugyhzrgyc.supabase.co",
+          name: "النسخة الاحتياطية (الثالث)",
+          key: "sb_publishable_bHCWG6iYSkbONKG7HR6Rkw_UVZGsjUe",
+        },
+      };
+
+      let activeSource = "main";
+      const clients = {};
+      const items = [];
+
+      function $(id) {
+        return document.getElementById(id);
+      }
+
+      function getClient(key) {
+        if (clients[key]) return clients[key];
+        const s = SOURCES[key];
+        if (!s || !window.supabase) return null;
+        clients[key] = window.supabase.createClient(s.url, s.key);
+        return clients[key];
+      }
+
+      function escapeHtml(str) {
+        if (str === null || str === undefined) return "";
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function formatPrice(p) {
+        if (p === null || p === undefined || p === "") return "-";
+        const num = Number(p);
+        if (Number.isNaN(num)) return escapeHtml(p);
+        return num.toLocaleString("ar-EG") + " ج.م";
+      }
+
+      function getImage(p) {
+        if (p.image) return p.image;
+        if (Array.isArray(p.images) && p.images.length > 0) {
+          const first = p.images[0];
+          if (typeof first === "string") return first;
+          if (first && first.url) return first.url;
+        }
+        if (typeof p.images === "string" && p.images) {
+          try {
+            const parsed = JSON.parse(p.images);
+            if (Array.isArray(parsed) && parsed.length)
+              return typeof parsed[0] === "string" ? parsed[0] : parsed[0]?.url;
+          } catch (e) {
+            return p.images;
+          }
+        }
+        if (p.image_url) return p.image_url;
+        return "";
+      }
+
+      function getName(p) {
+        return p.name || p.product_name || p.title || "بدون اسم";
+      }
+
+      function getPrice(p) {
+        return p.price ?? p.sale_price ?? p.original_price ?? null;
+      }
+
+      function splitId(fullId) {
+        const s = (fullId || "").trim();
+        if (!s) return null;
+        const idx = s.lastIndexOf("_");
+        if (idx === -1) return { prefix: "", num: s, old: s };
+        const prefix = s.slice(0, idx);
+        const num = s.slice(idx + 1);
+        if (!num) return null;
+        return { prefix, num, old: s };
+      }
+
+      // هل الـ id ينتهي بنفس الرقم بالضبط (taager_22152 / vendor_22152 / 22152)
+      function idMatchesNumber(id, num) {
+        const s = String(id == null ? "" : id).trim();
+        const n = String(num == null ? "" : num).trim();
+        if (!n) return false;
+        return s === n || s.endsWith("_" + n);
+      }
+
+      function getNewId(obj, newPrefix) {
+        const p = (newPrefix || "").trim();
+        if (!obj) return "";
+        if (!p) return obj.old;
+        const clean = p.replace(/[^a-zA-Z0-9_-]/g, "");
+        if (!clean) return obj.old;
+        return clean + "_" + obj.num;
+      }
+
+      function setStatus(elId, msg, type = "info") {
+        const el = $(elId);
+        if (!el) return;
+        el.innerHTML = msg
+          ? `<div class="alert ${type}">${escapeHtml(msg)}</div>`
+          : "";
+      }
+
+      // اختيار السيرفر
+      document.querySelectorAll(".source-card[data-source]").forEach((el) => {
+        el.addEventListener("click", () => {
+          document
+            .querySelectorAll(".source-card[data-source]")
+            .forEach((x) => x.classList.remove("active"));
+          el.classList.add("active");
+          activeSource = el.dataset.source;
+          renderList();
+        });
+      });
+
+      // فحص اتصال السيرفرات
+      async function pingServers() {
+        for (const key of Object.keys(SOURCES)) {
+          const el = $(`live-${key}`);
+          const client = getClient(key);
+          if (!client) {
+            if (el) el.innerHTML = "غير متاح";
+            continue;
+          }
+          try {
+            const { error, count } = await client
+              .from(TABLE)
+              .select("*", { count: "exact", head: true });
+            if (el) {
+              if (error) {
+                el.innerHTML =
+                  '<i class="fa-solid fa-circle-xmark"></i> خطأ بالاتصال';
+                el.style.color = "var(--danger)";
+              } else {
+                el.innerHTML = `<i class="fa-solid fa-circle-check"></i> شغال (${(
+                  count || 0
+                ).toLocaleString("ar-EG")} صف)`;
+                el.style.color = "var(--success)";
+              }
+            }
+          } catch (e) {
+            if (el) {
+              el.innerHTML =
+                '<i class="fa-solid fa-circle-xmark"></i> خطأ بالاتصال';
+              el.style.color = "var(--danger)";
+            }
+          }
+        }
+      }
+
+      // البحث عن المنتج (مطابقة دقيقة للرقم حتى لا يُخطئ)
+      async function findProduct(client, query) {
+        const q = (query || "").trim();
+        if (!q) return null;
+
+        const numOnly = q.replace(/[^0-9]/g, "");
+
+        // 1) لو المستخدم كتب الـ ID كامل (فيه _) → مطابقة تامة أولاً
+        if (q.includes("_")) {
+          const { data, error } = await client
+            .from(TABLE)
+            .select("*")
+            .eq(ID_COLUMN, q)
+            .limit(1);
+          if (error) throw error;
+          if (data && data.length) return data[0];
+        }
+
+        // 2) مطابقة تامة لو الـ id رقم فقط
+        if (numOnly) {
+          const { data, error } = await client
+            .from(TABLE)
+            .select("*")
+            .eq(ID_COLUMN, numOnly)
+            .limit(1);
+          if (error) throw error;
+          if (data && data.length) return data[0];
+
+          // 3) نجيب مرشحين منتهيين بنفس الرقم ثم نطابق بدقة في الجافاسكريبت
+          const { data: rows, error: e2 } = await client
+            .from(TABLE)
+            .select("*")
+            .ilike(ID_COLUMN, `%${numOnly}`)
+            .limit(100);
+          if (e2) throw e2;
+          if (rows && rows.length) {
+            // مطابقة تامة بالـ id الكامل لو المستخدم كتبه
+            if (q.includes("_")) {
+              const exactFull = rows.find((r) => String(r[ID_COLUMN]) === q);
+              if (exactFull) return exactFull;
+            }
+            // مطابقة دقيقة: الرقم هو آخر جزء بعد الشرطة السفلية بالضبط
+            const found = rows.find((r) =>
+              idMatchesNumber(r[ID_COLUMN], numOnly)
+            );
+            if (found) return found;
+            // غير كده مش هنخمن (حتى لو فيه مرشح واحد)
+            return null;
+          }
+        }
+
+        // 4) fallback عام (للبحث النصي)
+        const { data: d3, error: e3 } = await client
+          .from(TABLE)
+          .select("*")
+          .ilike(ID_COLUMN, `%${q}%`)
+          .limit(1);
+        if (e3) throw e3;
+        return d3 && d3.length ? d3[0] : null;
+      }
+
+      // جلب كل الصفوف في سيرفر معين التي ينتهي الـ id فيها بنفس الرقم
+      async function rowsByNumber(client, num) {
+        const { data, error } = await client
+          .from(TABLE)
+          .select(`${ID_COLUMN},name`)
+          .ilike(ID_COLUMN, `%${num}`)
+          .limit(500);
+        if (error) throw error;
+        return (data || []).filter((r) => idMatchesNumber(r[ID_COLUMN], num));
+      }
+
+      async function countByNumber(client, num) {
+        const rows = await rowsByNumber(client, num);
+        return rows.length;
+      }
+
+      // إضافة منتج
+      $("addBtn").addEventListener("click", async () => {
+        const val = $("searchId").value.trim();
+        if (!val) {
+          setStatus("addStatus", "يرجى إدخال معرف المنتج أو الرقم", "danger");
+          return;
+        }
+        const client = getClient(activeSource);
+        if (!client) {
+          setStatus("addStatus", "فشل الاتصال بـ Supabase", "danger");
+          return;
+        }
+
+        setStatus("addStatus", "جاري البحث عن المنتج في السيرفر...", "info");
+        $("addBtn").disabled = true;
+
+        try {
+          const p = await findProduct(client, val);
+          if (!p) {
+            setStatus(
+              "addStatus",
+              "لم يتم العثور على المنتج في السيرفر المختار. تأكد من الرقم أو الـ ID",
+              "danger"
+            );
+            return;
+          }
+
+          const foundId = String(p[ID_COLUMN] || val).trim();
+
+          if (items.find((x) => x.foundId === foundId)) {
+            setStatus("addStatus", "هذا المنتج مضاف بالفعل للقائمة", "warning");
+            return;
+          }
+
+          items.push({
+            foundId,
+            split: splitId(foundId),
+            product: p,
+            source: activeSource,
+          });
+
+          renderList();
+          $("searchId").value = "";
+          setStatus(
+            "addStatus",
+            `تم العثور على المنتج "${getName(p)}" وإضافته للقائمة`,
+            "success"
+          );
+        } catch (err) {
+          console.error(err);
+          setStatus(
+            "addStatus",
+            "حدث خطأ أثناء البحث: " + (err.message || err),
+            "danger"
+          );
+        } finally {
+          $("addBtn").disabled = false;
+        }
+      });
+
+      $("searchId").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") $("addBtn").click();
+      });
+
+      function renderList() {
+        const list = $("productList");
+        list.innerHTML = "";
+        const empty = $("listEmpty");
+
+        if (items.length === 0) {
+          empty.classList.remove("hidden");
+          return;
+        }
+        empty.classList.add("hidden");
+
+        const prefix = $("prefixInput").value.trim();
+
+        items.forEach((item, idx) => {
+          const p = item.product;
+          const sp = item.split;
+          const newIdFull = sp ? getNewId(sp, prefix) : item.foundId;
+          const img = getImage(p);
+          const imgTag = img
+            ? `<img class="product-thumb" src="${escapeHtml(
+                img
+              )}" alt="صورة المنتج" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'product-thumb',style:'display:flex;align-items:center;justify-content:center;color:var(--muted)',innerHTML:'<i class=\\'fa-regular fa-image\\'></i>'}))">`
+            : `<div class="product-thumb" style="display:flex;align-items:center;justify-content:center;color:var(--muted)"><i class="fa-regular fa-image"></i></div>`;
+
+          const card = document.createElement("div");
+          card.className = "product-card";
+          card.innerHTML = `
+            ${imgTag}
+            <div class="product-info">
+              <div class="product-name">${escapeHtml(getName(p))}</div>
+              <div class="product-meta">
+                <span class="chip"><i class="fa-solid fa-tag"></i> ${formatPrice(
+                  getPrice(p)
+                )}</span>
+                ${
+                  p.stock !== undefined && p.stock !== null
+                    ? `<span class="chip"><i class="fa-solid fa-boxes-stacked"></i> ${escapeHtml(
+                        p.stock
+                      )}</span>`
+                    : ""
+                }
+                ${
+                  p.category
+                    ? `<span class="chip"><i class="fa-solid fa-layer-group"></i> ${escapeHtml(
+                        p.category
+                      )}</span>`
+                    : ""
+                }
+              </div>
+              <div class="id-box">
+                <span class="id-old">${escapeHtml(item.foundId)}</span>
+                <span class="id-arrow"><i class="fa-solid fa-arrow-left"></i></span>
+                <span class="id-new">${escapeHtml(newIdFull)}</span>
+              </div>
+            </div>
+            <button class="btn btn-danger btn-small" data-idx="${idx}" title="حذف من القائمة">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          `;
+          list.appendChild(card);
+        });
+
+        list.querySelectorAll("button[data-idx]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            items.splice(Number(btn.dataset.idx), 1);
+            renderList();
+          });
+        });
+      }
+
+      $("prefixInput").addEventListener("input", renderList);
+      $("previewBtn").addEventListener("click", () => {
+        renderList();
+        if (items.length > 0) {
+          setStatus(
+            "previewInfo",
+            `تم تحديث معاينة ${items.length} منتج`,
+            "success"
+          );
+        } else {
+          setStatus("previewInfo", "", "");
+        }
+      });
+
+      // فحص السيرفرات
+      $("scanBtn").addEventListener("click", async () => {
+        if (items.length === 0) {
+          alert("يجب إضافة منتج واحد على الأقل أولاً");
+          return;
+        }
+        setStatus("actionStatus", "جاري فحص السيرفرات...", "info");
+        $("scanBtn").disabled = true;
+
+        const nums = items
+          .map((x) => x.split && x.split.num)
+          .filter(Boolean)
+          .filter((v, i, a) => a.indexOf(v) === i);
+
+        for (const key of Object.keys(SOURCES)) {
+          const client = getClient(key);
+          if (!client) {
+            $(`scan-${key}`).textContent = "موجود: ٠ (فشل الاتصال)";
+            continue;
+          }
+          try {
+            let found = 0;
+            for (const num of nums) {
+              const count = await countByNumber(client, num);
+              if (count > 0) found++;
+            }
+            $(`scan-${key}`).textContent = `موجود: ${found} من ${nums.length}`;
+          } catch (err) {
+            console.error(err);
+            $(`scan-${key}`).textContent = "موجود: ٠ (خطأ)";
+          }
+        }
+
+        setStatus("actionStatus", "تم فحص السيرفرات بنجاح", "success");
+        $("scanBtn").disabled = false;
+      });
+
+      // تطبيق التغيير
+      $("applyBtn").addEventListener("click", async () => {
+        if (items.length === 0) {
+          alert("لا توجد منتجات للتغيير");
+          return;
+        }
+        const prefix = $("prefixInput").value.trim();
+        if (!prefix) {
+          alert("يرجى إدخال البادئة الجديدة");
+          return;
+        }
+
+        const applyOthers = $("applyOthers").checked;
+        const keysToApply = applyOthers
+          ? Object.keys(SOURCES)
+          : [activeSource];
+
+        const resultPanel = $("resultPanel");
+        resultPanel.innerHTML = "";
+        $("resultCard").classList.add("hidden");
+
+        setStatus("actionStatus", `جاري تحديث ${items.length} منتج...`, "info");
+        $("applyBtn").disabled = true;
+
+        let totalUpdated = 0;
+        const resultsList = [];
+
+        try {
+          for (const key of keysToApply) {
+            const client = getClient(key);
+            if (!client) continue;
+
+            for (const item of items) {
+              const sp = item.split;
+              if (!sp) continue;
+              const num = sp.num;
+              const newId = getNewId(sp, prefix);
+
+              let rows = [];
+              try {
+                rows = await rowsByNumber(client, num);
+              } catch (rErr) {
+                console.warn(`فشل قراءة ${num} في ${key}:`, rErr.message);
+                resultsList.push({
+                  server: key,
+                  serverName: SOURCES[key].name,
+                  oldId: item.foundId,
+                  newId,
+                  count: 0,
+                  name: "",
+                  error: rErr.message || String(rErr),
+                });
+                continue;
+              }
+
+              if (rows.length === 0) continue;
+
+              for (const row of rows) {
+                const currentId = String(row[ID_COLUMN]);
+                if (currentId === newId) continue;
+
+                const { data, error } = await client
+                  .from(TABLE)
+                  .update({
+                    [ID_COLUMN]: newId,
+                    updated_at: new Date().toISOString(),
+                  })
+                  .eq(ID_COLUMN, currentId)
+                  .select(`${ID_COLUMN},name`);
+
+                if (error) {
+                  console.warn(`فشل تحديث ${currentId} في ${key}:`, error.message);
+                  resultsList.push({
+                    server: key,
+                    serverName: SOURCES[key].name,
+                    oldId: currentId,
+                    newId,
+                    count: 0,
+                    name: row.name || "",
+                    error: error.message,
+                  });
+                  continue;
+                }
+                if (data && data.length > 0) {
+                  totalUpdated += data.length;
+                  resultsList.push({
+                    server: key,
+                    serverName: SOURCES[key].name,
+                    oldId: currentId,
+                    newId,
+                    count: data.length,
+                    name: data[0]?.name || row.name || "",
+                  });
+                }
+              }
+            }
+          }
+
+          if (resultsList.length > 0) {
+            resultsList.forEach((r) => {
+              const el = document.createElement("div");
+              el.className = "result-item";
+              el.innerHTML = `
+                <div><strong>${escapeHtml(
+                  r.name || (r.error ? "فشل التحديث" : "منتج")
+                )}</strong></div>
+                <div class="result-meta">
+                  <span><i class="fa-solid fa-server"></i> ${escapeHtml(
+                    r.serverName
+                  )}</span>
+                  <span>${
+                    r.error
+                      ? "خطأ: " + escapeHtml(r.error)
+                      : "عدد السجلات المحدثة: " + r.count
+                  }</span>
+                </div>
+                <div class="id-box">
+                  <span class="id-old">${escapeHtml(r.oldId)}</span>
+                  <span class="id-arrow"><i class="fa-solid fa-arrow-left"></i></span>
+                  <span class="id-new">${escapeHtml(r.newId)}</span>
+                </div>
+              `;
+              resultPanel.appendChild(el);
+            });
+            $("resultCard").classList.remove("hidden");
+          }
+
+          setStatus(
+            "actionStatus",
+            `تم التحديث بنجاح. إجمالي السجلات المعدلة: ${totalUpdated}`,
+            totalUpdated > 0 ? "success" : "warning"
+          );
+
+          if (totalUpdated > 0) {
+            items.forEach((it) => {
+              const sp = it.split;
+              if (sp) it.foundId = getNewId(sp, prefix);
+            });
+          }
+        } catch (err) {
+          console.error(err);
+          setStatus(
+            "actionStatus",
+            "حدث خطأ أثناء التطبيق: " + (err.message || err),
+            "danger"
+          );
+        } finally {
+          $("applyBtn").disabled = false;
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", pingServers);
+    </script>
+  </body>
+</html>

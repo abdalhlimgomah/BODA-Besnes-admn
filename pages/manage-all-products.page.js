@@ -45,6 +45,11 @@ let switchNotice = "";
 let loadFailure = "";
 const backendReport = [];
 
+const existenceCache = new Map();
+const existenceFetched = new Set();
+const pendingEdits = new Map();
+let savingEdits = false;
+
 function getBackends() {
   const fromGuard = window.adminAuth && window.adminAuth.ADMIN_BACKENDS;
   if (fromGuard && fromGuard.primary) return fromGuard;
@@ -171,6 +176,7 @@ function buildRow(p) {
   const img = escapeHtml(firstImage(p) || PLACEHOLDER_IMAGE);
   const name = escapeHtml(p.name || "-");
   const id = escapeHtml(p.id || "");
+  const idKey = encodeURIComponent(p.id || "");
   const sellPrice = toNumber(p.price);
   const originalPrice = toNumber(p.original_price);
   const price = originalPrice > sellPrice ? originalPrice : sellPrice;
@@ -184,6 +190,10 @@ function buildRow(p) {
 
   const soldCount = toNumber(p.sales_count);
 
+  const pending = pendingEdits.get(String(p.id || ""));
+  const inputValue = pending === undefined ? stock : pending;
+  const dirtyCls = pending === undefined ? "" : " dirty";
+
   return `
     <tr data-id="${id}">
       <td>
@@ -195,14 +205,31 @@ function buildRow(p) {
       </td>
       <td>${price.toFixed(2)} ج.م</td>
       <td>${priceAfterDiscount.toFixed(2)} ج.م</td>
-      <td>${stock}</td>
+      <td class="stock-cell">${inputValue}</td>
       <td>${category}</td>
       <td><span class="stat-badge ${statusClass}">${statusText}</span></td>
       <td>${soldCount}</td>
+      <td class="servers-cell" data-servers="${idKey}">
+        <span class="srv-badge unknown">جاري الفحص...</span>
+      </td>
       <td>
-        <a class="edit-btn" href="taager-product-full-edit.html?id=${encodeURIComponent(p.id)}">
-          <i class="fa-solid fa-pen-to-square"></i> تعديل
-        </a>
+        <div class="row-actions">
+          <a class="edit-btn" href="taager-product-full-edit.html?id=${encodeURIComponent(p.id)}">
+            <i class="fa-solid fa-pen-to-square"></i> تعديل
+          </a>
+          <div class="row-stock">
+            <input
+              type="number"
+              class="stock-input${dirtyCls}"
+              data-id="${idKey}"
+              data-original="${stock}"
+              value="${inputValue}"
+              min="0"
+              title="تعديل الكمية"
+            />
+            <span class="row-msg"></span>
+          </div>
+        </div>
       </td>
     </tr>`;
 }
@@ -211,7 +238,7 @@ function setBodyMessage(message, className) {
   const body = document.getElementById("productsBody");
   if (!body) return;
   body.innerHTML =
-    '<tr><td colspan="9" class="' +
+    '<tr><td colspan="10" class="' +
     escapeHtml(className || "empty-state") +
     '">' +
     escapeHtml(message) +
@@ -239,7 +266,10 @@ function renderProducts() {
     }
   } else {
     body.innerHTML = visible.map(buildRow).join("");
+    hydrateServerCells();
+    primeExistence(visible);
   }
+  updateEditsCount();
 
   const totalPages = Math.ceil(total / PAGE_SIZE) || 1;
   const prevBtn = document.getElementById("prevBtn");
@@ -249,6 +279,297 @@ function renderProducts() {
   if (prevBtn) prevBtn.disabled = currentPage === 0;
   if (nextBtn) nextBtn.disabled = currentPage >= totalPages - 1;
   if (pageInfo) pageInfo.textContent = "صفحة " + (currentPage + 1) + " من " + totalPages;
+}
+
+const SERVER_SHORT_LABELS = {
+  primary: "أساسي",
+  backup: "احتياطي",
+  backup2: "ثالث",
+};
+
+function buildServerBadges(info) {
+  if (!info) return '<span class="srv-badge unknown">جاري الفحص...</span>';
+  return BACKEND_ORDER.map(function (name) {
+    const label = SERVER_SHORT_LABELS[name] || name;
+    const val = info[name];
+    if (val === "unknown") return '<span class="srv-badge unknown">' + label + " ؟</span>";
+    return '<span class="srv-badge ' + (val ? "yes" : "no") + '">' + label + " " + (val ? "✓" : "✗") + "</span>";
+  }).join("");
+}
+
+function hydrateServerCells() {
+  const cells = document.querySelectorAll(".servers-cell[data-servers]");
+  cells.forEach(function (cell) {
+    const id = decodeURIComponent(cell.getAttribute("data-servers") || "");
+    cell.innerHTML = buildServerBadges(existenceCache.get(id));
+  });
+}
+
+async function fetchIdsPresent(backend, ids) {
+  if (!ids.length || !backend || !backend.url || !backend.key) return [];
+  const filter = "in.(" + ids.map(function (id) { return '"' + String(id).replace(/"/g, "") + '"'; }).join(",") + ")";
+  const url = backend.url + "/rest/v1/" + PRODUCTS_TABLE + "?select=id&id=" + encodeURIComponent(filter);
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      apikey: backend.key,
+      Authorization: "Bearer " + backend.key,
+      "x-bypass-failover": "true",
+    },
+  });
+  if (!response.ok) throw new Error("HTTP " + response.status);
+  const rows = await response.json();
+  return (rows || []).map(function (r) { return String(r.id); });
+}
+
+async function primeExistence(visible) {
+  const backends = getBackends();
+  const active = activeBackendName;
+  const ids = [];
+  visible.forEach(function (p) {
+    const id = String(p.id || "");
+    if (!id) return;
+    if (!existenceCache.has(id)) existenceCache.set(id, { primary: false, backup: false, backup2: false });
+    existenceCache.get(id)[active] = true;
+    if (!existenceFetched.has(id)) ids.push(id);
+  });
+  if (!ids.length) {
+    hydrateServerCells();
+    return;
+  }
+  const others = BACKEND_ORDER.filter(function (name) {
+    return name !== active && backends[name] && backends[name].url && backends[name].key;
+  });
+  await Promise.all(
+    others.map(async function (name) {
+      try {
+        const present = new Set((await fetchIdsPresent(backends[name], ids)).map(String));
+        ids.forEach(function (id) { existenceCache.get(id)[name] = present.has(id); });
+      } catch (_e) {
+        ids.forEach(function (id) {
+          const info = existenceCache.get(id);
+          if (info && info[name] !== true) info[name] = "unknown";
+        });
+      }
+    })
+  );
+  ids.forEach(function (id) { existenceFetched.add(id); });
+  hydrateServerCells();
+}
+
+function updateEditsCount() {
+  const inputs = document.querySelectorAll(".stock-input");
+  inputs.forEach(function (input) {
+    const id = decodeURIComponent(input.getAttribute("data-id") || "");
+    input.classList.toggle("dirty", pendingEdits.has(id));
+  });
+  const el = document.getElementById("editsCount");
+  if (el) el.textContent = pendingEdits.size ? "تعديلات غير محفوظة: " + pendingEdits.size : "لا توجد تعديلات";
+}
+
+function findStockInput(id) {
+  return document.querySelector('.stock-input[data-id="' + encodeURIComponent(id) + '"]');
+}
+
+function setBulkMessage(message, kind) {
+  const el = document.getElementById("bulkMessage");
+  if (!el) return;
+  el.textContent = message || "";
+  el.className = "bulk-message" + (kind ? " " + kind : "");
+}
+
+function setRowMessage(input, text, kind) {
+  const row = input && input.closest ? input.closest("tr") : null;
+  const msgEl = row ? row.querySelector(".row-msg") : null;
+  if (!msgEl) return;
+  msgEl.textContent = text || "";
+  msgEl.className = "row-msg" + (kind ? " " + kind : "");
+}
+
+async function renderTopSummary() {
+  const el = document.getElementById("serverSummary");
+  if (!el) return;
+  el.innerHTML = '<span class="edits-count">جاري فحص السيرفرات...</span>';
+  const results = await probeAllBackends();
+  el.innerHTML = results
+    .map(function (r) {
+      const label = BACKEND_LABELS[r.name] || r.name;
+      const activeCls = r.name === activeBackendName ? " active" : "";
+      const detail = r.reachable ? (r.count === null ? "-" : r.count + " منتج") : r.note;
+      return (
+        '<span class="server-summary-item ' +
+        (r.reachable ? "healthy" : "down") +
+        activeCls +
+        '"><span class="dot"></span>' +
+        escapeHtml(label) +
+        ' <span style="color:var(--muted)">' +
+        escapeHtml(detail) +
+        "</span></span>"
+      );
+    })
+    .join("");
+}
+
+function stockStatusFor(value) {
+  const n = Number(value);
+  if (!isFinite(n) || n <= 0) return "out_of_stock";
+  if (n <= 10) return "low_stock";
+  return "in_stock";
+}
+
+function shouldPublishEditsToAll() {
+  const box = document.getElementById("publishAllServers");
+  return !!(box && box.checked);
+}
+
+async function mirrorStockToBackends(id, payload) {
+  const backends = getBackends();
+  const active = activeBackendName;
+  const others = BACKEND_ORDER.filter(function (name) {
+    return name !== active && backends[name] && backends[name].url && backends[name].key;
+  });
+  const results = [];
+  for (const name of others) {
+    const backend = backends[name];
+    try {
+      const response = await fetch(
+        backend.url + "/rest/v1/" + PRODUCTS_TABLE + "?id=eq." + encodeURIComponent(id),
+        {
+          method: "PATCH",
+          headers: {
+            apikey: backend.key,
+            Authorization: "Bearer " + backend.key,
+            "Content-Type": "application/json",
+            Prefer: "return=representation",
+            "x-bypass-failover": "true",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+      if (!response.ok) {
+        let message = "HTTP " + response.status;
+        try {
+          const info = await response.json();
+          message = info.message || info.error_description || info.details || message;
+        } catch (_e) {}
+        throw new Error(message);
+      }
+      let updated = null;
+      try {
+        updated = await response.json();
+      } catch (_e) {}
+      const exists = Array.isArray(updated) ? updated.length > 0 : !!updated;
+      if (exists) {
+        results.push({ name: name, ok: true });
+      } else {
+        results.push({ name: name, ok: false, missing: true });
+      }
+    } catch (error) {
+      results.push({ name: name, ok: false, error: error.message || String(error) });
+    }
+  }
+  return results;
+}
+
+async function saveEdits() {
+  if (savingEdits) return;
+
+  const entries = Array.from(pendingEdits.entries());
+  if (!entries.length) {
+    setBulkMessage("لا توجد تعديلات جديدة لحفظها.", "info");
+    return;
+  }
+
+  savingEdits = true;
+  const btn = document.getElementById("saveEditsBtn");
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ...';
+  }
+  setBulkMessage("جاري حفظ " + entries.length + " تعديل...", "info");
+
+  const publishAll = shouldPublishEditsToAll();
+  const now = new Date().toISOString();
+  let okCount = 0;
+  let failCount = 0;
+  const failedServers = {};
+
+  for (const entry of entries) {
+    const id = entry[0];
+    const value = entry[1];
+    const input = findStockInput(id);
+    if (input) setRowMessage(input, "جاري الحفظ...", "");
+    try {
+      const { error } = await getSupabaseClient()
+        .from(PRODUCTS_TABLE)
+        .update({ stock: value, stock_status: stockStatusFor(value), updated_at: now })
+        .eq("id", id);
+      if (error) throw error;
+      okCount++;
+      pendingEdits.delete(id);
+      if (input) {
+        input.setAttribute("data-original", String(value));
+        input.classList.remove("dirty");
+        setRowMessage(input, "تم الحفظ ✓", "ok");
+      }
+      const row = input && input.closest ? input.closest("tr") : null;
+      const stockCell = row ? row.querySelector(".stock-cell") : null;
+      if (stockCell) stockCell.textContent = String(value);
+    } catch (error) {
+      failCount++;
+      const reason =
+        (error && (error.message || error.error_description || error.details || error.hint)) ||
+        (error ? String(error) : "خطأ غير معروف");
+      console.error("تعذر حفظ الكمية للمنتج", id, error);
+      if (input) {
+        setRowMessage(input, "فشل: " + reason, "error");
+      }
+      continue;
+    }
+
+    if (!publishAll) continue;
+    const results = await mirrorStockToBackends(id, { stock: value, stock_status: stockStatusFor(value), updated_at: now });
+    const bad = results.filter(function (r) { return !r.ok; });
+    if (bad.length) {
+      bad.forEach(function (r) {
+        failedServers[r.name] = true;
+      });
+      if (input) {
+        const names = bad
+          .map(function (r) {
+            return (SERVER_SHORT_LABELS[r.name] || r.name) + (r.missing ? " (غير موجود)" : "");
+          })
+          .join("، ");
+        setRowMessage(input, "تم الحفظ، لكن فشل على: " + names, "error");
+      }
+    }
+  }
+
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> حفظ التعديلات';
+  }
+  savingEdits = false;
+  updateEditsCount();
+
+  const failedNames = Object.keys(failedServers)
+    .map(function (name) { return BACKEND_LABELS[name] || name; })
+    .join("، ");
+
+  if (failCount === 0 && !failedNames) {
+    setBulkMessage(
+      publishAll
+        ? "تم حفظ " + okCount + " تعديل على السيرفرات الثلاثة بنجاح."
+        : "تم حفظ " + okCount + " تعديل على " + (BACKEND_LABELS[activeBackendName] || activeBackendName) + ".",
+      "ok"
+    );
+  } else if (failCount === 0 && failedNames) {
+    setBulkMessage("تم الحفظ محلياً، لكن فشل النشر على: " + failedNames, "error");
+  } else {
+    setBulkMessage("تم حفظ " + okCount + " وفشل " + failCount + " تعديل." + (failedNames ? " سيرفرات فشلت: " + failedNames : ""), "error");
+  }
+
+  renderTopSummary();
 }
 
 function applyFilters() {
@@ -491,6 +812,8 @@ async function loadProducts() {
   loadFailure = "";
   switchNotice = "";
   backendReport.length = 0;
+  existenceCache.clear();
+  existenceFetched.clear();
   setBodyMessage("جاري تحميل المنتجات...", "empty-state");
 
   const chosen = await resolveBackend();
@@ -538,6 +861,8 @@ async function loadProducts() {
         "</div>";
     }
   }
+
+  renderTopSummary();
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -546,6 +871,36 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const idGroupFilter = document.getElementById("idGroupFilter");
   if (idGroupFilter) idGroupFilter.addEventListener("change", applyFilters);
+
+  const body = document.getElementById("productsBody");
+  if (body) {
+    body.addEventListener("input", function (e) {
+      const input = e.target && e.target.closest ? e.target.closest(".stock-input") : null;
+      if (!input) return;
+      const id = decodeURIComponent(input.getAttribute("data-id") || "");
+      const original = Number(input.getAttribute("data-original"));
+      const raw = input.value.trim();
+      const value = Number(raw);
+      const row = input.closest("tr");
+      const stockCell = row ? row.querySelector(".stock-cell") : null;
+
+      if (raw !== "" && Number.isFinite(value) && value >= 0 && value !== original) {
+        pendingEdits.set(id, value);
+        input.classList.add("dirty");
+        setRowMessage(input, "غير محفوظ", "dirty");
+        if (stockCell) stockCell.textContent = String(value);
+      } else {
+        pendingEdits.delete(id);
+        input.classList.remove("dirty");
+        setRowMessage(input, "", "");
+        if (stockCell) stockCell.textContent = raw === "" ? String(original) : raw;
+      }
+      updateEditsCount();
+    });
+  }
+
+  const saveBtn = document.getElementById("saveEditsBtn");
+  if (saveBtn) saveBtn.addEventListener("click", saveEdits);
 
   loadProducts();
 });

@@ -1,5 +1,29 @@
 const TABLE = "taager_products";
 
+const ADMIN_BACKEND_ORDER = ["primary", "backup", "backup2"];
+const ADMIN_BACKEND_LABELS = {
+  primary: "السيرفر الأساسي",
+  backup: "السيرفر الاحتياطي",
+  backup2: "السيرفر الثالث",
+};
+const FALLBACK_ADMIN_BACKENDS = {
+  primary: {
+    name: "primary",
+    url: "https://msgqzgzoslearaprgiqq.supabase.co",
+    key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE",
+  },
+  backup: {
+    name: "backup",
+    url: "https://wwlwwgqfjhmchrijaojr.supabase.co",
+    key: "sb_publishable_wIxpA7t3a2hII8asqYZ1Bg__NoMLLUU",
+  },
+  backup2: {
+    name: "backup2",
+    url: "https://qhqkgrpezoaugyhzrgyc.supabase.co",
+    key: "sb_publishable_bHCWG6iYSkbONKG7HR6Rkw_UVZGsjUe",
+  },
+};
+
 let supabaseClient = null;
 let original = null;
 let draft = null;
@@ -60,6 +84,176 @@ function getBackendName() {
     }
   } catch (e) {}
   return "active";
+}
+
+function getAdminBackends() {
+  const guard = window.adminAuth && window.adminAuth.ADMIN_BACKENDS;
+  if (guard && guard.primary) return guard;
+  return FALLBACK_ADMIN_BACKENDS;
+}
+
+function getActiveBackendName() {
+  try {
+    if (window.adminAuth && typeof window.adminAuth.getActiveBackend === "function") {
+      const b = window.adminAuth.getActiveBackend();
+      if (b && b.name) return b.name;
+    }
+  } catch (e) {}
+  return window.__bodaAdminBackendName || "primary";
+}
+
+function shouldPublishAll() {
+  const box = document.getElementById("fxPublishAll");
+  return !!(box && box.checked);
+}
+
+function getOtherBackends() {
+  const backends = getAdminBackends();
+  const activeName = getActiveBackendName();
+  return ADMIN_BACKEND_ORDER.filter(function (name) {
+    return name !== activeName && backends[name] && backends[name].url && backends[name].key;
+  }).map(function (name) {
+    return { name: name, backend: backends[name] };
+  });
+}
+
+async function backendRest(backend, tablePath, method, body, extraHeaders) {
+  const headers = Object.assign(
+    {
+      apikey: backend.key,
+      Authorization: "Bearer " + backend.key,
+      "Content-Type": "application/json",
+      Prefer: "return=representation",
+      "x-bypass-failover": "true",
+    },
+    extraHeaders || {}
+  );
+  const response = await fetch(backend.url + "/rest/v1/" + tablePath, {
+    method: method,
+    headers: headers,
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  if (!response.ok) {
+    let message = "HTTP " + response.status;
+    try {
+      const info = await response.json();
+      message = (info && (info.message || info.error_description || info.details || info.hint)) || message;
+    } catch (e) {}
+    throw new Error(message);
+  }
+  if (response.status === 204) return null;
+  try {
+    return await response.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+async function fetchProductOnBackend(backend, id) {
+  const rows = await backendRest(
+    backend,
+    "taager_products?select=id,name,updated_at&id=eq." + encodeURIComponent(id),
+    "GET"
+  );
+  const row = Array.isArray(rows) ? rows[0] : rows;
+  return { name: backend.name, exists: !!row, row: row || null, ok: true };
+}
+
+function renderServerStatus(results) {
+  const list = document.getElementById("fxServerList");
+  if (!list) return;
+  const activeName = getActiveBackendName();
+  list.innerHTML = results
+    .map(function (r) {
+      const label = ADMIN_BACKEND_LABELS[r.name] || r.name;
+      const stateClass = r.ok ? (r.exists ? "ok" : "missing") : "error";
+      const stateText = r.ok ? (r.exists ? "موجود" : "غير موجود") : "خطأ في الفحص";
+      return (
+        '<div class="fx-server-item ' +
+        stateClass +
+        (r.name === activeName ? " active" : "") +
+        '">' +
+        '<span class="dot"></span>' +
+        "<span>" +
+        escapeHtml(label) +
+        (r.name === activeName ? " (النشط)" : "") +
+        "</span>" +
+        '<span class="st">' +
+        escapeHtml(stateText) +
+        "</span>" +
+        "</div>"
+      );
+    })
+    .join("");
+}
+
+async function refreshServerStatus() {
+  const id = draft && draft.id ? draft.id : getProductId();
+  const list = document.getElementById("fxServerList");
+  if (!id) {
+    if (list) list.innerHTML = '<div class="hint">لا يوجد معرف منتج للفحص.</div>';
+    return [];
+  }
+  const backends = getAdminBackends();
+  const names = ADMIN_BACKEND_ORDER.filter(function (n) {
+    return backends[n] && backends[n].url && backends[n].key;
+  });
+  if (list) list.innerHTML = '<div class="hint">جاري فحص السيرفرات...</div>';
+  const results = await Promise.all(
+    names.map(function (name) {
+      return fetchProductOnBackend(backends[name], id).catch(function (error) {
+        return { name: name, exists: false, row: null, ok: false, error: error.message || String(error) };
+      });
+    })
+  );
+  renderServerStatus(results);
+  return results;
+}
+
+async function mirrorSaveToBackends(payload, id, createdAt) {
+  const others = getOtherBackends();
+  const results = [];
+  for (let i = 0; i < others.length; i++) {
+    const target = others[i];
+    try {
+      const updated = await backendRest(
+        target.backend,
+        "taager_products?id=eq." + encodeURIComponent(id),
+        "PATCH",
+        payload
+      );
+      const exists = Array.isArray(updated) ? updated.length > 0 : !!updated;
+      if (exists) {
+        results.push({ name: target.name, ok: true, action: "updated" });
+        continue;
+      }
+      const createPayload = Object.assign({}, payload, { id: id });
+      if (createdAt) createPayload.created_at = createdAt;
+      await backendRest(target.backend, "taager_products", "POST", [createPayload]);
+      results.push({ name: target.name, ok: true, action: "created" });
+    } catch (error) {
+      console.warn("mirror save failed on " + target.name + ":", error);
+      results.push({ name: target.name, ok: false, action: "failed", error: error.message || String(error) });
+    }
+  }
+  return results;
+}
+
+function buildMirrorToast(activeName, results) {
+  if (!results.length) return "تم حفظ كل التعديلات بنجاح.";
+  const allOk = results.every(function (r) {
+    return r.ok;
+  });
+  if (allOk) return "تم حفظ التعديلات على السيرفرات الثلاثة بنجاح.";
+  const failed = results
+    .filter(function (r) {
+      return !r.ok;
+    })
+    .map(function (r) {
+      return ADMIN_BACKEND_LABELS[r.name] || r.name;
+    })
+    .join("، ");
+  return "تم الحفظ على " + (ADMIN_BACKEND_LABELS[activeName] || activeName) + "، وفشل: " + failed;
 }
 
 function escapeHtml(value) {
@@ -792,7 +986,28 @@ async function save() {
   dirtyKeys.clear();
   renderSaveState();
   renderAll();
+
+  if (shouldPublishAll()) {
+    const activeName = getActiveBackendName();
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> نشر على السيرفرات...';
+    }
+    const results = await mirrorSaveToBackends(payload, draft.id, draft.created_at);
+    await refreshServerStatus();
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> حفظ كل التعديلات';
+    }
+    const allOk = results.length > 0 && results.every(function (r) {
+      return r.ok;
+    });
+    showToast(buildMirrorToast(activeName, results), allOk ? "success" : "error");
+    return;
+  }
+
   showToast("تم حفظ كل التعديلات بنجاح.", "success");
+  refreshServerStatus();
 }
 
 function resetDraft() {
@@ -841,6 +1056,7 @@ async function load() {
     shell.style.display = "block";
     renderAll();
     renderHeader();
+    refreshServerStatus();
   } catch (e) {
     console.error(e);
     loading.innerHTML =
@@ -861,6 +1077,13 @@ document.addEventListener("DOMContentLoaded", () => {
   if (resetBtn) resetBtn.addEventListener("click", resetDraft);
   const jsonBtn = document.getElementById("fxJsonBtn");
   if (jsonBtn) jsonBtn.addEventListener("click", applyJsonPatch);
+  const refreshStatusBtn = document.getElementById("fxRefreshStatus");
+  if (refreshStatusBtn) {
+    refreshStatusBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      refreshServerStatus();
+    });
+  }
   window.addEventListener("beforeunload", (e) => {
     if (dirtyKeys.size) {
       e.preventDefault();

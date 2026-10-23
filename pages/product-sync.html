@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>مزامنة المنتجات بين السيرفرات الثلاثة</title>
+    <link rel="stylesheet" href="../css/admin.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+      body { background: var(--bg-secondary); }
+      .sync-shell { max-width: 1280px; margin: 0 auto; padding: 24px 16px; display: flex; flex-direction: column; gap: 20px; }
+      .card { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 14px; box-shadow: var(--shadow-sm); overflow: hidden; }
+      .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+      .card-title { margin: 0; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+      .card-body { padding: 20px; display: flex; flex-direction: column; gap: 18px; }
+      .hint { color: var(--text-secondary); font-size: 13px; line-height: 1.8; }
+      .alert { padding: 12px 14px; border-radius: 10px; font-size: 13px; line-height: 1.8; }
+      .alert.info { background: rgba(37, 99, 235, 0.08); border: 1px solid rgba(37, 99, 235, 0.2); color: #1e40af; }
+      .alert.ok { background: rgba(46, 125, 50, 0.08); border: 1px solid rgba(46, 125, 50, 0.2); color: #1b5e20; }
+      .alert.warn { background: rgba(180, 83, 9, 0.08); border: 1px solid rgba(180, 83, 9, 0.2); color: #7c2d12; }
+      .alert.err { background: rgba(198, 40, 40, 0.08); border: 1px solid rgba(198, 40, 40, 0.2); color: #b71c1c; }
+      .servers { display: flex; flex-wrap: wrap; gap: 12px; }
+      .server-option { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 12px; background: var(--bg-secondary); cursor: pointer; transition: all .15s ease; min-width: 240px; }
+      .server-option:hover { border-color: var(--primary); }
+      .server-option.active { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12); background: #f0f7ff; }
+      body.dark-mode .server-option.active { background: rgba(59, 130, 246, 0.15); }
+      .server-option input { margin-top: 4px; }
+      .server-meta { display: flex; flex-direction: column; gap: 4px; }
+      .server-name { font-weight: 700; font-size: 14px; }
+      .server-url { font-size: 11px; color: var(--text-secondary); direction: ltr; text-align: left; }
+      .server-health { font-size: 12px; }
+      .btn-group { display: flex; flex-wrap: wrap; gap: 10px; }
+      .btn { padding: 9px 16px; border-radius: 10px; border: 1px solid transparent; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all .15s ease; }
+      .btn-primary { background: var(--primary); color: #fff; }
+      .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+      .btn-secondary { background: #f3f4f6; color: #111827; border-color: #e5e7eb; }
+      .btn-ghost { background: transparent; color: var(--text-primary); border-color: var(--border-color); }
+      .tables-grid { display: flex; flex-direction: column; gap: 10px; max-height: 420px; overflow: auto; padding: 2px; }
+      .table-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary); }
+      .table-info { display: flex; flex-direction: column; gap: 4px; }
+      .table-name { font-weight: 700; font-size: 13px; }
+      .table-meta { font-size: 11px; color: var(--text-secondary); display: flex; flex-wrap: wrap; gap: 8px; }
+      .badge { padding: 2px 6px; border-radius: 999px; font-size: 10px; font-weight: 700; border: 1px solid transparent; }
+      .badge.ok { background: rgba(46,125,50,.1); color: #1b5e20; border-color: rgba(46,125,50,.25); }
+      .badge.warn { background: rgba(180,83,9,.1); color: #7c2d12; border-color: rgba(180,83,9,.25); }
+      .badge.muted { background: rgba(107,114,128,.1); color: #374151; border-color: rgba(107,114,128,.2); }
+      .log-wrap { display: flex; flex-direction: column; gap: 8px; }
+      #log { background: #0f172a; color: #e2e8f0; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 11px; line-height: 1.9; padding: 14px; border-radius: 10px; max-height: 360px; overflow: auto; white-space: pre-wrap; direction: ltr; text-align: left; }
+      .summary { display: flex; flex-direction: column; gap: 8px; }
+      .summary-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding: 10px 12px; border: 1px dashed var(--border-color); border-radius: 10px; background: var(--bg-secondary); }
+      .summary-key { font-weight: 700; font-size: 13px; }
+      .summary-val { font-size: 13px; color: var(--text-secondary); }
+      .progress { height: 6px; background: var(--bg-secondary); border-radius: 999px; overflow: hidden; border: 1px solid var(--border-color); }
+      .progress-bar { height: 100%; background: linear-gradient(90deg, #2563eb, #7c3aed); transition: width .25s ease; }
+      .footer-actions { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    </style>
+  </head>
+  <body>
+    <div class="sync-shell">
+      <div class="card">
+        <div class="card-header">
+          <h1 class="card-title"><i class="fa-solid fa-sync"></i> مزامنة المنتجات بين السيرفرات الثلاثة</h1>
+          <div class="btn-group">
+            <a class="btn btn-ghost" href="./manage-all-products.html"><i class="fa-solid fa-arrow-right"></i> العودة لصفحة المنتجات</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="alert info">
+            الفكرة: يختار السيرفر <b>المصدر</b>، ويضيف الناقص بس (ما يكررش) على السيرفرين التانيين. بيشمل <b>taager_products</b> + <b>taager_variant_groups (المقاسات)</b> + أي جدول مرتبط بالمنتج فيه <b>product_id</b> أو <b>parent_id</b> (كشف تلقائي).
+          </div>
+
+          <div>
+            <h2 class="card-title" style="margin-bottom:8px"><i class="fa-solid fa-server"></i> اختيار السيرفر المصدر</h2>
+            <p class="hint">هننقل <b>من المصدر → الاتنين التانيين</b> مرة واحدة.</p>
+            <div class="servers" id="servers"></div>
+          </div>
+
+          <div>
+            <div class="footer-actions">
+              <div class="btn-group">
+                <button class="btn btn-secondary" id="btnCheck"><i class="fa-solid fa-magnifying-glass"></i> فحص الفروقات</button>
+                <button class="btn btn-primary" id="btnStart" disabled><i class="fa-solid fa-play"></i> بدء المزامنة (المصدر → الاتنين التانيين)</button>
+              </div>
+              <div class="btn-group">
+                <button class="btn btn-ghost" id="btnStop" disabled><i class="fa-solid fa-stop"></i> إيقاف مؤقت</button>
+                <button class="btn btn-ghost" id="btnClearLog"><i class="fa-solid fa-trash-can"></i> مسح السجل</button>
+              </div>
+            </div>
+            <div class="progress" style="margin-top:12px">
+              <div class="progress-bar" id="progress" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fa-solid fa-table"></i> الجداول المكتشفة + الفروقات</h2>
+          <span class="hint" id="tablesHint"></span>
+        </div>
+        <div class="card-body">
+          <div class="tables-grid" id="tables"></div>
+          <div class="alert warn" id="noTables" style="display:none">ما لقيناش جداول مرتبطة بالمنتج عشان ننقلها. جرّب "فحص الفروقات" تاني.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fa-solid fa-list-check"></i> السجل والتقدم</h2>
+          <span class="hint" id="phase"></span>
+        </div>
+        <div class="card-body">
+          <div class="log-wrap">
+            <pre id="log"></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fa-solid fa-chart-simple"></i> الملخص النهائي</h2>
+        </div>
+        <div class="card-body">
+          <div class="summary" id="summary"></div>
+          <div class="alert ok" id="summaryOk" style="display:none">كل السيرفرات متطابقة دلوقتي ✓ (الناقص = 0)</div>
+          <div class="alert err" id="summaryBad" style="display:none">لسه فيه صفوف ناقصة. جرّب "فحص الفروقات" تاني عشان تتأكد.</div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="./auth-guard.js"></script>
+    <script src="./product-sync.page.js"></script>
+  </body>
+</html>

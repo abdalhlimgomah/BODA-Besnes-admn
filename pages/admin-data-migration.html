@@ -66,6 +66,25 @@
       .health-box.err { background:#fdecea; color:#c62828; border:1px solid #f5c2c0; }
       .health-box pre { direction:ltr; text-align:left; background:#0f172a; color:#d1fae5; border-radius:8px; padding:8px; overflow-x:auto; font-size:.72rem; margin:8px 0 0; }
       @media (max-width:560px){ .srv-form .f-group{ grid-template-columns:1fr; } }
+      .syncall-box { border:1.5px solid #ddd6fe; }
+      .badge-sync { font-size:.68rem; border-radius:99px; padding:2px 8px; background:#ede9fe; color:#6d28d9; margin-inline-start:6px; }
+      .syncall-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:4px 0 12px; }
+      .syncall-actions .btn { font-size:.82rem; }
+      .ana-wrap { overflow:auto; max-height:460px; border:1px solid var(--border,#eef2f7); border-radius:10px; }
+      .ana-table { width:100%; border-collapse:collapse; font-size:.76rem; white-space:nowrap; }
+      .ana-table th, .ana-table td { border:1px solid #eef2f7; padding:6px 9px; text-align:center; }
+      .ana-table thead th { background:#f8fafc; position:sticky; top:0; z-index:1; font-weight:700; }
+      .ana-table td.tbl-name { text-align:right; font-weight:600; }
+      .ana-table td.tbl-name small { display:block; font-weight:400; direction:ltr; color:#98a2b3; font-size:.68rem; }
+      .ana-table td.miss { color:#c62828; font-weight:700; }
+      .ana-table td.zero { color:#2e7d32; font-weight:600; }
+      .ana-legend { font-size:.74rem; color:var(--muted,#667085); margin:10px 0 0; }
+      .ana-sum { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+      .ana-sum .card { flex:1; min-width:160px; border:1px solid var(--border,#eef2f7); border-radius:10px; padding:8px 11px; }
+      .ana-sum .card b { display:block; font-size:.82rem; margin-bottom:2px; }
+      .ana-sum .card span { font-size:.74rem; color:var(--muted,#667085); }
+      .ana-sum .card .miss { color:#c62828; font-weight:700; }
+      .edge-warn { background:#fff7e6; border:1px solid #fde68a; color:#b45309; border-radius:10px; padding:8px 11px; font-size:.78rem; margin-top:10px; }
     </style>
   </head>
   <body class="app-shell">
@@ -152,6 +171,26 @@
                 <div id="healthBox"></div>
                 <p class="srv-note"><i class="fa-solid fa-circle-question"></i> عايز تعرف إزاي تجيب المفاتيح وتجهز المشروع؟ افتح <a href="admin-migration-guide.html" style="color:#7c3aed">الدليل الكامل</a>.</p>
               </div>
+            </div>
+
+            <div class="mig-box syncall-box">
+              <h3><i class="fa-solid fa-arrows-rotate"></i> مزامنة كل السيرفرات بالكامل <span class="badge-sync">تلقائي 3-Way</span></h3>
+              <p style="font-size:.82rem;color:var(--muted,#667085);margin:0 0 12px">
+                يفحص <b>كل السيرفرات المتاحة</b>، ويحسب الناقص عند كل سيرفر مقارنةً بالأكبر.
+                المزامنة تعمل عبر <b>سيرفر منسّق</b> (السيرفر النشط المسجّل فيه الدخول): يسحب أولًا صفوف السيرفرات الأخرى
+                الناقصة عنده، ثم يدفع بياناته الكاملة إليها — حتى تصبح كل السيرفرات متطابقة (وضعية <b>تحديث + إضافة</b>).
+                النقل بالمراحل وقابل للاستئناف ولا يتوقف عند الجداول الضخمة.
+              </p>
+              <div class="syncall-actions">
+                <button type="button" class="btn btn-secondary" id="btnSyncAnalyze" onclick="syncAllAnalyze(false)">
+                  <i class="fa-solid fa-magnifying-glass-chart"></i> تحليل الفروقات
+                </button>
+                <button type="button" class="btn btn-primary" id="btnSyncAll" onclick="syncAllRun()">
+                  <i class="fa-solid fa-arrows-rotate"></i> مزامنة الكل الآن
+                </button>
+                <span id="syncPhase" style="font-size:.78rem;color:var(--muted,#667085)"></span>
+              </div>
+              <div id="syncAnalysis"></div>
             </div>
 
             <div class="mig-box">
@@ -320,8 +359,8 @@ CREATE OR REPLACE FUNCTION public.migration_import(p_table text, p_rows jsonb, p
 RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
 AS $$
 DECLARE
-  cols text; insert_cols text; update_set text; is_id_identity boolean;
-  _inserted bigint := 0; _existing bigint := 0; _sql text;
+  insert_cols text; select_cols text; update_set text; is_id_identity boolean;
+  _inserted bigint := 0; _existing bigint := 0;
 BEGIN
   IF auth.role() <> 'service_role' THEN RAISE EXCEPTION 'forbidden: service_role only'; END IF;
   IF p_table !~ '^[a-z_][a-z0-9_]*$' OR to_regclass('public.' || p_table) IS NULL THEN RAISE EXCEPTION 'bad table name: %', p_table; END IF;
@@ -330,15 +369,20 @@ BEGIN
   END IF;
   SELECT COALESCE(max(CASE WHEN is_identity='YES' THEN 1 ELSE 0 END),0)=1 INTO is_id_identity
     FROM information_schema.columns WHERE table_schema='public' AND table_name=p_table AND column_name='id';
-  SELECT string_agg(quote_ident(column_name),', ' ORDER BY ordinal_position) INTO cols
-    FROM information_schema.columns WHERE table_schema='public' AND table_name=p_table AND column_name<>'id' AND is_generated='NEVER';
-  insert_cols := 'id, ' || cols;
+  SELECT string_agg(quote_ident(column_name),', ' ORDER BY ordinal_position),
+         string_agg('(rec).'||quote_ident(column_name),', ' ORDER BY ordinal_position)
+    INTO insert_cols, select_cols
+    FROM information_schema.columns WHERE table_schema='public' AND table_name=p_table AND is_generated='NEVER';
   IF p_update THEN
-    SELECT string_agg(quote_ident(column_name)||' = EXCLUDED.'||quote_ident(column_name), ', ') INTO update_set
+    SELECT string_agg(quote_ident(column_name)||' = rec.'||quote_ident(column_name), ', ') INTO update_set
       FROM information_schema.columns WHERE table_schema='public' AND table_name=p_table AND column_name<>'id' AND is_generated='NEVER';
   END IF;
-  _sql := format('WITH ins AS (INSERT INTO public.%I AS t (%s) %s SELECT (rec).* FROM jsonb_populate_recordset(NULL::public.%I,$1) rec ON CONFLICT (id) DO %s RETURNING id,(t.xmax::text::bigint>0) AS _was_existing) SELECT count(*) FILTER (WHERE _was_existing), count(*) FILTER (WHERE NOT _was_existing) INTO _existing,_inserted FROM ins', p_table, insert_cols, CASE WHEN is_id_identity THEN 'OVERRIDING SYSTEM VALUE' ELSE '' END, p_table, CASE WHEN p_update THEN 'UPDATE SET '||update_set ELSE 'NOTHING' END);
-  EXECUTE _sql USING p_rows;
+  EXECUTE format('SELECT count(*) FROM public.%I WHERE id IN (SELECT (rec).id FROM jsonb_populate_recordset(NULL::public.%I,$1) rec)',p_table,p_table) INTO _existing USING p_rows;
+  EXECUTE format('INSERT INTO public.%I (%s) %s SELECT %s FROM jsonb_populate_recordset(NULL::public.%I,$1) rec ON CONFLICT DO NOTHING',p_table,insert_cols,CASE WHEN is_id_identity THEN 'OVERRIDING SYSTEM VALUE' ELSE '' END,select_cols,p_table) USING p_rows;
+  GET DIAGNOSTICS _inserted = ROW_COUNT;
+  IF p_update THEN
+    EXECUTE format('UPDATE public.%I AS t SET %s FROM jsonb_populate_recordset(NULL::public.%I,$1) rec WHERE rec.id = t.id',p_table,CASE WHEN update_set IS NULL OR update_set='' THEN 'id = t.id' ELSE update_set END,p_table) USING p_rows;
+  END IF;
   RETURN jsonb_build_object('table',p_table,'inserted',_inserted,'existing',_existing,'updated',CASE WHEN p_update THEN _existing ELSE 0 END,'total',_inserted+_existing);
 END;
 $$;
@@ -556,7 +600,7 @@ $$;`;
 
         if (!dry) {
           logLine('<i class="fa-solid fa-circle-info" style="color:#2563eb"></i> التنفيذ الحقيقي يتم <b>مرحلة-بمرحلة</b>: كل استدعاء ينقل صفحة (حتى 1000 صف) من كل جدول حتى اكتماله بالكامل، والنقل قابل للاستئناف عند أي انقطاع.', "ok");
-          await runSteps(tables, targets, mode, since, token);
+          await runSteps(STATE.sourceUrl, tables, targets, mode, since, token);
           STATE.running = false;
           $("btnMigrate").disabled = false;
           $("btnPreview").disabled = false;
@@ -605,16 +649,20 @@ $$;`;
         return table;
       }
 
-      async function runSteps(tables, targets, mode, since, token) {
+      async function runSteps(sourceUrl, tables, targets, mode, since, token, opts) {
+        opts = opts || {};
+        const prefix = opts.prefix || "";
         let insertedTotal = 0;
         let existingTotal = 0;
         let updatedTotal = 0;
         let stepsTotal = 0;
+        let failed = false;
+        let fatal = false;
 
         for (let ti = 0; ti < tables.length; ti++) {
           const table = tables[ti];
-          const label = tableLabel(table);
-          logLine('<i class="fa-solid fa-play" style="color:#7c3aed"></i> <b>' + esc(label) + '</b> — بدء النقل بمراحل حتى اكتمال كل صفوف الجدول...', "ok");
+          const label = opts.tableLabel || tableLabel(table);
+          if (!opts.quiet) logLine('<i class="fa-solid fa-play" style="color:#7c3aed"></i> ' + esc(prefix) + '<b>' + esc(label) + '</b> — بدء النقل بمراحل حتى اكتمال كل صفوف الجدول...', "ok");
           let lastId = null;
           let done = false;
           let tableInserted = 0;
@@ -639,7 +687,7 @@ $$;`;
             let ok = false;
             for (let attempt = 0; attempt < 3 && !ok; attempt++) {
               try {
-                const res = await fetch(STATE.sourceUrl + "/functions/v1/data-migrate", {
+                const res = await fetch(sourceUrl + "/functions/v1/data-migrate", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify(payload),
@@ -649,10 +697,16 @@ $$;`;
                   ok = true;
                   break;
                 }
+                if (res.status === 401 || res.status === 403) {
+                  stepErr = "توكن الأدمن غير صالح لهذا السيرفر (" + res.status + ") — السيرفرات لازم تشترك في نفس admin_token_secret أو سجّل دخول على كل سيرفر.";
+                  break;
+                }
                 if (res.ok && !body.success) break;
                 if (res.status === 402) {
-                  logLine('<i class="fa-solid fa-xmark" style="color:#c62828"></i> المصدر رجع 402 (تجاوز حدود الخطة) أثناء النقل — رقِّ الحساب أو انتقل لمصدر آخر.', "err");
-                  return false;
+                  logLine('<i class="fa-solid fa-xmark" style="color:#c62828"></i> ' + esc(prefix) + 'المصدر رجع 402 (تجاوز حدود الخطة) أثناء النقل — رقِّ الحساب أو انتقل لمصدر آخر.', "err");
+                  fatal = true;
+                  failed = true;
+                  return { inserted: insertedTotal, failed: failed, fatal: true };
                 }
               } catch (e) {
                 body = { error: (e && e.message) || String(e) };
@@ -661,7 +715,7 @@ $$;`;
             }
 
             if (!ok || !body) {
-              stepErr = (body && body.error) || "فشل متكرر بعد 3 محاولات (أعد المحاولة وسيكمل النقل من حيث توقف).";
+              stepErr = stepErr || (body && body.error) || "فشل متكرر بعد 3 محاولات (أعد المحاولة وسيكمل النقل من حيث توقف).";
               break;
             }
 
@@ -688,9 +742,9 @@ $$;`;
             done = !!body.done;
             lastId = body.nextLastId || null;
             if (!done) {
-              $("phase").textContent = "نقل " + label + "… " + (tableInserted + tableExisting).toLocaleString("en") + " صف";
-              if (steps % 25 === 0) {
-                logLine('… جاري: ' + esc(label) + " — " + (tableInserted + tableExisting).toLocaleString("en") + " صف منقول حتى الآن (جديد " + tableInserted.toLocaleString("en") + ")", "ok");
+              $("phase").textContent = esc(prefix) + "دفع " + label + "… " + (tableInserted + tableExisting).toLocaleString("en") + " صف";
+              if (steps % 50 === 0) {
+                logLine('… ' + esc(prefix) + 'جاري الدفع: ' + esc(label) + " — " + (tableInserted + tableExisting).toLocaleString("en") + " صف حتى الآن (جديد " + tableInserted.toLocaleString("en") + ")", "ok");
               }
             }
           }
@@ -701,15 +755,82 @@ $$;`;
             flags.push("موجود " + tableExisting.toLocaleString("en"));
             if (tableUpdated > 0) flags.push('<span style="color:#2563eb">مُحدَّث ' + tableUpdated.toLocaleString("en") + "</span>");
             flags.push(steps.toLocaleString("en") + " خطوة");
-            logLine('<i class="fa-solid fa-circle-check" style="color:#2e7d32"></i> <b>' + esc(label) + '</b> — اكتمل بالكامل: ' + flags.join(" • "), "ok");
+            logLine('<i class="fa-solid fa-circle-check" style="color:#2e7d32"></i> ' + esc(prefix) + '<b>' + esc(label) + '</b> — اكتمل بالكامل: ' + flags.join(" • "), "ok");
           } else {
-            logLine('<i class="fa-solid fa-xmark" style="color:#c62828"></i> <b>' + esc(label) + '</b> — توقف قبل الاكتمال: ' + esc(stepErr || "خطأ غير معروف") + " (نُقل " + tableInserted.toLocaleString("en") + " صف). أعد المحاولة وسيُكمّل تلقائيًا.", "err");
+            logLine('<i class="fa-solid fa-xmark" style="color:#c62828"></i> ' + esc(prefix) + '<b>' + esc(label) + '</b> — توقف قبل الاكتمال: ' + esc(stepErr || "خطأ غير معروف") + " (نُقل " + tableInserted.toLocaleString("en") + " صف). أعد المحاولة وسيُكمّل تلقائيًا.", "err");
+            failed = true;
             break;
           }
         }
 
-        logLine('<i class="fa-solid fa-flag-checkered" style="color:#7c3aed"></i> <b>ملخص النقل الكامل:</b> ' + insertedTotal.toLocaleString("en") + " جديد • " + existingTotal.toLocaleString("en") + " موجود • " + updatedTotal.toLocaleString("en") + " مُحدَّث • " + stepsTotal.toLocaleString("en") + " خطوة", "ok");
-        return true;
+        if (!opts.quiet) logLine('<i class="fa-solid fa-flag-checkered" style="color:#7c3aed"></i> ' + esc(prefix) + '<b>ملخص النقل الكامل:</b> ' + insertedTotal.toLocaleString("en") + " جديد • " + existingTotal.toLocaleString("en") + " موجود • " + updatedTotal.toLocaleString("en") + " مُحدَّث • " + stepsTotal.toLocaleString("en") + " خطوة", "ok");
+        return { inserted: insertedTotal, failed: failed, fatal: fatal };
+      }
+
+      // سحب جدول كامل من سيرفر آخر إلى السيرفر المنسّق عبر action=pull-step.
+      // كل استدعاء يقرأ صفحة (حتى 1000 صف) من السيرفر الآخر ويُدخلها في المنسّق،
+      // ويكمل من nextLastId حتى تنتهي كل صفوف الجدول (قابل للاستئناف).
+      async function pullTableFromSource(coordUrl, table, sourceRef, mode, token, opts) {
+        opts = opts || {};
+        let lastId = null;
+        let done = false;
+        let inserted = 0;
+        let steps = 0;
+        let err = null;
+        while (!done) {
+          steps++;
+          const payload = {
+            action: "pull-step",
+            adminToken: token,
+            mode: mode,
+            table: table,
+            source: sourceRef,
+            lastId: lastId == null ? undefined : String(lastId),
+          };
+          let body = null;
+          let ok = false;
+          for (let attempt = 0; attempt < 3 && !ok; attempt++) {
+            try {
+              const res = await fetch(coordUrl + "/functions/v1/data-migrate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              });
+              body = await res.json().catch(function () { return {}; });
+              if (res.ok && body && body.success) { ok = true; break; }
+              if (res.status === 401 || res.status === 403) {
+                err = "توكن الأدمن غير صالح على السيرفر المنسّق (" + res.status + ").";
+                break;
+              }
+              if (body && body.error && /غير معروف|unknown/i.test(body.error)) {
+                err = "وظيفة data-migrate على السيرفر المنسّق قديمة ولا تدعم السحب (pull-step) — أعد نشرها.";
+                break;
+              }
+              if (res.ok && !body.success) break;
+            } catch (e) {
+              body = { error: (e && e.message) || String(e) };
+            }
+            await new Promise(function (x) { setTimeout(x, 1000 * (attempt + 1)); });
+          }
+          if (!ok || !body) {
+            err = err || (body && body.error) || "فشل السحب بعد 3 محاولات.";
+            return { inserted: inserted, done: false, failed: true, error: err };
+          }
+          const errs = Array.isArray(body.errors) ? body.errors.filter(function (e) { return !!e; }) : [];
+          if (errs.length) {
+            return { inserted: inserted, done: false, failed: true, error: errs.slice(0, 3).join(" • ") };
+          }
+          inserted += Number(body.inserted) || 0;
+          done = !!body.done;
+          lastId = body.nextLastId || null;
+          if (!done) {
+            $("phase").textContent = "سحب " + (opts.tableLabel || table) + "… " + inserted.toLocaleString("en") + " صف جديد";
+            if (steps % 50 === 0) {
+              logLine('… سحب <b>' + esc(opts.tableLabel || table) + "</b> من <b>" + esc(opts.sourceLabel || sourceRef) + "</b>: +" + inserted.toLocaleString("en") + " صف حتى الآن", "ok");
+            }
+          }
+        }
+        return { inserted: inserted, done: true, failed: false };
       }
 
       function renderResult(body) {
@@ -895,6 +1016,295 @@ $$;`;
           STATE.info = null;
         }
         renderSources();
+      }
+
+      // ============================================================
+      // مزامنة كل السيرفرات بالكامل (3-Way Sync)
+      // ------------------------------------------------------------
+      // 1) تفحص كل السيرفرات وتبني مصفوفة أعداد الصفوف لكل جدول.
+      // 2) تحسب الناقص عند كل سيرفر = الفرق عن أكبر سيرفر لنفس الجدول
+      //    (السيرفرات تشترك في نفس الـ id لأن النقل ينسخه كما هو).
+      // 3) تنقل كل الصفوف في الاتجاهين عبر migrate-step حتى التطابق.
+      // ============================================================
+      const SYNC_SILENT = true;
+
+      function shortHost(url) {
+        return String(url || "").replace(/^https:\/\//, "").replace(/\.supabase\.co.*$/, "");
+      }
+
+      async function syncAllEnsureInfo() {
+        const srcs = getSources();
+        const results = await Promise.all(srcs.map(function (s) { return infoFrom(s); }));
+        for (let i = 0; i < srcs.length; i++) INFO_CACHE[srcs[i].url] = results[i];
+        renderSources();
+        return srcs.map(function (s, i) { return { src: s, info: results[i] }; });
+      }
+
+      function syncAllWorking(list) {
+        return (list || []).filter(function (x) { return x.info && x.info.success; });
+      }
+
+      function syncAllTables(working) {
+        const map = new Map();
+        for (const w of working) {
+          for (const t of (w.info.tables || [])) {
+            if (!t.exists) continue;
+            let cur = map.get(t.name);
+            if (!cur) {
+              cur = { name: t.name, label: t.label || t.name, group: t.group || "", counts: {} };
+              map.set(t.name, cur);
+            } else if ((!cur.label || cur.label === cur.name) && t.label) {
+              cur.label = t.label;
+            }
+            cur.counts[w.src.url] = (typeof t.count === "number" && isFinite(t.count)) ? t.count : null;
+          }
+        }
+        return map;
+      }
+
+      function renderSyncAnalysis(working, tables) {
+        const box = $("syncAnalysis");
+        box.innerHTML = "";
+        if (working.length < 2) {
+          box.innerHTML = '<div class="health-box warn"><b>محتاج على الأقل سيرفرين شغالين</b> لعمل التحليل/المزامنة. تأكد إن باقي السيرفرات افحصت بنجاح (شغالة والدوال منصوبة فيها).</div>';
+          return { totalMissing: 0, perServerMissing: {}, perServerRows: {}, missingEdge: false, working: working.length };
+        }
+
+        const urls = working.map(function (w) { return w.src.url; });
+        const edges = {};
+        let missingEdge = false;
+        for (const w of working) {
+          const tgts = (w.info.targets || []).map(function (t) { return t.url; })
+            .filter(function (u) { return urls.indexOf(u) !== -1 && u !== w.src.url; });
+          edges[w.src.url] = tgts;
+          for (const u of urls) {
+            if (u !== w.src.url && tgts.indexOf(u) === -1) missingEdge = true;
+          }
+        }
+
+        const perServerRows = {};
+        const perServerMissing = {};
+        for (const w of working) { perServerRows[w.src.url] = 0; perServerMissing[w.src.url] = 0; }
+
+        const wrap = document.createElement("div");
+        wrap.className = "ana-wrap";
+        const tbl = document.createElement("table");
+        tbl.className = "ana-table";
+        let head = "<thead><tr><th>الجدول</th>";
+        for (const w of working) head += "<th>" + esc(w.src.label || w.src.name) + "<br><span style='font-weight:400;color:#98a2b3'>" + esc(shortHost(w.src.url)) + "</span></th>";
+        head += "<th>الأكبر</th><th>الناقص</th></tr></thead>";
+        tbl.innerHTML = head;
+        const tbody = document.createElement("tbody");
+
+        const rows = Array.from(tables.values()).sort(function (a, b) {
+          return (a.group + "|" + a.label).localeCompare(b.group + "|" + b.label);
+        });
+
+        let totalMissing = 0;
+        for (const t of rows) {
+          const counts = working.map(function (w) {
+            const c = t.counts[w.src.url];
+            return (typeof c === "number") ? c : null;
+          });
+          const present = counts.filter(function (c) { return c !== null; });
+          const max = present.length ? Math.max.apply(null, present) : 0;
+          let rowMissing = 0;
+          let tr = '<tr><td class="tbl-name">' + esc(t.label) + "<small>" + esc(t.name) + "</small></td>";
+          working.forEach(function (w, i) {
+            const c = counts[i];
+            const has = c !== null;
+            if (has) perServerRows[w.src.url] += c;
+            const miss = has ? (max > c ? max - c : 0) : max;
+            rowMissing += miss;
+            if (miss > 0) perServerMissing[w.src.url] += miss;
+            if (!has) tr += '<td class="miss">غير موجود<br><span style="font-weight:400">(−' + max.toLocaleString("en") + ")</span></td>";
+            else if (miss > 0) tr += '<td class="miss">' + c.toLocaleString("en") + '<br><span style="font-weight:400">(−' + miss.toLocaleString("en") + ")</span></td>";
+            else tr += '<td class="zero">' + c.toLocaleString("en") + "</td>";
+          });
+          totalMissing += rowMissing;
+          tr += "<td>" + max.toLocaleString("en") + "</td>";
+          tr += '<td class="' + (rowMissing > 0 ? "miss" : "zero") + '">' + rowMissing.toLocaleString("en") + "</td></tr>";
+          tbody.insertAdjacentHTML("beforeend", tr);
+        }
+        tbl.appendChild(tbody);
+        wrap.appendChild(tbl);
+        box.appendChild(wrap);
+
+        const sum = document.createElement("div");
+        sum.className = "ana-sum";
+        for (const w of working) {
+          const card = document.createElement("div");
+          card.className = "card";
+          const pct = totalMissing > 0 ? "" : ' <span style="color:#2e7d32">✓ متطابق</span>';
+          card.innerHTML = "<b>" + esc(w.src.label || w.src.name) + "</b><span>" +
+            perServerRows[w.src.url].toLocaleString("en") + " صف إجمالي • الناقص <span class=\"" +
+            (perServerMissing[w.src.url] > 0 ? "miss" : "") + "\">" + perServerMissing[w.src.url].toLocaleString("en") + "</span> صف" + pct + "</span>";
+          sum.appendChild(card);
+        }
+        box.appendChild(sum);
+
+        const legend = document.createElement("p");
+        legend.className = "ana-legend";
+        legend.innerHTML = '<i class="fa-solid fa-circle-info"></i> «الناقص» = الفرق عن أكبر سيرفر لنفس الجدول (السيرفرات تشترك في نفس الـ id). إجمالي الصفوف الناقصة في كل السيرفرات: <b>' + totalMissing.toLocaleString("en") + "</b> صف. «الأكبر» = أكبر عدد صفوف موجود في أي سيرفر لنفس الجدول.";
+        box.appendChild(legend);
+
+        if (missingEdge) {
+          const d = document.createElement("div");
+          d.className = "edge-warn";
+          d.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> <b>تنبيه مهم:</b> المزامنة تعمل عبر <b>سيرفر منسّق</b> (السيرفر النشط اللي أنت مسجّل دخول عليه). لازم هذا المنسّق يكون عنده باقي السيرفرات كـ <b>أهداف (MIG_TARGETS)</b> عشان يسحب صفوفهم ويدفع صفوفه إليهم. من قسم "إضافة مشروع" اضبط MIG_TARGETS عند المنسّق ليشمل الباقي ثم أعد النشر، وبعدها أعِد التحليل.';
+          box.appendChild(d);
+        }
+
+        return { totalMissing: totalMissing, perServerMissing: perServerMissing, perServerRows: perServerRows, missingEdge: missingEdge, working: working.length };
+      }
+
+      async function syncAllAnalyze(quiet) {
+        const btn = $("btnSyncAnalyze");
+        if (btn) btn.disabled = true;
+        if (!quiet) {
+          $("syncPhase").textContent = "جارٍ فحص كل السيرفرات وحساب الفروقات...";
+          $("syncAnalysis").innerHTML = "";
+        }
+        try {
+          const list = await syncAllEnsureInfo();
+          const working = syncAllWorking(list);
+          const tables = syncAllTables(working);
+          const res = renderSyncAnalysis(working, tables);
+          window.__syncAnalysis = { totalMissing: res.totalMissing, perServerRows: res.perServerRows, perServerMissing: res.perServerMissing, tables: tables.size, missingEdge: res.missingEdge, working: working.length };
+          if (!quiet) $("syncPhase").textContent = "";
+          return { working: working, tables: tables, res: res };
+        } catch (e) {
+          $("syncAnalysis").innerHTML = '<div class="health-box err">فشل التحليل: ' + esc(e && e.message || e) + "</div>";
+          $("syncPhase").textContent = "";
+          return null;
+        } finally {
+          if (btn) btn.disabled = false;
+        }
+      }
+
+      async function syncAllRun() {
+        if (STATE.running) return;
+        const token = window.adminAuth && window.adminAuth.getToken ? window.adminAuth.getToken() : "";
+        if (!token) return alert("يجب تسجيل الدخول كأدمن أولاً.");
+        const btnAll = $("btnSyncAll");
+        const btnAna = $("btnSyncAnalyze");
+        if (btnAll) btnAll.disabled = true;
+        if (btnAna) btnAna.disabled = true;
+        STATE.running = true;
+        $("result").innerHTML = "";
+        try {
+          $("syncPhase").textContent = "فحص كل السيرفرات...";
+          const list = await syncAllEnsureInfo();
+          const working = syncAllWorking(list);
+          if (working.length < 2) {
+            alert("محتاج على الأقل سيرفرين شغالين لعمل المزامنة.");
+            return;
+          }
+
+          // المنسّق = السيرفر النشط (اللي توكن الأدمن بتاعه صالح عليه).
+          // الصفحة تتكلم معه وحده، وهو يسحب من الباقي بحكم مفاتيح الخدمة في MIG_TARGETS لديه.
+          const activeUrl = (window.adminAuth && window.adminAuth.getActiveBackend && window.adminAuth.getActiveBackend().url) || STATE.sourceUrl || working[0].src.url;
+          const coord = working.find(function (w) { return w.src.url === activeUrl; });
+          if (!coord) {
+            logLine('<i class="fa-solid fa-xmark" style="color:#c62828"></i> السيرفر النشط غير متاح ضمن السيرفرات الشغالة — افتح اللوحة على سيرفر شغال أو أعد فحص السيرفرات.', "err");
+            return;
+          }
+          const coordLabel = coord.src.label || coord.src.name;
+          const peers = working.filter(function (w) { return w.src.url !== coord.src.url; });
+
+          const tablesMap = syncAllTables(working);
+          const allTableNames = Array.from(tablesMap.keys());
+          if (!allTableNames.length) {
+            logLine('<i class="fa-solid fa-xmark" style="color:#c62828"></i> لا توجد جداول مشتركة بين السيرفرات.', "err");
+            return;
+          }
+
+          const beforeRes = renderSyncAnalysis(working, tablesMap);
+          window.__syncAnalysis = { totalMissing: beforeRes.totalMissing, perServerRows: beforeRes.perServerRows, perServerMissing: beforeRes.perServerMissing, tables: tablesMap.size, missingEdge: beforeRes.missingEdge, working: working.length };
+          const before = beforeRes.totalMissing;
+
+          const coordTargets = (coord.info.targets || []).filter(function (t) { return t.url !== coord.src.url; });
+          const peerUrls = peers.map(function (w) { return w.src.url; });
+          const targetNamesForPeers = coordTargets.filter(function (t) { return peerUrls.indexOf(t.url) !== -1; }).map(function (t) { return t.name; });
+
+          logLine('<i class="fa-solid fa-circle-info" style="color:#2563eb"></i> <b>بدء المزامنة الشاملة:</b> السيرفر المنسّق = <b>' + esc(coordLabel) + '</b> • ' + peers.length + " سيرفر آخر • " + allTableNames.length + " جدول. بياناتك الناقصة عليه تُسحب من الباقي أولًا ثم تُدفع للجميع.", "ok");
+
+          let fatal = false;
+
+          // المرحلة 1: سحب صفوف كل سيرفر آخر إلى المنسّق (حتى تجتمع كل الصفوف عنده).
+          logLine('<i class="fa-solid fa-download" style="color:#7c3aed"></i> <b>المرحلة 1/2:</b> سحب صفوف السيرفرات الأخرى إلى المنسّق (' + esc(coordLabel) + ") — يجمع كل الصفوف الناقصة عنده أولًا.", "ok");
+          for (const p of peers) {
+            const pLabel = p.src.label || p.src.name;
+            const known = coordTargets.some(function (t) { return t.url === p.src.url; });
+            if (!known) {
+              logLine('<i class="fa-solid fa-triangle-exclamation" style="color:#b45309"></i> المنسّق لا يعرف <b>' + esc(pLabel) + '</b> كهدف في MIG_TARGETS — لن يُسحب منه. أضِفه كهدف عند المنسّق ثم أعد النشر، وأعد المحاولة.', "err");
+              continue;
+            }
+            for (const table of allTableNames) {
+              const tinfo = (p.info.tables || []).find(function (x) { return x.name === table && x.exists; });
+              if (!tinfo) continue;
+              $("phase").textContent = "سحب [" + pLabel + "] → [" + coordLabel + "] " + (tinfo.label || table) + "…";
+              const r = await pullTableFromSource(coord.src.url, table, p.src.url, "sync", token, {
+                prefix: "[" + pLabel + " → " + coordLabel + "] ",
+                quiet: SYNC_SILENT,
+                tableLabel: tinfo.label || table,
+                sourceLabel: pLabel,
+              });
+              if (r.failed) {
+                const oldFn = /قديمة|pull-step|غير معروف/.test(r.error || "");
+                logLine('<i class="fa-solid fa-xmark" style="color:#c62828"></i> فشل سحب <b>' + esc(tinfo.label || table) + "</b> من <b>" + esc(pLabel) + "</b>: " + esc(r.error), "err");
+                if (oldFn) { fatal = true; break; }
+              } else if (r.inserted > 0) {
+                logLine('<i class="fa-solid fa-download" style="color:#2563eb"></i> سُحب <b>' + esc(tinfo.label || table) + "</b> من <b>" + esc(pLabel) + "</b>: +" + r.inserted.toLocaleString("en") + " صف.", "ok");
+              }
+            }
+            if (fatal) break;
+          }
+          if (fatal) {
+            logLine('<i class="fa-solid fa-xmark" style="color:#c62828"></i> توقفت المزامنة: وظيفة data-migrate على السيرفر المنسّق (' + esc(coordLabel) + ") قديمة ولا تدعم السحب (pull-step). أعد نشرها ثم أعد المحاولة.", "err");
+            return;
+          }
+
+          // المرحلة 2: دفع صفوف المنسّق (المكتملة الآن) إلى كل الأهداف.
+          if (!targetNamesForPeers.length) {
+            logLine('<i class="fa-solid fa-triangle-exclamation" style="color:#b45309"></i> المنسّق لا يملك أي هدف مطابق للسيرفرات الأخرى — لا يمكن الدفع. اضبط MIG_TARGETS عند المنسّق ليشمل باقي السيرفرات.', "err");
+          } else {
+            logLine('<i class="fa-solid fa-upload" style="color:#7c3aed"></i> <b>المرحلة 2/2:</b> دفع صفوف المنسّق إلى الأهداف (' + esc(targetNamesForPeers.join(", ")) + ") حتى تتطابق كل السيرفرات.", "ok");
+            for (const table of allTableNames) {
+              const tinfo = (coord.info.tables || []).find(function (x) { return x.name === table && x.exists; });
+              if (!tinfo) continue;
+              $("phase").textContent = "دفع [" + coordLabel + "] → الأهداف: " + (tinfo.label || table) + "…";
+              const r = await runSteps(coord.src.url, [table], targetNamesForPeers, "sync", "", token, {
+                prefix: "[" + coordLabel + " → الأهداف] ",
+                quiet: SYNC_SILENT,
+                tableLabel: tinfo.label || table,
+              });
+              if (r && r.fatal) { fatal = true; break; }
+              if (r && r.failed) {
+                logLine('<i class="fa-solid fa-xmark" style="color:#c62828"></i> توقف دفع <b>' + esc(tinfo.label || table) + "</b> — أعد الضغط على الزر لمتابعة الدفع من حيث توقف.", "err");
+              }
+            }
+            if (!fatal) logLine('<i class="fa-solid fa-circle-check" style="color:#2e7d32"></i> انتهت مرحلة الدفع.', "ok");
+          }
+
+          $("phase").textContent = "تحقق نهائي وإعادة التحليل...";
+          logLine('<i class="fa-solid fa-flag-checkered" style="color:#7c3aed"></i> <b>إعادة التحليل للتأكد من التطابق الكامل...</b>', "ok");
+          const after = await syncAllAnalyze(true);
+          const afterTotal = after && after.res ? after.res.totalMissing : (window.__syncAnalysis ? window.__syncAnalysis.totalMissing : null);
+          if (afterTotal !== null) {
+            const box = afterTotal === 0 ? "ok" : "err";
+            logLine('<i class="fa-solid fa-' + (afterTotal === 0 ? "circle-check" : "triangle-exclamation") + '" style="color:' + (afterTotal === 0 ? "#2e7d32" : "#c62828") + '"></i> <b>النتيجة النهائية:</b> إجمالي الصفوف الناقصة الآن = ' + afterTotal.toLocaleString("en") + " صف (قبل المزامنة: " + (before === null ? "؟" : before.toLocaleString("en")) + ")." + (afterTotal === 0 ? " كل السيرفرات متطابقة تمامًا ✓" : " راجع التحليل بالأعلى."), box);
+            $("result").scrollTop = $("result").scrollHeight;
+          }
+        } catch (e) {
+          logLine('<i class="fa-solid fa-xmark" style="color:#c62828"></i> فشل المزامنة: ' + esc(e && e.message || e), "err");
+        } finally {
+          STATE.running = false;
+          if (btnAll) btnAll.disabled = false;
+          if (btnAna) btnAna.disabled = false;
+          $("phase").textContent = "";
+          $("syncPhase").textContent = "";
+        }
       }
 
       function init() {

@@ -5,6 +5,219 @@ const supabaseClient = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE"
 );
 
+/* ═══════════════ السيرفرات الثلاثة (النشر على كل السيرفرات) ═══════════════ */
+const STORAGE_BUCKET = "Buda";
+const ADMIN_BACKEND_ORDER = ["primary", "backup", "backup2"];
+const ADMIN_BACKEND_LABELS = {
+  primary: "السيرفر الأساسي",
+  backup: "السيرفر الاحتياطي",
+  backup2: "السيرفر الثالث",
+};
+const FALLBACK_ADMIN_BACKENDS = {
+  primary: {
+    name: "primary",
+    url: "https://msgqzgzoslearaprgiqq.supabase.co",
+    key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE",
+  },
+  backup: {
+    name: "backup",
+    url: "https://wwlwwgqfjhmchrijaojr.supabase.co",
+    key: "sb_publishable_wIxpA7t3a2hII8asqYZ1Bg__NoMLLUU",
+  },
+  backup2: {
+    name: "backup2",
+    url: "https://qhqkgrpezoaugyhzrgyc.supabase.co",
+    key: "sb_publishable_bHCWG6iYSkbONKG7HR6Rkw_UVZGsjUe",
+  },
+};
+
+function getAdminBackends() {
+  const guard = window.adminAuth && window.adminAuth.ADMIN_BACKENDS;
+  if (guard && guard.primary) return guard;
+  return FALLBACK_ADMIN_BACKENDS;
+}
+
+function getActiveBackendName() {
+  try {
+    if (typeof window.getActiveAdminBackend === "function") {
+      const backend = window.getActiveAdminBackend();
+      if (backend && backend.name) return backend.name;
+    }
+  } catch (_e) {}
+  return window.__bodaAdminBackendName || "primary";
+}
+
+function shouldPublishAllServers() {
+  const box = document.getElementById("publishAllServers");
+  return !!(box && box.checked);
+}
+
+function getOtherBackends() {
+  const backends = getAdminBackends();
+  const activeName = getActiveBackendName();
+  return ADMIN_BACKEND_ORDER.filter(function (name) {
+    return name !== activeName && backends[name] && backends[name].url && backends[name].key;
+  }).map(function (name) {
+    return { name: name, backend: backends[name] };
+  });
+}
+
+async function backendRest(backend, tablePath, method, body, extraHeaders) {
+  const headers = Object.assign(
+    {
+      apikey: backend.key,
+      Authorization: "Bearer " + backend.key,
+      "Content-Type": "application/json",
+      Prefer: "return=representation",
+      "x-bypass-failover": "true",
+    },
+    extraHeaders || {}
+  );
+  const response = await fetch(backend.url + "/rest/v1/" + tablePath, {
+    method: method,
+    headers: headers,
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  if (!response.ok) {
+    let message = "HTTP " + response.status;
+    try {
+      const info = await response.json();
+      message = (info && (info.message || info.error_description || info.details || info.hint)) || message;
+    } catch (_e) {}
+    throw new Error(message);
+  }
+  if (response.status === 204) return null;
+  try {
+    return await response.json();
+  } catch (_e) {
+    return null;
+  }
+}
+
+async function uploadToBackendStorage(backend, path, blob, contentType) {
+  const response = await fetch(backend.url + "/storage/v1/object/" + STORAGE_BUCKET + "/" + path, {
+    method: "POST",
+    headers: Object.assign(
+      {
+        apikey: backend.key,
+        Authorization: "Bearer " + backend.key,
+        "x-upsert": "true",
+        "x-bypass-failover": "true",
+      },
+      contentType ? { "Content-Type": contentType } : {}
+    ),
+    body: blob,
+  });
+  if (!response.ok) throw new Error("storage HTTP " + response.status);
+  return backend.url + "/storage/v1/object/public/" + STORAGE_BUCKET + "/" + path;
+}
+
+function storagePathFromUrl(url) {
+  const marker = "/storage/v1/object/public/" + STORAGE_BUCKET + "/";
+  const value = String(url || "");
+  const index = value.indexOf(marker);
+  return index === -1 ? "" : value.slice(index + marker.length);
+}
+
+function rewriteStorageUrls(payload, storageUrls, fromUrl, toUrl) {
+  const clone = Object.assign({}, payload);
+  const rewrite = function (value) {
+    return typeof value === "string" && storageUrls.has(value) ? value.split(fromUrl).join(toUrl) : value;
+  };
+  ["image", "image1", "image2", "image3", "image4", "image5", "image6", "image7", "image8"].forEach(function (key) {
+    if (clone[key]) clone[key] = rewrite(clone[key]);
+  });
+  if (Array.isArray(clone.images)) clone.images = clone.images.map(rewrite);
+  if (Array.isArray(clone.videos)) clone.videos = clone.videos.map(rewrite);
+  return clone;
+}
+
+function buildVariantGroupPayload(payload, sizes, parentId, thumbnail) {
+  const variants = sizes.map(function (size) {
+    return {
+      id: String(payload.id),
+      size: sizeLabel(size),
+      price: safeNumber(size.price) || 0,
+      name: payload.name,
+      sku: "",
+      thumbnail: thumbnail || "",
+    };
+  });
+  return {
+    parent_id: parentId,
+    variants: variants,
+    product_name: payload.name,
+    variant_count: variants.length,
+    thumbnail: thumbnail || null,
+  };
+}
+
+async function mirrorProductToBackend(targetBackend, activeBackend, payload, sizes, parentId, storageUrls, rewriteMedia) {
+  const body = rewriteMedia
+    ? rewriteStorageUrls(payload, storageUrls, activeBackend.url, targetBackend.url)
+    : payload;
+  await backendRest(targetBackend, "taager_products", "POST", [body]);
+  if (sizes && sizes.length) {
+    try {
+      await backendRest(
+        targetBackend,
+        "taager_variant_groups?on_conflict=parent_id",
+        "POST",
+        [buildVariantGroupPayload(payload, sizes, parentId, body.image)],
+        { Prefer: "resolution=merge-duplicates,return=representation" }
+      );
+    } catch (err) {
+      console.warn("mirror variant group failed on " + targetBackend.name + ":", err);
+    }
+  }
+}
+
+async function mirrorUpdateToBackends(updatePayload, id, sizes, parentId) {
+  const others = getOtherBackends();
+  if (!others.length) return;
+  const encodedId = encodeURIComponent(id);
+  for (let i = 0; i < others.length; i++) {
+    const target = others[i];
+    try {
+      const updated = await backendRest(target.backend, "taager_products?id=eq." + encodedId, "PATCH", updatePayload);
+      const exists = Array.isArray(updated) ? updated.length > 0 : !!updated;
+      if (!exists) continue;
+      if (sizes && sizes.length) {
+        await backendRest(
+          target.backend,
+          "taager_variant_groups?on_conflict=parent_id",
+          "POST",
+          [buildVariantGroupPayload({ id: id, name: updatePayload.name }, sizes, parentId, updatePayload.image)],
+          { Prefer: "resolution=merge-duplicates,return=representation" }
+        );
+      } else {
+        await backendRest(
+          target.backend,
+          "taager_variant_groups?parent_id=eq." + encodeURIComponent(parentId),
+          "DELETE",
+          undefined
+        );
+      }
+    } catch (error) {
+      console.warn("mirror update failed on " + target.name + ":", error);
+    }
+  }
+}
+
+function buildPublishToast(activeName, others, results) {
+  if (!others.length) return "تمت إضافة المنتج بنجاح";
+  const failed = results.filter(function (item) {
+    return !item.ok;
+  });
+  if (!failed.length) return "تمت إضافة المنتج على السيرفرات الثلاثة بنجاح";
+  const failedLabels = failed
+    .map(function (item) {
+      return ADMIN_BACKEND_LABELS[item.name] || item.name;
+    })
+    .join("، ");
+  return "تمت الإضافة على " + (ADMIN_BACKEND_LABELS[activeName] || activeName) + "، وفشل: " + failedLabels;
+}
+
 const PRODUCT_COLUMNS = [
   "id",
   "taager_product_id",
@@ -480,6 +693,13 @@ function sizeBasedTotal(sizes, colors, store) {
   return sizes.reduce((sum, s) => sum + Math.max(0, safeNumber(s.stock) || 0), 0);
 }
 
+function stockStatusFor(value) {
+  const n = Number(value);
+  if (!isFinite(n) || n <= 0) return "out_of_stock";
+  if (n <= 10) return "low_stock";
+  return "in_stock";
+}
+
 function finalizeColors(sizes, colors, store) {
   return colors.map((c, ci) => ({
     name: colorLabel(c),
@@ -563,12 +783,15 @@ function collectFormPayload() {
   const contentIdeas = readInputValue("content_ideas");
   const availableCountries = getSelectedCountries();
 
+  const finalStock = stock > 0 ? stock : sizeBasedTotal(newSizes, newColors, newMatrixStock);
+
   return {
     name: name,
     price: price,
     original_price: originalPrice || null,
     description: description,
-    stock: stock > 0 ? stock : sizeBasedTotal(newSizes, newColors, newMatrixStock),
+    stock: finalStock,
+    stock_status: stockStatusFor(finalStock),
     sales_count: salesCount,
     category: category,
     seller: seller || null,
@@ -635,6 +858,14 @@ async function addProduct() {
   const generatedId = payload.taager_product_id
     ? "taager_" + payload.taager_product_id
     : "prod_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
+  const activeBackend = getAdminBackends()[getActiveBackendName()] || getAdminBackends().primary;
+  const otherBackends = shouldPublishAllServers() ? getOtherBackends() : [];
+  const mediaOk = {};
+  otherBackends.forEach(function (item) {
+    mediaOk[item.name] = true;
+  });
+  const storageUrls = new Set();
+
   const fileInput = document.getElementById("imageFile");
   const files = fileInput?.files ? Array.from(fileInput.files) : [];
   if (files.length > 8) {
@@ -645,7 +876,19 @@ async function addProduct() {
   const uploadedUrls = [];
   for (let i = 0; i < files.length; i++) {
     const url = await uploadImage(files[i]);
-    if (url) uploadedUrls.push(url);
+    if (!url) continue;
+    uploadedUrls.push(url);
+    storageUrls.add(url);
+    const path = storagePathFromUrl(url);
+    if (!path) continue;
+    for (let j = 0; j < otherBackends.length; j++) {
+      try {
+        await uploadToBackendStorage(otherBackends[j].backend, path, files[i], files[i].type || undefined);
+      } catch (err) {
+        mediaOk[otherBackends[j].name] = false;
+        console.warn("mirror image failed on " + otherBackends[j].name + ":", err);
+      }
+    }
   }
 
   const linkUrls = collectImageLinks();
@@ -666,6 +909,23 @@ async function addProduct() {
     if (videoUrl) payload.videos = [videoUrl];
   }
 
+  if (payload.videos && payload.videos.length && payload.videos[0].indexOf(activeBackend.url + "/storage/") === 0) {
+    const videoUrl = payload.videos[0];
+    storageUrls.add(videoUrl);
+    const videoPath = storagePathFromUrl(videoUrl);
+    const videoFile = document.getElementById("videoFile")?.files?.[0];
+    if (videoPath && videoFile) {
+      for (let j = 0; j < otherBackends.length; j++) {
+        try {
+          await uploadToBackendStorage(otherBackends[j].backend, videoPath, videoFile, videoFile.type || undefined);
+        } catch (err) {
+          mediaOk[otherBackends[j].name] = false;
+          console.warn("mirror video failed on " + otherBackends[j].name + ":", err);
+        }
+      }
+    }
+  }
+
   payload.id = generatedId;
   const sizes = payload.sizes;
 
@@ -677,11 +937,39 @@ async function addProduct() {
   }
 
   const row = data && data[0];
+  const rowId = row ? row.id : payload.id;
+  const rowParentId = parentKeyFor(rowId, row ? row.taager_product_id : payload.taager_product_id);
   if (row && sizes.length) {
-    await saveVariantGroup(row.id, parentKeyFor(row.id, row.taager_product_id), sizes, row.name, row.image);
+    await saveVariantGroup(rowId, rowParentId, sizes, row.name, row.image);
   }
 
-  showToast("تمت إضافة المنتج بنجاح", "success");
+  const mirrorResults = [];
+  for (let j = 0; j < otherBackends.length; j++) {
+    const target = otherBackends[j];
+    try {
+      await mirrorProductToBackend(
+        target.backend,
+        activeBackend,
+        payload,
+        sizes,
+        rowParentId,
+        storageUrls,
+        mediaOk[target.name] !== false
+      );
+      mirrorResults.push({ name: target.name, ok: true });
+    } catch (err) {
+      mirrorResults.push({ name: target.name, ok: false, error: err.message || String(err) });
+      console.warn("mirror product failed on " + target.name + ":", err);
+    }
+  }
+
+  const anyMirrorFailed = mirrorResults.some(function (item) {
+    return !item.ok;
+  });
+  showToast(
+    buildPublishToast(getActiveBackendName(), otherBackends, mirrorResults),
+    anyMirrorFailed ? "error" : "success"
+  );
   clearForm();
   await loadProducts();
 }
@@ -722,12 +1010,14 @@ async function updateProduct(id) {
   const sizes = finalizeSizes(editSizesArr, editColorsArr, editMatrixStock[id] || {}, stock);
   const colors = finalizeColors(editSizesArr, editColorsArr, editMatrixStock[id] || {});
   const derivedStock = sizeBasedTotal(editSizesArr, editColorsArr, editMatrixStock[id] || {});
+  const finalStock = stock > 0 ? stock : derivedStock;
 
   const updatePayload = {
     name: name,
     price: price,
     description: description,
-    stock: stock > 0 ? stock : derivedStock,
+    stock: finalStock,
+    stock_status: stockStatusFor(finalStock),
     category: category,
     seller: seller,
     vendor: vendor,
@@ -760,6 +1050,8 @@ async function updateProduct(id) {
   } else {
     await deleteVariantGroup(parentId);
   }
+
+  await mirrorUpdateToBackends(updatePayload, id, sizes, parentId);
 
   showToast("تم تعديل المنتج", "success");
   await loadProducts();
@@ -1294,6 +1586,8 @@ function clearForm() {
   clearImageLinks();
   const videoUrlInput = document.getElementById("videoUrlInput");
   if (videoUrlInput) videoUrlInput.value = "";
+  const publishAllBox = document.getElementById("publishAllServers");
+  if (publishAllBox) publishAllBox.checked = false;
   newSizes = [];
   newColors = [];
   Object.keys(newMatrixStock).forEach((key) => delete newMatrixStock[key]);

@@ -342,6 +342,112 @@
         color: var(--muted);
       }
 
+      .fx-publish-all {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 10px;
+        border: 1px dashed var(--border);
+        background: var(--surface);
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 800;
+        color: var(--text);
+      }
+
+      .fx-publish-all input {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--brand-teal, #00b8a9);
+        cursor: pointer;
+        flex: 0 0 auto;
+      }
+
+      .fx-server-panel {
+        margin: 12px 18px 0;
+        padding: 12px 14px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background: var(--surface-alt);
+      }
+
+      .fx-server-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        font-size: 13px;
+        font-weight: 800;
+        margin-bottom: 10px;
+      }
+
+      .fx-server-list {
+        display: grid;
+        gap: 8px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .fx-server-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 10px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        background: var(--surface);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .fx-server-item .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        flex: 0 0 auto;
+        background: var(--muted);
+      }
+
+      .fx-server-item.ok .dot {
+        background: #16a34a;
+      }
+
+      .fx-server-item.missing .dot {
+        background: #dc2626;
+      }
+
+      .fx-server-item.error .dot {
+        background: #f59e0b;
+      }
+
+      .fx-server-item.active {
+        border-color: var(--brand-teal);
+        box-shadow: 0 0 0 1px var(--brand-teal);
+      }
+
+      .fx-server-item .st {
+        margin-inline-start: auto;
+        font-weight: 800;
+      }
+
+      .fx-server-item.ok .st {
+        color: #11693b;
+      }
+
+      .fx-server-item.missing .st {
+        color: #b91c1c;
+      }
+
+      .fx-server-item.error .st {
+        color: #b45309;
+      }
+
+      @media (max-width: 720px) {
+        .fx-server-list {
+          grid-template-columns: 1fr;
+        }
+      }
+
       .fx-preview {
         grid-column: span 12;
         display: grid;
@@ -578,6 +684,17 @@
         </div>
 
         <div id="fxShell" class="card" style="display:none">
+          <div class="fx-server-panel" id="fxServerStatus">
+            <div class="fx-server-head">
+              <span><i class="fa-solid fa-server"></i> حالة المنتج على السيرفرات الثلاثة</span>
+              <button type="button" class="fx-icon-btn" id="fxRefreshStatus" title="إعادة الفحص">
+                <i class="fa-solid fa-rotate"></i>
+              </button>
+            </div>
+            <div class="fx-server-list" id="fxServerList">
+              <div class="hint">جاري فحص السيرفرات...</div>
+            </div>
+          </div>
           <div class="fx-tabs" id="fxTabs"></div>
 
           <div class="fx-panel active" data-panel="basic">
@@ -611,6 +728,10 @@
             <button type="button" class="btn btn-secondary" id="fxResetBtn" style="color:#fff">
               <i class="fa-solid fa-rotate-left"></i> استرجاع الأصلي
             </button>
+            <label class="fx-publish-all" for="fxPublishAll" title="لو مفعّلة: التعديلات هتتطبق على السيرفرات الثلاثة مرة واحدة">
+              <input type="checkbox" id="fxPublishAll" />
+              <span><i class="fa-solid fa-server"></i> تطبيق على السيرفرات الثلاثة</span>
+            </label>
             <button type="button" class="fx-icon-btn" id="fxJsonBtn" title="تطبيق التعديلات من JSON">
               <i class="fa-solid fa-code"></i>
             </button>
