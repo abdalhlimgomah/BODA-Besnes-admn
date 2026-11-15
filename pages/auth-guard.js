@@ -102,6 +102,7 @@
     "view-products.html",
     "taager-products.html",
     "taager-product-edit.html",
+    "product-lab.html",
     "admin-coupons.html",
     "admin-support.html",
     "admin-categories.html",
