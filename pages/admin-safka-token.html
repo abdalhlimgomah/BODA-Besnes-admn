@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>جلسة Safka - إدارة التوكن</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/app-shell.css" />
+    <link rel="stylesheet" href="../css/admin.css" />
+    <script>try{const s=JSON.parse(localStorage.getItem("dashboardSettings")||"{}");if(s.theme==="dark")document.body.classList.add("dark-mode")}catch(e){}</script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="./auth-guard.js"></script>
+    <style>
+      .tk-wrap { max-width:800px; margin:0 auto; }
+      .tk-card { background:var(--card-bg,#fff); border-radius:16px; padding:24px; box-shadow:0 2px 12px rgba(0,0,0,0.04); margin-bottom:20px; }
+      .tk-card h2 { font-size:1.1rem; margin:0 0 16px; display:flex; align-items:center; gap:8px; }
+      .tk-card h2 i { color:var(--brand-orange,#ff6b1a); }
+      .tk-field { margin-bottom:16px; }
+      .tk-field label { display:block; font-size:0.82rem; font-weight:700; color:var(--muted,#667085); margin-bottom:4px; }
+      .tk-field input, .tk-field textarea { width:100%; padding:10px 14px; border:1.5px solid var(--border,#d8dee9); border-radius:10px; font-size:0.9rem; font-family:inherit; outline:none; transition:border-color 0.2s; background:var(--card-bg,#fff); color:var(--text,#1f2937); box-sizing:border-box; }
+      .tk-field input:focus, .tk-field textarea:focus { border-color:var(--brand-teal,#00b8a9); }
+      .tk-field textarea { min-height:60px; resize:vertical; }
+      .tk-field .hint { font-size:0.75rem; color:var(--muted,#667085); margin-top:4px; }
+      .tk-btn { display:inline-flex; align-items:center; gap:8px; padding:10px 22px; border:none; border-radius:10px; font-size:0.9rem; font-weight:700; font-family:inherit; cursor:pointer; transition:background 0.2s,transform 0.1s; }
+      .tk-btn:active { transform:scale(0.97); }
+      .tk-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+      .tk-btn.primary { background:var(--brand-teal,#00b8a9); color:#fff; }
+      .tk-btn.primary:hover:not(:disabled) { background:var(--brand-teal-deep,#02998d); }
+      .tk-btn.secondary { background:var(--surface-muted,#eef2f7); color:var(--text,#1f2937); }
+      .tk-btn.secondary:hover:not(:disabled) { background:var(--border,#d8dee9); }
+      .tk-btn.danger { background:var(--danger,#e03131); color:#fff; }
+      .tk-btn.danger:hover:not(:disabled) { background:#c92a2a; }
+      .tk-btn.outline { background:transparent; color:var(--brand-teal,#00b8a9); border:1.5px solid var(--brand-teal,#00b8a9); }
+      .tk-btn.outline:hover { background:var(--brand-teal,#00b8a9); color:#fff; }
+      .tk-status { padding:12px 16px; border-radius:10px; font-size:0.85rem; font-weight:600; margin-bottom:16px; display:none; }
+      .tk-status.show { display:block; }
+      .tk-status.success { background:#f0fdf4; color:#1f9d55; border:1px solid #bbf7d0; }
+      .tk-status.error { background:#fef2f2; color:#e03131; border:1px solid #fecaca; }
+      .tk-status.info { background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; }
+      .tk-badge { display:inline-block; padding:3px 12px; border-radius:20px; font-size:0.75rem; font-weight:700; }
+      .tk-badge.ok { background:#f0fdf4; color:#1f9d55; }
+      .tk-badge.empty { background:#fef2f2; color:#e03131; }
+      .tk-badge.expired { background:#fff9db; color:#e67700; }
+      .tk-info-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+      .tk-info-item { padding:12px; background:var(--surface-muted,#f8f9fb); border-radius:10px; }
+      .tk-info-item .lbl { font-size:0.72rem; color:var(--muted,#667085); margin-bottom:2px; }
+      .tk-info-item .val { font-size:0.9rem; font-weight:700; word-break:break-all; }
+      .tk-flex { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+      .tk-token-preview { max-height:120px; overflow-y:auto; background:var(--surface-muted,#f8f9fb); padding:10px 14px; border-radius:8px; font-size:0.78rem; font-family:monospace; word-break:break-all; white-space:pre-wrap; }
+      .tk-inline-copy { background:none; border:1px solid var(--border,#d8dee9); border-radius:6px; padding:4px 8px; cursor:pointer; color:var(--muted,#667085); font-size:0.82rem; transition:all 0.15s; }
+      .tk-inline-copy:hover { background:var(--brand-teal,#00b8a9); color:#fff; border-color:var(--brand-teal); }
+      .tk-pr { display:grid; grid-template-columns:1fr auto; gap:4px 12px; padding:10px 14px; background:var(--surface-muted,#f8f9fb); border-radius:10px; align-items:center; margin-bottom:8px; }
+      .tk-pr-lbl { grid-column:1; font-size:0.75rem; font-weight:700; color:var(--muted,#667085); }
+      .tk-pr-val { grid-column:1; font-size:0.88rem; font-weight:600; word-break:break-all; }
+      .tk-pr-act { grid-column:2; grid-row:1/3; display:flex; align-items:center; }
+      .tk-health { display:none; margin-top:14px; padding:14px 16px; border-radius:12px; font-size:0.84rem; line-height:1.9; }
+      .tk-health.show { display:block; }
+      .tk-health.ok { background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; }
+      .tk-health.bad { background:#fef2f2; border:1px solid #fecaca; color:#991b1b; }
+      .tk-health code { background:rgba(0,0,0,0.06); padding:1px 6px; border-radius:4px; }
+      .tk-map { width:100%; border-collapse:collapse; font-size:0.8rem; }
+      .tk-map th, .tk-map td { padding:10px 8px; border-bottom:1px solid var(--border,#e5e7eb); text-align:right; vertical-align:top; line-height:1.8; }
+      .tk-map th { background:var(--surface-muted,#f8f9fb); color:var(--muted,#667085); font-size:0.74rem; white-space:nowrap; }
+      .tk-map tr:last-child td { border-bottom:none; }
+      .tk-map code { direction:ltr; display:inline-block; background:var(--surface-muted,#f3f4f6); padding:1px 6px; border-radius:4px; font-size:0.74rem; }
+      .tk-map .ok { color:#1f9d55; font-weight:700; }
+      .tk-map .no { color:#e03131; font-weight:700; }
+      .tk-map .partial { color:#d97706; font-weight:700; }
+      body.dark-mode .tk-card { background:var(--card-bg,#1e293b); }
+      body.dark-mode .tk-info-item { background:var(--surface,#0f172a); }
+      body.dark-mode .tk-token-preview { background:var(--surface,#0f172a); }
+      body.dark-mode .tk-pr { background:var(--surface,#0f172a); }
+      body.dark-mode .tk-map th { background:var(--surface,#0f172a); }
+      body.dark-mode .tk-map code { background:var(--surface,#0f172a); }
+    </style>
+  </head>
+  <body class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand-badge">
+        <i class="fa-solid fa-leaf"></i>
+        <div><strong>Buda Admin</strong><small>إدارة المتجر</small></div>
+      </div>
+      <nav class="side-nav">
+        <a class="side-link" href="shacksf.html"><i class="fa-solid fa-chart-line"></i><span>لوحة التحكم</span></a>
+        <a class="side-link" href="admin-support.html"><i class="fa-solid fa-headset"></i><span>رسائل الدعم</span></a>
+        <a class="side-link" href="admin.html"><i class="fa-solid fa-square-plus"></i><span>إضافة المنتجات</span></a>
+        <a class="side-link" href="admin-orders.html"><i class="fa-solid fa-receipt"></i><span>الطلبات</span></a>
+        <a class="side-link" href="admin-partners.html"><i class="fa-solid fa-handshake"></i><span>طلبات الشراكة</span></a>
+        <a class="side-link" href="view-products.html"><i class="fa-solid fa-box-open"></i><span>مراجعة المنتجات</span></a>
+        <a class="side-link" href="admin-ai-details.html"><i class="fa-solid fa-wand-magic-sparkles"></i><span>AI محتوى</span></a>
+        <a class="side-link" href="taager-products.html"><i class="fa-solid fa-database"></i><span>منتجات Taager</span></a>
+        <a class="side-link" href="../admin-pricing.html"><i class="fa-solid fa-coins"></i><span>شرائح الأسعار</span></a>
+        <a class="side-link" href="admin-sellers.html"><i class="fa-solid fa-store"></i><span>إدارة البائعين</span></a>
+        <a class="side-link" href="admin-coupons.html"><i class="fa-solid fa-tags"></i><span>إدارة الكوبونات</span></a>
+        <a class="side-link" href="admin-fake-prices.html"><i class="fa-solid fa-percent"></i><span>الأسعار الوهمية</span></a>
+        <a class="side-link" href="admin-taager-token.html"><i class="fa-solid fa-key"></i><span>توكن تاجر</span></a>
+        <a class="side-link" href="admin-vendor-products.html"><i class="fa-solid fa-box-open"></i><span>منتجات Vendoor</span></a>
+        <a class="side-link" href="admin-vendor-token.html"><i class="fa-solid fa-handshake"></i><span>جلسة Vendoor</span></a>
+        <a class="side-link active" href="admin-safka-token.html"><i class="fa-solid fa-leaf"></i><span>جلسة Safka</span></a>
+        <a class="side-link" href="admin-safka-verify.html"><i class="fa-solid fa-clipboard-check"></i><span>تدقيق Safka</span></a>
+      </nav>
+    </aside>
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-title">
+          <h1>جلسة Safka (سفقة)</h1>
+          <p>حفظ توكن Safka ومزامنته مع Supabase Secrets ثم فتح صفحة تدقيق المنتجات</p>
+        </div>
+      </header>
+      <section class="content-wrap admin-page tk-wrap">
+        <div id="tk-status" class="tk-status"></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+          <a href="admin-safka-verify.html" style="display:flex;align-items:center;gap:12px;padding:16px 20px;background:var(--card-bg,#fff);border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.04);text-decoration:none;color:var(--text,#1f2937);transition:box-shadow 0.2s;border:1.5px solid #bbf7d0;" onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow=''">
+            <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-clipboard-check" style="color:#fff;font-size:1.2rem;"></i></div>
+            <div><div style="font-weight:700;font-size:0.9rem;">تدقيق Safka</div><div style="font-size:0.75rem;color:var(--muted,#667085);margin-top:2px;">جلب المنتجات والصور والأسعار والكميات</div></div>
+          </a>
+          <a href="https://aff.safka-eg.com" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;padding:16px 20px;background:var(--card-bg,#fff);border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.04);text-decoration:none;color:var(--text,#1f2937);transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow=''">
+            <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#0ea5e9,#2563eb);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-arrow-up-right-from-square" style="color:#fff;font-size:1.2rem;"></i></div>
+            <div><div style="font-weight:700;font-size:0.9rem;">فتح منصة Safka</div><div style="font-size:0.75rem;color:var(--muted,#667085);margin-top:2px;">سجّل الدخول وانسخ التوكن من المتصفح</div></div>
+          </a>
+        </div>
+
+        <div class="tk-card">
+          <h2><i class="fa-solid fa-circle-info"></i> حالة التوكن الحالية</h2>
+          <div class="tk-info-grid" id="tk-info-grid">
+            <div class="tk-info-item"><div class="lbl">معرف الحساب (Safka ID)</div><div class="val" id="info-account-id">--</div></div>
+            <div class="tk-info-item"><div class="lbl">الدور (Role)</div><div class="val" id="info-role">--</div></div>
+            <div class="tk-info-item" style="grid-column:1/-1;"><div class="lbl">حالة التوكن</div><div class="val" id="info-token-status"><span class="tk-badge empty">غير محدد</span></div></div>
+            <div class="tk-info-item" style="grid-column:1/-1;"><div class="lbl">التوكن (JWT)</div><div class="val" id="info-token" style="font-size:0.78rem;font-family:monospace;">--</div></div>
+            <div class="tk-info-item" style="grid-column:1/-1;"><div class="lbl">API Base</div><div class="val" id="info-api-base" style="font-size:0.8rem;">https://api.safka-eg.com/api/v1</div></div>
+          </div>
+        </div>
+
+        <div class="tk-card">
+          <h2><i class="fa-solid fa-pen-to-square"></i> تحديث بيانات Safka</h2>
+          <div class="tk-field">
+            <label for="tk-account-id">معرف الحساب (Safka ID)</label>
+            <input type="text" id="tk-account-id" placeholder="مثال: 6adf53290194ccc0b52e2c3e" dir="ltr" />
+            <div class="hint">يُستخرج تلقائياً من داخل التوكن (حقل id). يمكن تركه فارغاً.</div>
+          </div>
+          <div class="tk-field">
+            <label for="tk-token">Safka Auth Token (JWT)</label>
+            <textarea id="tk-token" rows="4" placeholder="eyJhbGciOiJIUzI1NiIs..." dir="ltr"></textarea>
+            <div class="hint">التوكن الخام من <code>localStorage.authToken</code> على <code>aff.safka-eg.com</code>. لا تضف كلمة Bearer — الـ API يرفضها.</div>
+          </div>
+          <div class="tk-field">
+            <label for="tk-api-base">API Base (اختياري)</label>
+            <input type="text" id="tk-api-base" placeholder="https://api.safka-eg.com/api/v1" dir="ltr" />
+            <div class="hint">اتركه فارغاً لاستخدام القيمة الافتراضية.</div>
+          </div>
+          <div class="tk-flex">
+            <button id="btn-save" class="tk-btn primary"><i class="fa-solid fa-floppy-disk"></i> حفظ البيانات</button>
+            <button id="btn-clear" class="tk-btn danger"><i class="fa-solid fa-trash-can"></i> مسح البيانات</button>
+            <button id="btn-health" class="tk-btn outline"><i class="fa-solid fa-stethoscope"></i> اختبار الاتصال بـ Safka</button>
+          </div>
+          <div id="tk-health" class="tk-health"></div>
+        </div>
+
+        <div class="tk-card">
+          <h2><i class="fa-solid fa-robot"></i> مفتاح الذكاء الاصطناعي (AI API Key)</h2>
+          <div class="tk-field">
+            <label for="tk-ai-key">مفتاح API (اختياري)</label>
+            <input type="text" id="tk-ai-key" placeholder="مثال: sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" dir="ltr" />
+            <div class="hint">يُستخدم لتوليد محتوى المنتجات. اتركه فارغاً لاستخدام المولّد الافتراضي.</div>
+          </div>
+          <button id="btn-save-ai" class="tk-btn primary"><i class="fa-solid fa-floppy-disk"></i> حفظ مفتاح AI</button>
+        </div>
+
+        <div class="tk-card" id="tk-parser-card">
+          <h2><i class="fa-solid fa-microchip"></i> استخراج البيانات من JSON أو التوكن</h2>
+          <p style="font-size:0.85rem;color:var(--muted,#667085);margin:0 0 12px;">الصق التوكن الخام أو استجابة تسجيل الدخول (JSON) — اضغط "استخراج" لملء الحقول تلقائياً.</p>
+          <div class="tk-field">
+            <textarea id="tk-parser-input" rows="4" placeholder='{"data":{"authToken":"eyJ...","user":{"_id":"...","role":"marketer"}}}' dir="ltr"></textarea>
+          </div>
+          <div class="tk-flex">
+            <button id="btn-parse" class="tk-btn primary"><i class="fa-solid fa-search"></i> استخراج البيانات</button>
+            <button id="btn-clear-parse" class="tk-btn secondary"><i class="fa-solid fa-eraser"></i> مسح</button>
+          </div>
+          <div id="tk-parse-results" style="display:none;margin-top:16px;">
+            <hr style="border:none;border-top:1px solid var(--border,#d8dee9);margin:0 0 14px;">
+            <div class="tk-info-grid" id="tk-parse-grid"></div>
+          </div>
+        </div>
+
+        <div class="tk-card">
+          <h2><i class="fa-solid fa-rotate"></i> مزامنة مع Supabase Secrets</h2>
+          <p style="font-size:0.85rem;color:var(--muted,#667085);margin:0 0 12px;">تحديث <code>SAFKA_AUTH_TOKEN</code> و <code>SAFKA_ACCOUNT_ID</code> و <code>SAFKA_API_BASE</code> ثم إعادة نشر Edge Function <code>safka-proxy</code>. يتم توليد ملف .bat ينفّذ الأمرين تلقائياً.</p>
+          <button id="btn-sync-secrets" class="tk-btn secondary"><i class="fa-solid fa-cloud-upload-alt"></i> تحديث Supabase Secrets</button>
+          <div style="margin-top:12px;font-size:0.78rem;color:var(--muted,#667085);line-height:2;">
+            <div><i class="fa-solid fa-terminal"></i> الأمر اليدوي:</div>
+            <code style="display:block;background:var(--surface-muted,#f0f0f0);padding:6px 10px;border-radius:6px;direction:ltr;text-align:left;margin-top:4px;">supabase secrets set --project-ref msgqzgzoslearaprgiqq SAFKA_AUTH_TOKEN="..." SAFKA_ACCOUNT_ID="..." SAFKA_API_BASE="..."</code>
+            <code style="display:block;background:var(--surface-muted,#f0f0f0);padding:6px 10px;border-radius:6px;direction:ltr;text-align:left;margin-top:6px;">supabase functions deploy safka-proxy --project-ref msgqzgzoslearaprgiqq --no-verify-jwt</code>
+          </div>
+        </div>
+
+        <div class="tk-card">
+          <h2><i class="fa-solid fa-list-check"></i> ماذا يمكن سحبه من Safka؟ وكيف؟</h2>
+          <p style="font-size:0.84rem;color:var(--muted,#667085);margin:0 0 12px;line-height:1.9;">
+            كل البيانات تأتي من استدعاء واحد: <code style="direction:ltr;display:inline-block;">GET /products/get_products</code> — لا حاجة لاستدعاء تفاصيل منفصل لكل منتج.
+            الصور تُبنى بإضافة البادئة <code style="direction:ltr;display:inline-block;">https://safka.fra1.cdn.digitaloceanspaces.com/</code> إلى المسار النسبي.
+          </p>
+          <div style="overflow-x:auto;">
+            <table class="tk-map">
+              <thead>
+                <tr>
+                  <th>الحقل في متجرك</th>
+                  <th>المصدر في Safka</th>
+                  <th>طريقة التحويل / الحفظ</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>اسم المنتج</td>
+                  <td><code>name</code></td>
+                  <td>يُحفظ مباشرة في <code>name</code> بعد فك ترميز HTML.</td>
+                </tr>
+                <tr>
+                  <td>الوصف</td>
+                  <td><code>description</code> (HTML)</td>
+                  <td>يُحوّل إلى نص نظيف في <code>description</code>، ويُستخدم أيضاً لاستخراج التفاصيل السريعة وأفكار المحتوى.</td>
+                </tr>
+                <tr>
+                  <td>معلومات عامة</td>
+                  <td><code>category.name</code>، <code>merchant.name</code>، <code>product_type</code>، <code>labels</code>، <code>min_quantity</code>، <code>availability_type</code></td>
+                  <td>تُحفظ في <code>category</code> و<code>brand</code> و<code>vendor</code> و<code>safka_product_type</code> و<code>safka_labels</code> و<code>safka_min_quantity</code> و<code>safka_availability_type</code>.</td>
+                </tr>
+                <tr>
+                  <td>السعر</td>
+                  <td><code>sale_price</code> (تكلفة المورد) + <code>note</code> (سعر البيع المقترح) + <code>properties[].sale_price</code></td>
+                  <td>افتراضياً <code>price = sale_price</code>. عند تفعيل خيار «سعر البيع المقترح» يصبح <code>price</code> هو المقترح. التكلفة والمقترح يُحفظان دائماً في <code>safka_cost_price</code> و<code>safka_suggested_price</code>.</td>
+                </tr>
+                <tr>
+                  <td>خصومات الكميات</td>
+                  <td><code>discount_rules[]</code> — <code>qty</code>، <code>sale_price</code> (سعر الوحدة بعد الخصم)، <code>discount</code>، <code>name</code></td>
+                  <td>تُحفظ في جدول <code>safka_quantity_discounts</code> (صف لكل كمية) مع حساب النسبة وإجمالي قبل الخصم.</td>
+                </tr>
+                <tr>
+                  <td>الكمية / المخزون</td>
+                  <td><code>properties[].value</code> للمتغيرات التي <code>is_available !== false</code>، و<code>availability_type</code></td>
+                  <td>يُجمع مخزون كل المتغيرات في <code>stock</code>. إذا كان <code>availability_type = unavailable</code> أو لا توجد متغيرات متاحة تصبح الكمية 0. الحالة: <code>out_of_stock</code> / <code>low_stock</code> / <code>in_stock</code>.</td>
+                </tr>
+                <tr>
+                  <td>الصور</td>
+                  <td><code>images[]</code> + <code>image</code></td>
+                  <td>كل الصور الفريدة تُحفظ في <code>images</code>، وأول 8 صور في <code>image1..image8</code> مع <code>image</code>. الروابط كاملة بعد إضافة CDN.</td>
+                </tr>
+                <tr>
+                  <td>كود المنتج</td>
+                  <td><code>barcode</code></td>
+                  <td>يُحفظ في <code>safka_code</code> كما هو (كود Safka الحقيقي).</td>
+                </tr>
+                <tr>
+                  <td>الفيديو</td>
+                  <td><span class="no">لا يوجد</span> حقل فيديو في Safka</td>
+                  <td>يُترك <code>videos = []</code> للتوافق مع نفس شكل <code>taager_products</code>. أزرار الفيديو معطّلة، والفيديو غير محسوب في اكتمال المنتج.</td>
+                </tr>
+                <tr>
+                  <td>تفاصيل سريعة / أفكار محتوى / طريقة استخدام</td>
+                  <td><code>description</code> + <code>faqs[]</code></td>
+                  <td>تُستخرج تلقائياً: أول فقرة مفيدة للتفاصيل السريعة، قسم المميزات لأفكار المحتوى، وقسم طريقة الاستخدام أو سؤال/جواب مطابق من الـ FAQ. يمكن تعديلها يدوياً من صفحة التدقيق.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="font-size:0.78rem;color:var(--muted,#667085);margin:12px 0 0;line-height:1.9;">
+            <i class="fa-solid fa-circle-info"></i>
+            الحقول التي لا يوفّرها Safka مباشرة (الفيديو، بعض تفاصيل المحتوى) تبقى بقيم افتراضية أو تُستخرج من الوصف، ويمكن تعديلها يدوياً من صفحة التدقيق.
+          </p>
+        </div>
+
+        <div class="tk-card" style="border:1.5px solid #fde68a;background:#fffbeb;">
+          <h2 style="color:#92400e;"><i class="fa-solid fa-triangle-exclamation" style="color:#d97706;"></i> خطوات التشغيل لأول مرة</h2>
+          <ol style="font-size:0.84rem;color:#78350f;line-height:2;margin:0;padding-inline-start:20px;">
+            <li>شغّل ملف <code>sql/create_safka_products.sql</code> في Supabase SQL Editor (مرة واحدة) — ينشئ <code>safka_products</code> و<code>safka_quantity_discounts</code> و<code>safka_settings</code>.</li>
+            <li>احفظ التوكن هنا (يُحفظ في <code>safka_settings</code>) ثم اضغط "تحديث Supabase Secrets" لنسخه إلى Secrets أيضاً.</li>
+            <li>افتح ملف <code>.bat</code> الناتج لإعداد الـ Secrets ونشر <code>safka-proxy</code>.</li>
+            <li>ارجع هنا واضغط "اختبار الاتصال بـ Safka" — يجب أن يظهر <code>ping.ok = true</code>.</li>
+            <li>افتح صفحة <a href="admin-safka-verify.html" style="color:#b45309;font-weight:700;">تدقيق Safka</a> واضغط "سحب جميع المنتجات من Safka".</li>
+          </ol>
+        </div>
+      </section>
+    </main>
+    <script>
+      var SB_URL = "https://msgqzgzoslearaprgiqq.supabase.co";
+      var SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE";
+      var EDGE_URL = SB_URL + "/functions/v1/safka-proxy";
+      var DEFAULT_API_BASE = "https://api.safka-eg.com/api/v1";
+
+      var _sb;
+      try {
+        _sb = window._getSupabaseClient ? window._getSupabaseClient() : (window.__sb || window.supabase.createClient(SB_URL, SB_ANON));
+      } catch (e) {
+        _sb = window.supabase.createClient(SB_URL, SB_ANON);
+      }
+
+      function notify(msg, type) {
+        var el = document.getElementById("tk-status");
+        el.textContent = msg;
+        el.className = "tk-status show " + type;
+        if (type !== "error") setTimeout(function () { el.classList.remove("show"); }, 5000);
+      }
+
+      function explainSettingsError(message) {
+        var msg = String(message || "");
+        if (/safka_settings|schema cache|does not exist|PGRST205|42P01/i.test(msg)) {
+          return 'جدول safka_settings غير موجود. شغّل الملف "sql/create_safka_products.sql" في Supabase SQL Editor أولاً.';
+        }
+        if (/row-level security|42501|permission denied/i.test(msg)) {
+          return 'لا توجد صلاحية كتابة على safka_settings. أعد تشغيل "sql/create_safka_products.sql" لتحديث سياسات RLS.';
+        }
+        return msg;
+      }
+
+      function getVal(key) {
+        return document.getElementById("tk-" + key).value.trim();
+      }
+
+      function setVal(key, val) {
+        document.getElementById("tk-" + key).value = val || "";
+      }
+
+      function decodeJWT(token) {
+        try {
+          var parts = String(token || "").split(".");
+          if (parts.length !== 3) return null;
+          var base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+          var padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
+          return JSON.parse(decodeURIComponent(escape(atob(padded))));
+        } catch (e) {
+          try {
+            return JSON.parse(atob(parts[1]));
+          } catch (e2) {
+            return null;
+          }
+        }
+      }
+
+      function parseExpDate(exp) {
+        if (!exp) return { text: "غير محدد", expired: false };
+        var d = new Date(exp * 1000);
+        var now = new Date();
+        return {
+          text: d.toLocaleDateString("ar-EG") + " " + d.toLocaleTimeString("ar-EG"),
+          expired: d < now
+        };
+      }
+
+      function tokenSummary(token) {
+        var payload = decodeJWT(token);
+        var exp = payload && payload.exp ? parseExpDate(payload.exp) : { text: "غير محدد", expired: false };
+        return {
+          payload: payload,
+          accountId: payload ? String(payload.id || payload._id || payload.userId || "") : "",
+          role: payload && payload.role ? String(payload.role) : "",
+          exp: exp
+        };
+      }
+
+      async function loadSettings() {
+        var { data, error } = await _sb.from("safka_settings").select("key, value");
+        if (error) {
+          // المتصفح يقرأ من app_settings كنسخة قديمة فقط إذا لم يُشغّل SQL بعد.
+          var fallback = await _sb.from("app_settings").select("key, value");
+          if (fallback.error) {
+            notify("فشل تحميل الإعدادات: " + explainSettingsError(error.message || fallback.error.message), "error");
+            return;
+          }
+          data = fallback.data;
+          notify(explainSettingsError(error.message), "error");
+        }
+        if (!Array.isArray(data)) data = [];
+
+        var map = {};
+        data.forEach(function (r) { if (r && r.key) map[r.key] = r.value; });
+
+        var token = map.safka_auth_token || "";
+        var accountId = map.safka_account_id || "";
+        var apiBase = map.safka_api_base || DEFAULT_API_BASE;
+
+        setVal("token", token);
+        setVal("account-id", accountId);
+        setVal("api-base", map.safka_api_base || "");
+        setVal("ai-key", map.ai_api_key || "");
+
+        var summary = tokenSummary(token);
+        if (!accountId && summary.accountId) accountId = summary.accountId;
+
+        document.getElementById("info-account-id").textContent = accountId || "--";
+        document.getElementById("info-role").textContent = summary.role || "--";
+        document.getElementById("info-api-base").textContent = apiBase;
+        document.getElementById("info-token").textContent = token ? token.substring(0, 60) + "..." : "--";
+
+        var statusEl = document.getElementById("info-token-status");
+        if (!token) {
+          statusEl.innerHTML = '<span class="tk-badge empty">فارغ</span>';
+        } else if (summary.payload && summary.payload.exp) {
+          statusEl.innerHTML = summary.exp.expired
+            ? '<span class="tk-badge expired">منتهي الصلاحية (انتهى ' + summary.exp.text + ')</span>'
+            : '<span class="tk-badge ok">ساري المفعول (ينتهي ' + summary.exp.text + ')</span>';
+        } else {
+          statusEl.innerHTML = '<span class="tk-badge ok">موجود</span>';
+        }
+      }
+
+      document.getElementById("btn-save").addEventListener("click", async function () {
+        var token = getVal("token");
+        var accountId = getVal("account-id");
+        var apiBase = getVal("api-base");
+
+        if (!token) {
+          notify("يرجى إدخال توكن Safka أولاً.", "error");
+          return;
+        }
+
+        var summary = tokenSummary(token);
+        if (!accountId && summary.accountId) accountId = summary.accountId;
+
+        var btn = this;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جارٍ الحفظ...';
+
+        try {
+          var nowIso = new Date().toISOString();
+          var entries = [
+            { key: "safka_auth_token", value: token },
+            { key: "safka_account_id", value: accountId || "" },
+            { key: "safka_api_base", value: apiBase || DEFAULT_API_BASE },
+            { key: "safka_token_exp", value: summary.payload && summary.payload.exp ? String(summary.payload.exp) : "" }
+          ];
+          for (var i = 0; i < entries.length; i++) {
+            entries[i].updated_at = nowIso;
+            var { error } = await _sb.from("safka_settings").upsert(entries[i], { onConflict: "key" });
+            if (error) throw error;
+          }
+          await loadSettings();
+          notify("تم حفظ توكن Safka بنجاح. اضغط \"اختبار الاتصال\" للتأكد.", "success");
+        } catch (e) {
+          notify("فشل الحفظ: " + explainSettingsError(e.message || e), "error");
+        }
+
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> حفظ البيانات';
+      });
+
+      document.getElementById("btn-save-ai").addEventListener("click", async function () {
+        var aiKey = getVal("ai-key");
+        var btn = this;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جارٍ الحفظ...';
+        try {
+          var { error } = await _sb.from("safka_settings").upsert(
+            { key: "ai_api_key", value: aiKey, updated_at: new Date().toISOString() },
+            { onConflict: "key" }
+          );
+          if (error) throw error;
+          try { localStorage.setItem("_aiApiKey", aiKey); } catch (_e) {}
+          // نسخة اختيارية للصفحات القديمة — تفشل بهدوء إذا كانت app_settings مقفولة.
+          try { await _sb.from("app_settings").upsert({ key: "ai_api_key", value: aiKey }, { onConflict: "key" }); } catch (_e) {}
+          notify("تم حفظ مفتاح AI. ساري المفعول فوراً.", "success");
+        } catch (e) {
+          notify("فشل الحفظ: " + explainSettingsError(e.message || e), "error");
+        }
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> حفظ مفتاح AI';
+      });
+
+      document.getElementById("btn-clear").addEventListener("click", async function () {
+        if (!confirm("مسح جميع بيانات Safka؟")) return;
+        var btn = this;
+        btn.disabled = true;
+        try {
+          var keys = ["safka_auth_token", "safka_account_id", "safka_api_base", "safka_token_exp"];
+          var { error } = await _sb.from("safka_settings").delete().in("key", keys);
+          if (error) throw error;
+          try { await _sb.from("app_settings").delete().in("key", keys); } catch (_e) {}
+          await loadSettings();
+          document.getElementById("tk-health").className = "tk-health";
+          notify("تم مسح بيانات Safka.", "info");
+        } catch (e) {
+          notify("فشل المسح: " + explainSettingsError(e.message || e), "error");
+        }
+        btn.disabled = false;
+      });
+
+      document.getElementById("btn-health").addEventListener("click", async function () {
+        var btn = this;
+        var box = document.getElementById("tk-health");
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جارٍ الاختبار...';
+        box.className = "tk-health show";
+        box.textContent = "جارٍ الاتصال بالوسيط...";
+
+        try {
+          var res = await fetch(EDGE_URL + "?action=health&ping=1", {
+            headers: { apikey: SB_ANON, Authorization: "Bearer " + SB_ANON }
+          });
+          var text = await res.text();
+          var json;
+          try { json = JSON.parse(text); } catch (e) { json = { raw: text.substring(0, 500) }; }
+
+          if (!res.ok) {
+            box.className = "tk-health show bad";
+            box.innerHTML =
+              "<strong>فشل الاختبار (HTTP " + res.status + ")</strong><br>" +
+              "تأكد من نشر Edge Function <code>safka-proxy</code>.<br>" +
+              "<code>" + escapeHtml(text.substring(0, 400)) + "</code>";
+          } else {
+            var ping = json.ping || {};
+            var ok = ping.ok === true;
+            box.className = "tk-health show " + (ok ? "ok" : "bad");
+            box.innerHTML =
+              "<strong>" + (ok ? "الاتصال بـ Safka ناجح" : "الوسيط يعمل لكن Safka رفض الطلب") + "</strong><br>" +
+              "مصدر التوكن: <code>" + escapeHtml(String(json.token_source || "-")) + "</code><br>" +
+              "معرف الحساب: <code>" + escapeHtml(String(json.account_id || "-")) + "</code><br>" +
+              "الدور: <code>" + escapeHtml(String(json.role || "-")) + "</code><br>" +
+              "انتهاء التوكن: <code>" + escapeHtml(String(json.expires_at || "-")) + "</code><br>" +
+              (ping.ok
+                ? "عدد المنتجات في Safka: <code>" + escapeHtml(String(ping.total_items || 0)) + "</code>"
+                : "خطأ: <code>" + escapeHtml(String(ping.error || json.error || "-")) + "</code>" +
+                  (ping.code ? " — الكود: <code>" + escapeHtml(String(ping.code)) + "</code>" : ""));
+          }
+        } catch (e) {
+          box.className = "tk-health show bad";
+          box.innerHTML = "<strong>تعذر الوصول للوسيط</strong><br><code>" + escapeHtml(String(e.message || e)) + "</code>";
+        }
+
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-stethoscope"></i> اختبار الاتصال بـ Safka';
+      });
+
+      function escapeHtml(str) {
+        return String(str == null ? "" : str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function downloadFile(filename, content) {
+        try {
+          var blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement("a");
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          return true;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      document.getElementById("btn-sync-secrets").addEventListener("click", function () {
+        var token = getVal("token");
+        var accountId = getVal("account-id");
+        var apiBase = getVal("api-base") || DEFAULT_API_BASE;
+
+        if (!token) {
+          notify("يرجى إدخال توكن Safka أولاً.", "error");
+          return;
+        }
+
+        var summary = tokenSummary(token);
+        if (!accountId && summary.accountId) accountId = summary.accountId;
+
+        var PROJECT_REF = "msgqzgzoslearaprgiqq";
+        var cmd = 'supabase secrets set --project-ref ' + PROJECT_REF +
+          ' SAFKA_AUTH_TOKEN="' + token + '"' +
+          ' SAFKA_ACCOUNT_ID="' + accountId + '"' +
+          ' SAFKA_API_BASE="' + apiBase + '"';
+        var deployCmd = "supabase functions deploy safka-proxy --project-ref " + PROJECT_REF + " --no-verify-jwt";
+
+        var batContent = "@echo off\r\nchcp 65001 >nul 2>nul\r\necho ====================================\r\necho  Buda - تحديث Supabase Secrets لـ Safka\r\necho ====================================\r\necho.\r\nwhere supabase >nul 2>nul\r\nif %errorlevel% neq 0 (\r\n  echo [خطأ] لم يتم العثور على أمر supabase.\r\n  echo تأكد من تثبيت Supabase CLI: https://supabase.com/docs/guides/cli\r\n  echo أو شغّل الأمر التالي يدوياً في terminal مجلد المشروع:\r\n  echo.\r\n  echo   " + cmd + "\r\n  echo.\r\n  echo ثم:\r\n  echo   " + deployCmd + "\r\n  pause\r\n  exit /b 1\r\n)\r\necho [1/2] جاري تحديث Supabase Secrets...\r\necho.\r\n" + cmd + "\r\nif %errorlevel% neq 0 (\r\n  echo.\r\n  echo [خطأ] فشل تحديث الـ Secrets.\r\n  pause\r\n  exit /b 1\r\n)\r\necho.\r\necho [تم] تم تحديث الـ Secrets بنجاح!\r\necho.\r\necho [2/2] جاري إعادة نشر الـ Edge Function...\r\n" + deployCmd + "\r\nif %errorlevel% neq 0 (\r\n  echo.\r\n  echo [تحذير] فشل نشر الـ Edge Function. حاول يدوياً:\r\n  echo   " + deployCmd + "\r\n  pause\r\n  exit /b 1\r\n)\r\necho.\r\necho ====================================\r\necho  تم كل شيء بنجاح!\r\necho ====================================\r\necho.\r\npause\r\n";
+
+        if (downloadFile("update-safka-secrets.bat", batContent)) {
+          notify("تم تحميل ملف update-safka-secrets.bat — افتحه لتشغيل التحديث تلقائياً.", "success");
+        } else {
+          alert("انسخ الأمرين التاليين وشغّلهما في terminal:\n\n" + cmd + "\n\n" + deployCmd);
+          try { navigator.clipboard.writeText(cmd); notify("تم نسخ الأمر للحافظة.", "info"); } catch (_e) {}
+        }
+      });
+
+      function buildParseGrid(items) {
+        var grid = document.getElementById("tk-parse-grid");
+        if (!items || !items.length) {
+          grid.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted,#667085);font-size:0.85rem;">لم يتم العثور على بيانات</div>';
+          return;
+        }
+        grid.innerHTML = items.map(function (item) {
+          var val = String(item.value == null ? "" : item.value);
+          var extra = "";
+          if (item.expired !== undefined) {
+            extra = item.expired
+              ? ' <span class="tk-badge expired" style="font-size:0.7rem;">منتهي</span>'
+              : ' <span class="tk-badge ok" style="font-size:0.7rem;">ساري</span>';
+          }
+          var copyBtn = val
+            ? '<button class="tk-inline-copy" data-val="' + val.replace(/"/g, "&quot;") + '" title="نسخ"><i class="fa-solid fa-copy"></i></button>'
+            : "";
+          return '<div class="tk-pr"><div class="tk-pr-lbl">' + item.label + extra + '</div><div class="tk-pr-val">' +
+            (item.truncated ? val.substring(0, 90) + '...' : val) +
+            '</div><div class="tk-pr-act">' + copyBtn + '</div></div>';
+        }).join("");
+      }
+
+      function pickToken(obj) {
+        if (!obj || typeof obj !== "object") return "";
+        var keys = ["authToken", "accessToken", "access_token", "token", "jwt", "idToken", "id_token"];
+        for (var i = 0; i < keys.length; i++) {
+          if (typeof obj[keys[i]] === "string" && obj[keys[i]].split(".").length === 3) return obj[keys[i]];
+        }
+        var nested = [obj.data, obj.user, obj.result, obj.payload, obj.session];
+        for (var j = 0; j < nested.length; j++) {
+          var found = pickToken(nested[j]);
+          if (found) return found;
+        }
+        return "";
+      }
+
+      function parseInput() {
+        var input = document.getElementById("tk-parser-input").value.trim();
+        if (!input) {
+          notify("الصق البيانات أولاً.", "error");
+          return;
+        }
+
+        var items = [];
+        var foundToken = "";
+        var foundAccountId = "";
+        var foundRole = "";
+
+        try {
+          var parsed = JSON.parse(input);
+          var d = parsed.data || parsed.user || parsed;
+
+          foundToken = pickToken(parsed);
+
+          var idCandidates = [d.id, d._id, d.userId, d.accountId, parsed.id, parsed._id];
+          for (var i = 0; i < idCandidates.length; i++) {
+            if (idCandidates[i]) { foundAccountId = String(idCandidates[i]); break; }
+          }
+          var roleCandidates = [d.role, parsed.role, d.userType, parsed.userType];
+          for (var r = 0; r < roleCandidates.length; r++) {
+            if (roleCandidates[r]) { foundRole = String(roleCandidates[r]); break; }
+          }
+
+          if (foundAccountId) items.push({ label: "معرف الحساب (Safka ID)", value: foundAccountId });
+          if (foundRole) items.push({ label: "الدور (Role)", value: foundRole });
+          if (d.name) items.push({ label: "الاسم", value: d.name });
+          if (d.email) items.push({ label: "البريد الإلكتروني", value: d.email });
+          if (d.phone) items.push({ label: "الهاتف", value: d.phone });
+
+          if (foundToken) {
+            var summary = tokenSummary(foundToken);
+            if (!foundAccountId && summary.accountId) {
+              foundAccountId = summary.accountId;
+              items.push({ label: "معرف الحساب (من JWT)", value: foundAccountId });
+            }
+            if (!foundRole && summary.role) {
+              foundRole = summary.role;
+              items.push({ label: "الدور (من JWT)", value: foundRole });
+            }
+            if (summary.payload && summary.payload.exp) {
+              items.push({ label: "تاريخ انتهاء التوكن", value: summary.exp.text, expired: summary.exp.expired });
+            }
+            items.push({ label: "Safka Auth Token", value: foundToken, truncated: true });
+          }
+        } catch (_e) {
+          var summary2 = tokenSummary(input);
+          if (summary2.payload) {
+            foundToken = input;
+            if (summary2.accountId) {
+              foundAccountId = summary2.accountId;
+              items.push({ label: "معرف الحساب (Safka ID)", value: foundAccountId });
+            }
+            if (summary2.role) {
+              foundRole = summary2.role;
+              items.push({ label: "الدور (Role)", value: foundRole });
+            }
+            if (summary2.payload.exp) {
+              items.push({ label: "تاريخ انتهاء التوكن", value: summary2.exp.text, expired: summary2.exp.expired });
+            }
+            items.push({ label: "Safka Auth Token", value: foundToken, truncated: true });
+          }
+        }
+
+        if (!items.length) {
+          notify("لم نتمكن من استخراج أي بيانات. تأكد من أنك الصقت JSON أو JWT صحيح.", "error");
+          return;
+        }
+
+        if (foundAccountId) setVal("account-id", foundAccountId);
+        if (foundToken) setVal("token", foundToken);
+
+        document.getElementById("tk-parse-results").style.display = "block";
+        buildParseGrid(items);
+        notify("تم استخراج " + items.length + " حقل بنجاح. اضغط حفظ البيانات.", "success");
+      }
+
+      document.getElementById("btn-parse").addEventListener("click", parseInput);
+      document.getElementById("btn-clear-parse").addEventListener("click", function () {
+        document.getElementById("tk-parser-input").value = "";
+        document.getElementById("tk-parse-results").style.display = "none";
+      });
+
+      document.getElementById("tk-parse-grid").addEventListener("click", function (e) {
+        var btn = e.target.closest(".tk-inline-copy");
+        if (!btn) return;
+        var val = btn.getAttribute("data-val");
+        if (!val) return;
+        try {
+          navigator.clipboard.writeText(val);
+          notify("تم النسخ!", "info");
+        } catch (_e) {
+          var ta = document.createElement("textarea");
+          ta.value = val;
+          ta.style.position = "fixed";
+          ta.style.left = "-9999px";
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+          notify("تم النسخ!", "info");
+        }
+      });
+
+      loadSettings();
+    </script>
+  </body>
+</html>

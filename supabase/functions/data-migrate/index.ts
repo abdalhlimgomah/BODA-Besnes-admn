@@ -305,6 +305,39 @@ async function readPageForStep(
   return { rows: page, nextLastId, done };
 }
 
+// قراءة صفحة واحدة من سيرفر خارجي (هدف في MIG_TARGETS) عبر مفتاح خدمته.
+// تُستخدم لسحب صفوف السيرفرات الأخرى إلى السيرفر الحالي (المنسّق).
+async function readPageFromTarget(
+  target: Target,
+  table: string,
+  lastIdStr: string | null,
+  limit: number
+): Promise<{ rows: Record<string, unknown>[]; nextLastId: string | null; done: boolean }> {
+  let url = `${target.url}/rest/v1/${table}?select=*&order=id.asc&limit=${limit}`;
+  if (lastIdStr) url += `&id=gt.${encodeURIComponent(lastIdStr)}`;
+  const res = await fetch(url, { headers: restHeaders(target.key) });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    // جدول بلا عمود id (مفتاح مركّب) → نجلبه كاملًا مرة واحدة (عادةً صغير).
+    // فقط عند خطأ "العمود id غير موجود"، وإلا نُظهر الخطأ الحقيقي (حتى لا تُفقد صفوف).
+    const noIdCol = res.status === 400 && /(42703|does not exist|غير موجود)/i.test(text);
+    if (noIdCol) {
+      const all = await fetch(`${target.url}/rest/v1/${table}?select=*`, { headers: restHeaders(target.key) });
+      if (all.ok) {
+        const pageAll = (await all.json().catch(() => [])) as Record<string, unknown>[];
+        return { rows: pageAll, nextLastId: null, done: true };
+      }
+      const allText = await all.text().catch(() => "");
+      throw new Error(`قراءة ${table} من الهدف فشل: ${all.status} ${allText.slice(0, 200)}`);
+    }
+    throw new Error(`قراءة ${table} من الهدف فشل: ${res.status} ${text.slice(0, 200)}`);
+  }
+  const page = (await res.json().catch(() => [])) as Record<string, unknown>[];
+  const done = page.length < limit;
+  const nextLastId = page.length ? String(page[page.length - 1].id) : lastIdStr;
+  return { rows: page, nextLastId, done };
+}
+
 function chunk<T>(arr: T[], size: number): T[][] {
   const out: T[][] = [];
   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
@@ -371,7 +404,7 @@ async function importToTarget(
         const resolution = updateMode ? "merge-duplicates" : "ignore-duplicates";
         const res = await fetch(`${target.url}/rest/v1/${table}`, {
           method: "POST",
-          headers: { ...restHeaders(target.key), Prefer: `${resolution},return=minimal` },
+          headers: { ...restHeaders(target.key), Prefer: `resolution=${resolution},return=minimal` },
           body: JSON.stringify(payloadRows),
         });
         if (!res.ok) {
@@ -381,7 +414,7 @@ async function importToTarget(
         inserted += part.length - present;
         existing += present;
       } catch (e) {
-        errors.push(`حزمة ${part.length} صف: رفض RPC ثم بديل REST: ${e instanceof Error ? e.message : String(e)}`);
+        errors.push(`حزمة ${part.length} صف: رفض RPC (${lastErr || "بلا تفاصيل"}) ثم بديل REST: ${e instanceof Error ? e.message : String(e)}`);
       }
       continue;
     }
@@ -1210,6 +1243,55 @@ async function handleMigrateStep(body: Record<string, unknown>) {
   });
 }
 
+// السحب بالمراحل: كل استدعاء يقرأ صفحة واحدة من سيرفر "مصدر" خارجي
+// (عبر مفتاحه في MIG_TARGETS) ويُدخلها في هذا السيرفر نفسه.
+// بهذه الطريقة يصبح السيرفر الحالي (المنسّق) جامعًا لكل صفوف السيرفرات.
+async function handlePullStep(body: Record<string, unknown>) {
+  const table = String(body.table || "");
+  if (!table || !REGISTRY.some((r) => r.name === table)) {
+    return jsonResponse({ error: "جدول غير مسموح به في النسخ." }, { status: 400 });
+  }
+  const sourceRef = String(body.source || "");
+  const target = getTargets().find((t) => t.name === sourceRef || t.url === sourceRef);
+  if (!target) {
+    return jsonResponse({ error: `مصدر غير معروف: ${sourceRef}` }, { status: 400 });
+  }
+  if (target.url === selfUrl()) {
+    return jsonResponse({ error: "المصدر هو نفس السيرفر الحالي." }, { status: 400 });
+  }
+  const mode = String(body.mode || "sync");
+  const updateMode = mode === "sync" || mode === "copy";
+  const limit = Math.min(Math.max(Number(body.limit) || PAGE_SIZE, 50), PAGE_SIZE);
+  const lastIdStr = body.lastId != null && String(body.lastId) !== "" ? String(body.lastId) : null;
+
+  const { rows, nextLastId, done } = await readPageFromTarget(target, table, lastIdStr, limit);
+
+  const selfTarget: Target = { name: "self", url: selfUrl(), key: selfKey() };
+  const r = await importToTarget(selfTarget, table, rows, updateMode);
+
+  if (done) {
+    try {
+      await setSequencesOnTarget(selfTarget, [table]);
+    } catch (e) {
+      console.warn("setSequences(self) warning", table, e);
+    }
+  }
+
+  return jsonResponse({
+    success: true,
+    table,
+    mode,
+    source: target.name,
+    rows: rows.length,
+    done,
+    nextLastId,
+    inserted: r.inserted,
+    existing: r.existing,
+    updated: r.updated,
+    errors: r.errors.slice(0, 20),
+  });
+}
+
 function labelOf(table: string): string {
   return REGISTRY.find((r) => r.name === table)?.label || table;
 }
@@ -1246,6 +1328,15 @@ Deno.serve(async (req) => {
         return jsonResponse({ error: "توكن الأدمن غير صالح." }, { status: 401 });
       }
       return await handleMigrateStep(body);
+    }
+
+    if (action === "pull-step") {
+      const token = String(body.adminToken || "");
+      const ok = await isValidAdminToken(token);
+      if (!ok) {
+        return jsonResponse({ error: "توكن الأدمن غير صالح." }, { status: 401 });
+      }
+      return await handlePullStep(body);
     }
 
     if (action === "fullinfo") {
