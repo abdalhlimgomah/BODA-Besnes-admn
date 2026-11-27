@@ -392,6 +392,61 @@
       return isReadMethod(method);
     }
 
+    function isCountRequest(url, init) {
+      if (String(url || "").indexOf("/rest/v1/") === -1) return false;
+      try {
+        const headers = init && init.headers;
+        const prefer = headers && typeof headers.get === "function" ? headers.get("Prefer") : (headers && headers.Prefer);
+        return /count=(exact|planned|estimated)/i.test(String(prefer || ""));
+      } catch (_e) {
+        return false;
+      }
+    }
+
+    // نرجّع استجابة تشبه HEAD تحمل content-range حتى يقرأ supabase-js العدد،
+    // بدون تغيير السيرفر المختار.
+    function asHeadCountResponse(response) {
+      if (!response || !response.ok) return response;
+      const contentRange = response.headers && response.headers.get("content-range");
+      if (!contentRange) return response;
+      try {
+        return new Response(null, {
+          status: 200,
+          statusText: "OK",
+          headers: new Headers(response.headers),
+        });
+      } catch (_e) {
+        return response;
+      }
+    }
+
+    // HEAD أو count=exact على جدول كبير يفشلان أحياناً بـ 500/timeout.
+    // نعيد المحاولة على نفس السيرفر بـ GET ثم بـ count=planned (السريع).
+    function retryCountOnSameServer(fetchThis, routedInput, init, method) {
+      const getInit = Object.assign({}, init || {}, { method: "GET" });
+      try {
+        const headers = new Headers(getInit.headers || {});
+        if (!headers.get("Range")) headers.set("Range", "0-0");
+        getInit.headers = headers;
+      } catch (_e) {}
+      return originalFetch.call(fetchThis, routedInput, getInit).then(function (getResponse) {
+        if (getResponse && getResponse.ok) {
+          return method === "HEAD" ? asHeadCountResponse(getResponse) : getResponse;
+        }
+        let plannedInit;
+        try {
+          plannedInit = Object.assign({}, getInit, { headers: new Headers(getInit.headers) });
+          const prefer = plannedInit.headers.get("Prefer") || "";
+          plannedInit.headers.set("Prefer", prefer.replace(/count=exact/i, "count=planned"));
+        } catch (_e) {
+          return getResponse;
+        }
+        return originalFetch.call(fetchThis, routedInput, plannedInit).then(function (plannedResponse) {
+          return method === "HEAD" ? asHeadCountResponse(plannedResponse) : plannedResponse;
+        });
+      });
+    }
+
     window.fetch = function (input, init) {
       const fetchThis = this;
       const retryInput = cloneFetchInput(input);
@@ -433,6 +488,15 @@
       }
 
       return originalFetch.call(fetchThis, routedInput, nextInit).then(function (response) {
+        // علاج عدّ المنتجات على نفس السيرفر: HEAD/count=exact قد يفشلان،
+        // نعيد المحاولة بـ GET ثم بـ count=planned بدون تحويل للسيرفر الثاني.
+        if (!bypassFailover &&
+            isCountRequest(url, nextInit) &&
+            response && isRecoverableStatus(response.status)) {
+          return retryCountOnSameServer(fetchThis, routedInput, nextInit, method)
+            .catch(function () { return response; });
+        }
+
         const primaryFailed =
           !bypassFailover &&
           requestBackend === "primary" &&
@@ -441,8 +505,10 @@
           isRecoverableStatus(response.status);
         if (!primaryFailed) return response;
 
-        return activateBackup("http-" + response.status).then(function () {
-          if (response.status === 402 || isSafeToRetry(url, method)) {
+        return activateBackup("http-" + response.status).then(function (target) {
+          // لا نعيد الطلب للاحتياطي إلا إذا حصل تحويل فعلي؛ مع الاختيار اليدوي
+          // يبقى target هو الأساسي، فيجب إرجاع نتيجة الأساسي كما هي.
+          if (target && target.name === "backup" && (response.status === 402 || isSafeToRetry(url, method))) {
             return retryToBackup(fetchThis, retryInput, nextInit, response.status === 402);
           }
           return response;
@@ -451,8 +517,8 @@
         const failedOnPrimary = !bypassFailover && requestBackend === "primary" && getActiveBackend().name === "primary";
         if (!failedOnPrimary) throw error;
 
-        return activateBackup("network").then(function () {
-          if (isSafeToRetry(url, method)) {
+        return activateBackup("network").then(function (target) {
+          if (target && target.name === "backup" && isSafeToRetry(url, method)) {
             return retryToBackup(fetchThis, retryInput, nextInit, false);
           }
           throw error;

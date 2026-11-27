@@ -109,8 +109,9 @@
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
       
-      // Use bypass header to skip failover routing
-      const response = await fetch(`${url}/rest/v1/`, {
+      // Use bypass header to skip failover routing.
+      // نفحص جدول حقيقي بدل جذر /rest/v1/ لأن الجذر يرجع 401 حتى والسيرفر شغال.
+      const response = await fetch(`${url}/rest/v1/taager_products?select=id&limit=1`, {
         method: "HEAD",
         signal: controller.signal,
         headers: {

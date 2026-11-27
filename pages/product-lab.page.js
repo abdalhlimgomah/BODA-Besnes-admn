@@ -39,8 +39,13 @@
       key: "sb_publishable_bHCWG6iYSkbONKG7HR6Rkw_UVZGsjUe",
     },
   ];
-  const SERVER_SCAN_CHUNK = 80;
-  const SERVER_ADD_CHUNK = 25;
+  // PostgREST يحدّ أقصى عدد صفوف في الاستجابة بـ 1000 على السيرفرات دي.
+  const SERVER_ID_PAGE = 1000;
+  const SERVER_FETCH_ID_CHUNK = 200;
+  const SERVER_ADD_CHUNK = 100;
+  // إضافة مئات الآلاف دفعة واحدة في المتصفح غير عملية؛ نضيف على دفعات
+  // ونترك زر «إضافة الناقص» جاهزًا للمتابعة.
+  const SERVER_ADD_BATCH = 2000;
 
   const SETTINGS_KEY = "productLabJumiaSettings.v2";
   const DB_NAME = "bodaJumiaLab";
@@ -48,8 +53,7 @@
   const PRODUCT_STORE = "products";
   const PAGE_SIZE = 60;
   const SAVED_PAGE_SIZE = 60;
-  const SAVED_FETCH_PAGE = 500;
-  const SAVED_FETCH_MAX = 6000;
+  const SAVED_FETCH_PAGE = 150;
   const SAVE_CHUNK = 40;
   const DEFAULT_SQL_FILE = "../sql/jumia-products.sql";
 
@@ -145,6 +149,10 @@
     savedByUrl: new Map(),
     savedIds: new Set(),
     savedVisible: SAVED_PAGE_SIZE,
+    savedTotal: 0,
+    savedNextFrom: 0,
+    savedHasMore: true,
+    savedLoadingMore: false,
     visibleCount: PAGE_SIZE,
     loadedSaved: false,
     loadingSaved: false,
@@ -205,6 +213,8 @@
   let savedSearchTimer = 0;
   let pauseResolve = null;
   let savedLoadPromise = null;
+  let savedLoadMorePromise = null;
+  let savedFetchPageSize = SAVED_FETCH_PAGE;
   let serverSyncTimer = 0;
   let serverSyncIds = new Set();
   let serverSyncRunning = false;
@@ -899,11 +909,15 @@
       if (base && candidates.indexOf(base) === -1) candidates.push(base);
     };
 
+    var isLocal = /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname);
+    // على localhost نجرب نفس الأصل أولًا (Live Server يعمل كـ proxy لـ /api/jumia)،
+    // حتى نتجنب طلب budoq.com المباشر المحجوب بـ CORS.
+    if (isLocal && /^https?:$/.test(window.location.protocol)) addCandidate(window.location.origin);
     addCandidate(el.apiBaseInput ? el.apiBaseInput.value : "");
     if (/^https?:$/.test(window.location.protocol)) addCandidate(window.location.origin);
     addCandidate("http://localhost:8788");
     addCandidate("http://127.0.0.1:8788");
-    addCandidate("https://budoq.com");
+    if (!isLocal) addCandidate("https://budoq.com");
 
     for (var index = 0; index < candidates.length; index += 1) {
       var base = candidates[index];
@@ -2832,7 +2846,7 @@
       } else {
         parts.push(state.products.length + " منتج مسحوب");
       }
-      if (state.saved.length) parts.push(state.saved.length + " محفوظ");
+      if (savedTotalCount()) parts.push(savedTotalCount() + " محفوظ");
       el.productsStatus.textContent = parts.join(" · ");
     }
   }
@@ -2847,10 +2861,10 @@
     if (el.statScraped) el.statScraped.textContent = plainNumber(state.products.length);
     if (el.statPending) el.statPending.textContent = plainNumber(pending);
     if (el.statSelected) el.statSelected.textContent = plainNumber(state.selected.size);
-    if (el.statSaved) el.statSaved.textContent = plainNumber(state.saved.length);
+    if (el.statSaved) el.statSaved.textContent = plainNumber(savedTotalCount());
     if (el.statChanged) el.statChanged.textContent = plainNumber(changed);
     if (el.productsTabCount) el.productsTabCount.textContent = plainNumber(state.products.length);
-    if (el.savedTabCount) el.savedTabCount.textContent = plainNumber(state.saved.length);
+    if (el.savedTabCount) el.savedTabCount.textContent = plainNumber(savedTotalCount());
     if (el.selectedCount) el.selectedCount.textContent = plainNumber(state.selected.size);
     if (el.selectAllCount) el.selectAllCount.textContent = plainNumber(filteredCount);
 
@@ -2968,6 +2982,13 @@
     var text = [error.message, error.details, error.hint].filter(Boolean).join(" ");
     if (code === "42703" || code === "PGRST204") return true;
     return /column .* does not exist|could not find the ['"]?.*['"]? column|schema cache/i.test(text);
+  }
+
+  function isStatementTimeout(error) {
+    if (!error) return false;
+    var code = String(error.code || "");
+    var text = [error.message, error.details, error.hint].filter(Boolean).join(" ");
+    return code === "57014" || /statement timeout|canceling statement/i.test(text);
   }
 
   function chunkList(list, size) {
@@ -3491,6 +3512,146 @@
   // Saved rows
   // ------------------------------------------------------------------
 
+  function savedTotalCount() {
+    return state.savedTotal > 0 ? state.savedTotal : state.saved.length;
+  }
+
+  function markJumiaColumnsMissing() {
+    state.hasJumiaColumns = false;
+    if (el.sqlStatusSelect && el.sqlStatusSelect.value !== "later") {
+      el.sqlStatusSelect.value = "later";
+      persistSettings();
+      updateSqlState();
+      updateSetupSummary();
+    }
+  }
+
+  function markJumiaColumnsRich() {
+    state.hasJumiaColumns = true;
+    if (el.sqlStatusSelect && el.sqlStatusSelect.value !== "done") {
+      el.sqlStatusSelect.value = "done";
+      persistSettings();
+      updateSqlState();
+      updateSetupSummary();
+    }
+  }
+
+  // العدد الحقيقي من السيرفر: count=planned سريع حتى مع مئات الآلاف من الصفوف،
+  // بينما count=exact يسبب statement timeout على السيرفر الأساسي.
+  async function fetchSavedTotal() {
+    var result = await supabaseClient
+      .from("taager_products")
+      .select("id", { count: "planned", head: true })
+      .eq("source", "jumia");
+    if (!result.error && typeof result.count === "number") return result.count;
+    var alternative = await supabaseClient
+      .from("taager_products")
+      .select("id", { count: "estimated", head: true })
+      .eq("source", "jumia");
+    if (!alternative.error && typeof alternative.count === "number") return alternative.count;
+    return 0;
+  }
+
+  // صفحة واحدة فقط من نفس السيرفر المختار، بدون ORDER BY (يسبب timeout).
+  // الترتيب في الواجهة محلي على الصفوف المحمّلة فقط.
+  async function fetchSavedPage(from, size) {
+    var useRich = state.hasJumiaColumns !== false;
+    var pageSize = Math.min(size, savedFetchPageSize || size);
+    var timeoutRetries = 0;
+    while (true) {
+      var result = await supabaseClient
+        .from("taager_products")
+        .select(useRich ? SAVED_RICH_COLUMNS : SAVED_BASE_COLUMNS)
+        .eq("source", "jumia")
+        .range(from, from + pageSize - 1);
+
+      if (result.error && useRich && isMissingColumnError(result.error)) {
+        markJumiaColumnsMissing();
+        useRich = false;
+        result = await supabaseClient
+          .from("taager_products")
+          .select(SAVED_BASE_COLUMNS)
+          .eq("source", "jumia")
+          .range(from, from + pageSize - 1);
+      }
+
+      if (result.error && isStatementTimeout(result.error) && timeoutRetries < 4) {
+        timeoutRetries += 1;
+        if (useRich) {
+          markJumiaColumnsMissing();
+          useRich = false;
+          result = await supabaseClient
+            .from("taager_products")
+            .select(SAVED_BASE_COLUMNS)
+            .eq("source", "jumia")
+            .range(from, from + pageSize - 1);
+        }
+        if (result.error && isStatementTimeout(result.error)) {
+          pageSize = Math.max(50, Math.floor(pageSize / 2));
+          savedFetchPageSize = pageSize;
+          continue;
+        }
+      }
+
+      if (result.error) throw result.error;
+      if (useRich) markJumiaColumnsRich();
+
+      var fetched = (result.data || []).length;
+      var rows = (result.data || []).filter(function (row) {
+        return row && row.id;
+      });
+      return { rows: rows, fetched: fetched, size: pageSize };
+    }
+  }
+
+  function appendSavedRows(rows) {
+    rows.forEach(function (row) {
+      if (state.savedById.has(row.id)) return;
+      state.saved.push(row);
+      state.savedById.set(row.id, row);
+      state.savedIds.add(row.id);
+      var url = savedRowUrl(row);
+      if (url) state.savedByUrl.set(urlKey(url), row);
+    });
+  }
+
+  async function loadMoreSaved() {
+    if (savedLoadMorePromise) return savedLoadMorePromise;
+    if (state.savedLoadingMore || !state.loadedSaved || !state.savedHasMore) return;
+
+    state.savedLoadingMore = true;
+    if (el.savedMoreBtn) el.savedMoreBtn.disabled = true;
+    savedLoadMorePromise = (async function () {
+      try {
+        var page = await fetchSavedPage(state.savedNextFrom, SAVED_FETCH_PAGE);
+        appendSavedRows(page.rows);
+        state.savedNextFrom += page.fetched;
+        if (page.fetched < page.size) state.savedHasMore = false;
+        if (state.savedTotal > 0 && state.savedNextFrom >= state.savedTotal) {
+          state.savedHasMore = false;
+        }
+        state.savedVisible = Math.max(state.savedVisible, filterSavedRows().length);
+        recomputeChangedFlags();
+        renderSaved();
+        renderGrid();
+        updateStats();
+      } catch (error) {
+        log("load more saved failed: " + (error && error.message ? error.message : error), "error");
+        if (el.savedStatus) {
+          el.savedStatus.textContent =
+            "تعذر جلب صفوف إضافية: " + (error && error.message ? error.message : error);
+        }
+      } finally {
+        state.savedLoadingMore = false;
+        if (el.savedMoreBtn) el.savedMoreBtn.disabled = false;
+      }
+    })();
+
+    return savedLoadMorePromise.finally(function () {
+      savedLoadMorePromise = null;
+    });
+  }
+
   function loadSavedIndex(options) {
     var opts = options || {};
     if (opts.force) state.hasJumiaColumns = null;
@@ -3501,93 +3662,35 @@
       if (state.loadedSaved && !opts.force) return true;
 
       state.loadingSaved = true;
+      state.saved = [];
+      state.savedById.clear();
+      state.savedByUrl.clear();
+      state.savedIds.clear();
+      state.savedTotal = 0;
+      state.savedNextFrom = 0;
+      state.savedHasMore = true;
+      state.loadedSaved = false;
       if (el.savedStatus) el.savedStatus.textContent = "جاري تحميل الصفوف المحفوظة من Supabase...";
       try {
-        var rows = [];
-        var from = 0;
-        var useRich = state.hasJumiaColumns !== false;
-        while (from < SAVED_FETCH_MAX) {
-          var makeQuery = function (rich) {
-            return supabaseClient
-              .from("taager_products")
-              .select(rich ? SAVED_RICH_COLUMNS : SAVED_BASE_COLUMNS)
-              .eq("source", "jumia")
-              .order("updated_at", { ascending: false })
-              .range(from, from + SAVED_FETCH_PAGE - 1);
-          };
-          var result = await makeQuery(useRich);
-          if (result.error && useRich && isMissingColumnError(result.error)) {
-            useRich = false;
-            state.hasJumiaColumns = false;
-            // A successful basic select with a missing-column error proves the
-            // migration was not applied. Reflect that in the setup card instead
-            // of leaving the manual select on "لم يُتحقق".
-            if (el.sqlStatusSelect && el.sqlStatusSelect.value !== "later") {
-              el.sqlStatusSelect.value = "later";
-              persistSettings();
-              updateSqlState();
-              updateSetupSummary();
-            }
-            result = await makeQuery(false);
-          }
-          if (result.error) throw result.error;
-          var pageRows = result.data || [];
-          rows = rows.concat(pageRows);
-          if (pageRows.length < SAVED_FETCH_PAGE) break;
-          from += SAVED_FETCH_PAGE;
+        // العدد الحقيقي من السيرفر (مثلاً 219989) حتى لو لم نجلب كل الصفوف.
+        state.savedTotal = await fetchSavedTotal();
+        var firstPage = await fetchSavedPage(0, SAVED_FETCH_PAGE);
+        appendSavedRows(firstPage.rows);
+        state.savedNextFrom = firstPage.fetched;
+        if (firstPage.fetched < firstPage.size) state.savedHasMore = false;
+        if (state.savedTotal > 0 && state.savedNextFrom >= state.savedTotal) {
+          state.savedHasMore = false;
         }
-        if (useRich) {
-          state.hasJumiaColumns = true;
-          // Selecting the j_* columns is proof enough that the SQL ran; stop
-          // asking the admin to confirm it by hand.
-          if (el.sqlStatusSelect && el.sqlStatusSelect.value !== "done") {
-            el.sqlStatusSelect.value = "done";
-            persistSettings();
-            updateSqlState();
-            updateSetupSummary();
-          }
-        }
-
-        state.saved = rows
-          .filter(function (row) {
-            return row && row.id;
-          })
-          .sort(function (a, b) {
-            return String(b.updated_at || "").localeCompare(String(a.updated_at || ""));
-          });
-        state.savedById.clear();
-        state.savedByUrl.clear();
-        state.savedIds.clear();
-        state.saved.forEach(function (row) {
-          state.savedById.set(row.id, row);
-          state.savedIds.add(row.id);
-          var url = savedRowUrl(row);
-          if (url) state.savedByUrl.set(urlKey(url), row);
-        });
+        state.savedTotal = Math.max(state.savedTotal, state.saved.length);
         state.loadedSaved = true;
-        state.savedVisible = SAVED_PAGE_SIZE;
+        // نعرض كل ما تم جلبه، وكل ضغطة «عرض المزيد» تجلب صفحة جديدة.
+        state.savedVisible = Math.max(SAVED_PAGE_SIZE, state.saved.length);
         recomputeChangedFlags();
 
         renderSaved();
         renderGrid();
         updateStats();
-        var active = state.saved.filter(function (row) {
-          return row.is_active;
-        }).length;
-        if (el.savedStatus) {
-          el.savedStatus.textContent =
-            state.saved.length +
-            " صف محفوظ (" +
-            active +
-            " نشط، " +
-            (state.saved.length - active) +
-            " مسودة)" +
-            (state.hasJumiaColumns === false
-              ? " · الحفظ بالأعمدة الأساسية (لم تُشغّل SQL بعد)"
-              : "") +
-            ".";
-        }
-        log("saved rows loaded: " + state.saved.length, "ok");
+        log("saved rows loaded: " + state.saved.length + " / " + state.savedTotal, "ok");
         return true;
       } catch (error) {
         if (el.savedStatus) {
@@ -3666,21 +3769,29 @@
         state.loadedSaved && rows.length === 0 ? "flex" : "none";
     }
     if (el.savedMoreBtn) {
-      var more = rows.length > state.savedVisible;
+      // نُظهر زر «عرض المزيد» إما لكشف صفوف محمّلة مخفية أو لجلب صفحة جديدة.
+      var more = rows.length > state.savedVisible || state.savedHasMore;
       el.savedMoreBtn.style.display = more ? "" : "none";
       el.savedMoreBtn.textContent =
-        "عرض المزيد (" + Math.min(state.savedVisible, rows.length) + "/" + rows.length + ")";
+        "عرض المزيد (" +
+        Math.min(state.savedVisible, rows.length) +
+        "/" +
+        savedTotalCount() +
+        ")";
     }
     if (el.savedStatus && state.loadedSaved) {
       var active = state.saved.filter(function (row) {
         return row.is_active;
       }).length;
       var parts = [
-        "عرض " + Math.min(state.savedVisible, rows.length) + " من " + rows.length,
-        "إجمالي " + state.saved.length + " محفوظ",
-        active + " نشط",
-        state.saved.length - active + " مسودة",
+        "عرض " + Math.min(state.savedVisible, rows.length) + " من " + state.saved.length + " محمّل",
+        "إجمالي السيرفر " + savedTotalCount() + " محفوظ",
       ];
+      if (state.hasJumiaColumns === false) {
+        parts.push("الحفظ بالأعمدة الأساسية (لم تُشغّل SQL بعد)");
+      } else {
+        parts.push(active + " نشط، " + (state.saved.length - active) + " مسودة (في المحمّل)");
+      }
       el.savedStatus.textContent = parts.join(" · ") + ".";
     }
   }
@@ -4341,6 +4452,40 @@
     }
   }
 
+  // كل معرفات منتجات جوميا على سيرفر واحد، صفحة صفحة، بدون تحويل للسيرفر النشط.
+  // نستخدم keyset pagination (id > آخر معرف) لأن OFFSET الكبير مع فلتر source
+  // يسبب statement timeout على السيرفر الأساسي بعد حوالي 50 ألف صف.
+  async function serverAllIds(backend, onProgress) {
+    var ids = [];
+    var lastId = "";
+    var seenLast = new Set();
+    for (var page = 0; page < 2000; page += 1) {
+      var query =
+        "/rest/v1/taager_products?select=id&source=eq.jumia&order=id.asc" +
+        (lastId ? "&id=gt." + encodeURIComponent(lastId) : "");
+      var rows = await serverFetch(backend, query, {
+        timeoutMs: 60000,
+        headers: { Range: "0-" + (SERVER_ID_PAGE - 1) },
+      });
+      if (!Array.isArray(rows)) break;
+      rows.forEach(function (row) {
+        if (row && row.id != null) ids.push(String(row.id));
+      });
+      if (onProgress) onProgress(ids.length);
+      if (rows.length < SERVER_ID_PAGE) break;
+      var nextLast = String(rows[rows.length - 1].id || "");
+      // حماية من التكرار لو السيرفر تجاهل الفلتر أو رجع نفس الصفحة.
+      if (!nextLast || nextLast === lastId || seenLast.has(nextLast)) break;
+      seenLast.add(nextLast);
+      lastId = nextLast;
+    }
+    return ids;
+  }
+
+  function setServersStatus(text) {
+    if (el.serversStatus) el.serversStatus.textContent = text;
+  }
+
   /**
    * يطبّق تغيير الحالة/الحذف على السيرفرين الاحتياطيين أيضًا حتى لا يظهر
    * المنتج هناك عند التحويل التلقائي بين السيرفرات. الأخطاء لا تُفشل العملية
@@ -4407,7 +4552,7 @@
   async function fetchPrimaryRows(ids) {
     var primary = backendByName("primary") || BACKENDS[0];
     var rows = [];
-    var chunks = chunkList(ids, 40);
+    var chunks = chunkList(ids, SERVER_FETCH_ID_CHUNK);
     for (var index = 0; index < chunks.length; index += 1) {
       var data = await serverFetch(
         primary,
@@ -4566,12 +4711,31 @@
   async function scanServers(options) {
     var opts = options || {};
     if (state.servers.scanning) return;
-    if (!state.loadedSaved) await loadSavedIndex({ silent: true });
+    state.servers.scanning = true;
+    if (el.checkServersBtn) el.checkServersBtn.disabled = true;
+    // المرجع هو كل منتجات جوميا الموجودة فعليًا على السيرفر الأساسي،
+    // وليس الصفوف الـ 150 المحمّلة في الواجهة فقط.
+    var primary = backendByName("primary") || BACKENDS[0];
+    var allPrimaryIds = [];
+    try {
+      setServersStatus("جارٍ جلب كل معرفات منتجات جوميا من السيرفر الأساسي...");
+      allPrimaryIds = await serverAllIds(primary, function (count) {
+        setServersStatus("جارٍ جلب " + plainNumber(count) + " معرف من السيرفر الأساسي...");
+      });
+    } catch (error) {
+      state.servers.results = [];
+      renderServers();
+      var primaryError = "تعذر قراءة السيرفر الأساسي: " + friendlyServerError(error);
+      setServersStatus(primaryError);
+      if (!opts.silent) toast(primaryError, "error");
+      state.servers.scanning = false;
+      if (el.checkServersBtn) el.checkServersBtn.disabled = false;
+      return;
+    }
     var seen = new Set();
     var expected = [];
-    state.saved.forEach(function (row) {
-      var id = row && row.id != null ? String(row.id) : "";
-      if (!id || seen.has(id)) return;
+    allPrimaryIds.forEach(function (id) {
+      if (seen.has(id)) return;
       seen.add(id);
       expected.push(id);
     });
@@ -4579,11 +4743,12 @@
     if (!expected.length) {
       state.servers.results = [];
       renderServers();
-      if (el.serversStatus) el.serversStatus.textContent = "لا توجد منتجات جوميا محفوظة للفحص.";
+      setServersStatus("لا توجد منتجات جوميا محفوظة للفحص.");
+      state.servers.scanning = false;
+      if (el.checkServersBtn) el.checkServersBtn.disabled = false;
       return;
     }
 
-    state.servers.scanning = true;
     state.servers.results = BACKENDS.map(function (backend) {
       return {
         name: backend.name,
@@ -4614,11 +4779,25 @@
           continue;
         }
         try {
-          var present = await serverExistingIds(backend, expected);
-          result.present = present.size;
-          result.missing = expected.filter(function (id) {
-            return !present.has(id);
+          setServersStatus(
+            "جارٍ فحص [" + backend.label + "] — " +
+              plainNumber(expected.length) + " منتج متوقع..."
+          );
+          var foundIds = await serverAllIds(backend, function (count) {
+            setServersStatus(
+              "جارٍ فحص [" + backend.label + "]: " + plainNumber(count) + " معرف..."
+            );
           });
+          var present = new Set(foundIds);
+          var presentCount = 0;
+          result.missing = expected.filter(function (id) {
+            if (present.has(id)) {
+              presentCount += 1;
+              return false;
+            }
+            return true;
+          });
+          result.present = presentCount;
           result.status = result.missing.length ? "missing" : "ok";
         } catch (error) {
           result.status = "offline";
@@ -4682,16 +4861,19 @@
       return;
     }
 
+    // على دفعات: المتصفح لا يحتمل إضافة مئات الآلاف من الصفوف في عملية واحدة.
+    var batchIds = missingIds.slice(0, SERVER_ADD_BATCH);
     state.servers.adding = true;
     renderServers();
     if (el.addMissingServersBtn) el.addMissingServersBtn.disabled = true;
     if (el.serversStatus) {
       el.serversStatus.textContent =
-        "جارٍ إضافة " + plainNumber(missingIds.length) + " صف ناقص...";
+        "جارٍ إضافة " + plainNumber(batchIds.length) + " صف ناقص" +
+        (remainingAfter ? " من أصل " + plainNumber(missingIds.length) : "") + "...";
     }
 
     try {
-      var rows = await fetchPrimaryRows(missingIds);
+      var rows = await fetchPrimaryRows(batchIds);
       if (!rows.length) throw new Error("تعذر جلب الصفوف من السيرفر الأساسي.");
       var byId = new Map();
       rows.forEach(function (row) {
@@ -4733,10 +4915,14 @@
         renderServers();
       }
 
+      var stillMissing = totalMissingOnServers();
       var message =
-        insertedTotal > 0
-          ? "تمت إضافة " + plainNumber(insertedTotal) + " صف — " + notes.join(" · ") + "."
-          : "لم تتم إضافة صفوف — " + notes.join(" · ") + ".";
+        (insertedTotal > 0
+          ? "تمت إضافة " + plainNumber(insertedTotal) + " صف — " + notes.join(" · ")
+          : "لم تتم إضافة صفوف — " + notes.join(" · ")) +
+        (stillMissing
+          ? ". متبقي " + plainNumber(stillMissing) + " — اضغط «إضافة الناقص» للمتابعة."
+          : ".");
       if (el.serversStatus) el.serversStatus.textContent = message;
       toast(message, insertedTotal > 0 ? "success" : "error");
       log(message, insertedTotal > 0 ? "ok" : "error");
@@ -6033,8 +6219,13 @@
     }
     if (el.savedMoreBtn) {
       el.savedMoreBtn.addEventListener("click", function () {
-        state.savedVisible += SAVED_PAGE_SIZE;
-        renderSaved();
+        // أولاً نكشف ما تم جلبه، وبعدها نجلب صفحة جديدة من نفس السيرفر.
+        if (filterSavedRows().length > state.savedVisible) {
+          state.savedVisible += SAVED_PAGE_SIZE;
+          renderSaved();
+          return;
+        }
+        loadMoreSaved();
       });
     }
     if (el.savedGrid) {
