@@ -1,0 +1,6406 @@
+{
+  "app": "HS Home Studio",
+  "format": "hs-layout",
+  "version": 1,
+  "exportedAt": "2026-11-26T13:10:37.268593+00:00",
+  "name": "نون × بودو — تصميم من بيانات Supabase",
+  "country": "EG",
+  "scope": "all",
+  "source": "Supabase live snapshot",
+  "_readme": "افتح هذا الملف من زر «فتح ملف» في استوديو HS. التصميم يستخدم صفوف Supabase الحقيقية، وكل بلوك يحمل source.table/source.rowId ليمكن مزامنته لاحقاً. الألوان والصور من home_banners وhome_hero_slides وhome_categories وhome_mega_* وhome_ad_banners وsmart_category_showcase، والمنتجات من taager_products.",
+  "features": {
+    "supabase_project": "msgqzgzoslearaprgiqq",
+    "tables": {
+      "home_page_sections": [
+        {
+          "id": "d2f70e14-2e84-4f7e-bbcb-0739e12a9dc0",
+          "section_type": "hero",
+          "country": "EG",
+          "is_active": true,
+          "sort_order": 0,
+          "created_at": "2026-07-11T19:15:47.675987+00:00",
+          "updated_at": "2026-07-11T19:15:47.675987+00:00"
+        },
+        {
+          "id": "b2266d94-1815-4101-b1d5-8ba4ae4c8168",
+          "section_type": "categories",
+          "country": "EG",
+          "is_active": true,
+          "sort_order": 1,
+          "created_at": "2026-07-11T19:15:47.675987+00:00",
+          "updated_at": "2026-07-11T19:15:47.675987+00:00"
+        },
+        {
+          "id": "2564c7f1-a0e7-499f-8357-3fb8876a1e69",
+          "section_type": "banner_top",
+          "country": "EG",
+          "is_active": true,
+          "sort_order": 2,
+          "created_at": "2026-07-11T19:15:47.675987+00:00",
+          "updated_at": "2026-07-11T19:15:47.675987+00:00"
+        },
+        {
+          "id": "41ccbe01-4523-4dc6-89ea-f7e90b8b173f",
+          "section_type": "hero",
+          "country": "SA",
+          "is_active": true,
+          "sort_order": 0,
+          "created_at": "2026-07-11T19:15:47.675987+00:00",
+          "updated_at": "2026-07-11T19:15:47.675987+00:00"
+        },
+        {
+          "id": "14fc13f3-e9a0-4969-bc94-465c0d9ca08b",
+          "section_type": "categories",
+          "country": "SA",
+          "is_active": true,
+          "sort_order": 1,
+          "created_at": "2026-07-11T19:15:47.675987+00:00",
+          "updated_at": "2026-07-11T19:15:47.675987+00:00"
+        },
+        {
+          "id": "a339add1-6bf8-4163-80a4-d9825ef03eb6",
+          "section_type": "banner_top",
+          "country": "SA",
+          "is_active": true,
+          "sort_order": 2,
+          "created_at": "2026-07-11T19:15:47.675987+00:00",
+          "updated_at": "2026-07-11T19:15:47.675987+00:00"
+        },
+        {
+          "id": "b728955a-4e97-49ba-ac67-380edfbefe46",
+          "section_type": "mega_offers",
+          "country": "EG",
+          "is_active": true,
+          "sort_order": 10,
+          "created_at": "2026-07-11T20:24:06.68028+00:00",
+          "updated_at": "2026-07-11T20:24:06.68028+00:00"
+        },
+        {
+          "id": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "section_type": "ad_banners",
+          "country": "EG",
+          "is_active": true,
+          "sort_order": 11,
+          "created_at": "2026-07-11T20:24:06.68028+00:00",
+          "updated_at": "2026-07-11T20:24:06.68028+00:00"
+        },
+        {
+          "id": "2d2bdf7c-5799-4c8e-8633-0621bae17044",
+          "section_type": "mega_offers",
+          "country": "SA",
+          "is_active": true,
+          "sort_order": 10,
+          "created_at": "2026-07-11T20:24:06.68028+00:00",
+          "updated_at": "2026-07-11T20:24:06.68028+00:00"
+        },
+        {
+          "id": "ec4e31f2-bcf6-40b6-b6c7-280131a6f579",
+          "section_type": "ad_banners",
+          "country": "SA",
+          "is_active": true,
+          "sort_order": 11,
+          "created_at": "2026-07-11T20:24:06.68028+00:00",
+          "updated_at": "2026-07-11T20:24:06.68028+00:00"
+        }
+      ],
+      "home_section_config": [
+        {
+          "id": "313d352b-e1df-476d-a537-5d57e9fd1e39",
+          "section_id": "2d2bdf7c-5799-4c8e-8633-0621bae17044",
+          "config_key": "col1_mode",
+          "config_value": "manual",
+          "created_at": "2026-07-11T21:09:01.197009+00:00",
+          "updated_at": "2026-07-11T21:09:01.197009+00:00"
+        },
+        {
+          "id": "eb941f05-bb7a-4d80-aef5-97346e554c74",
+          "section_id": "2d2bdf7c-5799-4c8e-8633-0621bae17044",
+          "config_key": "col2_mode",
+          "config_value": "manual",
+          "created_at": "2026-07-11T21:09:01.197009+00:00",
+          "updated_at": "2026-07-11T21:09:01.197009+00:00"
+        },
+        {
+          "id": "cfebfa1c-4378-45d0-825c-aaf6b7ae23a1",
+          "section_id": "b728955a-4e97-49ba-ac67-380edfbefe46",
+          "config_key": "col1_mode",
+          "config_value": "auto",
+          "created_at": "2026-07-11T21:09:01.197009+00:00",
+          "updated_at": "2026-07-11T21:09:01.197009+00:00"
+        },
+        {
+          "id": "a87f4839-7cac-4ea5-ab70-2926e380124c",
+          "section_id": "b728955a-4e97-49ba-ac67-380edfbefe46",
+          "config_key": "col2_mode",
+          "config_value": "auto",
+          "created_at": "2026-07-11T21:09:01.197009+00:00",
+          "updated_at": "2026-07-11T21:09:01.197009+00:00"
+        }
+      ],
+      "home_hero_slides": [
+        {
+          "id": "04a69d19-8321-42fe-9d7e-aa6b5c328f23",
+          "section_id": "41ccbe01-4523-4dc6-89ea-f7e90b8b173f",
+          "image_url": "https://iili.io/CQmtS5u.png",
+          "link_url": "products.html?category=beauty&branch=عطور",
+          "sort_order": 3,
+          "created_at": "2026-08-21T17:30:31.941668+00:00",
+          "alt_text": "",
+          "device": "desktop"
+        },
+        {
+          "id": "0826ca11-eec1-4574-a572-33a088efdf68",
+          "section_id": "41ccbe01-4523-4dc6-89ea-f7e90b8b173f",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/1f4e8b67-4356-4f42-93b2-8a08f66ff352.png?width=2400",
+          "link_url": "category-landing.html?slug=skincare",
+          "sort_order": 6,
+          "created_at": "2026-09-14T02:23:00.239844+00:00",
+          "alt_text": "",
+          "device": "desktop"
+        },
+        {
+          "id": "0ebfacb6-8ac8-4bb4-ac9a-509b7525b8c0",
+          "section_id": "d2f70e14-2e84-4f7e-bbcb-0739e12a9dc0",
+          "image_url": "https://a.nooncdn.com/assets/img-706x706/ar_mb_eg-hero-01.1786973684.2674549.png?width=800",
+          "link_url": "https://budoq.com/pages/brand-landing.html?slug=nike#",
+          "sort_order": 0,
+          "created_at": "2026-08-21T17:09:18.556138+00:00",
+          "alt_text": "",
+          "device": "mobile"
+        },
+        {
+          "id": "478b6213-ecc6-463a-9eb8-744d751967d6",
+          "section_id": "d2f70e14-2e84-4f7e-bbcb-0739e12a9dc0",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/1f4e8b67-4356-4f42-93b2-8a08f66ff352.png?width=2400",
+          "link_url": "category-landing.html?slug=skincare",
+          "sort_order": 7,
+          "created_at": "2026-09-14T02:22:26.349598+00:00",
+          "alt_text": "",
+          "device": "desktop"
+        },
+        {
+          "id": "53488c91-936a-4918-8b15-1650245d3d07",
+          "section_id": "41ccbe01-4523-4dc6-89ea-f7e90b8b173f",
+          "image_url": "https://iili.io/CQmZiSn.png",
+          "link_url": "category-landing.html?slug=skincare",
+          "sort_order": 0,
+          "created_at": "2026-08-21T17:17:18.5006+00:00",
+          "alt_text": "",
+          "device": "desktop"
+        },
+        {
+          "id": "551f762b-4b29-4c17-9769-8b4394c5a5fc",
+          "section_id": "41ccbe01-4523-4dc6-89ea-f7e90b8b173f",
+          "image_url": "https://iili.io/CQmtzUF.png",
+          "link_url": "category-landing.html?slug=skincare",
+          "sort_order": 0,
+          "created_at": "2026-08-21T17:20:46.603997+00:00",
+          "alt_text": "",
+          "device": "mobile"
+        },
+        {
+          "id": "7614ab3f-3264-4774-9239-e48de656d8e8",
+          "section_id": "d2f70e14-2e84-4f7e-bbcb-0739e12a9dc0",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/a9ead18b-fae4-422c-8671-e2289ace828f.png?width=800",
+          "link_url": "products.html?category=watches&branch=ساعات%20ذكية",
+          "sort_order": 0,
+          "created_at": "2026-08-21T17:08:15.569693+00:00",
+          "alt_text": "",
+          "device": "mobile"
+        },
+        {
+          "id": "76e2bf62-1bb0-4a76-a193-47fa0de3a689",
+          "section_id": "41ccbe01-4523-4dc6-89ea-f7e90b8b173f",
+          "image_url": "https://iili.io/CQmZpPS.png",
+          "link_url": "category-landing.html?slug=skincare",
+          "sort_order": 0,
+          "created_at": "2026-08-21T17:19:25.98589+00:00",
+          "alt_text": "",
+          "device": "desktop"
+        },
+        {
+          "id": "80e0e8bb-5ac2-4fbe-a74f-f7bbd06beee7",
+          "section_id": "41ccbe01-4523-4dc6-89ea-f7e90b8b173f",
+          "image_url": "https://a.nooncdn.com/assets/img-706x706/ar_mb_eg-hero-01.1786973684.2674549.png?width=800",
+          "link_url": "products.html?category=electronics&branch=تابلت",
+          "sort_order": 2,
+          "created_at": "2026-08-21T07:21:59.728568+00:00",
+          "alt_text": "",
+          "device": "mobile"
+        },
+        {
+          "id": "81295be8-0d5d-45cd-8d7e-1cb3ed48991b",
+          "section_id": "d2f70e14-2e84-4f7e-bbcb-0739e12a9dc0",
+          "image_url": "https://iili.io/CQmZiSn.png",
+          "link_url": "category-landing.html?slug=skincare",
+          "sort_order": 0,
+          "created_at": "2026-08-21T17:16:06.925852+00:00",
+          "alt_text": "",
+          "device": "desktop"
+        },
+        {
+          "id": "8300b47b-a4b0-4cd3-bea9-f3c1a103f384",
+          "section_id": "d2f70e14-2e84-4f7e-bbcb-0739e12a9dc0",
+          "image_url": "https://iili.io/CQmtS5u.png",
+          "link_url": "https://budoq.com/pages/category-landing.html?slug=skincare",
+          "sort_order": 2,
+          "created_at": "2026-08-21T17:31:04.245679+00:00",
+          "alt_text": "",
+          "device": "desktop"
+        },
+        {
+          "id": "94154cd7-4541-4e5e-ae15-35c9db96ec32",
+          "section_id": "d2f70e14-2e84-4f7e-bbcb-0739e12a9dc0",
+          "image_url": "https://iili.io/CQmZpPS.png",
+          "link_url": "https://budoq.com/pages/category-landing.html?slug=skincare",
+          "sort_order": 3,
+          "created_at": "2026-08-21T17:18:39.007737+00:00",
+          "alt_text": "",
+          "device": "desktop"
+        },
+        {
+          "id": "9620ce2f-1112-4cc6-a30e-e6adba9dee46",
+          "section_id": "d2f70e14-2e84-4f7e-bbcb-0739e12a9dc0",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/0a931bd4-f275-491b-83cc-976dcb043d6e.png?width=2400",
+          "link_url": "products.html?category=watches&branch=ساعات%20ذكية",
+          "sort_order": 5,
+          "created_at": "2026-08-21T03:05:53.617967+00:00",
+          "alt_text": "",
+          "device": "desktop"
+        },
+        {
+          "id": "98dad3fb-9b29-4319-8350-5d870c885f2a",
+          "section_id": "d2f70e14-2e84-4f7e-bbcb-0739e12a9dc0",
+          "image_url": "https://iili.io/CQmQurF.png",
+          "link_url": "https://budoq.com/pages/category-landing.html?slug=skincare",
+          "sort_order": 0,
+          "created_at": "2026-08-21T17:07:28.935124+00:00",
+          "alt_text": "",
+          "device": "desktop"
+        },
+        {
+          "id": "a8f16f06-a976-40ab-b51e-d7571fad1606",
+          "section_id": "41ccbe01-4523-4dc6-89ea-f7e90b8b173f",
+          "image_url": "https://iili.io/CQmQnzQ.png",
+          "link_url": "products.html?category=watches&branch=ساعات%20ذكية",
+          "sort_order": 0,
+          "created_at": "2026-08-21T16:56:33.344329+00:00",
+          "alt_text": "",
+          "device": "desktop"
+        },
+        {
+          "id": "ceccec64-cbee-43cb-902e-5ff5285bf8b9",
+          "section_id": "d2f70e14-2e84-4f7e-bbcb-0739e12a9dc0",
+          "image_url": "https://a.nooncdn.com/assets/img-1440x1440/ar_dk_eg-hero-01.1786973693.148274.png?width=2400",
+          "link_url": "products.html?category=electronics&branch=تابلت",
+          "sort_order": 6,
+          "created_at": "2026-08-21T03:05:30.612643+00:00",
+          "alt_text": "",
+          "device": "desktop"
+        },
+        {
+          "id": "e57bc9fd-38ae-45d7-a775-0a2db5f2ea7e",
+          "section_id": "d2f70e14-2e84-4f7e-bbcb-0739e12a9dc0",
+          "image_url": "https://iili.io/CQmtzUF.png",
+          "link_url": "category-landing.html?slug=skincare",
+          "sort_order": 0,
+          "created_at": "2026-08-21T17:20:25.504273+00:00",
+          "alt_text": "",
+          "device": "mobile"
+        },
+        {
+          "id": "ebf3afd7-8a1b-4531-b5ae-a5f6b2bccae7",
+          "section_id": "41ccbe01-4523-4dc6-89ea-f7e90b8b173f",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/a9ead18b-fae4-422c-8671-e2289ace828f.png?width=800",
+          "link_url": "products.html?category=watches&branch=ساعات%20ذكية",
+          "sort_order": 0,
+          "created_at": "2026-08-21T07:22:28.516152+00:00",
+          "alt_text": "",
+          "device": "mobile"
+        },
+        {
+          "id": "f97aea60-2ec2-476f-a5bb-fdea039bc386",
+          "section_id": "41ccbe01-4523-4dc6-89ea-f7e90b8b173f",
+          "image_url": "https://iili.io/CQmQurF.png",
+          "link_url": "products.html?category=beauty&branch=كريمات%20مرطبات",
+          "sort_order": 4,
+          "created_at": "2026-08-21T17:07:05.003659+00:00",
+          "alt_text": "",
+          "device": "desktop"
+        }
+      ],
+      "home_categories": [
+        {
+          "id": "31fb6178-5bd4-4df0-bc83-078fbcf06f93",
+          "section_id": "b2266d94-1815-4101-b1d5-8ba4ae4c8168",
+          "name": "ملابس نساء",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/f5cb1ce7-d491-4458-aba3-62378146a3e3.gif?width=2400",
+          "link_url": "brand-landing.html?slug=nike#",
+          "sort_order": 0,
+          "created_at": "2026-09-14T01:35:41.057837+00:00"
+        },
+        {
+          "id": "5f3c1d32-271d-4afe-9588-2f0e992d2120",
+          "section_id": "14fc13f3-e9a0-4969-bc94-465c0d9ca08b",
+          "name": "الجمال",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/820c9e19-2956-42c3-b7bf-585bf6c45d9f.png?width=2400",
+          "link_url": "category-landing.html?slug=skincare",
+          "sort_order": 3,
+          "created_at": "2026-09-14T02:07:35.247487+00:00"
+        },
+        {
+          "id": "66699c3e-bc60-480f-8ee0-59e8fc26d848",
+          "section_id": "b2266d94-1815-4101-b1d5-8ba4ae4c8168",
+          "name": "إلكترونيات",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/839f2653-9cf3-4cee-9d65-49924be6078d.png?width=2400",
+          "link_url": "products.html?category=headphones",
+          "sort_order": 5,
+          "created_at": "2026-09-14T01:40:34.897777+00:00"
+        },
+        {
+          "id": "989427c2-29be-4bf5-8776-f6ba7c17350a",
+          "section_id": "14fc13f3-e9a0-4969-bc94-465c0d9ca08b",
+          "name": "اكسسورات",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/839f2653-9cf3-4cee-9d65-49924be6078d.png?width=2400",
+          "link_url": "products.html?category=headphones",
+          "sort_order": 6,
+          "created_at": "2026-09-14T02:14:50.945001+00:00"
+        },
+        {
+          "id": "9dd6aec6-b063-4579-b2a8-ea8b093fe1a2",
+          "section_id": "b2266d94-1815-4101-b1d5-8ba4ae4c8168",
+          "name": "برفان",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/d1d78d9d-76b7-4f91-9a06-ddda937571cb.png?width=2400",
+          "link_url": "products.html?category=beauty&branch=عطور",
+          "sort_order": 8,
+          "created_at": "2026-09-14T01:48:55.277734+00:00"
+        },
+        {
+          "id": "cd8c3b07-4538-4e05-9b3c-3cc44d4a2028",
+          "section_id": "14fc13f3-e9a0-4969-bc94-465c0d9ca08b",
+          "name": "الكترونيات تبلت",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/d0c845c7-03d5-4bde-aec7-4d1194e3191c.png?width=2400",
+          "link_url": "products.html?category=electronics&branch=هواتف",
+          "sort_order": 12,
+          "created_at": "2026-09-14T02:10:37.035059+00:00"
+        },
+        {
+          "id": "dd9e9b99-b73e-4634-934e-035a9ab435c7",
+          "section_id": "14fc13f3-e9a0-4969-bc94-465c0d9ca08b",
+          "name": "العاب",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/37868600-551a-4888-b6c6-27a40e38db94.png?width=2400",
+          "link_url": "brand-landing.html?slug=play",
+          "sort_order": 2,
+          "created_at": "2026-09-14T02:13:08.910942+00:00"
+        },
+        {
+          "id": "fb87d099-96ef-497d-91c9-736bbdf8630e",
+          "section_id": "b2266d94-1815-4101-b1d5-8ba4ae4c8168",
+          "name": "اذياء الرجال",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/3582f1f7-0396-4348-adf0-ea61c5a51046.gif?width=2400",
+          "link_url": "category-landing.html?slug=shoes",
+          "sort_order": 1,
+          "created_at": "2026-09-14T01:36:33.811142+00:00"
+        },
+        {
+          "id": "482b0818-1484-4390-a22a-d3d694d5d459",
+          "section_id": "b2266d94-1815-4101-b1d5-8ba4ae4c8168",
+          "name": "الكل",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/cf5fcebf-bc0e-4f93-b4d1-66f07a107be6.png?width=2400",
+          "link_url": "products.html?category=office",
+          "sort_order": 11,
+          "created_at": "2026-09-14T01:40:54.5833+00:00"
+        },
+        {
+          "id": "5d438a17-e96f-4af2-95ec-bb08aa66a76a",
+          "section_id": "b2266d94-1815-4101-b1d5-8ba4ae4c8168",
+          "name": "الكل",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/cda73fc0-b7f6-42bc-9866-391144565a69.png?width=2400",
+          "link_url": "products.html?category=home&branch=أثاث",
+          "sort_order": 12,
+          "created_at": "2026-09-14T01:47:42.047526+00:00"
+        },
+        {
+          "id": "bc92b0fa-0261-428a-8fec-3d4fb2f5b483",
+          "section_id": "b2266d94-1815-4101-b1d5-8ba4ae4c8168",
+          "name": "احذيه",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/65738a09-30c2-4f6d-8218-a28dae1082e7.png?width=2400",
+          "link_url": "category-landing.html?slug=احذيه",
+          "sort_order": 2,
+          "created_at": "2026-09-14T01:37:09.175828+00:00"
+        },
+        {
+          "id": "d8dd759a-ba19-462a-9602-da87cdf39c6f",
+          "section_id": "14fc13f3-e9a0-4969-bc94-465c0d9ca08b",
+          "name": "موبايلات",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/7e9ad8b0-f9b5-4f6c-a771-1ff8d143aafb.png?width=2400",
+          "link_url": "category-landing.html?slug=play",
+          "sort_order": 0,
+          "created_at": "2026-09-14T02:07:56.3777+00:00"
+        },
+        {
+          "id": "f4ab382a-610e-487d-9d73-8f2858c59e62",
+          "section_id": "14fc13f3-e9a0-4969-bc94-465c0d9ca08b",
+          "name": "روتينك",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/65ee20f5-d4a7-4228-acd0-ca938b47b020.png?width=2400",
+          "link_url": "category-landing.html?slug=skincare",
+          "sort_order": 10,
+          "created_at": "2026-09-14T02:11:09.371859+00:00"
+        },
+        {
+          "id": "8b194fc3-d3ae-4097-95f8-9aed6305bc65",
+          "section_id": "b2266d94-1815-4101-b1d5-8ba4ae4c8168",
+          "name": "عنايه بي البشره",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/97612698-d197-44b1-a7c1-1d1ccedcd85b.png?width=2400",
+          "link_url": "category-landing.html?slug=skincare",
+          "sort_order": 9,
+          "created_at": "2026-09-14T01:37:38.491225+00:00"
+        },
+        {
+          "id": "c6658ee4-c886-4d2a-a6f6-fa1c174d3666",
+          "section_id": "14fc13f3-e9a0-4969-bc94-465c0d9ca08b",
+          "name": "المدارس",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/cf5fcebf-bc0e-4f93-b4d1-66f07a107be6.png?width=2400",
+          "link_url": "products.html?category=office",
+          "sort_order": 11,
+          "created_at": "2026-09-14T02:11:27.070385+00:00"
+        },
+        {
+          "id": "cfce3520-c082-45e1-8a28-163c5d92c6b7",
+          "section_id": "14fc13f3-e9a0-4969-bc94-465c0d9ca08b",
+          "name": "الكترونيات",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/d0c845c7-03d5-4bde-aec7-4d1194e3191c.png?width=2400",
+          "link_url": "brand-landing.html?slug=تابلت",
+          "sort_order": 1,
+          "created_at": "2026-09-14T02:08:21.380852+00:00"
+        },
+        {
+          "id": "18f77ff2-6ab1-4c18-a486-4a9fae5a08e2",
+          "section_id": "14fc13f3-e9a0-4969-bc94-465c0d9ca08b",
+          "name": "سماعات",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/1e0f99b1-8feb-40a8-b2c9-a7af4badb8a6.png?width=2400",
+          "link_url": "products.html?category=headphones",
+          "sort_order": 4,
+          "created_at": "2026-09-14T02:08:53.952713+00:00"
+        },
+        {
+          "id": "856637e7-19f9-4812-8eb1-4ba5478b4721",
+          "section_id": "b2266d94-1815-4101-b1d5-8ba4ae4c8168",
+          "name": "ساعات",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/eb48ea19-19d5-4fb6-8b5f-74f3bea33fa5.png?width=2400",
+          "link_url": "products.html?category=watches&branch=ساعات%20ذكية",
+          "sort_order": 4,
+          "created_at": "2026-09-14T01:38:06.541395+00:00"
+        },
+        {
+          "id": "24450c87-5eba-442d-86be-4af9b9c33b8f",
+          "section_id": "14fc13f3-e9a0-4969-bc94-465c0d9ca08b",
+          "name": "ساعات",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/eb48ea19-19d5-4fb6-8b5f-74f3bea33fa5.png?width=2400",
+          "link_url": "products.html?category=watches&branch=ساعات%20ذكية",
+          "sort_order": 5,
+          "created_at": "2026-09-14T02:09:08.402202+00:00"
+        },
+        {
+          "id": "485f9341-e46e-4b72-ae65-25926976e244",
+          "section_id": "b2266d94-1815-4101-b1d5-8ba4ae4c8168",
+          "name": "سمعات",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/1e0f99b1-8feb-40a8-b2c9-a7af4badb8a6.png?width=2400",
+          "link_url": "products.html?category=headphones",
+          "sort_order": 3,
+          "created_at": "2026-09-14T01:38:29.188287+00:00"
+        },
+        {
+          "id": "05bb22ae-2900-43ff-8f8e-cf75a106bbf3",
+          "section_id": "b2266d94-1815-4101-b1d5-8ba4ae4c8168",
+          "name": "اكسسورات المبيايل",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/0edae349-c084-4294-b35f-e2d3e11aed73.png?width=2400",
+          "link_url": "products.html?category=electronics&branch=شواحن",
+          "sort_order": 6,
+          "created_at": "2026-09-14T01:38:54.033368+00:00"
+        },
+        {
+          "id": "56eba22e-d04b-4c82-9cb0-7012268c86ee",
+          "section_id": "14fc13f3-e9a0-4969-bc94-465c0d9ca08b",
+          "name": "برفان",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/d1d78d9d-76b7-4f91-9a06-ddda937571cb.png?width=2400",
+          "link_url": "products.html?category=beauty&branch=عطور",
+          "sort_order": 8,
+          "created_at": "2026-09-14T02:09:28.464085+00:00"
+        },
+        {
+          "id": "f4b47da7-46ee-4634-93f0-df05adbf88da",
+          "section_id": "b2266d94-1815-4101-b1d5-8ba4ae4c8168",
+          "name": "روتينك",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/65ee20f5-d4a7-4228-acd0-ca938b47b020.png?width=2400",
+          "link_url": "category-landing.html?slug=skincare",
+          "sort_order": 10,
+          "created_at": "2026-09-14T01:39:16.813811+00:00"
+        },
+        {
+          "id": "fdda1308-62ee-4e76-8b5d-2ad260600e5b",
+          "section_id": "14fc13f3-e9a0-4969-bc94-465c0d9ca08b",
+          "name": "اثاث",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/cda73fc0-b7f6-42bc-9866-391144565a69.png?width=2400",
+          "link_url": "products.html?category=home&branch=أثاث",
+          "sort_order": 9,
+          "created_at": "2026-09-14T02:09:45.86787+00:00"
+        },
+        {
+          "id": "1522a425-0ab6-44be-818e-a92f432bbfd6",
+          "section_id": "b2266d94-1815-4101-b1d5-8ba4ae4c8168",
+          "name": "الكترونات",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/d0c845c7-03d5-4bde-aec7-4d1194e3191c.png?width=2400",
+          "link_url": "products.html?category=electronics&branch=هواتف",
+          "sort_order": 7,
+          "created_at": "2026-09-14T01:40:16.164742+00:00"
+        },
+        {
+          "id": "2c6a4d19-098d-4416-9e91-76ddd0d337c6",
+          "section_id": "14fc13f3-e9a0-4969-bc94-465c0d9ca08b",
+          "name": "شواحن",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/0edae349-c084-4294-b35f-e2d3e11aed73.png?width=2400",
+          "link_url": "products.html?category=electronics&branch=شواحن",
+          "sort_order": 7,
+          "created_at": "2026-09-14T02:10:10.078354+00:00"
+        }
+      ],
+      "home_banners": [
+        {
+          "id": "32a47d29-9c6a-4234-94fd-80c82aed79c3",
+          "section_id": "a339add1-6bf8-4163-80a4-d9825ef03eb6",
+          "type": "image_banner",
+          "image_url": "https://a.nooncdn.com/mp-onsite/images/img_36xooyef-ar_dk_ksa-toggle-01.png?width=2400",
+          "link_url": "#",
+          "icon": "local_shipping",
+          "heading": "توصيل مجاني عند طلب اكثر من 5 منتجات",
+          "subtext": "",
+          "background_color": "#f8f4ff",
+          "border_color": "#f3e8ff",
+          "text_color": "#1a2530",
+          "accent_color": "#7c3aed",
+          "sort_order": 0,
+          "created_at": "2026-08-19T02:00:43.889609+00:00",
+          "device": "desktop"
+        },
+        {
+          "id": "8a1e9231-7bd8-466d-a9ff-4fe442d55a1a",
+          "section_id": "2564c7f1-a0e7-499f-8357-3fb8876a1e69",
+          "type": "image_banner",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/8326cd60-20c9-49c1-9f6a-49d2ccbe4b48.png?width=800",
+          "link_url": "#",
+          "icon": "local_shipping",
+          "heading": "",
+          "subtext": "",
+          "background_color": "#ffffff",
+          "border_color": "#ffffff",
+          "text_color": "#e1ff00",
+          "accent_color": "#1b1721",
+          "sort_order": 0,
+          "created_at": "2026-07-11T19:44:52.228244+00:00",
+          "device": "mobile"
+        },
+        {
+          "id": "db0b714e-add8-492b-840c-9d408f7c326e",
+          "section_id": "2564c7f1-a0e7-499f-8357-3fb8876a1e69",
+          "type": "image_banner",
+          "image_url": "https://iili.io/CQsnNJS.png",
+          "link_url": "#",
+          "icon": "local_shipping",
+          "heading": "",
+          "subtext": "",
+          "background_color": "#ffffff",
+          "border_color": "#ffffff",
+          "text_color": "#e1ff00",
+          "accent_color": "#1b1721",
+          "sort_order": 0,
+          "created_at": "2026-08-19T01:48:43.324962+00:00",
+          "device": "desktop"
+        },
+        {
+          "id": "fa9ac654-9bce-40f5-a6ec-5b422d8c0a8d",
+          "section_id": "a339add1-6bf8-4163-80a4-d9825ef03eb6",
+          "type": "image_banner",
+          "image_url": "https://iili.io/CLGxlG2.md.jpg",
+          "link_url": "#",
+          "icon": "local_shipping",
+          "heading": "",
+          "subtext": "",
+          "background_color": "#f8f4ff",
+          "border_color": "#f3e8ff",
+          "text_color": "#1a2530",
+          "accent_color": "#7c3aed",
+          "sort_order": 0,
+          "created_at": "2026-07-11T19:56:58.445746+00:00",
+          "device": "mobile"
+        }
+      ],
+      "home_mega_banners": [
+        {
+          "id": "762276b2-1cfa-4a2f-8830-c4c9bbcfbe3c",
+          "section_id": "2d2bdf7c-5799-4c8e-8633-0621bae17044",
+          "image_url": "https://iili.io/CQmtWbf.png",
+          "link_url": "https://budoq.com/pages/brand-landing.html?slug=play",
+          "title": "",
+          "subtitle": "",
+          "sort_order": 0,
+          "created_at": "2026-07-11T20:24:06.68028+00:00",
+          "device": null
+        },
+        {
+          "id": "0f285744-4614-4f18-b5bd-34874a391da5",
+          "section_id": "2d2bdf7c-5799-4c8e-8633-0621bae17044",
+          "image_url": "https://iili.io/CQmt0lt.png",
+          "link_url": "https://budoq.com/pages/products.html?category=electronics&branch=%D8%AA%D8%A7%D8%A8%D9%84%D8%AA",
+          "title": "",
+          "subtitle": "",
+          "sort_order": 0,
+          "created_at": "2026-07-11T20:24:06.68028+00:00",
+          "device": null
+        },
+        {
+          "id": "dccabaf7-6cab-475f-b996-c3cccb961881",
+          "section_id": "b728955a-4e97-49ba-ac67-380edfbefe46",
+          "image_url": "https://iili.io/o2Hkd11.png",
+          "link_url": "https://budoq.com/pages/category-landing.html?slug=skincare",
+          "title": "",
+          "subtitle": "",
+          "sort_order": 0,
+          "created_at": "2026-07-11T20:24:06.68028+00:00",
+          "device": null
+        },
+        {
+          "id": "92a711a9-4101-48e4-8528-e1b86ea597ec",
+          "section_id": "b728955a-4e97-49ba-ac67-380edfbefe46",
+          "image_url": "https://iili.io/o2Hk9LB.png",
+          "link_url": "https://budoq.com/pages/category-landing.html?slug=skincare",
+          "title": "",
+          "subtitle": "",
+          "sort_order": 0,
+          "created_at": "2026-07-11T20:24:06.68028+00:00",
+          "device": null
+        }
+      ],
+      "home_mega_products": [
+        {
+          "id": "0191e63e-50d9-4ecd-9b50-624e6b2eca41",
+          "section_id": "2d2bdf7c-5799-4c8e-8633-0621bae17044",
+          "product_id": "taager_5310",
+          "sort_order": 0,
+          "created_at": "2026-09-13T00:38:22.688063+00:00",
+          "col": 1
+        },
+        {
+          "id": "029b1b70-25f9-4331-baa4-9ee85ed2035d",
+          "section_id": "2d2bdf7c-5799-4c8e-8633-0621bae17044",
+          "product_id": "taager_19438",
+          "sort_order": 3,
+          "created_at": "2026-09-13T00:44:55.644066+00:00",
+          "col": 2
+        },
+        {
+          "id": "2930709c-f258-48fd-b5c6-91924bfbb626",
+          "section_id": "2d2bdf7c-5799-4c8e-8633-0621bae17044",
+          "product_id": "taager_17070",
+          "sort_order": 3,
+          "created_at": "2026-09-13T00:41:54.986265+00:00",
+          "col": 1
+        },
+        {
+          "id": "4429aca1-cdbf-4ef1-a63c-0837a5e5b24e",
+          "section_id": "2d2bdf7c-5799-4c8e-8633-0621bae17044",
+          "product_id": "taager_25874",
+          "sort_order": 1,
+          "created_at": "2026-09-13T00:43:07.157267+00:00",
+          "col": 2
+        },
+        {
+          "id": "5a741774-9685-4a56-a6c7-50bf26c950fa",
+          "section_id": "2d2bdf7c-5799-4c8e-8633-0621bae17044",
+          "product_id": "taager_21025",
+          "sort_order": 0,
+          "created_at": "2026-09-13T00:42:20.339111+00:00",
+          "col": 2
+        },
+        {
+          "id": "7d3acfd3-a7ff-4370-a42f-f0fd7bb9f92d",
+          "section_id": "2d2bdf7c-5799-4c8e-8633-0621bae17044",
+          "product_id": "taager_17998",
+          "sort_order": 1,
+          "created_at": "2026-09-13T00:39:46.697531+00:00",
+          "col": 1
+        },
+        {
+          "id": "99535bbb-69ed-48cb-a071-7e9e72f12341",
+          "section_id": "2d2bdf7c-5799-4c8e-8633-0621bae17044",
+          "product_id": "taager_13778",
+          "sort_order": 2,
+          "created_at": "2026-09-13T00:41:05.418473+00:00",
+          "col": 1
+        },
+        {
+          "id": "ca3cce4f-b9f7-4228-b88f-5adbd9f47d0d",
+          "section_id": "2d2bdf7c-5799-4c8e-8633-0621bae17044",
+          "product_id": "taager_22309",
+          "sort_order": 2,
+          "created_at": "2026-09-13T00:43:54.291227+00:00",
+          "col": 2
+        }
+      ],
+      "home_ad_banners": [
+        {
+          "id": "08eef593-56b5-483b-b29b-558823d2aec7",
+          "section_id": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "image_url": "https://iili.io/CQmtVOG.png",
+          "link_url": "https://budoq.com/pages/brand-landing.html?slug=nike#",
+          "badge_text": "مدفوع",
+          "sort_order": 0,
+          "is_active": true,
+          "created_at": "2026-07-18T08:44:12.620179+00:00",
+          "device": "mobile"
+        },
+        {
+          "id": "08f58317-2a71-4788-b6f6-07b32543330f",
+          "section_id": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "image_url": "https://iili.io/CQmtlfI.png",
+          "link_url": "budoq.com/pages/category-landing.html?slug=skincare",
+          "badge_text": "مدفوع",
+          "sort_order": 0,
+          "is_active": true,
+          "created_at": "2026-08-21T17:21:56.490211+00:00",
+          "device": "desktop"
+        },
+        {
+          "id": "14114075-a84f-48b0-8bcb-678ad6266765",
+          "section_id": "ec4e31f2-bcf6-40b6-b6c7-280131a6f579",
+          "image_url": "https://iili.io/CQmtlfI.png",
+          "link_url": "products.html?category=beauty&branch=كريمات%20مرطبات",
+          "badge_text": "مدفوع",
+          "sort_order": 3,
+          "is_active": true,
+          "created_at": "2026-08-21T17:22:57.729761+00:00",
+          "device": "desktop"
+        },
+        {
+          "id": "4c941bba-6a45-4562-baff-a6a408853d9e",
+          "section_id": "ec4e31f2-bcf6-40b6-b6c7-280131a6f579",
+          "image_url": "https://a.nooncdn.com/assets/img-800x800/ar_mb_eg-top-01.1786889896.3622208.png?width=800",
+          "link_url": "#",
+          "badge_text": "مدفوع",
+          "sort_order": 0,
+          "is_active": true,
+          "created_at": "2026-07-11T21:28:55.100949+00:00",
+          "device": "mobile"
+        },
+        {
+          "id": "865a7d5a-a6c2-4123-95ca-161e9c7b5b08",
+          "section_id": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "image_url": "https://iili.io/CQmtMRs.png",
+          "link_url": "products.html?category=beauty&branch=عناية%20بالبشرة",
+          "badge_text": "مدفوع",
+          "sort_order": 0,
+          "is_active": true,
+          "created_at": "2026-07-11T20:32:32.24494+00:00",
+          "device": "mobile"
+        },
+        {
+          "id": "8a2f261b-b695-4f16-bfd7-69c627c69723",
+          "section_id": "ec4e31f2-bcf6-40b6-b6c7-280131a6f579",
+          "image_url": "https://a.nooncdn.com/assets/img-800x800/ar_mb_eg-sfu-01_(29).1786548164.8092108.png?width=800",
+          "link_url": "products.html?category=beauty&branch=عناية%20بالبشرة",
+          "badge_text": "مدفوع",
+          "sort_order": 0,
+          "is_active": true,
+          "created_at": "2026-07-11T21:28:36.927992+00:00",
+          "device": "mobile"
+        },
+        {
+          "id": "b5ed6cee-4e84-474b-b409-a3e6d92e7cb9",
+          "section_id": "ec4e31f2-bcf6-40b6-b6c7-280131a6f579",
+          "image_url": "https://iili.io/CQmZL9s.png",
+          "link_url": "#",
+          "badge_text": "مدفوع",
+          "sort_order": 2,
+          "is_active": true,
+          "created_at": "2026-08-21T16:47:57.919335+00:00",
+          "device": "desktop"
+        },
+        {
+          "id": "f465960f-81aa-419f-8cb9-a62245e3fa98",
+          "section_id": "ec4e31f2-bcf6-40b6-b6c7-280131a6f579",
+          "image_url": "https://iili.io/CQmtGJn.png",
+          "link_url": "products.html?category=electronics&branch=تابلت",
+          "badge_text": "مدفوع",
+          "sort_order": 0,
+          "is_active": true,
+          "created_at": "2026-08-21T16:46:23.740871+00:00",
+          "device": "mobile"
+        },
+        {
+          "id": "2e9935ab-b883-4264-8853-6ea2f3664124",
+          "section_id": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "image_url": "https://iili.io/o2H32S9.png",
+          "link_url": "#",
+          "badge_text": "مدفوع",
+          "sort_order": 1,
+          "is_active": true,
+          "created_at": "2026-11-17T03:38:56.802576+00:00",
+          "device": "mobile"
+        },
+        {
+          "id": "1e690750-d123-4ab6-93d2-16d9c4c0ad16",
+          "section_id": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "image_url": "https://iili.io/o2H2pn4.png",
+          "link_url": "#",
+          "badge_text": "مدفوع",
+          "sort_order": 2,
+          "is_active": true,
+          "created_at": "2026-11-17T03:39:14.783464+00:00",
+          "device": "mobile"
+        },
+        {
+          "id": "1e09a489-3f13-4d6e-8e74-c3cdb567989c",
+          "section_id": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "image_url": "https://iili.io/o2H3wxf.png",
+          "link_url": "#",
+          "badge_text": "مدفوع",
+          "sort_order": 3,
+          "is_active": true,
+          "created_at": "2026-11-17T03:41:52.198633+00:00",
+          "device": "mobile"
+        },
+        {
+          "id": "8b270dfe-75ac-465a-804e-fa6a882a6d86",
+          "section_id": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "image_url": "https://iili.io/o2H2btf.png",
+          "link_url": "#",
+          "badge_text": "مدفوع",
+          "sort_order": 4,
+          "is_active": true,
+          "created_at": "2026-11-17T03:42:13.420092+00:00",
+          "device": "mobile"
+        },
+        {
+          "id": "ed2eb9cf-eae0-4ece-ab02-b5c4b001c8e6",
+          "section_id": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "image_url": "https://iili.io/oK2I6BI.png",
+          "link_url": "#",
+          "badge_text": "مدفوع",
+          "sort_order": 5,
+          "is_active": true,
+          "created_at": "2026-11-21T11:41:30.902125+00:00",
+          "device": "desktop"
+        },
+        {
+          "id": "080d99ce-69a9-4806-bf1d-0d3d0cc4fe16",
+          "section_id": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "image_url": "https://iili.io/oK2T9BS.png",
+          "link_url": "#",
+          "badge_text": "مدفوع",
+          "sort_order": 6,
+          "is_active": true,
+          "created_at": "2026-11-21T11:41:54.948478+00:00",
+          "device": "desktop"
+        },
+        {
+          "id": "9855b507-eda0-438a-88ef-22151367515b",
+          "section_id": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "image_url": "https://iili.io/oK2TCQV.png",
+          "link_url": "#",
+          "badge_text": "مدفوع",
+          "sort_order": 7,
+          "is_active": true,
+          "created_at": "2026-11-21T11:42:04.580375+00:00",
+          "device": "mobile"
+        },
+        {
+          "id": "60a6ec0b-6862-4b9b-bc6c-2a8b031e7197",
+          "section_id": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "image_url": "https://iili.io/oK2TBhQ.png",
+          "link_url": "#",
+          "badge_text": "مدفوع",
+          "sort_order": 8,
+          "is_active": true,
+          "created_at": "2026-11-21T11:42:15.198536+00:00",
+          "device": "desktop"
+        },
+        {
+          "id": "0fee3517-5c85-4a40-84e5-8c2c382a6408",
+          "section_id": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "image_url": "https://iili.io/oK2Itpf.png",
+          "link_url": "#",
+          "badge_text": "مدفوع",
+          "sort_order": 9,
+          "is_active": true,
+          "created_at": "2026-11-21T11:42:39.448792+00:00",
+          "device": "desktop"
+        },
+        {
+          "id": "f1a12753-266d-486a-a12b-2dc50ae3fb04",
+          "section_id": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "image_url": "https://a.nooncdn.com/assets/img-1200x1200/ar_dk_eg-atf-01.1786973886.9899728.png?width=2400",
+          "link_url": "#",
+          "badge_text": "مدفوع",
+          "sort_order": 0,
+          "is_active": true,
+          "created_at": "2026-08-20T01:57:12.743303+00:00",
+          "device": "desktop"
+        },
+        {
+          "id": "3f069023-17f0-4cc5-8e65-e3d55a1ba688",
+          "section_id": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "image_url": "https://iili.io/oK2TCQV.png",
+          "link_url": "#",
+          "badge_text": "مدفوع",
+          "sort_order": 10,
+          "is_active": true,
+          "created_at": "2026-11-21T11:45:05.564057+00:00",
+          "device": "desktop"
+        }
+      ],
+      "smart_category_showcase": [
+        {
+          "id": "1c235d5d-d86d-4a7d-aea8-6fc0f4712478",
+          "category_id": null,
+          "title": "",
+          "subtitle": "",
+          "image_url": "https://media0.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3cjB6MXF5NDBqd2NhMzkxcmsxbG9kaWYybWFzbThyanhyN3Q4eXcwZyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/YuTCxe71sGvoluBMw1/giphy.webp",
+          "link_url": "brand-landing.html?slug=play",
+          "gradient_from": "#000000",
+          "gradient_to": "#000000",
+          "sort_order": 0,
+          "is_active": true,
+          "created_at": "2026-09-13T01:57:16.872724+00:00",
+          "country_code": "SA"
+        },
+        {
+          "id": "320e3c3b-41ed-4788-a2a9-b1b6884f8999",
+          "category_id": null,
+          "title": "",
+          "subtitle": "",
+          "image_url": "https://media1.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3bWcxeGpuM25ocXVnbHVlNWFrNHkyanF5YzQ5Z2N6anJqY3BqNGwwbiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/r1uyZbdOcrXPIIfSCM/200w.webp",
+          "link_url": "category-landing.html?slug=play",
+          "gradient_from": "#000000",
+          "gradient_to": "#000000",
+          "sort_order": 3,
+          "is_active": true,
+          "created_at": "2026-09-13T02:54:40.492501+00:00",
+          "country_code": "SA"
+        },
+        {
+          "id": "611851ad-deb7-41a8-8b3c-a20cfede73a2",
+          "category_id": null,
+          "title": "",
+          "subtitle": "",
+          "image_url": "https://media1.giphy.com/media/qkuxgrswIgxcUT0dwy/giphy.webp",
+          "link_url": "category-landing.html?slug=skincare",
+          "gradient_from": "#000000",
+          "gradient_to": "#000000",
+          "sort_order": 0,
+          "is_active": true,
+          "created_at": "2026-09-13T01:07:27.306894+00:00",
+          "country_code": "SA"
+        },
+        {
+          "id": "71d0747e-c18f-4236-ae5e-a0c7bb0fb80a",
+          "category_id": null,
+          "title": "حريمي",
+          "subtitle": "",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/e32c98d3-3780-4d8e-ade5-acee4a44b043.gif?width=2400",
+          "link_url": "https://budoq.com/pages/brand-landing.html?slug=nike#",
+          "gradient_from": "#000000",
+          "gradient_to": "#000000",
+          "sort_order": 3,
+          "is_active": true,
+          "created_at": "2026-09-11T04:50:35.076275+00:00",
+          "country_code": "EG"
+        },
+        {
+          "id": "a84ed673-2768-49b8-b9fb-3ed78877aaca",
+          "category_id": null,
+          "title": "shoz",
+          "subtitle": "",
+          "image_url": "https://media.tenor.com/H1snf3Qk4MQAAAAM/adidas-adidas-trainers.gif",
+          "link_url": "https://budoq.com/pages/category-landing.html?slug=%D8%A7%D8%AD%D8%B0%D9%8A%D9%87",
+          "gradient_from": "#000000",
+          "gradient_to": "#000000",
+          "sort_order": 4,
+          "is_active": true,
+          "created_at": "2026-09-11T05:54:18.381815+00:00",
+          "country_code": "EG"
+        },
+        {
+          "id": "ce5666a0-141a-4970-8715-65740066efcd",
+          "category_id": null,
+          "title": "بشره",
+          "subtitle": "",
+          "image_url": "https://media1.giphy.com/media/qkuxgrswIgxcUT0dwy/giphy.webp",
+          "link_url": "category-landing.html?slug=skincare",
+          "gradient_from": "#00000",
+          "gradient_to": "#000000",
+          "sort_order": 2,
+          "is_active": true,
+          "created_at": "2026-07-15T00:16:36.417513+00:00",
+          "country_code": "EG"
+        },
+        {
+          "id": "e0000001-0000-0000-0000-000000000003",
+          "category_id": null,
+          "title": "رجالي",
+          "subtitle": "",
+          "image_url": "https://a.nooncdn.com/mpcms/EN0003/assets/1526b8b8-895b-4e03-b7bc-4c6a47fccf82.gif?width=2400",
+          "link_url": "category-landing.html?slug=shoes",
+          "gradient_from": "#4facfe",
+          "gradient_to": "#00f2fe",
+          "sort_order": 1,
+          "is_active": true,
+          "created_at": "2026-07-15T03:06:24.731621+00:00",
+          "country_code": "EG"
+        },
+        {
+          "id": "fc52faed-4d6a-4337-a8e3-5eb8b4e86dc9",
+          "category_id": null,
+          "title": "",
+          "subtitle": "",
+          "image_url": "https://media0.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3MWdrZXdqMXVsZGt3NmtvcjFsZDZyMnlqcWdrcWV6YnZyNDlmOXl1NyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/REbl2L9F2YRvRxAQrg/giphy.webp",
+          "link_url": "brand-landing.html?slug=تابلت",
+          "gradient_from": "#000000",
+          "gradient_to": "#000000",
+          "sort_order": 4,
+          "is_active": true,
+          "created_at": "2026-09-13T03:45:43.030972+00:00",
+          "country_code": "SA"
+        }
+      ]
+    },
+    "product_catalogue": {
+      "table": "taager_products",
+      "fetched": 80,
+      "usable": 80,
+      "sample": [
+        {
+          "id": "jumia_GE810ST1WGZIBNAFAMZ",
+          "name": "مشط الشعر من طه - عرض خاص",
+          "price": 34.53,
+          "original_price": 151.44,
+          "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/15/0064031/1.jpg?8585",
+          "category": "أجهزة تصفيف الشعر",
+          "rating": 4.4,
+          "source": "jumia",
+          "available_countries": [
+            "EG"
+          ]
+        },
+        {
+          "id": "jumia_BR404EA33P20ZNAFAMZ",
+          "name": "GOLDEN MASK جراب حافظة مع عدسة كاميرا واقية وإطار اسود (iPhone 14 Pro Max) جولدن ماسك لهاتف ايفون 14 برو ماكس",
+          "price": 120,
+          "original_price": 500,
+          "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/87/6064031/1.jpg?2430",
+          "category": "حافظات",
+          "rating": 1.0,
+          "source": "jumia",
+          "available_countries": [
+            "EG"
+          ]
+        },
+        {
+          "id": "jumia_GE810TG2ZDK17NAFAMZ",
+          "name": "Pokemon Game 25pcs Assorted Game Cards Gold Foil Card Series Rare Gold Cards",
+          "price": 125,
+          "original_price": 500,
+          "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/80/3514031/1.jpg?5166",
+          "category": "العاب",
+          "rating": 0.0,
+          "source": "jumia",
+          "available_countries": [
+            "EG"
+          ]
+        },
+        {
+          "id": "jumia_DE196SL2AI1GBNAFAMZ",
+          "name": "Defacto بيجامة بناتية ذات أكمام طويلة من ديفاكٹو بتصميم ضيق",
+          "price": 628.99,
+          "original_price": 2499,
+          "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/38/5702031/1.jpg?3932",
+          "category": "ملابس النوم أطفال بناتي",
+          "rating": 5.0,
+          "source": "jumia",
+          "available_countries": [
+            "EG"
+          ]
+        },
+        {
+          "id": "jumia_GE810EA2W13M3NAFAMZ",
+          "name": "راديو كهربائي / بطارية - M-2031-215",
+          "price": 1170,
+          "original_price": 2223,
+          "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/74/7314031/1.jpg?6049",
+          "category": "سمعيات وصوتيات",
+          "rating": 5.0,
+          "source": "jumia",
+          "available_countries": [
+            "EG"
+          ]
+        },
+        {
+          "id": "jumia_GE810FS2E2G7RNAFAMZ",
+          "name": "صندل مسطح للشباب لفصل الصيف",
+          "price": 140,
+          "original_price": 184,
+          "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/44/5613031/1.jpg?8806",
+          "category": "أحذية رجالي",
+          "rating": 5.0,
+          "source": "jumia",
+          "available_countries": [
+            "EG"
+          ]
+        },
+        {
+          "id": "jumia_AR830FS2INHKNNAFAMZ",
+          "name": "Arrow صندل Arrow النسائي الكاجوال لفصل الصيف",
+          "price": 119.2,
+          "original_price": 210,
+          "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/52/2613031/1.jpg?5209",
+          "category": "احذية",
+          "rating": 5.0,
+          "source": "jumia",
+          "available_countries": [
+            "EG"
+          ]
+        },
+        {
+          "id": "jumia_AR830FS2BOPSNNAFAMZ",
+          "name": "Arrow صندل مسطح شبابي من أرو بخصم الصيف",
+          "price": 188,
+          "original_price": 375,
+          "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/40/5613031/1.jpg?7130",
+          "category": "أحذية رجالي",
+          "rating": 5.0,
+          "source": "jumia",
+          "available_countries": [
+            "EG"
+          ]
+        }
+      ]
+    },
+    "rules": {
+      "device": "home_hero_slides وhome_ad_banners وhome_banners تحمل عمود device؛ البلوكات هنا مقسومة حسبه.",
+      "ads": "home_ad_banners: is_active، badge_text، link_url، device. الموضع/التوقيت قابل للتعديل من لوحة HS.",
+      "products": "productLayout.mode = manual لعرض بيانات حقيقية داخل الملف؛ بدّله إلى auto في اللوحة لسحب المنتجات تلقائياً من Supabase.",
+      "sync": "source.table + source.sectionId + source.sectionType + source.device تستخدمها «مزامنة من السيرفر» لمطابقة البلوكات."
+    },
+    "counts": {
+      "sections": 10,
+      "heroSlides": 19,
+      "categories": 26,
+      "banners": 4,
+      "megaBanners": 4,
+      "megaProducts": 8,
+      "adBanners": 19,
+      "smartCategories": 8,
+      "productsFetched": 80
+    }
+  },
+  "doc": {
+    "version": 1,
+    "theme": {
+      "bg": "#f7f8fa",
+      "text": "#0f172a",
+      "accent": "#feee00",
+      "fontFamily": "Cairo",
+      "radius": "12px",
+      "pageWidth": "1200px"
+    },
+    "blocks": [
+      {
+        "id": "noon_banner_top",
+        "type": "banner",
+        "name": "شريط نون — توصيل مجاني",
+        "visible": true,
+        "device": "desktop",
+        "style": {
+          "background": "#ffffff",
+          "color": "#e1ff00",
+          "gradient": false,
+          "border": "1px solid #ffffff",
+          "radius": "0px",
+          "padding": "8px",
+          "margin": "0 0 8px",
+          "width": "100%",
+          "height": "",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "13px",
+          "fontWeight": "800",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "توصيل مجاني عند طلب أكثر من 5 منتجات",
+          "subtitle": "",
+          "perLetter": [
+            {
+              "char": "ت",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "و",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "ص",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "ي",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "ل",
+              "color": "#e1ff00"
+            },
+            {
+              "char": " ",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "م",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "ج",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "ا",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "ن",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "ي",
+              "color": "#e1ff00"
+            },
+            {
+              "char": " ",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "ع",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "ن",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "د",
+              "color": "#e1ff00"
+            },
+            {
+              "char": " ",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "ط",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "ل",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "ب",
+              "color": "#e1ff00"
+            },
+            {
+              "char": " ",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "أ",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "ك",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "ث",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "ر",
+              "color": "#e1ff00"
+            },
+            {
+              "char": " ",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "م",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "ن",
+              "color": "#e1ff00"
+            },
+            {
+              "char": " ",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "5",
+              "color": "#e1ff00"
+            },
+            {
+              "char": " ",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "م",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "ن",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "ت",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "ج",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "ا",
+              "color": "#e1ff00"
+            },
+            {
+              "char": "ت",
+              "color": "#e1ff00"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_db0b714e_add8_492b_840c_9d408f7c326e",
+            "url": "https://iili.io/CQsnNJS.png",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "8px",
+            "opacity": 0.35,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "home_banners",
+          "sectionType": "banner_top",
+          "sectionId": "2564c7f1-a0e7-499f-8357-3fb8876a1e69",
+          "rowId": "db0b714e-add8-492b-840c-9d408f7c326e",
+          "device": "desktop",
+          "sectionOrder": 2
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_hero_desktop_1",
+        "type": "hero",
+        "name": "هيرو نون ديسكتوب 1",
+        "visible": true,
+        "device": "desktop",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "0px",
+          "padding": "0",
+          "margin": "0 0 8px",
+          "width": "100%",
+          "height": "300px",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "16px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "عروض الصيف",
+          "subtitle": "اسحب للتسوق",
+          "perLetter": [
+            {
+              "char": "ع",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ر",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ض",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ص",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ي",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ف",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_81295be8_0d5d_45cd_8d7e_1cb3ed48991b",
+            "url": "https://iili.io/CQmZiSn.png",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "0px",
+            "opacity": 1,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "home_hero_slides",
+          "sectionType": "hero",
+          "sectionId": "d2f70e14-2e84-4f7e-bbcb-0739e12a9dc0",
+          "rowId": "81295be8-0d5d-45cd-8d7e-1cb3ed48991b",
+          "device": "desktop",
+          "sectionOrder": 0,
+          "link": "category-landing.html?slug=skincare"
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_hero_desktop_2",
+        "type": "hero",
+        "name": "هيرو نون ديسكتوب 2",
+        "visible": true,
+        "device": "desktop",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "0px",
+          "padding": "0",
+          "margin": "0 0 8px",
+          "width": "100%",
+          "height": "300px",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "16px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "جديدنا",
+          "subtitle": "اسحب للتسوق",
+          "perLetter": [
+            {
+              "char": "ج",
+              "color": "#0f172a"
+            },
+            {
+              "char": "د",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ي",
+              "color": "#0f172a"
+            },
+            {
+              "char": "د",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ن",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_98dad3fb_9b29_4319_8350_5d870c885f2a",
+            "url": "https://iili.io/CQmQurF.png",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "0px",
+            "opacity": 1,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "home_hero_slides",
+          "sectionType": "hero",
+          "sectionId": "d2f70e14-2e84-4f7e-bbcb-0739e12a9dc0",
+          "rowId": "98dad3fb-9b29-4319-8350-5d870c885f2a",
+          "device": "desktop",
+          "sectionOrder": 0,
+          "link": "https://budoq.com/pages/category-landing.html?slug=skincare"
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_hero_desktop_3",
+        "type": "hero",
+        "name": "هيرو نون ديسكتوب 3",
+        "visible": true,
+        "device": "desktop",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "0px",
+          "padding": "0",
+          "margin": "0 0 8px",
+          "width": "100%",
+          "height": "300px",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "16px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "خصومات اليوم",
+          "subtitle": "اسحب للتسوق",
+          "perLetter": [
+            {
+              "char": "خ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ص",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ت",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ي",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_8300b47b_a4b0_4cd3_bea9_f3c1a103f384",
+            "url": "https://iili.io/CQmtS5u.png",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "0px",
+            "opacity": 1,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "home_hero_slides",
+          "sectionType": "hero",
+          "sectionId": "d2f70e14-2e84-4f7e-bbcb-0739e12a9dc0",
+          "rowId": "8300b47b-a4b0-4cd3-bea9-f3c1a103f384",
+          "device": "desktop",
+          "sectionOrder": 0,
+          "link": "https://budoq.com/pages/category-landing.html?slug=skincare"
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_hero_mobile_1",
+        "type": "hero",
+        "name": "هيرو نون موبايل 1",
+        "visible": true,
+        "device": "mobile",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "0px",
+          "padding": "0",
+          "margin": "0 0 8px",
+          "width": "100%",
+          "height": "220px",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "16px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "عروض الصيف",
+          "subtitle": "اسحب للتسوق",
+          "perLetter": [
+            {
+              "char": "ع",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ر",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ض",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ص",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ي",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ف",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_0ebfacb6_8ac8_4bb4_ac9a_509b7525b8c0",
+            "url": "https://a.nooncdn.com/assets/img-706x706/ar_mb_eg-hero-01.1786973684.2674549.png?width=800",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "0px",
+            "opacity": 1,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "home_hero_slides",
+          "sectionType": "hero",
+          "sectionId": "d2f70e14-2e84-4f7e-bbcb-0739e12a9dc0",
+          "rowId": "0ebfacb6-8ac8-4bb4-ac9a-509b7525b8c0",
+          "device": "mobile",
+          "sectionOrder": 0,
+          "link": "https://budoq.com/pages/brand-landing.html?slug=nike#"
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_hero_mobile_2",
+        "type": "hero",
+        "name": "هيرو نون موبايل 2",
+        "visible": true,
+        "device": "mobile",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "0px",
+          "padding": "0",
+          "margin": "0 0 8px",
+          "width": "100%",
+          "height": "220px",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "16px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "جديدنا",
+          "subtitle": "اسحب للتسوق",
+          "perLetter": [
+            {
+              "char": "ج",
+              "color": "#0f172a"
+            },
+            {
+              "char": "د",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ي",
+              "color": "#0f172a"
+            },
+            {
+              "char": "د",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ن",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_7614ab3f_3264_4774_9239_e48de656d8e8",
+            "url": "https://a.nooncdn.com/mpcms/EN0003/assets/a9ead18b-fae4-422c-8671-e2289ace828f.png?width=800",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "0px",
+            "opacity": 1,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "home_hero_slides",
+          "sectionType": "hero",
+          "sectionId": "d2f70e14-2e84-4f7e-bbcb-0739e12a9dc0",
+          "rowId": "7614ab3f-3264-4774-9239-e48de656d8e8",
+          "device": "mobile",
+          "sectionOrder": 0,
+          "link": "products.html?category=watches&branch=ساعات%20ذكية"
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_ad_hero",
+        "type": "ads",
+        "name": "إعلان أعلى الصفحة",
+        "visible": true,
+        "device": "desktop",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "0px",
+          "padding": "0",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "160px",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "18px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "إعلان ممول",
+          "subtitle": "",
+          "perLetter": [
+            {
+              "char": "إ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ع",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ن",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_08f58317_2a71_4788_b6f6_07b32543330f",
+            "url": "https://iili.io/CQmtlfI.png",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "0px",
+            "opacity": 1,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "top",
+          "trigger": "always",
+          "link": "budoq.com/pages/category-landing.html?slug=skincare",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "home_ad_banners",
+          "sectionType": "ad_banners",
+          "sectionId": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "rowId": "08f58317-2a71-4788-b6f6-07b32543330f",
+          "device": "desktop",
+          "sectionOrder": 11
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_categories_1",
+        "type": "categories",
+        "name": "فئات نون السريعة 1",
+        "visible": true,
+        "device": "all",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "12px",
+          "padding": "14px",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "17px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "تسوق حسب الفئة",
+          "subtitle": "اختياراتك في مكان واحد",
+          "perLetter": [
+            {
+              "char": "ت",
+              "color": "#0f172a"
+            },
+            {
+              "char": "س",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ق",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ح",
+              "color": "#0f172a"
+            },
+            {
+              "char": "س",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ب",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ف",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ئ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ة",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [],
+        "items": [
+          {
+            "id": "31fb6178-5bd4-4df0-bc83-078fbcf06f93",
+            "rowId": "31fb6178-5bd4-4df0-bc83-078fbcf06f93",
+            "name": "ملابس نساء",
+            "image": "https://a.nooncdn.com/mpcms/EN0003/assets/f5cb1ce7-d491-4458-aba3-62378146a3e3.gif?width=2400",
+            "link": "brand-landing.html?slug=nike#"
+          },
+          {
+            "id": "fb87d099-96ef-497d-91c9-736bbdf8630e",
+            "rowId": "fb87d099-96ef-497d-91c9-736bbdf8630e",
+            "name": "اذياء الرجال",
+            "image": "https://a.nooncdn.com/mpcms/EN0003/assets/3582f1f7-0396-4348-adf0-ea61c5a51046.gif?width=2400",
+            "link": "category-landing.html?slug=shoes"
+          },
+          {
+            "id": "bc92b0fa-0261-428a-8fec-3d4fb2f5b483",
+            "rowId": "bc92b0fa-0261-428a-8fec-3d4fb2f5b483",
+            "name": "احذيه",
+            "image": "https://a.nooncdn.com/mpcms/EN0003/assets/65738a09-30c2-4f6d-8218-a28dae1082e7.png?width=2400",
+            "link": "category-landing.html?slug=احذيه"
+          },
+          {
+            "id": "485f9341-e46e-4b72-ae65-25926976e244",
+            "rowId": "485f9341-e46e-4b72-ae65-25926976e244",
+            "name": "سمعات",
+            "image": "https://a.nooncdn.com/mpcms/EN0003/assets/1e0f99b1-8feb-40a8-b2c9-a7af4badb8a6.png?width=2400",
+            "link": "products.html?category=headphones"
+          },
+          {
+            "id": "856637e7-19f9-4812-8eb1-4ba5478b4721",
+            "rowId": "856637e7-19f9-4812-8eb1-4ba5478b4721",
+            "name": "ساعات",
+            "image": "https://a.nooncdn.com/mpcms/EN0003/assets/eb48ea19-19d5-4fb6-8b5f-74f3bea33fa5.png?width=2400",
+            "link": "products.html?category=watches&branch=ساعات%20ذكية"
+          },
+          {
+            "id": "66699c3e-bc60-480f-8ee0-59e8fc26d848",
+            "rowId": "66699c3e-bc60-480f-8ee0-59e8fc26d848",
+            "name": "إلكترونيات",
+            "image": "https://a.nooncdn.com/mpcms/EN0003/assets/839f2653-9cf3-4cee-9d65-49924be6078d.png?width=2400",
+            "link": "products.html?category=headphones"
+          },
+          {
+            "id": "05bb22ae-2900-43ff-8f8e-cf75a106bbf3",
+            "rowId": "05bb22ae-2900-43ff-8f8e-cf75a106bbf3",
+            "name": "اكسسورات المبيايل",
+            "image": "https://a.nooncdn.com/mpcms/EN0003/assets/0edae349-c084-4294-b35f-e2d3e11aed73.png?width=2400",
+            "link": "products.html?category=electronics&branch=شواحن"
+          }
+        ],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "home_categories",
+          "sectionType": "categories",
+          "sectionId": "b2266d94-1815-4101-b1d5-8ba4ae4c8168",
+          "rowId": "b2266d94-1815-4101-b1d5-8ba4ae4c8168",
+          "device": "all",
+          "sectionOrder": 1
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_categories_2",
+        "type": "categories",
+        "name": "فئات نون السريعة 2",
+        "visible": true,
+        "device": "all",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "12px",
+          "padding": "14px",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "17px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "اكتشف المزيد",
+          "subtitle": "اختياراتك في مكان واحد",
+          "perLetter": [
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ك",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ت",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ش",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ف",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ز",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ي",
+              "color": "#0f172a"
+            },
+            {
+              "char": "د",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [],
+        "items": [
+          {
+            "id": "1522a425-0ab6-44be-818e-a92f432bbfd6",
+            "rowId": "1522a425-0ab6-44be-818e-a92f432bbfd6",
+            "name": "الكترونات",
+            "image": "https://a.nooncdn.com/mpcms/EN0003/assets/d0c845c7-03d5-4bde-aec7-4d1194e3191c.png?width=2400",
+            "link": "products.html?category=electronics&branch=هواتف"
+          },
+          {
+            "id": "9dd6aec6-b063-4579-b2a8-ea8b093fe1a2",
+            "rowId": "9dd6aec6-b063-4579-b2a8-ea8b093fe1a2",
+            "name": "برفان",
+            "image": "https://a.nooncdn.com/mpcms/EN0003/assets/d1d78d9d-76b7-4f91-9a06-ddda937571cb.png?width=2400",
+            "link": "products.html?category=beauty&branch=عطور"
+          },
+          {
+            "id": "8b194fc3-d3ae-4097-95f8-9aed6305bc65",
+            "rowId": "8b194fc3-d3ae-4097-95f8-9aed6305bc65",
+            "name": "عنايه بي البشره",
+            "image": "https://a.nooncdn.com/mpcms/EN0003/assets/97612698-d197-44b1-a7c1-1d1ccedcd85b.png?width=2400",
+            "link": "category-landing.html?slug=skincare"
+          },
+          {
+            "id": "f4b47da7-46ee-4634-93f0-df05adbf88da",
+            "rowId": "f4b47da7-46ee-4634-93f0-df05adbf88da",
+            "name": "روتينك",
+            "image": "https://a.nooncdn.com/mpcms/EN0003/assets/65ee20f5-d4a7-4228-acd0-ca938b47b020.png?width=2400",
+            "link": "category-landing.html?slug=skincare"
+          },
+          {
+            "id": "482b0818-1484-4390-a22a-d3d694d5d459",
+            "rowId": "482b0818-1484-4390-a22a-d3d694d5d459",
+            "name": "الكل",
+            "image": "https://a.nooncdn.com/mpcms/EN0003/assets/cf5fcebf-bc0e-4f93-b4d1-66f07a107be6.png?width=2400",
+            "link": "products.html?category=office"
+          },
+          {
+            "id": "5d438a17-e96f-4af2-95ec-bb08aa66a76a",
+            "rowId": "5d438a17-e96f-4af2-95ec-bb08aa66a76a",
+            "name": "الكل",
+            "image": "https://a.nooncdn.com/mpcms/EN0003/assets/cda73fc0-b7f6-42bc-9866-391144565a69.png?width=2400",
+            "link": "products.html?category=home&branch=أثاث"
+          }
+        ],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "home_categories",
+          "sectionType": "categories",
+          "sectionId": "b2266d94-1815-4101-b1d5-8ba4ae4c8168",
+          "rowId": "b2266d94-1815-4101-b1d5-8ba4ae4c8168",
+          "device": "all",
+          "sectionOrder": 1
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_trust",
+        "type": "text",
+        "name": "مميزات نون — توصيل وإرجاع",
+        "visible": true,
+        "device": "all",
+        "style": {
+          "background": "#fffbeb",
+          "color": "#92400e",
+          "gradient": false,
+          "border": "1px solid #fde68a",
+          "radius": "10px",
+          "padding": "10px",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "14px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "توصيل سريع  ·  دفع آمن  ·  إرجاع مجاني",
+          "subtitle": "تسوق بثقة مع بودوكيو",
+          "perLetter": [
+            {
+              "char": "ت",
+              "color": "#92400e"
+            },
+            {
+              "char": "و",
+              "color": "#92400e"
+            },
+            {
+              "char": "ص",
+              "color": "#92400e"
+            },
+            {
+              "char": "ي",
+              "color": "#92400e"
+            },
+            {
+              "char": "ل",
+              "color": "#92400e"
+            },
+            {
+              "char": " ",
+              "color": "#92400e"
+            },
+            {
+              "char": "س",
+              "color": "#92400e"
+            },
+            {
+              "char": "ر",
+              "color": "#92400e"
+            },
+            {
+              "char": "ي",
+              "color": "#92400e"
+            },
+            {
+              "char": "ع",
+              "color": "#92400e"
+            },
+            {
+              "char": " ",
+              "color": "#92400e"
+            },
+            {
+              "char": " ",
+              "color": "#92400e"
+            },
+            {
+              "char": "·",
+              "color": "#92400e"
+            },
+            {
+              "char": " ",
+              "color": "#92400e"
+            },
+            {
+              "char": " ",
+              "color": "#92400e"
+            },
+            {
+              "char": "د",
+              "color": "#92400e"
+            },
+            {
+              "char": "ف",
+              "color": "#92400e"
+            },
+            {
+              "char": "ع",
+              "color": "#92400e"
+            },
+            {
+              "char": " ",
+              "color": "#92400e"
+            },
+            {
+              "char": "آ",
+              "color": "#92400e"
+            },
+            {
+              "char": "م",
+              "color": "#92400e"
+            },
+            {
+              "char": "ن",
+              "color": "#92400e"
+            },
+            {
+              "char": " ",
+              "color": "#92400e"
+            },
+            {
+              "char": " ",
+              "color": "#92400e"
+            },
+            {
+              "char": "·",
+              "color": "#92400e"
+            },
+            {
+              "char": " ",
+              "color": "#92400e"
+            },
+            {
+              "char": " ",
+              "color": "#92400e"
+            },
+            {
+              "char": "إ",
+              "color": "#92400e"
+            },
+            {
+              "char": "ر",
+              "color": "#92400e"
+            },
+            {
+              "char": "ج",
+              "color": "#92400e"
+            },
+            {
+              "char": "ا",
+              "color": "#92400e"
+            },
+            {
+              "char": "ع",
+              "color": "#92400e"
+            },
+            {
+              "char": " ",
+              "color": "#92400e"
+            },
+            {
+              "char": "م",
+              "color": "#92400e"
+            },
+            {
+              "char": "ج",
+              "color": "#92400e"
+            },
+            {
+              "char": "ا",
+              "color": "#92400e"
+            },
+            {
+              "char": "ن",
+              "color": "#92400e"
+            },
+            {
+              "char": "ي",
+              "color": "#92400e"
+            }
+          ]
+        },
+        "images": [],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {},
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_mega_banner_1",
+        "type": "banner",
+        "name": "بانر العروض الكبرى 1",
+        "visible": true,
+        "device": "all",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "12px",
+          "padding": "0",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "150px",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "18px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "عروض نون الكبرى",
+          "subtitle": "خصومات على آلاف المنتجات",
+          "perLetter": [
+            {
+              "char": "ع",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ر",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ض",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ن",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ن",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ك",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ب",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ر",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ى",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_92a711a9_4101_48e4_8528_e1b86ea597ec",
+            "url": "https://iili.io/o2Hk9LB.png",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "12px",
+            "opacity": 1,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "home_mega_banners",
+          "sectionType": "mega_offers",
+          "sectionId": "b728955a-4e97-49ba-ac67-380edfbefe46",
+          "rowId": "92a711a9-4101-48e4-8528-e1b86ea597ec",
+          "device": "all",
+          "sectionOrder": 10,
+          "link": "https://budoq.com/pages/category-landing.html?slug=skincare"
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_mega_banner_2",
+        "type": "banner",
+        "name": "بانر العروض الكبرى 2",
+        "visible": true,
+        "device": "all",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "12px",
+          "padding": "0",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "150px",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "18px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "عروض نون الكبرى",
+          "subtitle": "خصومات على آلاف المنتجات",
+          "perLetter": [
+            {
+              "char": "ع",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ر",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ض",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ن",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ن",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ك",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ب",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ر",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ى",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_dccabaf7_6cab_475f_b996_c3cccb961881",
+            "url": "https://iili.io/o2Hkd11.png",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "12px",
+            "opacity": 1,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "home_mega_banners",
+          "sectionType": "mega_offers",
+          "sectionId": "b728955a-4e97-49ba-ac67-380edfbefe46",
+          "rowId": "dccabaf7-6cab-475f-b996-c3cccb961881",
+          "device": "all",
+          "sectionOrder": 10,
+          "link": "https://budoq.com/pages/category-landing.html?slug=skincare"
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_smart_1",
+        "type": "banner",
+        "name": "فئة ذكية 1",
+        "visible": true,
+        "device": "all",
+        "style": {
+          "background": "linear-gradient(135deg,#4facfe,#00f2fe)",
+          "color": "#ffffff",
+          "gradient": false,
+          "border": "0",
+          "radius": "12px",
+          "padding": "18px",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "",
+          "align": "right",
+          "fontFamily": "Cairo",
+          "fontSize": "20px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "رجالي",
+          "subtitle": "",
+          "perLetter": [
+            {
+              "char": "ر",
+              "color": "#ffffff"
+            },
+            {
+              "char": "ج",
+              "color": "#ffffff"
+            },
+            {
+              "char": "ا",
+              "color": "#ffffff"
+            },
+            {
+              "char": "ل",
+              "color": "#ffffff"
+            },
+            {
+              "char": "ي",
+              "color": "#ffffff"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_e0000001_0000_0000_0000_000000000003",
+            "url": "https://a.nooncdn.com/mpcms/EN0003/assets/1526b8b8-895b-4e03-b7bc-4c6a47fccf82.gif?width=2400",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "12px",
+            "opacity": 0.3,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "smart_category_showcase",
+          "sectionType": "smart-categories",
+          "rowId": "e0000001-0000-0000-0000-000000000003",
+          "device": "all",
+          "sectionOrder": 20,
+          "link": "category-landing.html?slug=shoes"
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_smart_2",
+        "type": "banner",
+        "name": "فئة ذكية 2",
+        "visible": true,
+        "device": "all",
+        "style": {
+          "background": "linear-gradient(135deg,#111827,#000000)",
+          "color": "#ffffff",
+          "gradient": false,
+          "border": "0",
+          "radius": "12px",
+          "padding": "18px",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "",
+          "align": "right",
+          "fontFamily": "Cairo",
+          "fontSize": "20px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "بشره",
+          "subtitle": "",
+          "perLetter": [
+            {
+              "char": "ب",
+              "color": "#ffffff"
+            },
+            {
+              "char": "ش",
+              "color": "#ffffff"
+            },
+            {
+              "char": "ر",
+              "color": "#ffffff"
+            },
+            {
+              "char": "ه",
+              "color": "#ffffff"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_ce5666a0_141a_4970_8715_65740066efcd",
+            "url": "https://media1.giphy.com/media/qkuxgrswIgxcUT0dwy/giphy.webp",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "12px",
+            "opacity": 0.3,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "smart_category_showcase",
+          "sectionType": "smart-categories",
+          "rowId": "ce5666a0-141a-4970-8715-65740066efcd",
+          "device": "all",
+          "sectionOrder": 21,
+          "link": "category-landing.html?slug=skincare"
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_smart_3",
+        "type": "banner",
+        "name": "فئة ذكية 3",
+        "visible": true,
+        "device": "all",
+        "style": {
+          "background": "linear-gradient(135deg,#000000,#000000)",
+          "color": "#ffffff",
+          "gradient": false,
+          "border": "0",
+          "radius": "12px",
+          "padding": "18px",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "",
+          "align": "right",
+          "fontFamily": "Cairo",
+          "fontSize": "20px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "حريمي",
+          "subtitle": "",
+          "perLetter": [
+            {
+              "char": "ح",
+              "color": "#ffffff"
+            },
+            {
+              "char": "ر",
+              "color": "#ffffff"
+            },
+            {
+              "char": "ي",
+              "color": "#ffffff"
+            },
+            {
+              "char": "م",
+              "color": "#ffffff"
+            },
+            {
+              "char": "ي",
+              "color": "#ffffff"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_71d0747e_c18f_4236_ae5e_a0c7bb0fb80a",
+            "url": "https://a.nooncdn.com/mpcms/EN0003/assets/e32c98d3-3780-4d8e-ade5-acee4a44b043.gif?width=2400",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "12px",
+            "opacity": 0.3,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "smart_category_showcase",
+          "sectionType": "smart-categories",
+          "rowId": "71d0747e-c18f-4236-ae5e-a0c7bb0fb80a",
+          "device": "all",
+          "sectionOrder": 22,
+          "link": "https://budoq.com/pages/brand-landing.html?slug=nike#"
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_smart_4",
+        "type": "banner",
+        "name": "فئة ذكية 4",
+        "visible": true,
+        "device": "all",
+        "style": {
+          "background": "linear-gradient(135deg,#000000,#000000)",
+          "color": "#ffffff",
+          "gradient": false,
+          "border": "0",
+          "radius": "12px",
+          "padding": "18px",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "",
+          "align": "right",
+          "fontFamily": "Cairo",
+          "fontSize": "20px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "shoz",
+          "subtitle": "",
+          "perLetter": [
+            {
+              "char": "s",
+              "color": "#ffffff"
+            },
+            {
+              "char": "h",
+              "color": "#ffffff"
+            },
+            {
+              "char": "o",
+              "color": "#ffffff"
+            },
+            {
+              "char": "z",
+              "color": "#ffffff"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_a84ed673_2768_49b8_b9fb_3ed78877aaca",
+            "url": "https://media.tenor.com/H1snf3Qk4MQAAAAM/adidas-adidas-trainers.gif",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "12px",
+            "opacity": 0.3,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "smart_category_showcase",
+          "sectionType": "smart-categories",
+          "rowId": "a84ed673-2768-49b8-b9fb-3ed78877aaca",
+          "device": "all",
+          "sectionOrder": 23,
+          "link": "https://budoq.com/pages/category-landing.html?slug=%D8%A7%D8%AD%D8%B0%D9%8A%D9%87"
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_deals",
+        "type": "products",
+        "name": "عروض نون اليوم",
+        "visible": true,
+        "device": "all",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "12px",
+          "padding": "14px",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "18px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "خصومات نون اليوم",
+          "subtitle": "أقل الأسعار لفترة محدودة",
+          "perLetter": [
+            {
+              "char": "خ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ص",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ت",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ن",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ن",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ي",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [],
+        "items": [
+          {
+            "id": "jumia_GE810ST1WGZIBNAFAMZ",
+            "rowId": "jumia_GE810ST1WGZIBNAFAMZ",
+            "name": "مشط الشعر من طه - عرض خاص",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/15/0064031/1.jpg?8585",
+            "price": 34.53,
+            "oldPrice": 151.44,
+            "rating": 4.4,
+            "badge": "jumia",
+            "link": "product.html?id=jumia_GE810ST1WGZIBNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_BR404EA33P20ZNAFAMZ",
+            "rowId": "jumia_BR404EA33P20ZNAFAMZ",
+            "name": "GOLDEN MASK جراب حافظة مع عدسة كاميرا واقية وإطار اسود (iPhone 14 Pro Max) جولدن ماسك لهاتف ايفون 14 برو ماكس",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/87/6064031/1.jpg?2430",
+            "price": 120,
+            "oldPrice": 500,
+            "rating": 1.0,
+            "badge": "GOLDEN MASK",
+            "link": "product.html?id=jumia_BR404EA33P20ZNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_GE810TG2ZDK17NAFAMZ",
+            "rowId": "jumia_GE810TG2ZDK17NAFAMZ",
+            "name": "Pokemon Game 25pcs Assorted Game Cards Gold Foil Card Series Rare Gold Cards",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/80/3514031/1.jpg?5166",
+            "price": 125,
+            "oldPrice": 500,
+            "rating": 0.0,
+            "badge": "jumia",
+            "link": "product.html?id=jumia_GE810TG2ZDK17NAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_DE196SL2AI1GBNAFAMZ",
+            "rowId": "jumia_DE196SL2AI1GBNAFAMZ",
+            "name": "Defacto بيجامة بناتية ذات أكمام طويلة من ديفاكٹو بتصميم ضيق",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/38/5702031/1.jpg?3932",
+            "price": 628.99,
+            "oldPrice": 2499,
+            "rating": 5.0,
+            "badge": "Defacto",
+            "link": "product.html?id=jumia_DE196SL2AI1GBNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_GE810EA2O3XERNAFAMZ",
+            "rowId": "jumia_GE810EA2O3XERNAFAMZ",
+            "name": "جراب سيليكون مبطن بالألياف الدقيقة مع حماية للكاميرا مقاوم للسقوط والصدمات ومضاد للخدش لهاتف Infinix Hot 10 Play / X688",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/61/4264031/1.jpg?5025",
+            "price": 129,
+            "oldPrice": 500,
+            "rating": 0.0,
+            "badge": "jumia",
+            "link": "product.html?id=jumia_GE810EA2O3XERNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_BR404EA31DGRNNAFAMZ",
+            "rowId": "jumia_BR404EA31DGRNNAFAMZ",
+            "name": "GOLDEN MASK جراب حافظة مع عدسة كاميرا واقية وإطار اسود (iPhone 13 Pro Max) جولدن ماسك لهاتف ايفون 13 برو ماكس",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/83/7064031/1.jpg?2784",
+            "price": 135,
+            "oldPrice": 500,
+            "rating": 0.0,
+            "badge": "GOLDEN MASK",
+            "link": "product.html?id=jumia_BR404EA31DGRNNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_GE810EA1ZCEI3NAFAMZ",
+            "rowId": "jumia_GE810EA1ZCEI3NAFAMZ",
+            "name": "جراب سيليكون مبطن بالألياف الدقيقة مع حماية للكاميرا مقاوم للسقوط والصدمات ومضاد للخدش لهاتف Xiaomi Redmi A3",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/19/8314031/1.jpg?8324",
+            "price": 139,
+            "oldPrice": 500,
+            "rating": 0.0,
+            "badge": "jumia",
+            "link": "product.html?id=jumia_GE810EA1ZCEI3NAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_LC160MW2YS84RNAFAMZ",
+            "rowId": "jumia_LC160MW2YS84RNAFAMZ",
+            "name": "LC Waikiki تي شيرت نسائي بأكمام طويلة بنمط و ياقة دائرية",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/79/3562031/1.jpg?7431",
+            "price": 209,
+            "oldPrice": 699,
+            "rating": 4.5,
+            "badge": "LC Waikiki",
+            "link": "product.html?id=jumia_LC160MW2YS84RNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_GE810FD33V5UVNAFAMZ",
+            "rowId": "jumia_GE810FD33V5UVNAFAMZ",
+            "name": "ملصق جداري للزينة ذاتي اللصق والاضاءة دبل فيس للزجاج او الحائط",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/87/8913031/1.jpg?9543",
+            "price": 175,
+            "oldPrice": 500,
+            "rating": 0.0,
+            "badge": "jumia",
+            "link": "product.html?id=jumia_GE810FD33V5UVNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_GE810FD2455K7NAFAMZ",
+            "rowId": "jumia_GE810FD2455K7NAFAMZ",
+            "name": "ملصق جداري للزينة ذاتي اللصق والاضاءة دبل فيس للزجاج او الحائط",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/27/8913031/1.jpg?8384",
+            "price": 175,
+            "oldPrice": 500,
+            "rating": 0.0,
+            "badge": "jumia",
+            "link": "product.html?id=jumia_GE810FD2455K7NAFAMZ",
+            "source": "taager_products"
+          }
+        ],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "taager_products",
+          "sectionType": "products",
+          "rowId": "noon_deals",
+          "device": "all",
+          "sectionOrder": 30
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_top_rated",
+        "type": "products",
+        "name": "الأكثر تقييماً",
+        "visible": true,
+        "device": "all",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "12px",
+          "padding": "14px",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "18px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "الأكثر تقييماً",
+          "subtitle": "اختيارات أحبها العملاء",
+          "perLetter": [
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            },
+            {
+              "char": "أ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ك",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ث",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ر",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ت",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ق",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ي",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ي",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ً",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [],
+        "items": [
+          {
+            "id": "jumia_GE810EA2W13M3NAFAMZ",
+            "rowId": "jumia_GE810EA2W13M3NAFAMZ",
+            "name": "راديو كهربائي / بطارية - M-2031-215",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/74/7314031/1.jpg?6049",
+            "price": 1170,
+            "oldPrice": 2223,
+            "rating": 5.0,
+            "badge": "jumia",
+            "link": "product.html?id=jumia_GE810EA2W13M3NAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_GE810FS2E2G7RNAFAMZ",
+            "rowId": "jumia_GE810FS2E2G7RNAFAMZ",
+            "name": "صندل مسطح للشباب لفصل الصيف",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/44/5613031/1.jpg?8806",
+            "price": 140,
+            "oldPrice": 184,
+            "rating": 5.0,
+            "badge": "jumia",
+            "link": "product.html?id=jumia_GE810FS2E2G7RNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_AR830FS2INHKNNAFAMZ",
+            "rowId": "jumia_AR830FS2INHKNNAFAMZ",
+            "name": "Arrow صندل Arrow النسائي الكاجوال لفصل الصيف",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/52/2613031/1.jpg?5209",
+            "price": 119.2,
+            "oldPrice": 210,
+            "rating": 5.0,
+            "badge": "Arrow",
+            "link": "product.html?id=jumia_AR830FS2INHKNNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_AR830FS2BOPSNNAFAMZ",
+            "rowId": "jumia_AR830FS2BOPSNNAFAMZ",
+            "name": "Arrow صندل مسطح شبابي من أرو بخصم الصيف",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/40/5613031/1.jpg?7130",
+            "price": 188,
+            "oldPrice": 375,
+            "rating": 5.0,
+            "badge": "Arrow",
+            "link": "product.html?id=jumia_AR830FS2BOPSNNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_CI848ST2AT7JBNAFAMZ",
+            "rowId": "jumia_CI848ST2AT7JBNAFAMZ",
+            "name": "Ciao مجموعة كريم الشفاه من Ciao - 8 قطع",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/39/0913031/1.jpg?5906",
+            "price": 220,
+            "oldPrice": 400,
+            "rating": 5.0,
+            "badge": "Ciao",
+            "link": "product.html?id=jumia_CI848ST2AT7JBNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_DE196SL2AI1GBNAFAMZ",
+            "rowId": "jumia_DE196SL2AI1GBNAFAMZ",
+            "name": "Defacto بيجامة بناتية ذات أكمام طويلة من ديفاكٹو بتصميم ضيق",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/38/5702031/1.jpg?3932",
+            "price": 628.99,
+            "oldPrice": 2499,
+            "rating": 5.0,
+            "badge": "Defacto",
+            "link": "product.html?id=jumia_DE196SL2AI1GBNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_BR416PF2XP08ZNAFAMZ",
+            "rowId": "jumia_BR416PF2XP08ZNAFAMZ",
+            "name": "Shalis شيلز اسبرى رجالي 175 مل",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/77/5264031/1.jpg?6824",
+            "price": 228,
+            "oldPrice": 262,
+            "rating": 5.0,
+            "badge": "Shalis",
+            "link": "product.html?id=jumia_BR416PF2XP08ZNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_LC160MW25O4NFNAFAMZ",
+            "rowId": "jumia_LC160MW25O4NFNAFAMZ",
+            "name": "LC Waikiki بنطلون كابري نسائي مريح من LC وايكيكي بخصر مرن",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/30/4562031/1.jpg?8944",
+            "price": 1289,
+            "oldPrice": 1949,
+            "rating": 4.7,
+            "badge": "LC Waikiki",
+            "link": "product.html?id=jumia_LC160MW25O4NFNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_MI779HA22I3V7NAFAMZ",
+            "rowId": "jumia_MI779HA22I3V7NAFAMZ",
+            "name": "Mienta خلاط يدوي 1000 وات من ميانتا 4*1",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/25/1364031/1.jpg?7166",
+            "price": 1495,
+            "oldPrice": 2150,
+            "rating": 4.6,
+            "badge": "Mienta",
+            "link": "product.html?id=jumia_MI779HA22I3V7NAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_AM715ST2QQZEFNAFAMZ",
+            "rowId": "jumia_AM715ST2QQZEFNAFAMZ",
+            "name": "Amanda Milano Level Up Mascara Extreme Definition 15ml",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/65/8613031/1.jpg?7994",
+            "price": 364,
+            "oldPrice": 400,
+            "rating": 4.5,
+            "badge": "Amanda Milano",
+            "link": "product.html?id=jumia_AM715ST2QQZEFNAFAMZ",
+            "source": "taager_products"
+          }
+        ],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "taager_products",
+          "sectionType": "products",
+          "rowId": "noon_top_rated",
+          "device": "all",
+          "sectionOrder": 30
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_new",
+        "type": "products",
+        "name": "وصل حديثاً",
+        "visible": true,
+        "device": "all",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "12px",
+          "padding": "14px",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "18px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "وصل حديثاً",
+          "subtitle": "جديد في متجر بودوكيو",
+          "perLetter": [
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ص",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ح",
+              "color": "#0f172a"
+            },
+            {
+              "char": "د",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ي",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ث",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ً",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [],
+        "items": [
+          {
+            "id": "jumia_GE810EA2W13M3NAFAMZ",
+            "rowId": "jumia_GE810EA2W13M3NAFAMZ",
+            "name": "راديو كهربائي / بطارية - M-2031-215",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/74/7314031/1.jpg?6049",
+            "price": 1170,
+            "oldPrice": 2223,
+            "rating": 5.0,
+            "badge": "jumia",
+            "link": "product.html?id=jumia_GE810EA2W13M3NAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_GE810ST1WGZIBNAFAMZ",
+            "rowId": "jumia_GE810ST1WGZIBNAFAMZ",
+            "name": "مشط الشعر من طه - عرض خاص",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/15/0064031/1.jpg?8585",
+            "price": 34.53,
+            "oldPrice": 151.44,
+            "rating": 4.4,
+            "badge": "jumia",
+            "link": "product.html?id=jumia_GE810ST1WGZIBNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_GE810TG2ZDK17NAFAMZ",
+            "rowId": "jumia_GE810TG2ZDK17NAFAMZ",
+            "name": "Pokemon Game 25pcs Assorted Game Cards Gold Foil Card Series Rare Gold Cards",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/80/3514031/1.jpg?5166",
+            "price": 125,
+            "oldPrice": 500,
+            "rating": 0.0,
+            "badge": "jumia",
+            "link": "product.html?id=jumia_GE810TG2ZDK17NAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_GE810EA1ZCEI3NAFAMZ",
+            "rowId": "jumia_GE810EA1ZCEI3NAFAMZ",
+            "name": "جراب سيليكون مبطن بالألياف الدقيقة مع حماية للكاميرا مقاوم للسقوط والصدمات ومضاد للخدش لهاتف Xiaomi Redmi A3",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/19/8314031/1.jpg?8324",
+            "price": 139,
+            "oldPrice": 500,
+            "rating": 0.0,
+            "badge": "jumia",
+            "link": "product.html?id=jumia_GE810EA1ZCEI3NAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_ST352FS25KX2BNAFAMZ",
+            "rowId": "jumia_ST352FS25KX2BNAFAMZ",
+            "name": "Starter حذاء ستارتر ليوارا النسائي - بنفسجي",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/30/3064031/1.jpg?9486",
+            "price": 993.75,
+            "oldPrice": 1590,
+            "rating": 4.0,
+            "badge": "Starter",
+            "link": "product.html?id=jumia_ST352FS25KX2BNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_GE810HA277YU3NAFAMZ",
+            "rowId": "jumia_GE810HA277YU3NAFAMZ",
+            "name": "خلاط يدوي كهربائي عام بسبع سرعات، مضرب بيض، مناسب لخبز الكيك، يعمل بالكهرباء",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/33/0614031/1.jpg?9005",
+            "price": 490,
+            "oldPrice": 500,
+            "rating": 0.0,
+            "badge": "jumia",
+            "link": "product.html?id=jumia_GE810HA277YU3NAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_DE196MW264ZABNAFAMZ",
+            "rowId": "jumia_DE196MW264ZABNAFAMZ",
+            "name": "Defacto بنطلون ستان بيزك سادة سيجاريت بياقة فرو صناعي",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/31/2424031/1.jpg?0710",
+            "price": 799,
+            "oldPrice": null,
+            "rating": 0.0,
+            "badge": "Defacto",
+            "link": "product.html?id=jumia_DE196MW264ZABNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_GE810TG32X6XVNAFAMZ",
+            "rowId": "jumia_GE810TG32X6XVNAFAMZ",
+            "name": "مجموعة سيارات سباق معدنية للأطفال - مجموعة من 24 سيارة سباق معدنية",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/86/3064031/1.jpg?9906",
+            "price": 300,
+            "oldPrice": 500,
+            "rating": 3.0,
+            "badge": "jumia",
+            "link": "product.html?id=jumia_GE810TG32X6XVNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_GE810ST34425FNAFAMZ",
+            "rowId": "jumia_GE810ST34425FNAFAMZ",
+            "name": "فرشاة تمليس الشعر الكهربائية المتينة",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/88/3064031/1.jpg?4285",
+            "price": 450,
+            "oldPrice": 575,
+            "rating": 0.0,
+            "badge": "jumia",
+            "link": "product.html?id=jumia_GE810ST34425FNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_GE810TG2PY5O3NAFAMZ",
+            "rowId": "jumia_GE810TG2PY5O3NAFAMZ",
+            "name": "خيمة تلوين كبيرة للأطفال - بيت من الورق المقوى 3D",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/64/5164031/1.jpg?7406",
+            "price": 1271,
+            "oldPrice": 1695,
+            "rating": 0.0,
+            "badge": "jumia",
+            "link": "product.html?id=jumia_GE810TG2PY5O3NAFAMZ",
+            "source": "taager_products"
+          }
+        ],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "taager_products",
+          "sectionType": "products",
+          "rowId": "noon_new",
+          "device": "all",
+          "sectionOrder": 30
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_value",
+        "type": "products",
+        "name": "أسعار ممتازة",
+        "visible": true,
+        "device": "all",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "12px",
+          "padding": "14px",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "18px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "أسعار تستاهل",
+          "subtitle": "قيمة كبيرة بمبلغ بسيط",
+          "perLetter": [
+            {
+              "char": "أ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "س",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ع",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ر",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ت",
+              "color": "#0f172a"
+            },
+            {
+              "char": "س",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ت",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ه",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [],
+        "items": [
+          {
+            "id": "jumia_GE810ST1WGZIBNAFAMZ",
+            "rowId": "jumia_GE810ST1WGZIBNAFAMZ",
+            "name": "مشط الشعر من طه - عرض خاص",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/15/0064031/1.jpg?8585",
+            "price": 34.53,
+            "oldPrice": 151.44,
+            "rating": 4.4,
+            "badge": "jumia",
+            "link": "product.html?id=jumia_GE810ST1WGZIBNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_HY030ST2S8BUJNAFAMZ",
+            "rowId": "jumia_HY030ST2S8BUJNAFAMZ",
+            "name": "Hydro جل استحمام هيدرو ستاند بالفواكه الاستوائية 750 مل",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/68/3502031/1.jpg?6207",
+            "price": 85,
+            "oldPrice": 160,
+            "rating": 0.0,
+            "badge": "Hydro",
+            "link": "product.html?id=jumia_HY030ST2S8BUJNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_MI466ST2Q84DZNAFAMZ",
+            "rowId": "jumia_MI466ST2Q84DZNAFAMZ",
+            "name": "Might Cinema مستحضر شفاه مايت سينما المات طويل الأمد لجاذبية كاملة (مايت سينما) 5000 - اللون 210",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/64/9813031/1.jpg?3128",
+            "price": 99.99,
+            "oldPrice": 249,
+            "rating": 4.4,
+            "badge": "Might Cinema",
+            "link": "product.html?id=jumia_MI466ST2Q84DZNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_GE810BM28AJNBNAFAMZ",
+            "rowId": "jumia_GE810BM28AJNBNAFAMZ",
+            "name": "حدائق ماغنوليا: الطريق الطويل إلى المنزل - بقلم جيسا هاستينغز",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/34/8613031/1.jpg?4386",
+            "price": 110,
+            "oldPrice": 220,
+            "rating": 0.0,
+            "badge": "jumia",
+            "link": "product.html?id=jumia_GE810BM28AJNBNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_GE810BM2307SNNAFAMZ",
+            "rowId": "jumia_GE810BM2307SNNAFAMZ",
+            "name": "هيتس: التراجع العظيم - بقلم جيسا هاستينغز",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/25/9813031/1.jpg?5747",
+            "price": 110,
+            "oldPrice": 220,
+            "rating": 0.0,
+            "badge": "jumia",
+            "link": "product.html?id=jumia_GE810BM2307SNNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_GE810BM1X1VQVNAFAMZ",
+            "rowId": "jumia_GE810BM1X1VQVNAFAMZ",
+            "name": "ديزي هايتس - بقلم جيسا هاستينغز",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/15/9813031/1.jpg?5773",
+            "price": 110,
+            "oldPrice": 220,
+            "rating": 0.0,
+            "badge": "jumia",
+            "link": "product.html?id=jumia_GE810BM1X1VQVNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_AR830FS2INHKNNAFAMZ",
+            "rowId": "jumia_AR830FS2INHKNNAFAMZ",
+            "name": "Arrow صندل Arrow النسائي الكاجوال لفصل الصيف",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/52/2613031/1.jpg?5209",
+            "price": 119.2,
+            "oldPrice": 210,
+            "rating": 5.0,
+            "badge": "Arrow",
+            "link": "product.html?id=jumia_AR830FS2INHKNNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_BR404EA33P20ZNAFAMZ",
+            "rowId": "jumia_BR404EA33P20ZNAFAMZ",
+            "name": "GOLDEN MASK جراب حافظة مع عدسة كاميرا واقية وإطار اسود (iPhone 14 Pro Max) جولدن ماسك لهاتف ايفون 14 برو ماكس",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/87/6064031/1.jpg?2430",
+            "price": 120,
+            "oldPrice": 500,
+            "rating": 1.0,
+            "badge": "GOLDEN MASK",
+            "link": "product.html?id=jumia_BR404EA33P20ZNAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_GE810TG2ZDK17NAFAMZ",
+            "rowId": "jumia_GE810TG2ZDK17NAFAMZ",
+            "name": "Pokemon Game 25pcs Assorted Game Cards Gold Foil Card Series Rare Gold Cards",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/80/3514031/1.jpg?5166",
+            "price": 125,
+            "oldPrice": 500,
+            "rating": 0.0,
+            "badge": "jumia",
+            "link": "product.html?id=jumia_GE810TG2ZDK17NAFAMZ",
+            "source": "taager_products"
+          },
+          {
+            "id": "jumia_CA148ST39VFCNNAFAMZ",
+            "rowId": "jumia_CA148ST39VFCNNAFAMZ",
+            "name": "Carefree كير فري نورمال قطن خالية من العطور 20 قطعه",
+            "image": "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/97/9813031/1.jpg?4525",
+            "price": 128,
+            "oldPrice": 178,
+            "rating": 0.0,
+            "badge": "Carefree",
+            "link": "product.html?id=jumia_CA148ST39VFCNNAFAMZ",
+            "source": "taager_products"
+          }
+        ],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "taager_products",
+          "sectionType": "products",
+          "rowId": "noon_value",
+          "device": "all",
+          "sectionOrder": 30
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_ad_1",
+        "type": "ads",
+        "name": "إعلان نون 1",
+        "visible": true,
+        "device": "mobile",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "0px",
+          "padding": "0",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "130px",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "18px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "إعلان ممول",
+          "subtitle": "",
+          "perLetter": [
+            {
+              "char": "إ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ع",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ن",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_08eef593_56b5_483b_b29b_558823d2aec7",
+            "url": "https://iili.io/CQmtVOG.png",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "0px",
+            "opacity": 1,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "middle",
+          "trigger": "always",
+          "link": "https://budoq.com/pages/brand-landing.html?slug=nike#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "home_ad_banners",
+          "sectionType": "ad_banners",
+          "sectionId": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "rowId": "08eef593-56b5-483b-b29b-558823d2aec7",
+          "device": "mobile",
+          "sectionOrder": 11
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_ad_3",
+        "type": "ads",
+        "name": "إعلان نون 3",
+        "visible": true,
+        "device": "mobile",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "0px",
+          "padding": "0",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "130px",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "18px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "إعلان ممول",
+          "subtitle": "",
+          "perLetter": [
+            {
+              "char": "إ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ع",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ن",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_865a7d5a_a6c2_4123_95ca_161e9c7b5b08",
+            "url": "https://iili.io/CQmtMRs.png",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "0px",
+            "opacity": 1,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 7,
+          "position": "bottom",
+          "trigger": "always",
+          "link": "products.html?category=beauty&branch=عناية%20بالبشرة",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "home_ad_banners",
+          "sectionType": "ad_banners",
+          "sectionId": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "rowId": "865a7d5a-a6c2-4123-95ca-161e9c7b5b08",
+          "device": "mobile",
+          "sectionOrder": 11
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_ad_4",
+        "type": "ads",
+        "name": "إعلان نون 4",
+        "visible": true,
+        "device": "desktop",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "0px",
+          "padding": "0",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "130px",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "18px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "إعلان ممول",
+          "subtitle": "",
+          "perLetter": [
+            {
+              "char": "إ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ع",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ن",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_f1a12753_266d_486a_a12b_2dc50ae3fb04",
+            "url": "https://a.nooncdn.com/assets/img-1200x1200/ar_dk_eg-atf-01.1786973886.9899728.png?width=2400",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "0px",
+            "opacity": 1,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "top",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "home_ad_banners",
+          "sectionType": "ad_banners",
+          "sectionId": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "rowId": "f1a12753-266d-486a-a12b-2dc50ae3fb04",
+          "device": "desktop",
+          "sectionOrder": 11
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_ad_5",
+        "type": "ads",
+        "name": "إعلان نون 5",
+        "visible": true,
+        "device": "mobile",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "0px",
+          "padding": "0",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "130px",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "18px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "إعلان ممول",
+          "subtitle": "",
+          "perLetter": [
+            {
+              "char": "إ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ع",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ن",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_2e9935ab_b883_4264_8853_6ea2f3664124",
+            "url": "https://iili.io/o2H32S9.png",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "0px",
+            "opacity": 1,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 6,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "home_ad_banners",
+          "sectionType": "ad_banners",
+          "sectionId": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "rowId": "2e9935ab-b883-4264-8853-6ea2f3664124",
+          "device": "mobile",
+          "sectionOrder": 11
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_ad_6",
+        "type": "ads",
+        "name": "إعلان نون 6",
+        "visible": true,
+        "device": "mobile",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "0px",
+          "padding": "0",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "130px",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "18px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "إعلان ممول",
+          "subtitle": "",
+          "perLetter": [
+            {
+              "char": "إ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ع",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ن",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_1e690750_d123_4ab6_93d2_16d9c4c0ad16",
+            "url": "https://iili.io/o2H2pn4.png",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "0px",
+            "opacity": 1,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 7,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "home_ad_banners",
+          "sectionType": "ad_banners",
+          "sectionId": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "rowId": "1e690750-d123-4ab6-93d2-16d9c4c0ad16",
+          "device": "mobile",
+          "sectionOrder": 11
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_ad_7",
+        "type": "ads",
+        "name": "إعلان نون 7",
+        "visible": true,
+        "device": "mobile",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "0px",
+          "padding": "0",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "130px",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "18px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "إعلان ممول",
+          "subtitle": "",
+          "perLetter": [
+            {
+              "char": "إ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ع",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ن",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_1e09a489_3f13_4d6e_8e74_c3cdb567989c",
+            "url": "https://iili.io/o2H3wxf.png",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "0px",
+            "opacity": 1,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "bottom",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "home_ad_banners",
+          "sectionType": "ad_banners",
+          "sectionId": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "rowId": "1e09a489-3f13-4d6e-8e74-c3cdb567989c",
+          "device": "mobile",
+          "sectionOrder": 11
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_ad_8",
+        "type": "ads",
+        "name": "إعلان نون 8",
+        "visible": true,
+        "device": "mobile",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "0px",
+          "padding": "0",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "130px",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "18px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "إعلان ممول",
+          "subtitle": "",
+          "perLetter": [
+            {
+              "char": "إ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ع",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ن",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_8b270dfe_75ac_465a_804e_fa6a882a6d86",
+            "url": "https://iili.io/o2H2btf.png",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "0px",
+            "opacity": 1,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 6,
+          "position": "top",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "home_ad_banners",
+          "sectionType": "ad_banners",
+          "sectionId": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "rowId": "8b270dfe-75ac-465a-804e-fa6a882a6d86",
+          "device": "mobile",
+          "sectionOrder": 11
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_ad_9",
+        "type": "ads",
+        "name": "إعلان نون 9",
+        "visible": true,
+        "device": "desktop",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "0px",
+          "padding": "0",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "130px",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "18px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "إعلان ممول",
+          "subtitle": "",
+          "perLetter": [
+            {
+              "char": "إ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ع",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ن",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_ed2eb9cf_eae0_4ece_ab02_b5c4b001c8e6",
+            "url": "https://iili.io/oK2I6BI.png",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "0px",
+            "opacity": 1,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 7,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "home_ad_banners",
+          "sectionType": "ad_banners",
+          "sectionId": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "rowId": "ed2eb9cf-eae0-4ece-ab02-b5c4b001c8e6",
+          "device": "desktop",
+          "sectionOrder": 11
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_ad_10",
+        "type": "ads",
+        "name": "إعلان نون 10",
+        "visible": true,
+        "device": "desktop",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "0px",
+          "padding": "0",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "130px",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "18px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "إعلان ممول",
+          "subtitle": "",
+          "perLetter": [
+            {
+              "char": "إ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ع",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ن",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_080d99ce_69a9_4806_bf1d_0d3d0cc4fe16",
+            "url": "https://iili.io/oK2T9BS.png",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "0px",
+            "opacity": 1,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "home_ad_banners",
+          "sectionType": "ad_banners",
+          "sectionId": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "rowId": "080d99ce-69a9-4806-bf1d-0d3d0cc4fe16",
+          "device": "desktop",
+          "sectionOrder": 11
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_ad_11",
+        "type": "ads",
+        "name": "إعلان نون 11",
+        "visible": true,
+        "device": "mobile",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "0px",
+          "padding": "0",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "130px",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "18px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "إعلان ممول",
+          "subtitle": "",
+          "perLetter": [
+            {
+              "char": "إ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ع",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ن",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_9855b507_eda0_438a_88ef_22151367515b",
+            "url": "https://iili.io/oK2TCQV.png",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "0px",
+            "opacity": 1,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 6,
+          "position": "bottom",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "home_ad_banners",
+          "sectionType": "ad_banners",
+          "sectionId": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "rowId": "9855b507-eda0-438a-88ef-22151367515b",
+          "device": "mobile",
+          "sectionOrder": 11
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_ad_12",
+        "type": "ads",
+        "name": "إعلان نون 12",
+        "visible": true,
+        "device": "desktop",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "0px",
+          "padding": "0",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "130px",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "18px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "إعلان ممول",
+          "subtitle": "",
+          "perLetter": [
+            {
+              "char": "إ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ع",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ن",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_60a6ec0b_6862_4b9b_bc6c_2a8b031e7197",
+            "url": "https://iili.io/oK2TBhQ.png",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "0px",
+            "opacity": 1,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 7,
+          "position": "top",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "home_ad_banners",
+          "sectionType": "ad_banners",
+          "sectionId": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "rowId": "60a6ec0b-6862-4b9b-bc6c-2a8b031e7197",
+          "device": "desktop",
+          "sectionOrder": 11
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_ad_13",
+        "type": "ads",
+        "name": "إعلان نون 13",
+        "visible": true,
+        "device": "desktop",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "0px",
+          "padding": "0",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "130px",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "18px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "إعلان ممول",
+          "subtitle": "",
+          "perLetter": [
+            {
+              "char": "إ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ع",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ن",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_0fee3517_5c85_4a40_84e5_8c2c382a6408",
+            "url": "https://iili.io/oK2Itpf.png",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "0px",
+            "opacity": 1,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 5,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "home_ad_banners",
+          "sectionType": "ad_banners",
+          "sectionId": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "rowId": "0fee3517-5c85-4a40-84e5-8c2c382a6408",
+          "device": "desktop",
+          "sectionOrder": 11
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      },
+      {
+        "id": "noon_ad_14",
+        "type": "ads",
+        "name": "إعلان نون 14",
+        "visible": true,
+        "device": "desktop",
+        "style": {
+          "background": "#ffffff",
+          "color": "#0f172a",
+          "gradient": false,
+          "border": "1px solid #edf1f7",
+          "radius": "0px",
+          "padding": "0",
+          "margin": "0 0 12px",
+          "width": "100%",
+          "height": "130px",
+          "align": "center",
+          "fontFamily": "Cairo",
+          "fontSize": "18px",
+          "fontWeight": "700",
+          "letterSpacing": "0px",
+          "shadow": ""
+        },
+        "text": {
+          "title": "إعلان ممول",
+          "subtitle": "",
+          "perLetter": [
+            {
+              "char": "إ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ع",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ا",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ن",
+              "color": "#0f172a"
+            },
+            {
+              "char": " ",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "م",
+              "color": "#0f172a"
+            },
+            {
+              "char": "و",
+              "color": "#0f172a"
+            },
+            {
+              "char": "ل",
+              "color": "#0f172a"
+            }
+          ]
+        },
+        "images": [
+          {
+            "id": "noon_img_3f069023_17f0_4cc5_8e65_e3d55a1ba688",
+            "url": "https://iili.io/oK2TCQV.png",
+            "x": 50,
+            "y": 50,
+            "w": 100,
+            "h": 100,
+            "zoom": 1,
+            "cropX": 50,
+            "cropY": 50,
+            "radius": "0px",
+            "opacity": 1,
+            "z": 1,
+            "anim": {
+              "type": "none",
+              "power": 4,
+              "delay": 0,
+              "duration": 1.2,
+              "repeat": "infinite"
+            }
+          }
+        ],
+        "items": [],
+        "productLayout": {
+          "mode": "manual",
+          "category": "",
+          "cols": 5,
+          "cardSize": "sm",
+          "cardBg": "#ffffff",
+          "cardColor": "#0f172a",
+          "cardRadius": "12px",
+          "show": {
+            "image": true,
+            "name": true,
+            "price": true,
+            "oldPrice": true,
+            "discount": true,
+            "rating": true,
+            "badge": true,
+            "button": true
+          }
+        },
+        "ad": {
+          "startAt": "",
+          "endAt": "",
+          "power": 6,
+          "position": "middle",
+          "trigger": "always",
+          "link": "#",
+          "badge": "مدفوع"
+        },
+        "source": {
+          "snapshot": true,
+          "table": "home_ad_banners",
+          "sectionType": "ad_banners",
+          "sectionId": "e84b4b65-5a16-4470-a43d-808d8ba65d77",
+          "rowId": "3f069023-17f0-4cc5-8e65-e3d55a1ba688",
+          "device": "desktop",
+          "sectionOrder": 11
+        },
+        "anim": {
+          "type": "none",
+          "power": 4,
+          "delay": 0,
+          "duration": 1.2,
+          "repeat": "infinite"
+        }
+      }
+    ]
+  }
+}

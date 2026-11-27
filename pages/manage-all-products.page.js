@@ -68,27 +68,47 @@ function isDebugMode() {
   }
 }
 
-function readStoredBackendName() {
+function readStoredBackendRaw() {
   try {
-    const saved = JSON.parse(sessionStorage.getItem(BACKEND_STORAGE_KEY) || "null");
-    if (saved && BACKEND_ORDER.indexOf(saved.name) !== -1 && Number(saved.until) > Date.now()) {
-      return saved.name;
+    return JSON.parse(sessionStorage.getItem(BACKEND_STORAGE_KEY) || "null");
+  } catch (_e) {
+    return null;
+  }
+}
+
+function isManualBackendSelection() {
+  try {
+    if (window.adminAuth && typeof window.adminAuth.hasManualBackendSelection === "function") {
+      return window.adminAuth.hasManualBackendSelection();
     }
-    sessionStorage.removeItem(BACKEND_STORAGE_KEY);
   } catch (_e) {}
+  const saved = readStoredBackendRaw();
+  return !!(saved && saved.reason === "manual" && BACKEND_ORDER.indexOf(saved.name) !== -1);
+}
+
+function readStoredBackendName() {
+  const saved = readStoredBackendRaw();
+  if (saved && BACKEND_ORDER.indexOf(saved.name) !== -1 &&
+      (saved.reason === "manual" || Number(saved.until) > Date.now())) {
+    return saved.name;
+  }
+  try { sessionStorage.removeItem(BACKEND_STORAGE_KEY); } catch (_e) {}
   return "";
 }
 
-function writeStoredBackendName(name) {
+function writeStoredBackendName(name, reason) {
+  const previous = readStoredBackendRaw();
+  // الاختيار اليدوي له الأولوية؛ التحويل التلقائي لا يكتب فوقه.
+  if (previous && previous.reason === "manual" && previous.name === name) return;
   try {
-    if (name === "primary") {
-      sessionStorage.removeItem(BACKEND_STORAGE_KEY);
-    } else {
-      sessionStorage.setItem(
-        BACKEND_STORAGE_KEY,
-        JSON.stringify({ name: name, reason: "auto", until: Date.now() + BACKEND_TTL_MS })
-      );
-    }
+    sessionStorage.setItem(
+      BACKEND_STORAGE_KEY,
+      JSON.stringify({
+        name: name,
+        reason: reason === "manual" ? "manual" : "auto",
+        until: reason === "manual" ? 0 : Date.now() + BACKEND_TTL_MS
+      })
+    );
   } catch (_e) {}
 }
 
@@ -100,7 +120,7 @@ function getChosenBackendName() {
   return "primary";
 }
 
-function applyActiveBackendName(name, previous) {
+function applyActiveBackendName(name, previous, reason) {
   const backends = getBackends();
   const backend = backends[name];
   if (!backend) return;
@@ -108,12 +128,12 @@ function applyActiveBackendName(name, previous) {
   window.__bodaAdminBackendName = name;
   window.SUPABASE_URL = backend.url;
   window.SUPABASE_ANON_KEY = backend.key;
-  writeStoredBackendName(name);
+  writeStoredBackendName(name, reason);
   supabaseClient = null;
   try {
     document.dispatchEvent(
       new CustomEvent("boda:admin-failover", {
-        detail: { from: previous || name, to: name, reason: "auto" },
+        detail: { from: previous || name, to: name, reason: reason || "auto" },
       })
     );
   } catch (_e) {}
@@ -684,6 +704,14 @@ async function resolveBackend() {
   });
 
   const chosenProbe = byName[chosen];
+
+  // المستخدم اختار السيرفر بيده: نفحص للعرض فقط ونثبّت اختياره بدون تحويل تلقائي.
+  if (isManualBackendSelection()) {
+    switchNotice = "";
+    applyActiveBackendName(chosen, chosen, "manual");
+    return { name: chosen, switchedFrom: "", report: probes };
+  }
+
   if (chosenProbe && chosenProbe.reachable) {
     switchNotice = "";
     applyActiveBackendName(chosen, chosen);

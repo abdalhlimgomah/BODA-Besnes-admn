@@ -31,6 +31,10 @@
       .tv-btn:disabled { opacity:0.5; cursor:not-allowed; }
       .tv-btn.primary { background:var(--brand-teal,#00b8a9); color:#fff; }
       .tv-btn.secondary { background:var(--surface-muted,#eef2f7); color:var(--text,#1f2937); }
+      .tv-btn.danger { background:#e03131; color:#fff; }
+      .tv-delete-sep { width:1px; height:22px; background:var(--border,#d8dee9); margin:0 2px; }
+      .tv-delete-select { padding:5px 10px; border:1.5px solid var(--border,#d8dee9); border-radius:8px; font-family:inherit; font-size:.78rem; font-weight:700; outline:none; background:var(--card-bg,#fff); color:var(--text,#1f2937); }
+      .tv-delete-select:focus { border-color:#e03131; }
       .tv-table-wrap { overflow-x:auto; background:var(--card-bg,#fff); border-radius:14px; box-shadow:0 2px 12px rgba(0,0,0,0.04); }
       .tv-table { width:100%; border-collapse:collapse; font-size:0.82rem; min-width:800px; }
       .tv-table th { position:sticky; top:0; background:var(--surface-muted,#f8f9fc); text-align:center; padding:10px 8px; font-size:0.75rem; color:var(--muted,#667085); font-weight:700; text-transform:uppercase; z-index:1; }
@@ -130,6 +134,19 @@
           <button class="tv-btn secondary" id="fetch-stock" style="font-size:.78rem;padding:5px 12px" title="تحديث الكميات من تاجر — النطاقات تتحول لأرقام، و not_available تتحول لنفد المخزون"><i class="fa-solid fa-boxes-stacked"></i> تحديث الكميات</button>
           <button class="tv-btn secondary" id="fetch-new" style="font-size:.78rem;padding:5px 12px" title="جلب المنتجات الجديدة من تاجر وإضافتها للموجودين دون حذف"><i class="fa-solid fa-circle-plus"></i> جلب الجديد</button>
           <button class="tv-btn secondary" id="fetch-codes" style="font-size:.78rem;padding:5px 12px" title="تعبئة أكواد تاجر الحقيقية (sku) لكل المنتجات الموجودة في عمود taager_code"><i class="fa-solid fa-barcode"></i> أكواد تاجر</button>
+          <span class="tv-delete-sep" title="حذف المنتجات حسب الشركة/البادئة"></span>
+          <span style="font-size:.78rem;font-weight:700;color:#e03131">حذف حسب البادئة:</span>
+          <select id="delete-prefix" class="tv-delete-select" title="بادئة معرّف المنتج (تاجر_ / gotager_ / vendor_ ...) — بتتعمل تلقائياً من فحص الجدول">
+            <option value="">جاري الفحص...</option>
+          </select>
+          <select id="delete-country" class="tv-delete-select" title="الدولة — اختار كل الدول أو مصر أو السعودية">
+            <option value="EG">🇪🇬 مصر (EG)</option>
+            <option value="SA">🇸🇦 السعودية (SA)</option>
+            <option value="ALL">🌍 كل الدول</option>
+          </select>
+          <button class="tv-btn secondary" id="btn-rescan-prefixes" style="font-size:.78rem;padding:5px 12px" title="إعادة فحص كل معرفات الجدول وتحديث الأعداد"><i class="fa-solid fa-magnifying-glass"></i> فحص</button>
+          <span id="delete-count" style="font-size:.72rem;color:var(--muted,#667085)">...</span>
+          <button class="tv-btn danger" id="btn-delete-taager" style="font-size:.78rem;padding:5px 12px" title="يحذف المنتجات اللي بادئتهاها هي والدولة المختارة فقط — الباقي ما يتلمسش"><i class="fa-solid fa-trash-can"></i> حذف المحدد</button>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;padding:8px 14px;background:var(--card-bg,#fff);border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,0.04);align-items:center">
           <span style="font-size:.78rem;font-weight:700;color:var(--muted,#667085)">خصم الكميات:</span>
@@ -1350,6 +1367,196 @@
         }
         btn.disabled = false; btn.innerHTML = origHtml;
       }
+      // ===== حذف المنتجات حسب بادئة المعرّف + الدولة =====
+      // بيفحص كل الجدول، بيجمع المعرفات حسب البادئة (taager_ / gotager_ / vendor_ / jumia_ ...)
+      // وبيقول عدد كل شركة/بادئة (مصر / السعودية / غيرها)، والمستخدم بيختار اللي عايز يحذفه.
+      function normalizeTaagerCountries(row) {
+        var out = [];
+        var ac = row && row.available_countries;
+        if (typeof ac === 'string') { try { ac = JSON.parse(ac); } catch(e) { ac = [ac]; } }
+        if (Array.isArray(ac)) ac.forEach(function(c){ if (c != null && String(c).trim()) out.push(String(c).trim().toUpperCase()); });
+        else if (ac != null && String(ac).trim()) out.push(String(ac).trim().toUpperCase());
+        var rd = row && row.raw_data;
+        if (typeof rd === 'string') { try { rd = JSON.parse(rd); } catch(e) { rd = null; } }
+        if (rd && rd._taager_country) out.push(String(rd._taager_country).trim().toUpperCase());
+        return out;
+      }
+      function countryLabel(code) {
+        return code === 'SA' ? 'السعودية (SA)' : code === 'ALL' ? 'كل الدول' : 'مصر (EG)';
+      }
+      function rowCountryMatches(row, country) {
+        if (country === 'ALL') return true;
+        var cs = normalizeTaagerCountries(row);
+        var other = country === 'SA' ? 'EG' : 'SA';
+        return cs.indexOf(country) !== -1 && cs.indexOf(other) === -1;
+      }
+      function idPrefix(id) {
+        var s = String(id || '');
+        var m = s.match(/^([^_]+_)/);
+        return m ? m[1] : '(بدون بادئة)';
+      }
+      var prefixGroups = {};
+
+      async function fetchAllProductRows() {
+        var base = String(window.SUPABASE_URL || (_sb && _sb.supabaseUrl) || 'https://msgqzgzoslearaprgiqq.supabase.co').replace(/\/$/, '');
+        var key = window.SUPABASE_ANON_KEY || (_sb && _sb.supabaseKey) || '';
+        var rows = [], off = 0, size = 1000;
+        while (true) {
+          var url = base + '/rest/v1/taager_products?select=' + encodeURIComponent('id,source,seller,available_countries') + '&offset=' + off + '&limit=' + size;
+          var res = await fetchWithTimeout(url, { headers: { 'apikey': key, 'Authorization': 'Bearer ' + key } }, 20000);
+          if (!res.ok) throw new Error('Supabase HTTP ' + res.status);
+          var data = await res.json();
+          if (!Array.isArray(data) || !data.length) break;
+          rows = rows.concat(data);
+          off += data.length;
+          if (data.length < size) break;
+        }
+        return rows;
+      }
+
+      async function scanPrefixGroups() {
+        var rows = await fetchAllProductRows();
+        var groups = {};
+        rows.forEach(function(row) {
+          var key = idPrefix(row.id);
+          var g = groups[key] || (groups[key] = { prefix: key, total: 0, EG: 0, SA: 0, other: 0, sources: {} });
+          g.total++;
+          g.sources[String(row.source || row.seller || '—')] = 1;
+          var cs = normalizeTaagerCountries(row);
+          var inEG = cs.indexOf('EG') !== -1, inSA = cs.indexOf('SA') !== -1;
+          if (inEG && !inSA) g.EG++;
+          else if (inSA && !inEG) g.SA++;
+          else g.other++;
+        });
+        return groups;
+      }
+
+      function updateSelectedCount() {
+        var el = document.getElementById('delete-count');
+        var sel = document.getElementById('delete-prefix');
+        var csel = document.getElementById('delete-country');
+        if (!el || !sel || !csel) return;
+        var g = prefixGroups[sel.value];
+        if (!g) { el.textContent = '—'; return; }
+        var c = csel.value;
+        var n = c === 'ALL' ? g.total : c === 'SA' ? g.SA : g.EG;
+        el.textContent = 'المحدد: ' + n.toLocaleString('ar-EG') + ' منتج';
+      }
+
+      function renderPrefixOptions(groups) {
+        var sel = document.getElementById('delete-prefix');
+        var keys = Object.keys(groups).sort(function(a, b) { return groups[b].total - groups[a].total; });
+        if (!keys.length) { sel.innerHTML = '<option value="">لا توجد منتجات</option>'; return; }
+        sel.innerHTML = keys.map(function(k) {
+          var g = groups[k];
+          var src = Object.keys(g.sources).join(' / ');
+          var label = k + ' (' + src + ') — ' + g.total.toLocaleString('ar-EG') +
+            ' [مصر ' + g.EG.toLocaleString('ar-EG') + ' | السعودية ' + g.SA.toLocaleString('ar-EG') + ']';
+          return '<option value="' + k.replace(/"/g, '&quot;') + '">' + label + '</option>';
+        }).join('');
+        updateSelectedCount();
+      }
+
+      async function refreshPrefixes(silent) {
+        var sel = document.getElementById('delete-prefix');
+        var btn = document.getElementById('btn-rescan-prefixes');
+        var old = sel.value;
+        btn.disabled = true;
+        if (!silent) setStatus('جاري فحص كل المعرفات في الجدول...');
+        try {
+          var lastErr = null;
+          // السيرفر الأساسي ممكن يعمل failover أثناء الفحص — نعيد المحاولة مرة
+          for (var attempt = 0; attempt < 2; attempt++) {
+            try {
+              prefixGroups = await scanPrefixGroups();
+              renderPrefixOptions(prefixGroups);
+              if (old && prefixGroups[old]) sel.value = old;
+              updateSelectedCount();
+              if (!silent) {
+                var total = Object.keys(prefixGroups).reduce(function(s, k) { return s + prefixGroups[k].total; }, 0);
+                setStatus('تم فحص ' + total.toLocaleString('ar-EG') + ' منتج — ' + Object.keys(prefixGroups).length + ' بادئة/شركة.');
+                notify('تم تحديث قائمة البادئات.', 'success');
+              }
+              return;
+            } catch(e) {
+              lastErr = e;
+              if (attempt === 0) await new Promise(function(r){ setTimeout(r, 400); });
+            }
+          }
+          console.error('prefix scan failed', lastErr);
+          if (!silent) { setStatus('خطأ في الفحص: ' + (lastErr.message || lastErr).substring(0, 100), true); notify('خطأ في الفحص', 'error'); }
+          else { var el = document.getElementById('delete-count'); if (el) el.textContent = 'فشل الفحص — اضغط فحص'; }
+        } finally {
+          btn.disabled = false;
+        }
+      }
+
+      async function runDeleteByPrefix() {
+        var btn = document.getElementById('btn-delete-taager');
+        var sel = document.getElementById('delete-prefix');
+        var csel = document.getElementById('delete-country');
+        var prefix = sel.value;
+        var country = csel.value;
+        var g = prefixGroups[prefix];
+        if (!g) { notify('اختار بادئة/شركة أولاً.', 'error'); return; }
+        var expected = country === 'ALL' ? g.total : country === 'SA' ? g.SA : g.EG;
+        if (!expected) { notify('لا توجد منتجات مطابقة للاختيار.', 'info'); return; }
+        var origHtml = btn.innerHTML;
+        btn.disabled = true; sel.disabled = true; csel.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري...';
+        var wrap = document.getElementById('tv-progress');
+        var bar = document.getElementById('tv-progress-bar');
+        wrap.style.display = 'block'; bar.style.width = '0%';
+        try {
+          var confirmMsg = '⚠️ حذف نهائي من Supabase\n\n' +
+            'هيتحذف ' + expected.toLocaleString('ar-EG') + ' منتج من البادئة «' + prefix + '»' +
+            ' (المصدر: ' + Object.keys(g.sources).join(' / ') + ')' +
+            ' في ' + countryLabel(country) + '.\n' +
+            'باقي البادئات والدول التانية مش هتتغير.\n\nمتأكد؟';
+          if (!window.confirm(confirmMsg)) { setStatus('تم إلغاء الحذف — لم يتم تغيير أي شيء.'); return; }
+          // فحص جديد قبل التنفيذ عشان المعرفات والأعداد تكون محدثة
+          setStatus('جاري تحديد منتجات «' + prefix + '»...');
+          var ids = [];
+          var rows = await fetchAllProductRows();
+          rows.forEach(function(row) {
+            if (idPrefix(row.id) === prefix && rowCountryMatches(row, country) && row.id) ids.push(row.id);
+          });
+          if (!ids.length) {
+            setStatus('لا توجد منتجات مطابقة بعد الفحص — لم يتم حذف أي شيء.');
+            notify('لا توجد منتجات مطابقة.', 'info');
+            return;
+          }
+          setStatus('جاري حذف ' + ids.length.toLocaleString('ar-EG') + ' منتج من «' + prefix + '»...');
+          var BATCH = 200, deleted = 0, errors = 0;
+          for (var k = 0; k < ids.length; k += BATCH) {
+            var chunk = ids.slice(k, k + BATCH);
+            try {
+              var { error: delErr } = await _sb.from('taager_products').delete().in('id', chunk);
+              if (delErr) throw delErr;
+              deleted += chunk.length;
+            } catch(e) { errors += chunk.length; }
+            bar.style.width = Math.min(100, Math.round((k + chunk.length) / ids.length * 100)) + '%';
+            if (k + BATCH < ids.length) await new Promise(function(r){ setTimeout(r, 20); });
+          }
+          wrap.style.display = 'none'; bar.style.width = '0%';
+          var msg = 'تم حذف ' + deleted.toLocaleString('ar-EG') + ' منتج من «' + prefix + '» في ' + countryLabel(country);
+          if (errors) msg += ' (' + errors.toLocaleString('ar-EG') + ' خطأ)';
+          setStatus(msg, errors > 0);
+          notify(msg, errors ? 'error' : 'success');
+          await loadProducts();
+          await refreshPrefixes(true);
+        } catch(e) {
+          wrap.style.display = 'none'; bar.style.width = '0%';
+          setStatus('خطأ: ' + (e.message || e).substring(0, 120), true);
+          notify('خطأ: ' + (e.message || e), 'error');
+        }
+        btn.disabled = false; sel.disabled = false; csel.disabled = false; btn.innerHTML = origHtml;
+      }
+      document.getElementById('btn-delete-taager').addEventListener('click', runDeleteByPrefix);
+      document.getElementById('btn-rescan-prefixes').addEventListener('click', function(){ refreshPrefixes(false); });
+      document.getElementById('delete-prefix').addEventListener('change', updateSelectedCount);
+      document.getElementById('delete-country').addEventListener('change', updateSelectedCount);
+
       document.getElementById('fetch-all').addEventListener('click',function(){runTaagerFetch('all','all')});
       document.getElementById('fetch-stock').addEventListener('click',runStockUpdate);
       document.getElementById('fetch-codes').addEventListener('click',runTaagerCodeBackfill);
@@ -1578,6 +1785,7 @@
       });
 
       loadProducts();
+      refreshPrefixes(true);
     </script>
   </body>
 </html>

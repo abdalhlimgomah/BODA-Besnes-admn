@@ -23,21 +23,63 @@
   };
   const ADMIN_BACKEND_STORAGE_KEY = "boda_admin_active_backend";
   const ADMIN_BACKEND_TTL_MS = 15 * 60 * 1000;
+  const ADMIN_BACKEND_NAMES = ["primary", "backup", "backup2"];
+  const MANUAL_REASON = "manual";
   let _adminFailoverPromise = null;
 
   function getBackend(name) {
     return ADMIN_BACKENDS[name] || null;
   }
 
-  function getStoredBackend() {
+  function readStoredBackend() {
     try {
-      const saved = JSON.parse(sessionStorage.getItem(ADMIN_BACKEND_STORAGE_KEY) || "null");
-      if (saved && (saved.name === "backup" || saved.name === "backup2") && Number(saved.until) > Date.now()) {
-        return getBackend(saved.name);
-      }
-      sessionStorage.removeItem(ADMIN_BACKEND_STORAGE_KEY);
-    } catch (_e) {}
+      return JSON.parse(sessionStorage.getItem(ADMIN_BACKEND_STORAGE_KEY) || "null");
+    } catch (_e) {
+      return null;
+    }
+  }
+
+  function isManualSelection(saved) {
+    return !!saved &&
+      saved.reason === MANUAL_REASON &&
+      ADMIN_BACKEND_NAMES.indexOf(saved.name) !== -1 &&
+      !!getBackend(saved.name);
+  }
+
+  // الاختيار اليدوي يفضل محفوظ طول الجلسة، أما التحويل التلقائي فله مدة محدودة.
+  function isStoredBackendValid(saved) {
+    if (!saved || ADMIN_BACKEND_NAMES.indexOf(saved.name) === -1 || !getBackend(saved.name)) return false;
+    if (isManualSelection(saved)) return true;
+    return Number(saved.until) > Date.now();
+  }
+
+  function getStoredBackend() {
+    const saved = readStoredBackend();
+    if (isStoredBackendValid(saved)) return getBackend(saved.name);
+    try { sessionStorage.removeItem(ADMIN_BACKEND_STORAGE_KEY); } catch (_e) {}
     return null;
+  }
+
+  function hasManualBackendSelection() {
+    return isManualSelection(readStoredBackend());
+  }
+
+  function persistBackend(name, reason) {
+    const backend = getBackend(name);
+    if (!backend) return;
+    const manual = String(reason || "") === MANUAL_REASON;
+    // أي تحويل تلقائي (حتى لو تأخر) لا يمحو اختيار المستخدم.
+    if (!manual && hasManualBackendSelection()) return;
+    try {
+      sessionStorage.setItem(
+        ADMIN_BACKEND_STORAGE_KEY,
+        JSON.stringify({
+          name: backend.name,
+          reason: manual ? MANUAL_REASON : String(reason || "auto"),
+          until: manual ? 0 : Date.now() + ADMIN_BACKEND_TTL_MS
+        })
+      );
+    } catch (_e) {}
   }
 
   function getActiveBackend() {
@@ -51,29 +93,44 @@
     window.SUPABASE_ANON_KEY = backend.key;
   }
 
-  function persistActiveBackup(reason) {
+  function dispatchBackendChange(previous, to, reason) {
     try {
-      sessionStorage.setItem(
-        ADMIN_BACKEND_STORAGE_KEY,
-        JSON.stringify({ name: "backup", reason: String(reason || "failover"), until: Date.now() + ADMIN_BACKEND_TTL_MS })
+      document.dispatchEvent(
+        new CustomEvent("boda:admin-failover", {
+          detail: { from: (previous && previous.name) || "primary", to: to, reason: String(reason || "http") }
+        })
       );
     } catch (_e) {}
   }
 
+  function setActiveBackend(name, reason) {
+    const backend = getBackend(name);
+    if (!backend) return null;
+    const previous = getActiveBackend();
+    applyActiveBackend(backend);
+    persistBackend(backend.name, reason || MANUAL_REASON);
+    dispatchBackendChange(previous, backend.name, reason || MANUAL_REASON);
+    return backend;
+  }
+
+  function selectBackendAndReload(name, reason) {
+    const backend = setActiveBackend(name, reason || MANUAL_REASON);
+    if (backend) window.location.reload();
+    return backend;
+  }
+
   function activateBackup(reason) {
-    if (getActiveBackend().name === "backup") return Promise.resolve(ADMIN_BACKENDS.backup);
+    const current = getActiveBackend();
+    // إذا اختار المستخدم سيرفر بيده فلا يتبدل تلقائياً مهما ظهرت أخطاء مؤقتة.
+    if (hasManualBackendSelection()) return Promise.resolve(current);
+    // التحويل التلقائي يكون من الأساسي فقط حتى لا نقلق سيرفراً اختاره المستخدم.
+    if (current.name !== "primary") return Promise.resolve(current);
     if (_adminFailoverPromise) return _adminFailoverPromise;
     _adminFailoverPromise = Promise.resolve().then(function () {
       const previous = getActiveBackend();
       applyActiveBackend(ADMIN_BACKENDS.backup);
-      persistActiveBackup(reason);
-      try {
-        document.dispatchEvent(
-          new CustomEvent("boda:admin-failover", {
-            detail: { from: previous.name, to: "backup", reason: String(reason || "http") },
-          })
-        );
-      } catch (_e) {}
+      persistBackend("backup", reason || "failover");
+      dispatchBackendChange(previous, "backup", reason || "http");
       return ADMIN_BACKENDS.backup;
     });
     _adminFailoverPromise.then(
@@ -95,6 +152,7 @@
   const DASHBOARD_PAGE = "shacksf.html";
   const PROTECTED_PAGES = new Set([
     "shacksf.html",
+    "hs.html",
     "admin.html",
     "admin-orders.html",
     "admin-today-orders.html",
@@ -209,6 +267,11 @@
   window.adminAuth = {
     ADMIN_BACKENDS,
     getActiveBackend,
+    getStoredBackend,
+    hasManualBackendSelection,
+    persistBackend,
+    setActiveBackend,
+    selectBackendAndReload,
     createSession,
     clearSession,
     getToken: getAuthToken,
@@ -347,14 +410,19 @@
         return originalFetch.call(fetchThis, input, init);
       }
 
+      // فحص الصحة/probe يستخدم x-bypass-failover؛ نقرأه قبل أي تعديل على الهيدرز
+      // حتى لا يتحول فحص السيرفرات نفسه إلى سبب لتغيير السيرفر النشط.
+      const rawHeaders = init && init.headers;
+      const bypassFailover =
+        (rawHeaders && typeof rawHeaders.get === "function" && rawHeaders.get("x-bypass-failover") === "true") ||
+        (rawHeaders && rawHeaders["x-bypass-failover"] === "true");
+
       if (isSupabase && url.indexOf("/rest/v1/") !== -1) {
         nextInit = applyAdminIdentity(nextInit, url);
       }
 
       const active = getActiveBackend();
       let routedInput = input;
-      const bypassFailover = init?.headers?.["x-bypass-failover"] === "true" || 
-                             (init?.headers instanceof Headers && init.headers.get("x-bypass-failover") === "true");
       if (isSupabase && !bypassFailover) {
         routedInput = routeFetchInput(input, active);
         if (active.name === "backup") {
@@ -366,6 +434,7 @@
 
       return originalFetch.call(fetchThis, routedInput, nextInit).then(function (response) {
         const primaryFailed =
+          !bypassFailover &&
           requestBackend === "primary" &&
           getActiveBackend().name === "primary" &&
           response &&
@@ -379,7 +448,7 @@
           return response;
         });
       }).catch(function (error) {
-        const failedOnPrimary = requestBackend === "primary" && getActiveBackend().name === "primary";
+        const failedOnPrimary = !bypassFailover && requestBackend === "primary" && getActiveBackend().name === "primary";
         if (!failedOnPrimary) throw error;
 
         return activateBackup("network").then(function () {

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>استوديو الهوم HS — Buda</title>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;500;600;700;800;900&family=Inter:wght@400;600;700&family=Manrope:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="../css/theme.css" />
+  <script src="../assets/vendor/supabase/supabase-js@2.js"></script>
+  <script src="./auth-guard.js"></script>
+  <script defer src="../js/hs.js"></script>
+  <link href="../css/hs.css" rel="stylesheet" />
+</head>
+<body class="hs-shell">
+  <div class="hs-app">
+    <!-- ================= TOP BAR ================= -->
+    <header class="hs-topbar">
+      <div id="serverSelector" class="hs-server-select"></div>
+      <div class="hs-brand" title="Home Studio">
+        <span class="hs-brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="22" height="22" fill="none">
+            <path d="M4 18 16 5l12 13-3 3-9-9-9 9-3-3Z" fill="currentColor"/>
+            <path d="M9 20h14v7H9z" fill="currentColor" opacity=".55"/>
+            <path d="M14 23h4" stroke="#0B0F19" stroke-width="2"/>
+          </svg>
+        </span>
+        <span class="hs-brand-text"><strong>HS</strong><small>Home Studio</small></span>
+      </div>
+
+      <label class="hs-doc-name">
+        <span>اسم الصفحة</span>
+        <input id="hsDocName" type="text" maxlength="80" value="الصفحة الرئيسية" />
+      </label>
+
+      <div class="hs-top-group">
+        <label class="hs-mini-field">
+          <span>الدولة</span>
+          <select id="hsCountry" title="الدولة">
+            <option value="EG">🇪🇬 مصر</option>
+            <option value="SA">🇸🇦 السعودية</option>
+          </select>
+        </label>
+        <div class="hs-mini-field">
+          <span>الجهاز</span>
+          <div class="hs-seg" id="hsDeviceSeg" role="group" aria-label="الجهاز">
+            <button type="button" data-device="all" class="active">الكل</button>
+            <button type="button" data-device="mobile">موبايل</button>
+            <button type="button" data-device="desktop">ديسكتوب</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="hs-top-actions">
+        <span class="hs-status" id="hsStatus" data-state="saved"><i class="fa-solid fa-circle-check"></i> محفوظ</span>
+        <button type="button" class="hs-btn ghost" id="hsBtnSync" title="جلب الأقسام من السيرفر"><i class="fa-solid fa-rotate"></i> مزامنة</button>
+        <button type="button" class="hs-btn ghost" id="hsBtnLive" title="قراءة شكل الصفحة الحقيقية وترتيبها"><i class="fa-solid fa-globe"></i> من الموقع</button>
+        <button type="button" class="hs-btn ghost" id="hsBtnReset" title="تفريغ اللوحة"><i class="fa-solid fa-eraser"></i> تصفير</button>
+        <button type="button" class="hs-btn ghost" id="hsBtnRestore" title="حذف كل تعديلات HS وإرجاع المتجر لشكله الأصلي"><i class="fa-solid fa-rotate-left"></i> استعادة الأصل</button>
+        <button type="button" class="hs-btn" id="hsBtnSave"><i class="fa-solid fa-floppy-disk"></i> حفظ مسودة</button>
+        <button type="button" class="hs-btn primary" id="hsBtnPublish"><i class="fa-solid fa-cloud-arrow-up"></i> نشر</button>
+        <button type="button" class="hs-btn accent" id="hsBtnPreview"><i class="fa-solid fa-eye"></i> معاينة</button>
+        <button type="button" class="hs-btn icon" id="hsBtnActivity" title="سجل النشاط"><i class="fa-solid fa-clock-rotate-left"></i></button>
+        <button type="button" class="hs-btn icon" id="hsBtnExport" title="تنزيل نسخة من التصميم"><i class="fa-solid fa-file-arrow-down"></i></button>
+        <button type="button" class="hs-btn icon" id="hsBtnImport" title="فتح ملف تصميم محفوظ"><i class="fa-solid fa-file-arrow-up"></i></button>
+        <button type="button" class="hs-btn icon" id="hsBtnFocus" title="لوحة التصميم بملء الشاشة"><i class="fa-solid fa-expand"></i></button>
+        <button type="button" class="hs-btn icon" id="hsBtnHelp" title="إعداد قاعدة البيانات"><i class="fa-solid fa-circle-question"></i></button>
+      </div>
+    </header>
+
+    <!-- ================= WORKSPACE ================= -->
+    <div class="hs-workspace">
+      <!-- ---------- LEFT RAIL ---------- -->
+      <aside class="hs-rail" aria-label="إضافة البلوكات والطبقات">
+        <section class="hs-rail-section">
+          <h2 class="hs-section-title"><i class="fa-solid fa-shapes"></i> أضف بلوك</h2>
+          <div class="hs-palette" id="hsPalette">
+            <button type="button" data-add="banner"><i class="fa-solid fa-image"></i><span>بانر</span></button>
+            <button type="button" data-add="hero"><i class="fa-solid fa-bolt"></i><span>هيرو</span></button>
+            <button type="button" data-add="categories"><i class="fa-solid fa-grip"></i><span>فئات</span></button>
+            <button type="button" data-add="products"><i class="fa-solid fa-boxes-stacked"></i><span>منتجات</span></button>
+            <button type="button" data-add="ads"><i class="fa-solid fa-bullhorn"></i><span>إعلانات</span></button>
+            <button type="button" data-add="text"><i class="fa-solid fa-font"></i><span>نص</span></button>
+            <button type="button" data-add="image"><i class="fa-solid fa-photo-film"></i><span>صورة</span></button>
+            <button type="button" data-add="sticker"><i class="fa-solid fa-stamp"></i><span>ملصق</span></button>
+            <button type="button" data-add="spacer"><i class="fa-solid fa-arrows-up-down"></i><span>مسافة</span></button>
+          </div>
+        </section>
+
+        <section class="hs-rail-section hs-templates-section">
+          <h2 class="hs-section-title"><i class="fa-solid fa-shop"></i> مكتبة القوالب <em id="hsTemplateCount">0</em></h2>
+          <input id="hsTemplateSearch" class="hs-template-search" type="search" placeholder="ابحث: عروض، ماركات، تقييمات..." aria-label="البحث في القوالب" />
+          <div id="hsTemplateGroups" class="hs-template-groups"></div>
+          <div class="hs-template-scroll"><div id="hsTemplateList" class="hs-template-list"></div></div>
+        </section>
+
+        <section class="hs-rail-section hs-layers-section">
+          <h2 class="hs-section-title"><i class="fa-solid fa-layer-group"></i> الطبقات <em id="hsLayerCount">0</em></h2>
+          <div class="hs-layers-scroll"><ul class="hs-layers" id="hsLayers"></ul></div>
+          <p class="hs-hint">اسحب الطبقة لتغيير ترتيبها · انقر لتحديدها</p>
+        </section>
+      </aside>
+
+      <!-- ---------- CENTER CANVAS ---------- -->
+      <main class="hs-stage">
+        <div class="hs-stage-toolbar">
+          <div class="hs-stage-label"><i class="fa-solid fa-mobile-screen-button"></i> لوحة التصميم <span id="hsStageDevice">الكل</span></div>
+          <div class="hs-stage-tools">
+            <label class="hs-zoom"><i class="fa-solid fa-magnifying-glass-minus"></i><input id="hsZoom" type="range" min="40" max="120" step="5" value="75" /><i class="fa-solid fa-magnifying-glass-plus"></i><span id="hsZoomLabel">75%</span></label>
+            <button type="button" class="hs-chip-toggle active" id="hsAnimateToggle"><i class="fa-solid fa-wand-magic-sparkles"></i> حركة</button>
+          </div>
+        </div>
+        <div class="hs-canvas-wrap" id="hsCanvasWrap">
+          <div class="hs-device-frame" id="hsFrame">
+            <div class="hs-device-notch" aria-hidden="true"></div>
+            <div class="hs-device-screen" id="hsCanvas"></div>
+          </div>
+          <div class="hs-empty" id="hsEmpty">
+            <div class="hs-empty-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+            <h3>لوحتك فارغة</h3>
+            <p>اختر بلوكاً من الشريط الجانبي أو اضغط «مزامنة» لجلب أقسام الصفحة من السيرفر.</p>
+            <button type="button" class="hs-btn primary" id="hsEmptySync"><i class="fa-solid fa-rotate"></i> مزامنة من السيرفر</button>
+          </div>
+        </div>
+      </main>
+
+      <!-- ---------- RIGHT INSPECTOR ---------- -->
+      <aside class="hs-inspector" aria-label="خصائص العنصر">
+        <div class="hs-inspector-head">
+          <h2><i class="fa-solid fa-sliders"></i> الخصائص</h2>
+          <span class="hs-selected-name" id="hsSelectedName">لا يوجد عنصر محدد</span>
+        </div>
+        <nav class="hs-tabs" id="hsTabs" role="tablist">
+          <button type="button" data-tab="style" class="active" role="tab">ستايل</button>
+          <button type="button" data-tab="text" role="tab">نص</button>
+          <button type="button" data-tab="image" role="tab">صورة</button>
+          <button type="button" data-tab="product" role="tab">منتج</button>
+          <button type="button" data-tab="ad" role="tab">إعلان</button>
+          <button type="button" data-tab="motion" role="tab">حركة</button>
+        </nav>
+
+        <div class="hs-inspector-body" id="hsInspectorBody">
+          <!-- STYLE -->
+          <div class="hs-panel active" data-panel="style">
+            <div class="hs-field"><label>الخلفية</label><div class="hs-color-row"><input type="color" data-bind="style.background" value="#ffffff" /><input type="text" data-bind="style.background" value="#ffffff" placeholder="#ffffff أو gradient" /></div></div>
+            <div class="hs-field"><label>لون النص</label><div class="hs-color-row"><input type="color" data-bind="style.color" value="#101828" /><input type="text" data-bind="style.color" value="#101828" /></div></div>
+            <label class="hs-check"><input type="checkbox" data-bind="style.gradient" /> تدرج لوني violet → cyan</label>
+            <div class="hs-grid-2">
+              <div class="hs-field"><label>الحدود</label><input type="text" data-bind="style.border" placeholder="1px solid #e2e8f0" /></div>
+              <div class="hs-field"><label>الانحناء</label><input type="text" data-bind="style.radius" placeholder="16px" /></div>
+              <div class="hs-field"><label>الحشو</label><input type="text" data-bind="style.padding" placeholder="24px" /></div>
+              <div class="hs-field"><label>الهامش</label><input type="text" data-bind="style.margin" placeholder="8px 0" /></div>
+              <div class="hs-field"><label>العرض</label><input type="text" data-bind="style.width" placeholder="100%" /></div>
+              <div class="hs-field"><label>الارتفاع</label><input type="text" data-bind="style.height" placeholder="auto" /></div>
+            </div>
+            <div class="hs-field"><label>محاذاة المحتوى</label><select data-bind="style.align"><option value="center">وسط</option><option value="right">يمين</option><option value="left">يسار</option></select></div>
+            <div class="hs-field"><label>الخط</label><select data-bind="style.fontFamily">
+              <option value="Cairo">Cairo</option><option value="Tajawal">Tajawal</option><option value="Almarai">Almarai</option>
+              <option value="Plus Jakarta Sans">Plus Jakarta Sans</option><option value="Manrope">Manrope</option>
+              <option value="Inter">Inter</option><option value="Amiri">Amiri</option>
+            </select></div>
+            <div class="hs-grid-2">
+              <div class="hs-field"><label>حجم الخط</label><input type="text" data-bind="style.fontSize" placeholder="20px" /></div>
+              <div class="hs-field"><label>الوزن</label><input type="text" data-bind="style.fontWeight" placeholder="700" /></div>
+              <div class="hs-field"><label>تباعد الحروف</label><input type="text" data-bind="style.letterSpacing" placeholder="0px" /></div>
+              <div class="hs-field"><label>الظل</label><input type="text" data-bind="style.shadow" placeholder="0 8px 24px rgba(0,0,0,.12)" /></div>
+            </div>
+            <div class="hs-field"><label>اسم البلوك</label><input type="text" data-bind="name" placeholder="مثال: هيرو رئيسي" /></div>
+          </div>
+
+          <!-- TEXT -->
+          <div class="hs-panel" data-panel="text">
+            <div class="hs-field"><label>العنوان</label><textarea id="hsTitle" rows="2" placeholder="اكتب العنوان"></textarea></div>
+            <div class="hs-field"><label>العنوان الفرعي</label><textarea id="hsSubtitle" rows="2" placeholder="نص مساعد"></textarea></div>
+            <div class="hs-subhead"><span>ألوان الحروف</span><small>لكل حرف لونه الخاص</small></div>
+            <div class="hs-letter-chips" id="hsLetterChips"></div>
+            <p class="hs-hint">غيّر لون أي حرف من خلال مربع اللون أسفله. يُحدَّث العنوان تلقائياً.</p>
+          </div>
+
+          <!-- IMAGE -->
+          <div class="hs-panel" data-panel="image">
+            <div class="hs-field"><label>رابط الصورة</label><input id="hsImgUrl" type="text" placeholder="https://... أو رابط Supabase" /></div>
+            <div class="hs-row-buttons"><button type="button" class="hs-btn small" id="hsImgAdd"><i class="fa-solid fa-plus"></i> إضافة صورة</button><button type="button" class="hs-btn small ghost" id="hsImgUpload"><i class="fa-solid fa-cloud-arrow-up"></i> رفع</button><button type="button" class="hs-btn small danger" id="hsImgRemove"><i class="fa-solid fa-trash"></i> حذف</button></div>
+            <div class="hs-image-list" id="hsImageList"></div>
+            <div class="hs-subhead"><span>القصّ والتكبير</span><small id="hsImgCount">لا توجد صور</small></div>
+            <div class="hs-field"><label>تكبير (zoom)</label><div class="hs-range-row"><input id="hsImgZoom" type="range" min="1" max="3" step="0.05" value="1" /><output id="hsImgZoomOut">1.00×</output></div></div>
+            <div class="hs-grid-2">
+              <div class="hs-field"><label>موضع أفقي X</label><input id="hsImgX" type="range" min="0" max="100" value="50" /></div>
+              <div class="hs-field"><label>موضع رأسي Y</label><input id="hsImgY" type="range" min="0" max="100" value="50" /></div>
+              <div class="hs-field"><label>العرض %</label><input id="hsImgW" type="number" min="1" max="100" value="100" /></div>
+              <div class="hs-field"><label>الارتفاع %</label><input id="hsImgH" type="number" min="1" max="100" value="100" /></div>
+              <div class="hs-field"><label>الانحناء</label><input id="hsImgRadius" type="text" placeholder="12px" /></div>
+              <div class="hs-field"><label>الشفافية</label><input id="hsImgOpacity" type="range" min="0" max="1" step="0.05" value="1" /></div>
+            </div>
+            <div class="hs-field"><label>طبقة العرض (z-index)</label><input id="hsImgZ" type="number" min="0" max="99" value="1" /></div>
+            <div class="hs-row-buttons"><button type="button" class="hs-btn small ghost" id="hsImgCropModal"><i class="fa-solid fa-crop"></i> قصّ في نافذة كبيرة</button></div>
+          </div>
+
+          <!-- PRODUCT -->
+          <div class="hs-panel" data-panel="product">
+            <div class="hs-field"><label>الوضع</label><select data-bind="productLayout.mode"><option value="auto">تلقائي من المتجر</option><option value="manual">اختيار يدوي</option></select></div>
+            <div class="hs-field"><label>تصفية الفئة</label><input type="text" data-bind="productLayout.category" placeholder="اسم الفئة أو المعرّف" /></div>
+            <div class="hs-grid-2">
+              <div class="hs-field"><label>عدد الأعمدة</label><input type="number" min="1" max="8" data-bind="productLayout.cols" /></div>
+              <div class="hs-field"><label>حجم البطاقة</label><select data-bind="productLayout.cardSize"><option value="sm">صغير</option><option value="md">متوسط</option><option value="lg">كبير</option></select></div>
+              <div class="hs-field"><label>خلفية البطاقة</label><input type="color" data-bind="productLayout.cardBg" value="#ffffff" /></div>
+              <div class="hs-field"><label>لون نص البطاقة</label><input type="color" data-bind="productLayout.cardColor" value="#101828" /></div>
+              <div class="hs-field"><label>انحناء البطاقة</label><input type="text" data-bind="productLayout.cardRadius" placeholder="14px" /></div>
+            </div>
+            <div class="hs-subhead"><span>عناصر البطاقة</span><small>إظهار / إخفاء</small></div>
+            <div class="hs-check-grid">
+              <label class="hs-check"><input type="checkbox" data-bind="productLayout.show.image" /> صورة</label>
+              <label class="hs-check"><input type="checkbox" data-bind="productLayout.show.name" /> اسم</label>
+              <label class="hs-check"><input type="checkbox" data-bind="productLayout.show.price" /> سعر</label>
+              <label class="hs-check"><input type="checkbox" data-bind="productLayout.show.oldPrice" /> سعر قديم</label>
+              <label class="hs-check"><input type="checkbox" data-bind="productLayout.show.discount" /> خصم</label>
+              <label class="hs-check"><input type="checkbox" data-bind="productLayout.show.rating" /> تقييم</label>
+              <label class="hs-check"><input type="checkbox" data-bind="productLayout.show.badge" /> وسم</label>
+              <label class="hs-check"><input type="checkbox" data-bind="productLayout.show.button" /> زر شراء</label>
+            </div>
+            <div class="hs-row-buttons"><button type="button" class="hs-btn small primary" id="hsProductPick"><i class="fa-solid fa-magnifying-glass"></i> اختيار منتجات</button><button type="button" class="hs-btn small ghost" id="hsProductClear"><i class="fa-solid fa-xmark"></i> مسح الاختيار</button></div>
+            <div class="hs-product-chips" id="hsProductChips"></div>
+          </div>
+
+          <!-- AD -->
+          <div class="hs-panel" data-panel="ad">
+            <div class="hs-grid-2">
+              <div class="hs-field"><label>يظهر من</label><input type="datetime-local" data-bind="ad.startAt" /></div>
+              <div class="hs-field"><label>يختفي عند</label><input type="datetime-local" data-bind="ad.endAt" /></div>
+            </div>
+            <div class="hs-field"><label>شدة الإعلان</label><div class="hs-range-row"><input type="range" data-bind="ad.power" min="1" max="10" step="1" value="5" /><span data-output="ad.power">5</span></div></div>
+            <div class="hs-field"><label>الموضع</label><select data-bind="ad.position"><option value="top">أعلى</option><option value="middle">وسط</option><option value="bottom">أسفل</option><option value="inline">داخل المحتوى</option></select></div>
+            <div class="hs-field"><label>المحفّز</label><select data-bind="ad.trigger"><option value="always">دائماً</option><option value="scroll">عند التمرير</option><option value="click">عند النقر</option></select></div>
+            <div class="hs-field"><label>رابط الإعلان</label><input type="text" data-bind="ad.link" placeholder="category.html?cat=..." /></div>
+            <div class="hs-field"><label>نص الوسم</label><input type="text" data-bind="ad.badge" placeholder="مدفوع" /></div>
+            <p class="hs-hint">الصورة تُضاف من تبويب «صورة». الإعلان يظهر فقط داخل نافذة الوقت المحددة.</p>
+          </div>
+
+          <!-- MOTION -->
+          <div class="hs-panel" data-panel="motion">
+            <div class="hs-field"><label>تطبيق الحركة على</label><select id="hsAnimTarget"><option value="block">البلوك كاملاً</option></select></div>
+            <div class="hs-field"><label>نوع الحركة</label><select data-bind="anim.type"><option value="none">بدون</option><option value="float">تعويم float</option><option value="rocket">انطلاق rocket</option><option value="fade">ظهور fade</option><option value="slide">انزلاق slide</option><option value="pulse">نبض pulse</option></select></div>
+            <div class="hs-field"><label>القوة</label><div class="hs-range-row"><input type="range" data-bind="anim.power" min="1" max="10" step="1" value="4" /><span data-output="anim.power">4</span></div></div>
+            <div class="hs-grid-2">
+              <div class="hs-field"><label>التأخير (ث)</label><input type="number" min="0" max="20" step="0.1" data-bind="anim.delay" /></div>
+              <div class="hs-field"><label>المدة (ث)</label><input type="number" min="0.1" max="20" step="0.1" data-bind="anim.duration" /></div>
+              <div class="hs-field"><label>التكرار</label><input type="text" data-bind="anim.repeat" placeholder="infinite أو 3" /></div>
+            </div>
+            <p class="hs-hint">الحركة تعمل مباشرة على اللوحة، ويمكن إيقافها من شريط اللوحة.</p>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- ================= ACTIVITY DOCK ================= -->
+    <section class="hs-dock" id="hsDock">
+      <button type="button" class="hs-dock-toggle" id="hsDockToggle" aria-expanded="true"><i class="fa-solid fa-chevron-down"></i> سجل النشاط <span id="hsLogCount">0</span></button>
+      <div class="hs-dock-body"><ul class="hs-log" id="hsLog"><li class="hs-log-empty">لا يوجد نشاط بعد. أضف بلوكاً أو ابدأ بالمزامنة.</li></ul></div>
+    </section>
+  </div>
+
+  <!-- ================= MODAL / TOASTS ================= -->
+  <div class="hs-modal-backdrop" id="hsModal" hidden>
+    <div class="hs-modal-box" id="hsModalBox" role="dialog" aria-modal="true" aria-labelledby="hsModalTitle">
+      <header class="hs-modal-head"><h2 id="hsModalTitle">نافذة</h2><button type="button" id="hsModalClose" title="إغلاق"><i class="fa-solid fa-xmark"></i></button></header>
+      <div class="hs-modal-body" id="hsModalBody"></div>
+    </div>
+  </div>
+  <input type="file" id="hsUploadInput" accept="image/png,image/jpeg,image/webp,image/gif" hidden />
+  <input type="file" id="hsImportInput" accept="application/json,.json" hidden />
+  <div class="hs-focus-bar" id="hsFocusBar" aria-label="أدوات سريعة">
+    <button type="button" data-focus-act="exit" title="الخروج من ملء الشاشة"><i class="fa-solid fa-compress"></i></button>
+    <button type="button" data-focus-act="rail" title="إظهار/إخفاء القوالب والطبقات"><i class="fa-solid fa-shapes"></i></button>
+    <button type="button" data-focus-act="inspector" title="إظهار/إخفاء الخصائص"><i class="fa-solid fa-sliders"></i></button>
+    <button type="button" data-focus-act="dock" title="سجل النشاط"><i class="fa-solid fa-clock-rotate-left"></i></button>
+    <hr />
+    <button type="button" data-focus-act="mobile" title="وضع الهاتف"><i class="fa-solid fa-mobile-screen-button"></i></button>
+    <button type="button" data-focus-act="desktop" title="وضع الديسكتوب"><i class="fa-solid fa-desktop"></i></button>
+    <button type="button" data-focus-act="fit" title="ملاءمة الشاشة"><i class="fa-solid fa-maximize"></i></button>
+    <hr />
+    <button type="button" data-focus-act="undo" title="تراجع"><i class="fa-solid fa-rotate-left"></i></button>
+    <button type="button" data-focus-act="redo" title="إعادة"><i class="fa-solid fa-rotate-right"></i></button>
+    <button type="button" data-focus-act="preview" title="معاينة"><i class="fa-solid fa-eye"></i></button>
+    <button type="button" data-focus-act="save" title="حفظ مسودة"><i class="fa-solid fa-floppy-disk"></i></button>
+  </div>
+  <div class="hs-toasts" id="hsToasts" aria-live="polite"></div>
+</body>
+</html>
