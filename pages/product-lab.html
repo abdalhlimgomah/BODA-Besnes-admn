@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <title>مختبر المنتجات والشركاء</title>
+    <title>مختبر منتجات جوميا — Buda Admin</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/app-shell.css" />
     <link rel="stylesheet" href="../css/product-lab.css" />
@@ -43,13 +43,13 @@
     <main class="app-main">
       <header class="app-topbar">
         <div class="topbar-title">
-          <h1>مختبر المنتجات والشركاء</h1>
-          <p>اسحب منتجات الشركاء، اختبر مرورها، واحفظها في Supabase</p>
+          <h1>مختبر منتجات جوميا</h1>
+          <p>اسحب المنتجات من جوميا مصر منتجًا منتجًا، راجع التفاصيل الكاملة، ثم احفظها في Supabase</p>
         </div>
         <div class="topbar-actions lab-topbar-actions">
-          <span class="lab-conn" id="apiStatus" title="حالة الاتصال بمصدر البيانات">
+          <span class="lab-conn" id="apiStatus" title="حالة الاتصال بسيرفر السحب">
             <span class="lab-conn-dot"></span>
-            <span id="apiStatusText">جاهز</span>
+            <span id="apiStatusText">جارٍ الفحص...</span>
           </span>
           <button type="button" class="btn btn-secondary" id="refreshAllBtn">
             <i class="fa-solid fa-rotate"></i>
@@ -63,152 +63,324 @@
         <section class="lab-summary">
           <article class="lab-stat">
             <div class="lab-stat-icon" style="background:#eef2ff;color:#4338ca"><i class="fa-solid fa-boxes-stacked"></i></div>
-            <div>
-              <p>المنتجات المسحوبة</p>
-              <strong id="statTotal">0</strong>
-            </div>
+            <div><p>منتجات مسحوبة</p><strong id="statScraped">0</strong></div>
           </article>
           <article class="lab-stat">
-            <div class="lab-stat-icon" style="background:#fff4e8;color:#c2410c"><i class="fa-solid fa-store"></i></div>
-            <div>
-              <p>منتجات جوميا</p>
-              <strong id="statJumia">0</strong>
-            </div>
+            <div class="lab-stat-icon" style="background:#fff4e8;color:#c2410c"><i class="fa-solid fa-hourglass-half"></i></div>
+            <div><p>في الانتظار</p><strong id="statPending">0</strong></div>
           </article>
           <article class="lab-stat">
             <div class="lab-stat-icon" style="background:#ecfdf5;color:#047857"><i class="fa-solid fa-square-check"></i></div>
-            <div>
-              <p>المحدد للحفظ</p>
-              <strong id="statSelected">0</strong>
-            </div>
+            <div><p>المحدد</p><strong id="statSelected">0</strong></div>
           </article>
           <article class="lab-stat">
             <div class="lab-stat-icon" style="background:#fdf2f8;color:#be185d"><i class="fa-solid fa-database"></i></div>
-            <div>
-              <p>محفوظ في Supabase</p>
-              <strong id="statSaved">0</strong>
-            </div>
+            <div><p>محفوظ في Supabase</p><strong id="statSaved">0</strong></div>
+          </article>
+          <article class="lab-stat">
+            <div class="lab-stat-icon" style="background:#fef9c3;color:#a16207"><i class="fa-solid fa-code-compare"></i></div>
+            <div><p>تغييرات مكتشفة</p><strong id="statChanged">0</strong></div>
           </article>
         </section>
 
+        <!-- ===== Setup ===== -->
+        <details class="lab-setup card" id="setupCard" open>
+          <summary>
+            <i class="fa-solid fa-plug-circle-check"></i>
+            التهيئة — 3 خطوات قبل السحب
+            <span class="lab-setup-pill" id="setupSummary">جارٍ الفحص...</span>
+          </summary>
+          <div class="lab-setup-body">
+            <div class="lab-setup-step">
+              <div class="lab-setup-num">1</div>
+              <div class="lab-setup-main">
+                <h4>سيرفر السحب (API)</h4>
+                <p>
+                  جوميا لا تسمح للمتصفح بسحب صفحاتها مباشرة. شغّل سيرفر السحب المحلي مرة واحدة،
+                  أو استخدم نسخة الموقع على <code>budoq.com</code>.
+                </p>
+                <div class="lab-inline-row">
+                  <input type="url" id="apiBaseInput" dir="ltr" placeholder="http://localhost:8788" />
+                  <button type="button" class="btn btn-secondary" id="detectApiBtn">
+                    <i class="fa-solid fa-magnifying-glass"></i> فحص
+                  </button>
+                </div>
+                <div class="lab-cmd" dir="ltr">
+                  <code>node server/jumia-server.mjs</code>
+                  <button type="button" class="lab-copy" id="copyServerBtn" title="نسخ الأمر"><i class="fa-regular fa-copy"></i></button>
+                </div>
+                <a class="lab-mini-link" href="http://localhost:8788/pages/product-lab.html" target="_blank" rel="noopener">
+                  فتح الصفحة من السيرفر المحلي <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </a>
+              </div>
+              <span class="lab-setup-state" id="apiSetupState">—</span>
+            </div>
+
+            <div class="lab-setup-step">
+              <div class="lab-setup-num">2</div>
+              <div class="lab-setup-main">
+                <h4>أعمدة Supabase الجديدة</h4>
+                <p>
+                  ملف <code>sql/jumia-products.sql</code> يضيف أماكن للبائع والتقييمات والمواصفات
+                  وسجل الأسعار. البيانات تُحفظ في <code>raw_data</code> حتى قبل تشغيله، لكن شغّله
+                  لتستفيد من الفلاتر والاستعلامات.
+                </p>
+                <div class="lab-inline-row">
+                  <select id="sqlStatusSelect">
+                    <option value="unknown">لم أتحقق بعد</option>
+                    <option value="done">شغّلت الملف بنجاح</option>
+                    <option value="later">سأشغله لاحقًا</option>
+                  </select>
+                  <button type="button" class="btn btn-secondary" id="copySqlBtn">
+                    <i class="fa-regular fa-copy"></i> نسخ SQL
+                  </button>
+                </div>
+              </div>
+              <span class="lab-setup-state" id="sqlSetupState">—</span>
+            </div>
+
+            <div class="lab-setup-step">
+              <div class="lab-setup-num">3</div>
+              <div class="lab-setup-main">
+                <h4>الصفحة الأمامية</h4>
+                <p>
+                  صفحة المنتج في الموقع (<code>pages/product.html</code>) تعرض الآن تفاصيل جوميا
+                  تلقائيًا: البائع، أداء البائع، المواصفات، التقييمات، التوصيل والإرجاع، ومنتجات ذات صلة.
+                </p>
+              </div>
+              <span class="lab-setup-state is-ok"><i class="fa-solid fa-circle-check"></i></span>
+            </div>
+          </div>
+        </details>
+
+        <!-- ===== Proxy pool ========================================== -->
+        <details class="card lab-proxy-card" id="proxyCard">
+          <summary class="lab-proxy-summary">
+            <span class="lab-proxy-title">
+              <i class="fa-solid fa-network-wired"></i> مجمع الوسائط (Proxy Pool)
+            </span>
+            <span class="lab-proxy-badge" id="proxyPoolBadge">0 جاهز</span>
+            <span class="lab-proxy-chevron"><i class="fa-solid fa-chevron-down"></i></span>
+          </summary>
+          <div class="lab-proxy-body">
+            <p class="lab-hint">
+              الصق قائمة الوسائط — سطر لكل وسيط. الصيغ المدعومة:
+              <code>host:port</code> ·
+              <code>host:port:user:pass</code> ·
+              <code>user:pass@host:port</code> ·
+              <code>http://user:pass@host:port</code>.
+              SOCKS غير مدعوم. كل منتج يُسحب من وسيط مختلف لتجنّب حظر جوميا.
+            </p>
+            <textarea id="proxyText" rows="5" dir="ltr" spellcheck="false"
+              placeholder="1.2.3.4:8080&#10;5.6.7.8:3128:user:pass&#10;http://user:pass@9.9.9.9:8000"></textarea>
+            <div class="lab-crawl-grid lab-proxy-grid">
+              <div class="lab-field">
+                <label for="workerCountInput">عدد العمال المتوازيين (سحب/تحديث)</label>
+                <input type="number" id="workerCountInput" min="1" max="64" value="6" />
+              </div>
+              <div class="lab-field">
+                <label for="proxyTestLimitInput">عدد الوسائط في الاختبار</label>
+                <input type="number" id="proxyTestLimitInput" min="1" max="500" value="50" />
+              </div>
+              <label class="lab-inline-check lab-proxy-toggle">
+                <input type="checkbox" id="useProxyPoolInput" checked />
+                استخدم المجمع في السحب والتحديث (موصى به)
+              </label>
+            </div>
+            <div class="lab-proxy-actions">
+              <button type="button" class="btn btn-primary" id="saveProxyBtn">
+                <i class="fa-solid fa-floppy-disk"></i> حفظ واستبدال
+              </button>
+              <button type="button" class="btn btn-secondary" id="appendProxyBtn">
+                <i class="fa-solid fa-plus"></i> إضافة للقائمة
+              </button>
+              <button type="button" class="btn btn-secondary" id="testProxyBtn">
+                <i class="fa-solid fa-vial"></i> اختبار عينة
+              </button>
+              <button type="button" class="btn btn-secondary" id="refreshProxyBtn">
+                <i class="fa-solid fa-rotate"></i> تحديث الحالة
+              </button>
+              <button type="button" class="lab-link-btn" id="clearProxyBtn">
+                <i class="fa-solid fa-trash-can"></i> مسح القائمة
+              </button>
+            </div>
+            <p class="lab-sync-status" id="proxyStatsText">لا توجد وسائط محفوظة بعد.</p>
+            <div class="lab-proxy-results" id="proxyResults"></div>
+          </div>
+        </details>
+
         <!-- ===== Tabs ===== -->
         <div class="lab-tabs" role="tablist">
-          <button type="button" class="lab-tab is-active" data-tab="pull">
-            <i class="fa-solid fa-cloud-arrow-down"></i> سحب المنتجات
+          <button type="button" class="lab-tab is-active" data-tab="crawl">
+            <i class="fa-solid fa-cloud-arrow-down"></i> سحب جوميا
           </button>
-          <button type="button" class="lab-tab" data-tab="inspect">
-            <i class="fa-solid fa-vial-circle-check"></i> فحص منتج
+          <button type="button" class="lab-tab" data-tab="products">
+            <i class="fa-solid fa-boxes-stacked"></i> المنتجات
+            <span class="lab-tab-count" id="productsTabCount">0</span>
           </button>
           <button type="button" class="lab-tab" data-tab="saved">
-            <i class="fa-solid fa-database"></i> المحفوظة
+            <i class="fa-solid fa-database"></i> المحفوظة والمزامنة
             <span class="lab-tab-count" id="savedTabCount">0</span>
           </button>
+          <button type="button" class="lab-tab" data-tab="inspect">
+            <i class="fa-solid fa-vial-circle-check"></i> فحص رابط
+          </button>
           <button type="button" class="lab-tab" data-tab="import">
-            <i class="fa-solid fa-file-import"></i> استيراد JSON
+            <i class="fa-solid fa-file-import"></i> استيراد
           </button>
         </div>
 
-        <!-- ===== Pull panel ===== -->
-        <section class="lab-panel is-active" id="panel-pull">
-          <div class="lab-toolbar card">
-            <div class="lab-field">
-              <label for="sourceSelect">المصدر</label>
-              <select id="sourceSelect">
-                <option value="jumia">جوميا مصر</option>
-                <option value="taager">Taager / الموردون</option>
-                <option value="all">كل المصادر</option>
-              </select>
+        <!-- ============================================================ -->
+        <!-- ===== Crawl panel ========================================== -->
+        <!-- ============================================================ -->
+        <section class="lab-panel is-active" id="panel-crawl">
+          <div class="card lab-crawl-card">
+            <div class="lab-crawl-head">
+              <div>
+                <h3><i class="fa-solid fa-spider"></i> إعداد السحب من جوميا</h3>
+                <p class="lab-hint">
+                  ضع روابط أقسام أو صفحات بحث من جوميا. الصفحة تقرأ قائمة المنتجات، ثم تفتح كل منتج
+                  على حدة وتجلب كل تفاصيله (السعر، الصور، المواصفات، البائع، التقييمات، الشحن...).
+                </p>
+              </div>
+              <span class="lab-source-badge">jumia.com.eg</span>
             </div>
-            <div class="lab-field">
-              <label for="countrySelect">الدولة</label>
-              <select id="countrySelect">
-                <option value="EG">مصر</option>
-                <option value="SA">السعودية</option>
-                <option value="">كل الدول</option>
-              </select>
+
+            <div class="lab-crawl-grid">
+              <div class="lab-field">
+                <label for="crawlMode">طريقة السحب</label>
+                <select id="crawlMode">
+                  <option value="listing">أقسام / صفحات بحث (الأفضل)</option>
+                  <option value="sitemap">خريطة موقع جوميا (كل المنتجات)</option>
+                  <option value="links">روابط منتجات جاهزة</option>
+                </select>
+              </div>
+              <div class="lab-field">
+                <label for="pagesInput">عدد الصفحات لكل رابط</label>
+                <input type="number" id="pagesInput" min="1" max="200" value="3" />
+              </div>
+              <div class="lab-field">
+                <label for="maxProductsInput">حد المنتجات في الجلسة</label>
+                <input type="number" id="maxProductsInput" min="1" max="100000" value="500" />
+              </div>
+              <div class="lab-field">
+                <label for="delayInput">تأخير بين المنتجات (مللي ثانية)</label>
+                <input type="number" id="delayInput" min="0" max="15000" step="100" value="1200" />
+              </div>
+              <div class="lab-field lab-field-wide">
+                <label for="crawlSources">الروابط (رابط في كل سطر)</label>
+                <textarea id="crawlSources" rows="5" dir="ltr" placeholder="https://www.jumia.com.eg/ar/catalog/?q=earbuds"></textarea>
+              </div>
+              <div class="lab-field lab-field-action">
+                <label>&nbsp;</label>
+                <button type="button" class="btn btn-primary lab-start-btn" id="startCrawlBtn">
+                  <i class="fa-solid fa-play"></i> بدء السحب
+                </button>
+                <div class="lab-crawl-buttons">
+                  <button type="button" class="btn btn-secondary" id="pauseCrawlBtn" disabled>
+                    <i class="fa-solid fa-pause"></i> إيقاف مؤقت
+                  </button>
+                  <button type="button" class="btn btn-secondary" id="stopCrawlBtn" disabled>
+                    <i class="fa-solid fa-stop"></i> إنهاء
+                  </button>
+                </div>
+              </div>
             </div>
-            <div class="lab-field">
-              <label for="limitInput">حد السحب</label>
-              <input type="number" id="limitInput" min="20" max="12000" step="20" value="12000" />
-            </div>
-            <div class="lab-field lab-field-wide">
-              <label for="apiBaseInput">رابط API</label>
-              <input type="url" id="apiBaseInput" placeholder="https://budoq.com" value="https://budoq.com" dir="ltr" />
-            </div>
-            <div class="lab-field lab-field-action">
-              <button type="button" class="btn btn-primary" id="pullBtn">
-                <i class="fa-solid fa-cloud-arrow-down"></i>
-                سحب المنتجات
-              </button>
+
+            <div class="lab-presets">
+              <span>مصادر جاهزة:</span>
+              <button type="button" class="lab-chip" data-preset="categories">كل الأقسام الرئيسية</button>
+              <button type="button" class="lab-chip" data-preset="offers">أفضل العروض</button>
+              <button type="button" class="lab-chip" data-preset="search">بحث محدد</button>
+              <button type="button" class="lab-chip" data-preset="sitemap">خريطة الموقع</button>
+              <span class="lab-spacer"></span>
+              <label class="lab-inline-check"><input type="checkbox" id="skipSavedInput" /> تخطي المنتجات المحفوظة</label>
+              <label class="lab-inline-check"><input type="checkbox" id="autoSaveInput" /> حفظ تلقائي أثناء السحب</label>
             </div>
           </div>
 
-          <div class="lab-status-row">
-            <p class="lab-status" id="pullStatus">لم يتم السحب بعد. اختر المصدر ثم اضغط «سحب المنتجات».</p>
-            <div class="lab-filters">
-              <input type="search" id="localSearch" placeholder="بحث سريع في النتائج..." />
-              <select id="categoryFilter">
-                <option value="">كل الأقسام</option>
-              </select>
-              <select id="sortSelect">
-                <option value="relevance">الترتيب: الأكثر صلة</option>
+          <div class="card lab-progress-card" id="progressCard">
+            <div class="lab-progress-head">
+              <div>
+                <h3><i class="fa-solid fa-gauge-high"></i> حالة السحب</h3>
+                <p id="crawlStatusText">جاهز. اضبط المصادر ثم اضغط «بدء السحب».</p>
+              </div>
+              <div class="lab-progress-numbers">
+                <div><span>تم</span><strong id="crawlDone">0</strong></div>
+                <div><span>فشل</span><strong id="crawlFailed">0</strong></div>
+                <div><span>متبقي</span><strong id="crawlRemaining">0</strong></div>
+                <div><span>الوقت المتوقع</span><strong id="crawlEta">—</strong></div>
+              </div>
+            </div>
+            <div class="lab-bar"><span id="crawlBar"></span></div>
+            <div class="lab-current" id="crawlCurrent" hidden>
+              <img id="crawlCurrentImg" alt="" />
+              <div>
+                <strong id="crawlCurrentName">—</strong>
+                <span id="crawlCurrentMeta">—</span>
+              </div>
+              <span class="lab-spinner" id="crawlSpinner"><i class="fa-solid fa-spinner fa-spin"></i></span>
+            </div>
+            <div class="lab-crawl-bottom">
+              <div class="lab-queue" id="queueList"></div>
+              <details class="lab-log lab-log-inline">
+                <summary><i class="fa-solid fa-list-check"></i> سجل العمليات</summary>
+                <div id="labLog"></div>
+              </details>
+            </div>
+            <div class="lab-crawl-footer">
+              <button type="button" class="lab-link-btn" id="clearCrawlBtn"><i class="fa-solid fa-broom"></i> مسح المنتجات المسحوبة</button>
+              <button type="button" class="lab-link-btn" id="exportJsonBtn"><i class="fa-solid fa-file-arrow-down"></i> تصدير JSON</button>
+              <span class="lab-spacer"></span>
+              <button type="button" class="lab-link-btn" id="goProductsBtn">عرض المنتجات <i class="fa-solid fa-arrow-left"></i></button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- ===== Products panel ====================================== -->
+        <!-- ============================================================ -->
+        <section class="lab-panel" id="panel-products">
+          <div class="card lab-products-toolbar">
+            <div class="lab-filters lab-filters-wide">
+              <input type="search" id="productSearch" placeholder="بحث بالاسم / SKU / البائع..." />
+              <select id="productCategory"><option value="">كل الأقسام</option></select>
+              <select id="productSort">
+                <option value="newest">الأحدث سحبًا</option>
                 <option value="price-asc">السعر: الأقل أولاً</option>
                 <option value="price-desc">السعر: الأعلى أولاً</option>
+                <option value="discount">أعلى خصم</option>
                 <option value="rating">الأعلى تقييماً</option>
                 <option value="name">الاسم أبجدياً</option>
               </select>
             </div>
+            <div class="lab-quick-filters">
+              <label><input type="checkbox" id="onlySelected" /> المحدد فقط</label>
+              <label><input type="checkbox" id="onlyDiscount" /> عليه خصم</label>
+              <label><input type="checkbox" id="onlySaved" /> محفوظ سابقًا</label>
+              <label><input type="checkbox" id="onlyChanged" /> تغيّر سعره</label>
+              <span class="lab-spacer"></span>
+              <button type="button" class="lab-link-btn" id="selectAllBtn">تحديد الكل (<span id="selectAllCount">0</span>)</button>
+              <button type="button" class="lab-link-btn" id="selectVisibleBtn">تحديد الظاهر</button>
+              <button type="button" class="lab-link-btn" id="invertSelectionBtn">عكس التحديد</button>
+              <button type="button" class="lab-link-btn" id="clearSelectionBtn">مسح التحديد</button>
+            </div>
           </div>
 
-          <div class="lab-quick-filters">
-            <label><input type="checkbox" id="onlySelected" /> المحدد فقط</label>
-            <label><input type="checkbox" id="onlyDiscount" /> عليه خصم</label>
-            <label><input type="checkbox" id="onlyMissing" /> غير المحفوظ فقط</label>
-            <span class="lab-spacer"></span>
-            <button type="button" class="lab-link-btn" id="selectAllVisible">تحديد الظاهر</button>
-            <button type="button" class="lab-link-btn" id="clearSelectionBtn">مسح التحديد</button>
-          </div>
-
+          <p class="lab-status" id="productsStatus">لا توجد منتجات بعد.</p>
           <div class="lab-grid" id="labGrid"></div>
           <div class="lab-empty" id="labEmpty">
             <i class="fa-solid fa-box-open"></i>
-            <p>لا توجد منتجات بعد. اضغط «سحب المنتجات» لبدء التجربة.</p>
+            <p>لا توجد منتجات بعد. ابدأ السحب من تبويب «سحب جوميا».</p>
           </div>
           <div class="lab-load-more-wrap">
             <button type="button" class="btn btn-secondary" id="loadMoreBtn" style="display:none">عرض المزيد</button>
           </div>
-
-          <details class="lab-log card">
-            <summary><i class="fa-solid fa-list-check"></i> سجل العمليات</summary>
-            <div id="labLog"></div>
-          </details>
         </section>
 
-        <!-- ===== Inspect panel ===== -->
-        <section class="lab-panel" id="panel-inspect">
-          <div class="card lab-inspect-box">
-            <h3><i class="fa-solid fa-vial-circle-check"></i> اختبر منتجًا قبل نشره</h3>
-            <p class="lab-hint">
-              الصق رابط منتج من جوميا، أو معرف المنتج (مثل <code dir="ltr">jumia_GE810EA1QGISJNAFAMZ</code>)،
-              أو اسم المنتج. سيتم التحقق من وجوده في كتالوج بودوكيو، ومن بياناته، ومن رابط الشراء الخارجي.
-            </p>
-            <div class="lab-inspect-row">
-              <input type="text" id="inspectInput" placeholder="https://www.jumia.com.eg/ar/... أو اسم المنتج" />
-              <button type="button" class="btn btn-primary" id="inspectBtn">
-                <i class="fa-solid fa-magnifying-glass-chart"></i>
-                فحص
-              </button>
-            </div>
-            <div class="lab-inspect-samples">
-              <button type="button" class="lab-chip" data-sample="jumia">منتج جوميا</button>
-              <button type="button" class="lab-chip" data-sample="taager">منتج مورد</button>
-              <button type="button" class="lab-chip" data-sample="url">رابط جوميا</button>
-            </div>
-          </div>
-          <div id="inspectResult"></div>
-        </section>
-
-        <!-- ===== Saved panel ===== -->
+        <!-- ============================================================ -->
+        <!-- ===== Saved + sync panel ================================== -->
+        <!-- ============================================================ -->
         <section class="lab-panel" id="panel-saved">
           <div class="card lab-saved-head">
             <div>
@@ -216,43 +388,165 @@
               <p id="savedStatus">جاري التحميل...</p>
             </div>
             <div class="lab-saved-actions">
+              <input type="search" id="savedSearch" placeholder="بحث في المحفوظات..." />
               <select id="savedFilter">
                 <option value="">الكل</option>
                 <option value="jumia">جوميا</option>
-                <option value="taager">موردون</option>
                 <option value="active">نشط فقط</option>
-                <option value="inactive">مسودة فقط</option>
+                <option value="draft">مسودة فقط</option>
+                <option value="incomplete">ناقص البيانات</option>
               </select>
               <button type="button" class="btn btn-secondary" id="reloadSavedBtn">
-                <i class="fa-solid fa-rotate"></i>
-                تحديث
+                <i class="fa-solid fa-rotate"></i> تحديث
               </button>
             </div>
           </div>
+
+          <div class="card lab-sync-card">
+            <div class="lab-sync-head">
+              <div>
+                <h3><i class="fa-solid fa-arrows-rotate"></i> مزامنة الأسعار والتحديثات</h3>
+                <p class="lab-hint">
+                  يفتح صفحة كل منتج محفوظ على جوميا ويقارن السعر والاسم والصور والمخزون.
+                  لو اختلف أي شيء يظهر هنا لتطبّقه، ويُسجَّل السعر القديم في سجل الأسعار.
+                </p>
+              </div>
+              <div class="lab-sync-actions">
+                <button type="button" class="btn btn-primary" id="syncStartBtn">
+                  <i class="fa-solid fa-magnifying-glass-chart"></i> فحص التحديثات
+                </button>
+                <button type="button" class="btn btn-secondary" id="syncStopBtn" disabled>
+                  <i class="fa-solid fa-stop"></i> إيقاف
+                </button>
+                <button type="button" class="btn btn-primary" id="applySyncBtn" disabled>
+                  <i class="fa-solid fa-cloud-arrow-up"></i> تطبيق (<span id="syncApplyCount">0</span>)
+                </button>
+              </div>
+            </div>
+            <div class="lab-bar lab-bar-sm"><span id="syncBar"></span></div>
+            <p class="lab-sync-status" id="syncStatus">لم يتم الفحص بعد.</p>
+            <div class="lab-sync-list" id="syncList"></div>
+          </div>
+
+          <div class="card lab-sync-card lab-servers-card">
+            <div class="lab-sync-head">
+              <div>
+                <h3><i class="fa-solid fa-server"></i> التحقق من السيرفرات الثلاثة</h3>
+                <p class="lab-hint">
+                  يفحص وجود منتجات جوميا المحفوظة على السيرفر الأساسي والاحتياطي والثالث،
+                  يعرض الناقص في كل سيرفر، ويضيفه تلقائيًا عند الطلب.
+                </p>
+              </div>
+              <div class="lab-sync-actions">
+                <button type="button" class="btn btn-primary" id="checkServersBtn">
+                  <i class="fa-solid fa-magnifying-glass"></i> فحص السيرفرات
+                </button>
+                <button type="button" class="btn btn-secondary" id="addMissingServersBtn" disabled>
+                  <i class="fa-solid fa-cloud-arrow-up"></i> إضافة الناقص
+                </button>
+              </div>
+            </div>
+            <label class="lab-inline-check lab-proxy-toggle">
+              <input type="checkbox" id="autoServerSyncInput" />
+              مزامنة تلقائية بعد الحفظ أو التحديث (يضيف الناقص فقط)
+            </label>
+            <div class="lab-servers-list" id="serversList"></div>
+            <p class="lab-sync-status" id="serversStatus">لم يتم الفحص بعد.</p>
+          </div>
+
           <div class="lab-saved-list" id="savedGrid"></div>
           <div class="lab-empty" id="savedEmpty" style="display:none">
             <i class="fa-solid fa-database"></i>
             <p>لا توجد منتجات محفوظة بعد.</p>
           </div>
+          <div class="lab-load-more-wrap">
+            <button type="button" class="btn btn-secondary" id="savedMoreBtn" style="display:none">عرض المزيد</button>
+          </div>
         </section>
 
-        <!-- ===== Import panel ===== -->
+        <!-- ============================================================ -->
+        <!-- ===== Inspect panel ======================================= -->
+        <!-- ============================================================ -->
+        <section class="lab-panel" id="panel-inspect">
+          <div class="card lab-inspect-box">
+            <h3><i class="fa-solid fa-vial-circle-check"></i> افحص منتجًا قبل الحفظ</h3>
+            <p class="lab-hint">
+              الصق رابط منتج من جوميا. سيتم فتح الصفحة وسحب كل التفاصيل ثم عرضها هنا قبل أي حفظ.
+              يمكنك أيضًا لصق كود HTML لصفحة محفوظة عندك إذا منعت جوميا السيرفر.
+            </p>
+            <div class="lab-inspect-row">
+              <input type="text" id="inspectInput" dir="ltr" placeholder="https://www.jumia.com.eg/ar/....html" />
+              <button type="button" class="btn btn-primary" id="inspectBtn">
+                <i class="fa-solid fa-magnifying-glass-chart"></i> فحص
+              </button>
+            </div>
+            <div class="lab-inspect-samples">
+              <button type="button" class="lab-chip" data-sample="first">أول منتج مسحوب</button>
+              <button type="button" class="lab-chip" data-sample="search">رابط بحث</button>
+              <button type="button" class="lab-chip" data-sample="paste">لصق HTML</button>
+            </div>
+          </div>
+
+          <details class="card lab-paste-box" id="bridgeBox">
+            <summary><i class="fa-solid fa-window-restore"></i> جسر المتصفح — سحب المنتج من صفحة جوميا المفتوحة عندك</summary>
+            <div class="lab-paste-body">
+              <p class="lab-hint">
+                عندما ترد جوميا على السيرفر بالحظر (429) استخدم الجسر: اضغط «فتح الصفحة»، ثم على صفحة
+                جوميا اضغط رابط «ربط جوميا» من المفضلة. المنتج يصل إلى هنا تلقائيًا بصوره ومواصفاته
+                وسعره، ثم احفظه كمسودة أو نشِطه.
+              </p>
+              <div class="lab-inspect-row">
+                <button type="button" class="btn btn-secondary" id="openBridgeBtn">
+                  <i class="fa-solid fa-arrow-up-right-from-square"></i> فتح الصفحة
+                </button>
+                <button type="button" class="btn btn-secondary" id="copyBridgeBtn">
+                  <i class="fa-solid fa-copy"></i> نسخ كود الربط
+                </button>
+              </div>
+              <code id="bridgeCode" dir="ltr" style="display:block;direction:ltr;text-align:left;font-size:11px;opacity:0.65;word-break:break-all;margin-top:8px;max-height:70px;overflow:auto"></code>
+              <p class="lab-hint">
+                أنشئ إشارة مرجعية جديدة في المتصفح وضع فيها الكود المنسوخ بدل الرابط. إن لم يعمل
+                الكود بسبب حماية الصفحة، استخدم «لصق HTML» بالأسفل.
+              </p>
+            </div>
+          </details>
+
+          <details class="card lab-paste-box" id="pasteBox">
+            <summary><i class="fa-solid fa-code"></i> لصق HTML صفحة منتج (بديل عند الحظر)</summary>
+            <div class="lab-paste-body">
+              <p class="lab-hint">
+                افتح صفحة المنتج في متصفحك، اضغط <code>Ctrl+S</code> واحفظ الصفحة، ثم افتح الملف في
+                Notepad وانقل محتواه هنا. أو استخدم «View page source» وانسخ الكود.
+              </p>
+              <input type="url" id="pasteUrl" dir="ltr" placeholder="رابط صفحة المنتج على جوميا (للربط)" />
+              <textarea id="pasteHtml" rows="8" dir="ltr" placeholder="<!doctype html> ..."></textarea>
+              <button type="button" class="btn btn-secondary" id="parseHtmlBtn">
+                <i class="fa-solid fa-code"></i> تحليل HTML
+              </button>
+            </div>
+          </details>
+
+          <div id="inspectResult"></div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- ===== Import panel ======================================== -->
+        <!-- ============================================================ -->
         <section class="lab-panel" id="panel-import">
           <div class="card lab-import-box">
             <h3><i class="fa-solid fa-file-import"></i> استيراد منتجات من JSON</h3>
             <p class="lab-hint">
-              الصق مصفوفة منتجات، أو كائنًا يحتوي على <code>products</code>، أو نسخة من
-              <code>JUMIA_PRODUCTS</code>. يمكن استخدام هذا كبديل عند تعذر السحب من API.
+              الصق مصفوفة منتجات، أو كائنًا يحتوي على <code>products</code>. الحقول المدعومة:
+              name, price, original_price, image, images, url, description, specs, highlights,
+              seller, rating, reviews. يمكن استخدام هذا كبديل عند تعذر السحب.
             </p>
             <textarea id="importJson" rows="14" dir="ltr" placeholder='[{"name":"Product","price":100,"image":"https://...","url":"https://www.jumia.com.eg/..."}]'></textarea>
             <div class="lab-import-actions">
               <button type="button" class="btn btn-primary" id="parseImportBtn">
-                <i class="fa-solid fa-code"></i>
-                تحليل JSON
+                <i class="fa-solid fa-code"></i> تحليل JSON
               </button>
               <button type="button" class="btn btn-secondary" id="sendToPullBtn" disabled>
-                <i class="fa-solid fa-arrow-left"></i>
-                إضافة إلى قائمة السحب
+                <i class="fa-solid fa-arrow-left"></i> إضافة إلى قائمة المنتجات
               </button>
             </div>
             <div id="importPreview"></div>
@@ -269,16 +563,34 @@
         تنشيط على الموقع فورًا
       </label>
       <button type="button" class="btn btn-primary" id="saveSelectedBtn">
-        <i class="fa-solid fa-floppy-disk"></i>
-        حفظ المحدد في Supabase
+        <i class="fa-solid fa-floppy-disk"></i> حفظ المحدد
+      </button>
+      <button type="button" class="btn btn-primary lab-btn-ghost" id="saveAllBtn">
+        <i class="fa-solid fa-layer-group"></i> حفظ الكل
+      </button>
+      <button type="button" class="btn btn-secondary lab-btn-ghost" id="updateSelectedBtn">
+        <i class="fa-solid fa-arrows-rotate"></i> تحديث أسعار المحدد
       </button>
       <button type="button" class="lab-bulk-close" id="hideBulkBar" aria-label="إغلاق">×</button>
+    </div>
+
+    <!-- ===== Save progress dialog ===== -->
+    <div class="lab-modal" id="saveModal" aria-hidden="true">
+      <div class="lab-modal-backdrop" data-close-save></div>
+      <div class="lab-modal-card lab-save-modal" role="dialog" aria-modal="true">
+        <button type="button" class="lab-modal-close" data-close-save aria-label="إغلاق">×</button>
+        <h2 id="saveModalTitle">جارٍ الحفظ في Supabase...</h2>
+        <p class="lab-hint" id="saveModalHint">لا تغلق الصفحة أثناء الحفظ.</p>
+        <div class="lab-bar"><span id="saveBar"></span></div>
+        <div class="lab-save-stats" id="saveStats"></div>
+        <div class="lab-save-diffs" id="saveDiffs"></div>
+      </div>
     </div>
 
     <!-- ===== Product details modal ===== -->
     <div class="lab-modal" id="productModal" aria-hidden="true">
       <div class="lab-modal-backdrop" data-close-modal></div>
-      <div class="lab-modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="lab-modal-card lab-modal-wide" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <button type="button" class="lab-modal-close" data-close-modal aria-label="إغلاق">×</button>
         <div id="modalBody"></div>
       </div>
@@ -293,6 +605,6 @@
       <a class="mobile-link" href="manage-all-products.html"><i class="fa-solid fa-boxes-stacked"></i><span>المنتجات</span></a>
     </nav>
 
-    <script src="./product-lab.page.js"></script>
+    <script src="./product-lab.page.js?v=20261116g"></script>
   </body>
 </html>
